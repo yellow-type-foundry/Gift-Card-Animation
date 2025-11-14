@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import Image from 'next/image'
+import { TOKENS } from '../constants/tokens'
 
 const GiftCard = ({ 
   state = 'unopened',
@@ -19,6 +20,11 @@ const GiftCard = ({
   const [isHovered, setIsHovered] = useState(false)
   const cardRef = useRef(null)
 
+  // Memoize computed state
+  const isOpening = useMemo(() => state === 'opening' || isOpen, [state, isOpen])
+  const isUnopened = useMemo(() => state !== 'opening' && !isOpen, [state, isOpen])
+
+  // Click outside handler
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (cardRef.current && !cardRef.current.contains(event.target)) {
@@ -35,16 +41,115 @@ const GiftCard = ({
     }
   }, [isOpen])
 
-  const handleCardClick = () => {
-    setIsOpen(!isOpen)
-  }
+  // Event handlers with useCallback
+  const handleCardClick = useCallback(() => {
+    setIsOpen(prev => !prev)
+  }, [])
+
+  const handleHoverEnter = useCallback(() => {
+    setIsHovered(true)
+  }, [])
+
+  const handleHoverLeave = useCallback(() => {
+    setIsHovered(false)
+  }, [])
+
+  const handleSwapClick = useCallback((e) => {
+    e.stopPropagation()
+    onSwap?.()
+  }, [onSwap])
+
+  const handleAcceptClick = useCallback((e) => {
+    e.stopPropagation()
+    onAccept?.()
+  }, [onAccept])
+
+  // Memoized transforms
+  const box1Transform = useMemo(() => {
+    const baseTranslate = 'translate(-50%, -50%)'
+    
+    if (isHovered && isUnopened) {
+      const { rotate, translateX, translateY, scale } = TOKENS.transforms.box1.hover
+      return `${baseTranslate} rotate(${rotate}) translateX(${translateX}) translateY(${translateY}) scale(${scale})`
+    }
+    
+    if (isOpening) {
+      const { rotate, translateX, translateY, scale } = TOKENS.transforms.box1.opening
+      return `${baseTranslate} rotate(${rotate}) translateX(${translateX}) translateY(${translateY}) scale(${scale})`
+    }
+    
+    return `${baseTranslate} rotate(0deg) translateX(0px) translateY(0px) scale(1)`
+  }, [isHovered, isUnopened, isOpening])
+
+  const box2Transform = useMemo(() => {
+    const baseTranslate = 'translate(-50%, -50%)'
+    
+    if (isOpening) {
+      const { rotate, translateX, translateY, scale } = TOKENS.transforms.box2.opening
+      return `${baseTranslate} rotate(${rotate}) translateX(${translateX}) translateY(${translateY}) scale(${scale})`
+    }
+    
+    return `${baseTranslate} rotate(0deg) translateX(0px) translateY(0px) scale(1)`
+  }, [isOpening])
+
+  // Memoized styles
+  const whiteCardStyle = useMemo(() => ({
+    boxShadow: isOpening ? TOKENS.colors.shadow.opening : TOKENS.colors.shadow.default,
+    transition: `box-shadow ${TOKENS.animation.duration.medium} ${TOKENS.animation.easing.easeOut}, height ${TOKENS.animation.duration.medium} ${TOKENS.animation.easing.easeOut}`
+  }), [isOpening])
+
+  const messageStyle = useMemo(() => ({
+    color: TOKENS.colors.text.primary,
+    transform: `scale(${isOpening ? TOKENS.transforms.message.scale.opening : TOKENS.transforms.message.scale.default})`,
+    transition: `transform ${TOKENS.animation.duration.fast} ${TOKENS.animation.easing.easeOut}, opacity ${TOKENS.animation.duration.fast} ${TOKENS.animation.easing.easeOut}, height ${TOKENS.animation.duration.fast} ${TOKENS.animation.easing.easeOut}`
+  }), [isOpening])
+
+  const expiryTextStyle = useMemo(() => ({
+    transform: isOpen ? 'none' : `translateY(${TOKENS.spacing.expiryTextOffset})`,
+    transition: `transform ${TOKENS.animation.duration.fast} ${TOKENS.animation.easing.easeOut}, opacity ${TOKENS.animation.duration.fast} ${TOKENS.animation.easing.easeOut}, max-height ${TOKENS.animation.duration.fast} ${TOKENS.animation.easing.easeOut}`
+  }), [isOpen])
+
+  const giftBoxContainerStyle = useMemo(() => ({
+    height: isOpen ? '80%' : 'auto',
+    transition: `height ${TOKENS.animation.duration.slow} ${TOKENS.animation.easing.easeOut}`
+  }), [isOpen])
+
+  const box1Style = useMemo(() => ({
+    transition: `transform ${TOKENS.animation.duration.slow} ${TOKENS.animation.easing.box1}`,
+    transform: box1Transform,
+    top: '50%',
+    left: '50%',
+    transformOrigin: 'center center',
+    willChange: 'transform'
+  }), [box1Transform])
+
+  const box2Style = useMemo(() => ({
+    transition: `transform ${TOKENS.animation.duration.slow} ${TOKENS.animation.easing.box2}`,
+    transform: box2Transform,
+    top: '50%',
+    left: '50%',
+    transformOrigin: 'center center',
+    willChange: 'transform'
+  }), [box2Transform])
+
+  const actionsStyle = useMemo(() => ({
+    width: '100%',
+    transitionTimingFunction: TOKENS.animation.easing.easeOut,
+    transition: `opacity ${TOKENS.animation.duration.medium} ${TOKENS.animation.easing.easeOut}, max-height ${TOKENS.animation.duration.medium} ${TOKENS.animation.easing.easeOut}`
+  }), [])
 
   return (
     <div 
       ref={cardRef}
       onClick={handleCardClick}
-      className="border-[0.884px] border-solid relative rounded-[24px] w-[300px] h-[384px] overflow-hidden cursor-pointer"
-      style={{ borderColor: '#DDE2E9' }}
+      className="border-solid relative overflow-hidden cursor-pointer"
+      style={{ 
+        borderWidth: TOKENS.sizes.borderWidth,
+        borderColor: TOKENS.colors.border.default,
+        borderRadius: TOKENS.sizes.borderRadius.card,
+        width: TOKENS.sizes.card.width,
+        height: TOKENS.sizes.card.height.closed
+      }}
       data-name="Default"
     >
       {/* Background Image */}
@@ -52,40 +157,56 @@ const GiftCard = ({
         alt=""
         src="/assets/f93cde9a1130f6c57e6462db2258fe32049760f3.png"
         fill
-        className="object-cover pointer-events-none rounded-[24px]"
-        style={{ objectPosition: '50% 50%' }}
+        className="object-cover pointer-events-none"
+        style={{ 
+          objectPosition: '50% 50%',
+          borderRadius: TOKENS.sizes.borderRadius.card
+        }}
         unoptimized
       />
       
       {/* Inner Container */}
-      <div className="relative w-full h-full z-10 overflow-clip">
+      <div className="relative w-full h-full overflow-clip" style={{ zIndex: TOKENS.zIndex.innerContainer }}>
         {/* White Card Container */}
         <div 
-          className={`bg-white box-border flex flex-col gap-[16px] items-center p-4 absolute rounded-[24px] w-[300px] ${isOpen ? 'h-[352px]' : 'h-[384px]'} left-1/2 -translate-x-1/2 bottom-0 transition-all duration-500 ease-out`}
+          className="bg-white box-border flex flex-col items-center absolute bottom-0"
           style={{
-            boxShadow: state === 'opening' || isOpen 
-              ? '0px -8px 24px -4px rgba(0, 0, 0, 0.12), 0px -4px 8px -2px rgba(0, 0, 0, 0.08)' 
-              : '0px 4px 12px -4px rgba(0, 0, 0, 0.03), 0px 2px 3px 0px rgba(0, 0, 0, 0.05)'
+            ...whiteCardStyle,
+            borderRadius: TOKENS.sizes.borderRadius.card,
+            width: TOKENS.sizes.card.width,
+            height: isOpen ? TOKENS.sizes.card.height.open : TOKENS.sizes.card.height.closed,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            padding: TOKENS.spacing.cardPadding,
+            gap: TOKENS.spacing.cardGap
           }}
           data-name="Unopened Gift"
         >
           {/* Header */}
           <div 
-            className={`flex flex-col gap-[8px] items-center relative shrink-0 text-center w-full overflow-hidden transition-all duration-500 ease-out`}
+            className="flex flex-col items-center relative shrink-0 text-center w-full overflow-hidden"
+            style={{
+              gap: TOKENS.spacing.headerGap,
+              transition: `all ${TOKENS.animation.duration.medium} ${TOKENS.animation.easing.easeOut}`
+            }}
             data-name="Header"
           >
             <p 
-              className="text-body-l relative shrink-0 whitespace-pre h-[20px]"
-              style={{ color: '#525f7a' }}
+              className="text-body-l relative shrink-0 whitespace-pre"
+              style={{ 
+                color: TOKENS.colors.text.tertiary,
+                height: TOKENS.sizes.text.senderHeight
+              }}
               data-node-id="1420:12372"
             >
               {from || 'From Lisa Tran'}
             </p>
             <p 
-              className={`text-message relative shrink-0 w-full overflow-hidden ${state === 'opening' || isOpen ? 'h-0 opacity-0' : 'h-[58px] opacity-100'} transition-all duration-300 ease-out`}
-              style={{ 
-                color: '#000000',
-                transform: state === 'opening' || isOpen ? 'scale(0.85)' : 'scale(1)'
+              className="text-message relative shrink-0 w-full overflow-hidden"
+              style={{
+                ...messageStyle,
+                height: isOpening ? '0' : TOKENS.sizes.text.messageHeight,
+                opacity: isOpening ? 0 : 1
               }}
               data-node-id="1420:12373"
             >
@@ -95,25 +216,21 @@ const GiftCard = ({
           
           {/* Gift Box */}
           <div 
-            className={`basis-0 flex gap-[10px] grow items-center justify-center min-h-px min-w-px relative shrink-0 w-full`}
-            style={{ 
-              height: isOpen ? '80%' : 'auto',
-              transition: 'height 700ms cubic-bezier(0.4, 0, 0.2, 1)'
+            className="basis-0 flex grow items-center justify-center min-h-px min-w-px relative shrink-0 w-full"
+            style={{
+              ...giftBoxContainerStyle,
+              gap: TOKENS.spacing.giftBoxGap
             }}
             data-name="GiftBox"
           >
-            {/* Duplicate illustration - lower z-index */}
+            {/* Box 2 - Duplicate illustration - lower z-index */}
             <div 
-              className="absolute aspect-square w-full h-full max-w-[200px] max-h-[200px] z-0"
-              style={{ 
-                transition: 'transform 700ms cubic-bezier(0.2, 0, 0.7, 1)',
-                transform: state === 'opening' || isOpen 
-                  ? 'translate(-50%, -50%) rotate(-15deg) translateX(-36px) translateY(-10px) scale(0.9)' 
-                  : 'translate(-50%, -50%) rotate(0deg) translateX(0px) translateY(0px) scale(1)',
-                top: '50%',
-                left: '50%',
-                transformOrigin: 'center center',
-                willChange: 'transform'
+              className="absolute aspect-square w-full h-full"
+              style={{
+                ...box2Style,
+                maxWidth: TOKENS.sizes.giftBox.maxWidth,
+                maxHeight: TOKENS.sizes.giftBox.maxHeight,
+                zIndex: TOKENS.zIndex.box2
               }}
               data-name="Pattern-Unpacked 1-duplicate"
             >
@@ -126,28 +243,16 @@ const GiftCard = ({
                 unoptimized
               />
             </div>
-            {/* Original illustration - higher z-index - Box 1 */}
+            {/* Box 1 - Original illustration - higher z-index */}
             <div 
-              className="absolute aspect-square w-full h-full max-w-[200px] max-h-[200px] z-10"
-              onMouseEnter={() => setIsHovered(true)}
-              onMouseLeave={() => setIsHovered(false)}
-              style={{ 
-                transition: 'transform 700ms cubic-bezier(0.2, 0, 0.4, 1)',
-                transform: (() => {
-                  const baseTransform = state === 'opening' || isOpen 
-                    ? 'translate(-50%, -50%) rotate(15deg) translateX(32px) translateY(-8px) scale(0.9)' 
-                    : 'translate(-50%, -50%) rotate(0deg) translateX(0px) translateY(0px) scale(1)'
-                  
-                  if (isHovered && (state !== 'opening' && !isOpen)) {
-                    return 'translate(-50%, -50%) rotate(4deg) translateX(16px) translateY(-4px) scale(1)'
-                  }
-                  
-                  return baseTransform
-                })(),
-                top: '50%',
-                left: '50%',
-                transformOrigin: 'center center',
-                willChange: 'transform'
+              className="absolute aspect-square w-full h-full"
+              onMouseEnter={handleHoverEnter}
+              onMouseLeave={handleHoverLeave}
+              style={{
+                ...box1Style,
+                maxWidth: TOKENS.sizes.giftBox.maxWidth,
+                maxHeight: TOKENS.sizes.giftBox.maxHeight,
+                zIndex: TOKENS.zIndex.box1
               }}
               data-name="Pattern-Unpacked 1"
             >
@@ -164,13 +269,20 @@ const GiftCard = ({
           
           {/* Bottom / Footer - Expiry Text */}
           <div 
-            className={`flex gap-[10px] items-center justify-center shrink-0 w-full ${isOpen ? 'absolute bottom-0 left-0 right-0 opacity-0 max-h-0 pointer-events-none' : 'relative opacity-100 max-h-[30px]'} transition-all duration-300 ease-out`}
-            style={{ transform: isOpen ? 'none' : 'translateY(6px)' }}
+            className={`flex items-center justify-center shrink-0 w-full ${isOpen ? 'absolute bottom-0 left-0 right-0 opacity-0 max-h-0 pointer-events-none' : 'relative opacity-100'}`}
+            style={{
+              ...expiryTextStyle,
+              gap: TOKENS.spacing.giftBoxGap,
+              maxHeight: isOpen ? '0' : TOKENS.sizes.text.expiryMaxHeight
+            }}
             data-name="Bottom"
           >
             <p 
-              className="text-body-l relative shrink-0 whitespace-pre h-[20px]"
-              style={{ color: '#525f7a' }}
+              className="text-body-l relative shrink-0 whitespace-pre"
+              style={{ 
+                color: TOKENS.colors.text.tertiary,
+                height: TOKENS.sizes.text.senderHeight
+              }}
               data-node-id="1420:12398"
             >
               {expiryText || 'Expiring in 21 days'}
@@ -179,18 +291,26 @@ const GiftCard = ({
 
           {/* Gift Info */}
           <div 
-            className={`flex flex-col gap-[4px] items-center justify-center w-full transition-all duration-500 ease-out ${isOpen ? 'opacity-100 max-h-[100px] relative' : 'absolute bottom-[120px] left-0 right-0 opacity-0 max-h-0'}`}
+            className={`flex flex-col items-center justify-center w-full ${isOpen ? 'opacity-100 relative' : 'absolute opacity-0 max-h-0'}`}
+            style={{
+              gap: TOKENS.spacing.xs,
+              bottom: isOpen ? 'auto' : '120px',
+              left: isOpen ? 'auto' : '0',
+              right: isOpen ? 'auto' : '0',
+              maxHeight: isOpen ? TOKENS.sizes.text.giftInfoMaxHeight : '0',
+              transition: `all ${TOKENS.animation.duration.medium} ${TOKENS.animation.easing.easeOut}`
+            }}
             data-name="Gift Info"
           >
             <p 
               className="text-body-l-bold relative shrink-0 text-center w-full"
-              style={{ color: '#000000' }}
+              style={{ color: TOKENS.colors.text.primary }}
             >
               {giftTitle || '24 Pack of Cookies'}
             </p>
             <p 
               className="text-body-l relative shrink-0 text-center w-full"
-              style={{ color: '#525f7a' }}
+              style={{ color: TOKENS.colors.text.secondary }}
             >
               {giftSubtitle || 'Levain Cookies'}
             </p>
@@ -198,16 +318,18 @@ const GiftCard = ({
 
           {/* Actions */}
           <div 
-            className={`flex gap-[8px] items-center justify-center w-full transition-all duration-500 ease-out ${isOpen ? 'opacity-100 max-h-[30px] relative' : 'opacity-0 max-h-0 relative pointer-events-none'}`}
-            style={{ width: '100%', transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)' }}
+            className={`flex items-center justify-center w-full ${isOpen ? 'opacity-100 relative' : 'opacity-0 relative pointer-events-none'}`}
+            style={{
+              ...actionsStyle,
+              gap: TOKENS.spacing.actionsGap,
+              maxHeight: isOpen ? TOKENS.sizes.text.actionsMaxHeight : '0'
+            }}
             data-name="Actions"
           >
             <button
-              onClick={(e) => {
-                e.stopPropagation()
-                onSwap?.()
-              }}
+              onClick={handleSwapClick}
               className="px-2 py-1.5 bg-white rounded-[12px] outline outline-1 outline-offset-[-1px] outline-zinc-200 hover:outline-slate-300 active:outline-slate-300 inline-flex justify-center items-center flex-1 transition-all duration-300 ease-out group"
+              style={{ borderRadius: TOKENS.sizes.borderRadius.button }}
               data-name="Button/Text/M"
             >
               <div className="self-stretch min-h-6 px-1 flex justify-center items-center gap-2.5">
@@ -217,11 +339,9 @@ const GiftCard = ({
               </div>
             </button>
             <button
-              onClick={(e) => {
-                e.stopPropagation()
-                onAccept?.()
-              }}
+              onClick={handleAcceptClick}
               className="px-2 py-1.5 bg-violet-500 hover:bg-violet-600 active:bg-violet-600 rounded-[12px] outline outline-1 outline-offset-[-1px] outline-violet-600 inline-flex justify-center items-center flex-1 transition-all duration-300 ease-out"
+              style={{ borderRadius: TOKENS.sizes.borderRadius.button }}
               data-name="Button/Text/M"
             >
               <div className="self-stretch min-h-6 px-1 flex justify-center items-center gap-2.5">
@@ -237,4 +357,4 @@ const GiftCard = ({
   )
 }
 
-export default GiftCard
+export default React.memo(GiftCard)
