@@ -39,6 +39,7 @@ export const TOKENS = {
     giftBoxGap: '10px',
     actionsGap: '8px',
     expiryTextOffset: '6px',
+    cardOpeningMargin: '12px', // Margin to reveal background in opening state
   },
 
   // Sizes
@@ -89,7 +90,7 @@ export const TOKENS = {
         rotate: '15deg',
         translateX: '32px',
         translateY: '-8px',
-        scale: '0.9',
+        scale: '0.875',
       },
       hover: {
         rotate: '4deg',
@@ -103,7 +104,7 @@ export const TOKENS = {
         rotate: '-15deg',
         translateX: '-36px',
         translateY: '-10px',
-        scale: '0.9',
+        scale: '0.875',
       },
     },
     message: {

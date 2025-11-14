@@ -95,7 +95,7 @@ const GiftCard = ({
   // Memoized styles
   const whiteCardStyle = useMemo(() => ({
     boxShadow: isOpening ? TOKENS.colors.shadow.opening : TOKENS.colors.shadow.default,
-    transition: `box-shadow ${TOKENS.animation.duration.medium} ${TOKENS.animation.easing.easeOut}, height ${TOKENS.animation.duration.medium} ${TOKENS.animation.easing.easeOut}`
+    transition: `box-shadow ${TOKENS.animation.duration.medium} ${TOKENS.animation.easing.easeOut}`
   }), [isOpening])
 
   const messageStyle = useMemo(() => ({
@@ -105,14 +105,15 @@ const GiftCard = ({
   }), [isOpening])
 
   const expiryTextStyle = useMemo(() => ({
-    transform: isOpen ? 'none' : `translateY(${TOKENS.spacing.expiryTextOffset})`,
-    transition: `transform ${TOKENS.animation.duration.fast} ${TOKENS.animation.easing.easeOut}, opacity ${TOKENS.animation.duration.fast} ${TOKENS.animation.easing.easeOut}, max-height ${TOKENS.animation.duration.fast} ${TOKENS.animation.easing.easeOut}`
+    marginBottom: isOpen ? '0' : '0',
+    transition: `opacity ${TOKENS.animation.duration.fast} ${TOKENS.animation.easing.easeOut}, max-height ${TOKENS.animation.duration.fast} ${TOKENS.animation.easing.easeOut}`
   }), [isOpen])
 
   const giftBoxContainerStyle = useMemo(() => ({
     height: isOpen ? '80%' : 'auto',
-    transition: `height ${TOKENS.animation.duration.slow} ${TOKENS.animation.easing.easeOut}`
-  }), [isOpen])
+    transform: isOpening ? 'translateY(-2px)' : 'translateY(0)',
+    transition: `height ${TOKENS.animation.duration.slow} ${TOKENS.animation.easing.easeOut}, transform ${TOKENS.animation.duration.slow} ${TOKENS.animation.easing.easeOut}`
+  }), [isOpen, isOpening])
 
   const box1Style = useMemo(() => ({
     transition: `transform ${TOKENS.animation.duration.slow} ${TOKENS.animation.easing.box1}`,
@@ -174,7 +175,7 @@ const GiftCard = ({
             ...whiteCardStyle,
             borderRadius: TOKENS.sizes.borderRadius.card,
             width: TOKENS.sizes.card.width,
-            height: isOpen ? TOKENS.sizes.card.height.open : TOKENS.sizes.card.height.closed,
+            height: TOKENS.sizes.card.height.closed,
             left: '50%',
             transform: 'translateX(-50%)',
             padding: TOKENS.spacing.cardPadding,
@@ -269,11 +270,12 @@ const GiftCard = ({
           
           {/* Bottom / Footer - Expiry Text */}
           <div 
-            className={`flex items-center justify-center shrink-0 w-full ${isOpen ? 'absolute bottom-0 left-0 right-0 opacity-0 max-h-0 pointer-events-none' : 'relative opacity-100'}`}
+            className={`flex items-center justify-center shrink-0 w-full ${isOpen ? 'opacity-0 max-h-0 pointer-events-none' : 'opacity-100'} absolute left-0 right-0`}
             style={{
               ...expiryTextStyle,
               gap: TOKENS.spacing.giftBoxGap,
-              maxHeight: isOpen ? '0' : TOKENS.sizes.text.expiryMaxHeight
+              maxHeight: isOpen ? '0' : TOKENS.sizes.text.expiryMaxHeight,
+              bottom: isOpen ? '0' : TOKENS.spacing.cardPadding
             }}
             data-name="Bottom"
           >
@@ -291,12 +293,9 @@ const GiftCard = ({
 
           {/* Gift Info */}
           <div 
-            className={`flex flex-col items-center justify-center w-full ${isOpen ? 'opacity-100 relative' : 'absolute opacity-0 max-h-0'}`}
+            className={`flex flex-col items-center justify-center w-full ${isOpen ? 'opacity-100 relative' : 'opacity-0 max-h-0 relative pointer-events-none'}`}
             style={{
               gap: TOKENS.spacing.xs,
-              bottom: isOpen ? 'auto' : '120px',
-              left: isOpen ? 'auto' : '0',
-              right: isOpen ? 'auto' : '0',
               maxHeight: isOpen ? TOKENS.sizes.text.giftInfoMaxHeight : '0',
               transition: `all ${TOKENS.animation.duration.medium} ${TOKENS.animation.easing.easeOut}`
             }}
