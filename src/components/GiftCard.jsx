@@ -94,24 +94,25 @@ const GiftCard = ({
           
           {/* Gift Box */}
           <div 
-            className={`basis-0 flex gap-[10px] grow items-center justify-center min-h-px min-w-px relative shrink-0 w-full transition-all duration-100 ease-out`}
+            className={`basis-0 flex gap-[10px] grow items-center justify-center min-h-px min-w-px relative shrink-0 w-full`}
             style={{ 
-              transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
-              height: isOpen ? '80%' : 'auto'
+              height: isOpen ? '80%' : 'auto',
+              transition: 'height 700ms cubic-bezier(0.4, 0, 0.2, 1)'
             }}
             data-name="GiftBox"
           >
             {/* Duplicate illustration - lower z-index */}
             <div 
-              className="absolute aspect-square w-full h-full max-w-[200px] max-h-[200px] transition-all duration-700 ease-out z-0"
+              className="absolute aspect-square w-full h-full max-w-[200px] max-h-[200px] z-0"
               style={{ 
-                transitionTimingFunction: 'cubic-bezier(0.2, 0, 0.7 1)',
+                transition: 'transform 700ms cubic-bezier(0.2, 0, 0.7, 1)',
                 transform: state === 'opening' || isOpen 
                   ? 'translate(-50%, -50%) rotate(-15deg) translateX(-36px) translateY(-10px) scale(0.9)' 
                   : 'translate(-50%, -50%) rotate(0deg) translateX(0px) translateY(0px) scale(1)',
                 top: '50%',
                 left: '50%',
-                transformOrigin: 'center center'
+                transformOrigin: 'center center',
+                willChange: 'transform'
               }}
               data-name="Pattern-Unpacked 1-duplicate"
             >
@@ -126,15 +127,16 @@ const GiftCard = ({
             </div>
             {/* Original illustration - higher z-index */}
             <div 
-              className="absolute aspect-square w-full h-full max-w-[200px] max-h-[200px] transition-all duration-700 ease-out z-10"
+              className="absolute aspect-square w-full h-full max-w-[200px] max-h-[200px] z-10"
               style={{ 
-                transitionTimingFunction: 'cubic-bezier(0.2, 0, 0.4, 1)',
+                transition: 'transform 700ms cubic-bezier(0.2, 0, 0.4, 1)',
                 transform: state === 'opening' || isOpen 
                   ? 'translate(-50%, -50%) rotate(15deg) translateX(32px) translateY(-8px) scale(0.9)' 
                   : 'translate(-50%, -50%) rotate(0deg) translateX(0px) translateY(0px) scale(1)',
                 top: '50%',
                 left: '50%',
-                transformOrigin: 'center center'
+                transformOrigin: 'center center',
+                willChange: 'transform'
               }}
               data-name="Pattern-Unpacked 1"
             >
@@ -186,7 +188,7 @@ const GiftCard = ({
 
           {/* Actions */}
           <div 
-            className={`flex gap-[8px] items-center justify-center w-full transition-all duration-500 ease-out ${isOpen ? 'opacity-100 max-h-[30px] relative' : 'absolute bottom-0 left-0 right-0 opacity-0 max-h-0'}`}
+            className={`flex gap-[8px] items-center justify-center w-full transition-all duration-500 ease-out ${isOpen ? 'opacity-100 max-h-[30px] relative' : 'opacity-0 max-h-0 relative pointer-events-none'}`}
             style={{ width: '100%', transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)' }}
             data-name="Actions"
           >
