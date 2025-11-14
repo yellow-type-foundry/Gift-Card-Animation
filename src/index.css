@@ -68,3 +68,40 @@
     --font-hw-cigars: 'HW Cigars', serif;
   }
 }
+
+@layer utilities {
+  /* Text Styles from Figma */
+  
+  /* Body/L - Goody Sans Regular, 16px, line-height 1.4 */
+  .text-body-l {
+    font-family: var(--font-goody-sans);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.4;
+  }
+  
+  /* Body/M (B) - Goody Sans Medium, 14px, line-height 1.4 */
+  .text-body-m-bold {
+    font-family: var(--font-goody-sans);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+  
+  /* Body/L (B) - Goody Sans Medium, 16px, line-height 1.4 */
+  .text-body-l-bold {
+    font-family: var(--font-goody-sans);
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+  
+  /* Message Text - HW Cigars Regular, 24px, line-height 1.2, tracking -0.36px */
+  .text-message {
+    font-family: var(--font-hw-cigars);
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 1.2;
+    letter-spacing: -0.36px;
+  }
+}
