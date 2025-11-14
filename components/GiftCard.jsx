@@ -10,6 +10,7 @@ const GiftCard = ({
   giftSubtitle,
   expiryText,
   boxImage = '/assets/Box 1/Box 01.png',
+  box2Image = '/assets/Box 2/Box2-01.png',
   onAccept,
   onSwap,
   onSendThankYou,
@@ -253,7 +254,12 @@ const GiftCard = ({
               style={{
                 ...messageStyle,
                 height: isOpening ? '0' : TOKENS.sizes.text.messageHeight,
-                opacity: isOpening ? 0 : 1
+                opacity: isOpening ? 0 : 1,
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+                textOverflow: 'ellipsis',
+                overflow: 'hidden'
               }}
               data-node-id="1420:12373"
             >
@@ -283,7 +289,7 @@ const GiftCard = ({
             >
               <Image
                 alt=""
-                src="/assets/Opened Box-shadowed.png"
+                src={box2Image}
                 fill
                 className="object-contain pointer-events-none"
                 style={{ objectPosition: '50% 50%' }}
