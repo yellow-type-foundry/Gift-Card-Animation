@@ -9,6 +9,7 @@ const GiftCard = ({
   giftTitle,
   giftSubtitle,
   expiryText,
+  boxImage = '/assets/Box 1/Box 01.png',
   onAccept,
   onSwap,
   onSendThankYou,
@@ -304,7 +305,7 @@ const GiftCard = ({
             >
               <Image
                 alt=""
-                src="/assets/9bc1300f188601fbe3925683f624a4a16adfcc21.png"
+                src={boxImage}
                 fill
                 className="object-contain pointer-events-none"
                 style={{ objectPosition: '50% 50%' }}

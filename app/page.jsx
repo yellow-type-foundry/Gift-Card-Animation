@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import GiftCard from '@/components/GiftCard'
 
 export default function Home() {
@@ -10,6 +10,21 @@ export default function Home() {
     card3: 'unopened',
     card4: 'unopened'
   })
+  
+  // Randomize box assignments on mount
+  const boxImages = useMemo(() => {
+    const boxes = [
+      '/assets/Box 1/Box 01.png',
+      '/assets/Box 1/Box 02.png',
+      '/assets/Box 1/Box 03.png',
+      '/assets/Box 1/Box 04.png',
+      '/assets/Box 1/Box 05.png',
+      '/assets/Box 1/Box 06.png'
+    ]
+    // Shuffle and pick 4 random boxes
+    const shuffled = [...boxes].sort(() => Math.random() - 0.5)
+    return shuffled.slice(0, 4)
+  }, [])
   
   const handleOpenGift = (cardId) => {
     setCardStates(prev => ({
@@ -36,6 +51,7 @@ export default function Home() {
           expiryText={cardStates.card1 === 'unopened' ? 'Expiring in 21 days' : undefined}
           giftTitle="24 Pack of Cookies"
           giftSubtitle="Levain Cookies"
+          boxImage={boxImages[0]}
           onOpenGift={() => handleOpenGift('card1')}
         />
         
@@ -47,6 +63,7 @@ export default function Home() {
           expiryText={cardStates.card2 === 'unopened' ? 'Expiring in 18 days' : undefined}
           giftTitle="Coffee Gift Set"
           giftSubtitle="Blue Bottle Coffee"
+          boxImage={boxImages[1]}
           onOpenGift={() => handleOpenGift('card2')}
         />
         
@@ -58,6 +75,7 @@ export default function Home() {
           expiryText={cardStates.card3 === 'unopened' ? 'Expiring in 15 days' : undefined}
           giftTitle="Chocolate Box Collection"
           giftSubtitle="Godiva Chocolates"
+          boxImage={boxImages[2]}
           onOpenGift={() => handleOpenGift('card3')}
         />
         
@@ -69,6 +87,7 @@ export default function Home() {
           expiryText={cardStates.card4 === 'unopened' ? 'Expiring in 30 days' : undefined}
           giftTitle="Gourmet Tea Selection"
           giftSubtitle="TWG Tea"
+          boxImage={boxImages[3]}
           onOpenGift={() => handleOpenGift('card4')}
         />
       </div>
