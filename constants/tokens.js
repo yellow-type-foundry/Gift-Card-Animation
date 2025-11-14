@@ -80,6 +80,8 @@ export const TOKENS = {
       easeOut: 'cubic-bezier(0.4, 0, 0.2, 1)',
       box1: 'cubic-bezier(0.1, 0, 0.1, 1)',
       box2: 'cubic-bezier(0.2, 0, 0.7, 1)',
+      accelerate: 'cubic-bezier(0.4, 0, 1, 1)', // Accelerated ease-in
+      bounce: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)', // Bouncy spring effect
     },
   },
 

@@ -110,13 +110,19 @@ const GiftCard = ({
   const box2Transform = useMemo(() => {
     const baseTranslate = 'translate(-50%, -50%)'
     
+    // Return to original position when accepted (after loading icon is done)
+    // The bounce easing will create an interesting overshoot effect
+    if (isAcceptExpanded) {
+      return `${baseTranslate} rotate(0deg) translateX(0px) translateY(0px) scale(1)`
+    }
+    
     if (isOpening) {
       const { rotate, translateX, translateY, scale } = TOKENS.transforms.box2.opening
       return `${baseTranslate} rotate(${rotate}) translateX(${translateX}) translateY(${translateY}) scale(${scale})`
     }
     
     return `${baseTranslate} rotate(0deg) translateX(0px) translateY(0px) scale(1)`
-  }, [isOpening])
+  }, [isOpening, isAcceptExpanded])
 
   // Memoized styles
   const whiteCardStyle = useMemo(() => ({
@@ -142,17 +148,20 @@ const GiftCard = ({
   }), [isOpen, isOpening])
 
   const box1Style = useMemo(() => ({
-    transition: `transform ${TOKENS.animation.duration.slow} ${TOKENS.animation.easing.box1}`,
+    transition: `transform ${TOKENS.animation.duration.slow} ${TOKENS.animation.easing.box1}, opacity ${TOKENS.animation.duration.slow} ${TOKENS.animation.easing.accelerate}, filter ${TOKENS.animation.duration.fast} ${TOKENS.animation.easing.accelerate}`,
     transform: box1Transform,
+    opacity: isAcceptExpanded ? 0 : 1,
+    filter: isAcceptExpanded ? 'blur(8px)' : 'blur(0px)',
     top: '50%',
     left: '50%',
     transformOrigin: 'center center',
-    willChange: 'transform'
-  }), [box1Transform])
+    willChange: 'transform, opacity, filter'
+  }), [box1Transform, isAcceptExpanded])
 
   const box2Style = useMemo(() => ({
-    transition: `transform ${TOKENS.animation.duration.slow} ${TOKENS.animation.easing.box2}`,
+    transition: `transform ${TOKENS.animation.duration.slow} ${TOKENS.animation.easing.bounce}, opacity ${TOKENS.animation.duration.slow} ${TOKENS.animation.easing.box2}`,
     transform: box2Transform,
+    opacity: 1,
     top: '50%',
     left: '50%',
     transformOrigin: 'center center',
