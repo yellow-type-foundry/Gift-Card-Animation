@@ -100,10 +100,8 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-[#f0f1f5] flex items-center">
       <div 
-        className="w-full grid justify-center gift-card-grid" 
+        className="w-full grid justify-center gift-card-grid px-5 md:px-[240px] py-10" 
         style={{ 
-          paddingLeft: '240px', 
-          paddingRight: '240px', 
           gap: '24px'
         }}
       >
