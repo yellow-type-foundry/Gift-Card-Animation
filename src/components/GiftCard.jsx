@@ -164,18 +164,17 @@ const GiftCard = ({
           
           {/* Bottom / Footer - Expiry Text */}
           <div 
-            className={`flex gap-[10px] items-center justify-center shrink-0 w-full ${isOpen ? 'absolute bottom-0 left-0 right-0 opacity-0 max-h-0 pointer-events-none' : 'relative opacity-100 max-h-[50px]'} transition-all duration-300 ease-out overflow-hidden`}
+            className={`flex gap-[10px] items-center justify-center shrink-0 w-full ${isOpen ? 'absolute bottom-0 left-0 right-0 opacity-0 max-h-0 pointer-events-none' : 'relative opacity-100 max-h-[30px]'} transition-all duration-300 ease-out`}
+            style={{ transform: isOpen ? 'none' : 'translateY(6px)' }}
             data-name="Bottom"
           >
-            <div 
-              className="basis-0 flex flex-col font-goody-sans grow justify-end leading-[0] min-h-px min-w-px relative shrink-0 text-body-m-bold text-center"
-              style={{ color: '#7b8aa7' }}
+            <p 
+              className="text-body-l relative shrink-0 whitespace-pre h-[20px]"
+              style={{ color: '#525f7a' }}
               data-node-id="1420:12398"
             >
-              <p className="leading-[1.4]">
-                {expiryText || 'Expiring in 21 days'}
-              </p>
-            </div>
+              {expiryText || 'Expiring in 21 days'}
+            </p>
           </div>
 
           {/* Gift Info */}
@@ -208,16 +207,13 @@ const GiftCard = ({
                 e.stopPropagation()
                 onSwap?.()
               }}
-              className="bg-white border border-[#dde2e9] border-solid box-border flex items-center justify-center px-[8px] py-[6px] rounded-[8px] flex-1 transition-all duration-300 ease-out"
+              className="px-2 py-1.5 bg-white rounded-[12px] outline outline-1 outline-offset-[-1px] outline-zinc-200 hover:outline-slate-300 active:outline-slate-300 inline-flex justify-center items-center flex-1 transition-all duration-300 ease-out group"
               data-name="Button/Text/M"
             >
-              <div className="flex flex-row items-center">
-                <p 
-                  className="text-body-m-bold text-center whitespace-pre"
-                  style={{ color: '#7b8aa7' }}
-                >
+              <div className="self-stretch min-h-6 px-1 flex justify-center items-center gap-2.5">
+                <div className="text-center justify-start text-slate-400 group-hover:text-slate-600 group-active:text-slate-600 text-sm font-medium font-['Goody_Sans'] leading-5 line-clamp-1">
                   Swap
-                </p>
+                </div>
               </div>
             </button>
             <button
@@ -225,15 +221,13 @@ const GiftCard = ({
                 e.stopPropagation()
                 onAccept?.()
               }}
-              className="bg-[#7f53fd] border border-[#6935fd] border-solid box-border flex items-center justify-center px-[8px] py-[6px] rounded-[8px] flex-1 transition-all duration-300 ease-out"
+              className="px-2 py-1.5 bg-violet-500 hover:bg-violet-600 active:bg-violet-600 rounded-[12px] outline outline-1 outline-offset-[-1px] outline-violet-600 inline-flex justify-center items-center flex-1 transition-all duration-300 ease-out"
               data-name="Button/Text/M"
             >
-              <div className="flex flex-row items-center">
-                <p 
-                  className="text-body-m-bold text-center whitespace-pre text-white"
-                >
+              <div className="self-stretch min-h-6 px-1 flex justify-center items-center gap-2.5">
+                <div className="text-center justify-start text-white text-sm font-medium font-['Goody_Sans'] leading-5 line-clamp-1">
                   Accept
-                </p>
+                </div>
               </div>
             </button>
           </div>
