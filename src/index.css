@@ -1,0 +1,70 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Font Face Declarations */
+@font-face {
+  font-family: 'Goody Sans';
+  src: url('./assets/Goody_Sans-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Goody Sans';
+  src: url('./assets/Goody_Sans-Medium.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Goody Sans';
+  src: url('./assets/Goody_Sans-Semibold.otf') format('opentype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Goody Sans';
+  src: url('./assets/Goody_Sans-Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'HW Cigars';
+  src: url('./assets/HW Cigars Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@layer base {
+  body {
+    margin: 0;
+    font-family: 'Goody Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  /* Design tokens from Figma */
+  :root {
+    --color-content-secondary: #525F7A;
+    --color-content-primary: #000000;
+    --color-content-tertiary: #7B8AA7;
+    --color-background-primary: #FFFFFF;
+    --color-background-secondary: #F0F1F5;
+    --color-border: #DDE2E9;
+    --color-button-primary: #7F53FD;
+    --color-button-primary-border: #6935FD;
+    --color-gift-wrap: #FF9E9E;
+    --font-goody-sans: 'Goody Sans', sans-serif;
+    --font-hw-cigars: 'HW Cigars', serif;
+  }
+}
