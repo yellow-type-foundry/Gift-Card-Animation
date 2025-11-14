@@ -78,7 +78,7 @@ export const TOKENS = {
     },
     easing: {
       easeOut: 'cubic-bezier(0.4, 0, 0.2, 1)',
-      box1: 'cubic-bezier(0.2, 0, 0.4, 1)',
+      box1: 'cubic-bezier(0.1, 0, 0.1, 1)',
       box2: 'cubic-bezier(0.2, 0, 0.7, 1)',
     },
   },
@@ -94,7 +94,7 @@ export const TOKENS = {
       },
       hover: {
         rotate: '4deg',
-        translateX: '16px',
+        translateX: '24px',
         translateY: '-4px',
         scale: '1',
       },

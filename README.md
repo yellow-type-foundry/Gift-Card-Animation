@@ -1,11 +1,11 @@
 # UI Card Prototype
 
-A modern React + Vite project for prototyping beautiful UI card designs.
+A modern React + Next.js project for prototyping beautiful UI card designs.
 
 ## Features
 
-- ⚡️ Fast development with Vite
 - ⚛️ React 18
+- 🚀 Next.js 14
 - 🎨 Tailwind CSS for styling
 - 🎯 Beautiful card components with hover effects
 - 📱 Responsive design
@@ -24,7 +24,7 @@ npm install
 npm run dev
 ```
 
-The app will be available at `http://localhost:5173`
+The app will be available at `http://localhost:3005`
 
 ### Build for Production
 
@@ -32,28 +32,31 @@ The app will be available at `http://localhost:5173`
 npm run build
 ```
 
-### Preview Production Build
+### Start Production Server
 
 ```bash
-npm run preview
+npm start
 ```
 
 ## Project Structure
 
 ```
-├── src/
-│   ├── components/
-│   │   └── Card.jsx      # Reusable card component
-│   ├── App.jsx           # Main app component
-│   ├── main.jsx          # Entry point
-│   └── index.css         # Global styles
-├── index.html
+├── app/
+│   ├── globals.css       # Global styles
+│   ├── layout.jsx        # Root layout
+│   └── page.jsx          # Home page
+├── components/
+│   └── GiftCard.jsx      # Gift card component
+├── constants/
+│   └── tokens.js         # Design tokens
+├── public/
+│   └── assets/           # Static assets
 ├── package.json
-├── vite.config.js
+├── next.config.js
 └── tailwind.config.js
 ```
 
 ## Customization
 
-Edit `src/components/Card.jsx` to modify the card design, or create new card variations in `src/App.jsx`.
+Edit `components/GiftCard.jsx` to modify the card design, or create new card variations in `app/page.jsx`.
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import Image from 'next/image'
-import { TOKENS } from '../constants/tokens'
+import { TOKENS } from '@/constants/tokens'
 
 const GiftCard = ({ 
   state = 'unopened',
@@ -19,6 +19,7 @@ const GiftCard = ({
   const [isOpen, setIsOpen] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
   const [isAcceptLoading, setIsAcceptLoading] = useState(false)
+  const [isAcceptExpanded, setIsAcceptExpanded] = useState(false)
   const cardRef = useRef(null)
 
   // Memoize computed state
@@ -31,6 +32,7 @@ const GiftCard = ({
       if (cardRef.current && !cardRef.current.contains(event.target)) {
         setIsOpen(false)
         setIsAcceptLoading(false)
+        setIsAcceptExpanded(false)
       }
     }
 
@@ -43,6 +45,19 @@ const GiftCard = ({
     }
   }, [isOpen])
 
+  // Handle Accept button expansion after 700ms
+  useEffect(() => {
+    if (isAcceptLoading) {
+      const timer = setTimeout(() => {
+        setIsAcceptExpanded(true)
+      }, 700)
+
+      return () => clearTimeout(timer)
+    } else {
+      setIsAcceptExpanded(false)
+    }
+  }, [isAcceptLoading])
+
   // Event handlers with useCallback
   const handleCardClick = useCallback(() => {
     setIsOpen(prev => {
@@ -50,6 +65,7 @@ const GiftCard = ({
       if (!newValue) {
         // Reset loading state when closing
         setIsAcceptLoading(false)
+        setIsAcceptExpanded(false)
       }
       return newValue
     })
@@ -146,21 +162,31 @@ const GiftCard = ({
   const actionsStyle = useMemo(() => ({
     width: '100%',
     transitionTimingFunction: TOKENS.animation.easing.easeOut,
-    transition: `opacity ${TOKENS.animation.duration.medium} ${TOKENS.animation.easing.easeOut}, max-height ${TOKENS.animation.duration.medium} ${TOKENS.animation.easing.easeOut}`
+    transition: `opacity ${TOKENS.animation.duration.medium} ${TOKENS.animation.easing.easeOut}, max-height ${TOKENS.animation.duration.medium} ${TOKENS.animation.easing.easeOut}, gap ${TOKENS.animation.duration.fast} ${TOKENS.animation.easing.easeOut}`
   }), [])
+
+  // Card container hover styles
+  const cardContainerStyle = useMemo(() => ({
+    borderWidth: TOKENS.sizes.borderWidth,
+    borderColor: TOKENS.colors.border.default,
+    borderRadius: TOKENS.sizes.borderRadius.card,
+    width: TOKENS.sizes.card.width,
+    height: TOKENS.sizes.card.height.closed,
+    transform: isHovered ? 'translateY(-4px)' : 'translateY(0)',
+    boxShadow: isHovered 
+      ? '0 12px 40px -8px rgba(0, 0, 0, 0.15), 0 4px 12px -4px rgba(0, 0, 0, 0.1)' 
+      : 'none',
+    transition: `transform ${TOKENS.animation.duration.medium} ${TOKENS.animation.easing.easeOut}, box-shadow ${TOKENS.animation.duration.medium} ${TOKENS.animation.easing.easeOut}`
+  }), [isHovered])
 
   return (
     <div 
       ref={cardRef}
       onClick={handleCardClick}
+      onMouseEnter={handleHoverEnter}
+      onMouseLeave={handleHoverLeave}
       className="border-solid relative overflow-hidden cursor-pointer"
-      style={{ 
-        borderWidth: TOKENS.sizes.borderWidth,
-        borderColor: TOKENS.colors.border.default,
-        borderRadius: TOKENS.sizes.borderRadius.card,
-        width: TOKENS.sizes.card.width,
-        height: TOKENS.sizes.card.height.closed
-      }}
+      style={cardContainerStyle}
       data-name="Default"
     >
       {/* Background Image */}
@@ -330,76 +356,88 @@ const GiftCard = ({
             className={`flex items-center justify-center w-full ${isOpen ? 'opacity-100 relative' : 'opacity-0 relative pointer-events-none'}`}
             style={{
               ...actionsStyle,
-              gap: TOKENS.spacing.actionsGap,
+              gap: isAcceptExpanded ? '0' : TOKENS.spacing.actionsGap,
               maxHeight: isOpen ? TOKENS.sizes.text.actionsMaxHeight : '0'
             }}
             data-name="Actions"
           >
-            <button
-              onClick={handleSwapClick}
-              className="px-2 py-1.5 bg-white rounded-[12px] outline outline-1 outline-offset-[-1px] outline-zinc-200 hover:outline-slate-300 active:outline-slate-300 inline-flex justify-center items-center flex-1 transition-all duration-300 ease-out group"
-              style={{ borderRadius: TOKENS.sizes.borderRadius.button }}
-              data-name="Button/Text/M"
-            >
-              <div className="self-stretch min-h-6 px-1 flex justify-center items-center gap-2.5">
-                <div className="text-center justify-start text-slate-400 group-hover:text-slate-600 group-active:text-slate-600 text-sm font-medium font-['Goody_Sans'] leading-5 line-clamp-1">
-                  Swap
+            {!isAcceptExpanded && (
+              <button
+                onClick={handleSwapClick}
+                className="px-2 py-1.5 bg-white rounded-[12px] outline outline-1 outline-offset-[-1px] outline-zinc-200 hover:outline-slate-300 active:outline-slate-300 inline-flex justify-center items-center flex-1 transition-all duration-300 ease-out group"
+                style={{ 
+                  borderRadius: TOKENS.sizes.borderRadius.button
+                }}
+                data-name="Button/Text/M"
+              >
+                <div className="self-stretch min-h-6 px-1 flex justify-center items-center gap-2.5">
+                  <div className="text-center justify-start text-slate-400 group-hover:text-slate-600 group-active:text-slate-600 text-sm font-medium font-['Goody_Sans'] leading-5 line-clamp-1">
+                    Swap
+                  </div>
                 </div>
-              </div>
-            </button>
+              </button>
+            )}
             <button
               onClick={handleAcceptClick}
-              className="px-2 py-1.5 bg-violet-500 hover:bg-violet-600 active:bg-violet-600 rounded-[12px] outline outline-1 outline-offset-[-1px] outline-violet-600 inline-flex justify-center items-center flex-1 transition-all duration-300 ease-out"
-              style={{ borderRadius: TOKENS.sizes.borderRadius.button }}
+              className="px-2 py-1.5 bg-violet-500 hover:bg-violet-600 active:bg-violet-600 rounded-[12px] outline outline-1 outline-offset-[-1px] outline-violet-600 inline-flex justify-center items-center transition-all duration-300 ease-out"
+              style={{ 
+                borderRadius: TOKENS.sizes.borderRadius.button,
+                flex: isAcceptExpanded ? '1 1 100%' : '1 1 0',
+                minWidth: isAcceptExpanded ? '100%' : '0',
+                maxWidth: isAcceptExpanded ? '100%' : 'none',
+                transition: 'flex 300ms ease-out, min-width 300ms ease-out, max-width 300ms ease-out'
+              }}
               data-name="Button/Text/M"
             >
               <div className="self-stretch min-h-6 px-1 flex justify-center items-center gap-2.5" style={{ position: 'relative' }}>
-                <div
-                  style={{
-                    position: 'absolute',
-                    opacity: isAcceptLoading ? 1 : 0,
-                    transform: isAcceptLoading ? 'translateX(0) scale(1)' : 'translateX(12px) scale(0.8)',
-                    transition: 'opacity 300ms ease-out, transform 300ms ease-out',
-                    pointerEvents: isAcceptLoading ? 'auto' : 'none',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                >
-                  <svg
-                    className="animate-spin"
+                {!isAcceptExpanded && (
+                  <div
                     style={{
-                      width: '16px',
-                      height: '16px',
-                      color: 'white'
+                      position: 'absolute',
+                      opacity: isAcceptLoading ? 1 : 0,
+                      transform: isAcceptLoading ? 'translateX(0) scale(1)' : 'translateX(12px) scale(0.8)',
+                      transition: 'opacity 300ms ease-out, transform 300ms ease-out',
+                      pointerEvents: isAcceptLoading ? 'auto' : 'none',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
                     }}
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
                   >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    />
-                  </svg>
-                </div>
+                    <svg
+                      className="animate-spin"
+                      style={{
+                        width: '16px',
+                        height: '16px',
+                        color: 'white'
+                      }}
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      />
+                    </svg>
+                  </div>
+                )}
                 <div 
                   className="text-center justify-start text-white text-sm font-medium font-['Goody_Sans'] leading-5 line-clamp-1"
                   style={{
-                    opacity: isAcceptLoading ? 0 : 1,
+                    opacity: isAcceptLoading && !isAcceptExpanded ? 0 : 1,
                     transition: 'opacity 300ms ease-out'
                   }}
                 >
-                  Accept
+                  {isAcceptExpanded ? 'Send Thank-You Note' : 'Accept'}
                 </div>
               </div>
             </button>
