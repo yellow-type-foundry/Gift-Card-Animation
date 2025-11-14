@@ -16,6 +16,7 @@ const GiftCard = ({
   onOpenGift
 }) => {
   const [isOpen, setIsOpen] = useState(false)
+  const [isHovered, setIsHovered] = useState(false)
   const cardRef = useRef(null)
 
   useEffect(() => {
@@ -125,14 +126,24 @@ const GiftCard = ({
                 unoptimized
               />
             </div>
-            {/* Original illustration - higher z-index */}
+            {/* Original illustration - higher z-index - Box 1 */}
             <div 
               className="absolute aspect-square w-full h-full max-w-[200px] max-h-[200px] z-10"
+              onMouseEnter={() => setIsHovered(true)}
+              onMouseLeave={() => setIsHovered(false)}
               style={{ 
                 transition: 'transform 700ms cubic-bezier(0.2, 0, 0.4, 1)',
-                transform: state === 'opening' || isOpen 
-                  ? 'translate(-50%, -50%) rotate(15deg) translateX(32px) translateY(-8px) scale(0.9)' 
-                  : 'translate(-50%, -50%) rotate(0deg) translateX(0px) translateY(0px) scale(1)',
+                transform: (() => {
+                  const baseTransform = state === 'opening' || isOpen 
+                    ? 'translate(-50%, -50%) rotate(15deg) translateX(32px) translateY(-8px) scale(0.9)' 
+                    : 'translate(-50%, -50%) rotate(0deg) translateX(0px) translateY(0px) scale(1)'
+                  
+                  if (isHovered && (state !== 'opening' && !isOpen)) {
+                    return 'translate(-50%, -50%) rotate(4deg) translateX(16px) translateY(-4px) scale(1)'
+                  }
+                  
+                  return baseTransform
+                })(),
                 top: '50%',
                 left: '50%',
                 transformOrigin: 'center center',
