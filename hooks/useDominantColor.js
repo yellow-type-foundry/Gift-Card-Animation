@@ -45,13 +45,30 @@ const extractDominantColor = (imageSrc) => {
           { r: 0, g: 0, b: 0 }
         )
         
+        // Calculate perceived brightness (luminance) on 0-100 scale
+        // Formula: (R * 299 + G * 587 + B * 114) / 1000 gives 0-255, convert to 0-100
+        const brightness = ((avg.r * 299 + avg.g * 587 + avg.b * 114) / 1000) * (100 / 255)
+        
+        // Cap luminance at 50 - darken if above 50
+        let finalColor = { r: avg.r, g: avg.g, b: avg.b }
+        if (brightness > 50) {
+          // Darken the color by scaling down proportionally
+          const darkenFactor = 50 / brightness
+          finalColor = {
+            r: avg.r * darkenFactor,
+            g: avg.g * darkenFactor,
+            b: avg.b * darkenFactor
+          }
+        }
+        
         // Convert to hex
         const toHex = (value) => {
-          const hex = Math.round(value).toString(16).padStart(2, '0')
+          const clamped = Math.max(0, Math.min(255, Math.round(value)))
+          const hex = clamped.toString(16).padStart(2, '0')
           return hex
         }
         
-        const hex = `#${toHex(avg.r)}${toHex(avg.g)}${toHex(avg.b)}`
+        const hex = `#${toHex(finalColor.r)}${toHex(finalColor.g)}${toHex(finalColor.b)}`
         resolve(hex)
       } catch (error) {
         reject(error)

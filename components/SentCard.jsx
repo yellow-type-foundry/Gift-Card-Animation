@@ -1,9 +1,75 @@
 'use client'
 
-import React from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { TOKENS } from '@/constants/tokens'
 import useDominantColor from '@/hooks/useDominantColor'
+
+// Button component with hover/pressed states
+const ButtonWithHover = () => {
+  const [isButtonHovered, setIsButtonHovered] = useState(false)
+  const [isButtonPressed, setIsButtonPressed] = useState(false)
+
+  return (
+    <div
+      data-icon-leading="false"
+      data-icon-trailing="true"
+      data-label="true"
+      data-state={isButtonPressed ? 'Pressed' : 'Default'}
+      data-style="Accent 2"
+      className="px-2 py-1.5 rounded-lg outline outline-1 outline-offset-[-1px] outline-violet-600 inline-flex justify-center items-center cursor-pointer"
+      style={{
+        borderRadius: '12px',
+        borderColor: '#7c3aed',
+        backgroundColor: (isButtonHovered || isButtonPressed) ? '#7c3aed' : 'transparent',
+        whiteSpace: 'nowrap',
+        transition: 'background-color 300ms ease-out'
+      }}
+      onMouseEnter={() => setIsButtonHovered(true)}
+      onMouseLeave={() => {
+        setIsButtonHovered(false)
+        setIsButtonPressed(false)
+      }}
+      onMouseDown={() => setIsButtonPressed(true)}
+      onMouseUp={() => setIsButtonPressed(false)}
+    >
+      <div className="self-stretch min-h-6 px-1 flex justify-center items-center gap-2.5">
+        <div
+          className="text-center justify-start text-sm font-medium font-['Goody_Sans'] leading-5 line-clamp-1"
+          style={{
+            fontFamily: 'var(--font-goody-sans)',
+            fontSize: '14px',
+            fontWeight: 500,
+            lineHeight: 1.4,
+            color: (isButtonHovered || isButtonPressed) ? '#ffffff' : '#7c3aed',
+            transition: 'color 300ms ease-out'
+          }}
+        >
+          Send a reminder
+        </div>
+      </div>
+      <div
+        data-size="M"
+        className="w-6 h-6 max-w-6 max-h-6 inline-flex flex-col justify-center items-center"
+      >
+        <div className="w-6 h-6 flex flex-col justify-center items-center">
+          <div
+            className="self-stretch h-5 text-center justify-center text-sm font-['SF_Pro'] leading-4"
+            style={{
+              fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro", sans-serif',
+              fontSize: '14px',
+              lineHeight: 1.4,
+              color: (isButtonHovered || isButtonPressed) ? '#ffffff' : '#7c3aed',
+              transition: 'color 0.2s ease-out'
+            }}
+          >
+            􀋙
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 const SentCard = ({
   from = 'Jim Pfiffer',
@@ -14,10 +80,79 @@ const SentCard = ({
   progress = { current: 2, total: 4 },
   sentDate = '1 day ago'
 }) => {
-  const progressPercentage = (progress.current / progress.total) * 100
+  // Ensure current never exceeds total, and total never exceeds 40
+  const validatedProgress = {
+    current: Math.min(progress.current, progress.total),
+    total: Math.min(40, progress.total)
+  }
+  
+  // Calculate target progress percentage precisely (will never exceed 100% since current <= total)
+  // For example: 9/22 = 0.409090909... = 40.909090909...%
+  const targetProgressPercentage = validatedProgress.total > 0 
+    ? (validatedProgress.current / validatedProgress.total) * 100 
+    : 0
+  
+  // Animated progress percentage (starts at 0, animates to target after content loads)
+  const [animatedProgress, setAnimatedProgress] = useState(0)
+  // Animated current value (starts at 0, counts up to target)
+  const [animatedCurrent, setAnimatedCurrent] = useState(0)
+  
+  // Refs to store timers for cleanup
+  const countIntervalRef = useRef(null)
+  const timerRef = useRef(null)
+  
+  // Hover state
+  const [isHovered, setIsHovered] = useState(false)
   
   // Extract dominant color from cover image
   const { dominantColor, isLoading } = useDominantColor(boxImage, '#47caeb')
+  
+  // Animate progress bar and count after content is loaded
+  useEffect(() => {
+    // Wait for image to load and color extraction to complete
+    if (!isLoading && dominantColor) {
+      // Small delay before animation starts
+      timerRef.current = setTimeout(() => {
+        const targetCurrent = validatedProgress.current
+        const duration = 500 // 0.5s to match CSS transition
+        const steps = 30 // Number of animation steps
+        const stepDuration = duration / steps
+        const increment = targetCurrent / steps
+        let currentStep = 0
+        
+        // Animate progress bar width immediately
+        setAnimatedProgress(targetProgressPercentage)
+        
+        // Animate counting number
+        countIntervalRef.current = setInterval(() => {
+          currentStep++
+          const newValue = Math.min(
+            targetCurrent,
+            Math.floor(increment * currentStep)
+          )
+          setAnimatedCurrent(newValue)
+          
+          if (currentStep >= steps) {
+            // Ensure final value is exact
+            setAnimatedCurrent(targetCurrent)
+            if (countIntervalRef.current) {
+              clearInterval(countIntervalRef.current)
+              countIntervalRef.current = null
+            }
+          }
+        }, stepDuration)
+      }, 100)
+      
+      return () => {
+        if (timerRef.current) {
+          clearTimeout(timerRef.current)
+        }
+        if (countIntervalRef.current) {
+          clearInterval(countIntervalRef.current)
+        }
+      }
+    }
+  }, [isLoading, dominantColor, targetProgressPercentage, validatedProgress.current])
 
   return (
     <div
@@ -25,8 +160,15 @@ const SentCard = ({
       style={{
         width: '300px',
         height: '321px',
-        borderRadius: TOKENS.sizes.borderRadius.card
+        borderRadius: TOKENS.sizes.borderRadius.card,
+        transform: isHovered ? 'translateY(-4px)' : 'translateY(0)',
+        boxShadow: isHovered 
+          ? '0 12px 40px -8px rgba(0, 0, 0, 0.15), 0 4px 12px -4px rgba(0, 0, 0, 0.1)' 
+          : 'none',
+        transition: `transform ${TOKENS.animation.duration.medium} ${TOKENS.animation.easing.easeOut}, box-shadow ${TOKENS.animation.duration.medium} ${TOKENS.animation.easing.easeOut}`
       }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       data-name="Gift Card"
     >
       <div className="content-stretch flex flex-col items-start overflow-clip relative rounded-[inherit] size-full">
@@ -276,52 +418,89 @@ const SentCard = ({
             data-name="Bottom"
           >
             <div
-              className="bg-[#f0f1f5] border border-[rgba(221,226,233,0)] border-solid box-border content-stretch flex flex-col gap-[10px] items-start justify-center p-[3px] relative rounded-[100px] shrink-0 w-[120px]"
+              className="flex items-center justify-center relative w-full"
               style={{
-                borderRadius: '100px',
-                backgroundColor: '#f0f1f5'
+                height: '36px'
               }}
-              data-name="Progress Bar Container"
             >
-              {/* Progress Bar */}
+              {/* Progress Bar - hidden on hover only if not all accepted */}
               <div
-                className="bg-gradient-to-b box-border content-stretch flex flex-col from-[#5a3dff] gap-[10px] items-start justify-center px-[8px] py-[2px] relative rounded-[100px] shrink-0"
+                className="bg-[#f0f1f5] border border-[rgba(221,226,233,0)] border-solid box-border content-stretch flex flex-col gap-[10px] items-start justify-center p-[2px] relative rounded-[100px] absolute"
                 style={{
-                  background: 'linear-gradient(to bottom, #5a3dff, #a799ff)',
                   borderRadius: '100px',
-                  width: `${(progress.current / progress.total) * 100}%`,
-                  minWidth: 'fit-content'
+                  backgroundColor: '#f0f1f5',
+                  width: '120px',
+                  opacity: (isHovered && validatedProgress.current !== validatedProgress.total) ? 0 : 1,
+                  visibility: (isHovered && validatedProgress.current !== validatedProgress.total) ? 'hidden' : 'visible',
+                  transition: 'opacity 0.3s ease-out, visibility 0.3s ease-out',
+                  pointerEvents: (isHovered && validatedProgress.current !== validatedProgress.total) ? 'none' : 'auto'
                 }}
-                data-name="Progress Bar"
+                data-name="Progress Bar Container"
               >
-                <p
-                  className="font-['Goody_Sans:Medium',sans-serif] leading-[1.4] not-italic relative shrink-0 text-[14px] text-white w-full"
-                  style={{
-                    fontFamily: 'var(--font-goody-sans)',
-                    fontSize: '14px',
-                    fontWeight: 500,
-                    lineHeight: 1.4,
-                    color: '#ffffff',
-                    whiteSpace: 'nowrap'
-                  }}
-                >
-                  {progress.current}/{progress.total}
-                </p>
+                {/* Progress Bar */}
                 <div
-                  className="absolute inset-0 pointer-events-none"
+                  className="bg-gradient-to-b box-border content-stretch flex flex-col from-[#5a3dff] gap-[10px] items-start justify-center px-[8px] py-[2px] relative rounded-[100px] shrink-0"
                   style={{
-                    boxShadow: '0px 1px 2px 0px inset rgba(255,255,255,0.5)',
+                    background: 'linear-gradient(to bottom, #5a3dff, #a799ff)',
+                    borderRadius: '100px',
+                    width: validatedProgress.current === validatedProgress.total ? '100%' : `${animatedProgress}%`,
+                    maxWidth: '100%',
+                    minWidth: 'fit-content',
+                    transition: 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
+                  }}
+                  data-name="Progress Bar"
+                >
+                  <p
+                    className={`font-['Goody_Sans:Medium',sans-serif] leading-[1.4] not-italic relative shrink-0 text-[14px] text-white ${
+                      validatedProgress.current === validatedProgress.total ? 'text-center' : ''
+                    }`}
+                    style={{
+                      fontFamily: 'var(--font-goody-sans)',
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      lineHeight: 1.4,
+                      color: '#ffffff',
+                      whiteSpace: 'nowrap',
+                      width: '100%',
+                      textAlign: validatedProgress.current === validatedProgress.total ? 'center' : 'left'
+                    }}
+                  >
+                    {validatedProgress.current === validatedProgress.total 
+                      ? 'All accepted' 
+                      : `${animatedCurrent}/${validatedProgress.total}`}
+                  </p>
+                  <div
+                    className="absolute inset-0 pointer-events-none"
+                    style={{
+                      boxShadow: '0px 1px 2px 0px inset rgba(255,255,255,0.5)',
+                      borderRadius: '100px'
+                    }}
+                  />
+                </div>
+                <div
+                  className="absolute inset-[-1px] pointer-events-none"
+                  style={{
+                    boxShadow: '0px 1px 2.25px 0px inset #c2c6d6, 0px -1px 2.25px 0px inset #ffffff',
                     borderRadius: '100px'
                   }}
                 />
               </div>
-              <div
-                className="absolute inset-[-1px] pointer-events-none"
-                style={{
-                  boxShadow: '0px 1px 2.25px 0px inset #c2c6d6, 0px -1px 2.25px 0px inset #ffffff',
-                  borderRadius: '100px'
-                }}
-              />
+              
+              {/* Send a reminder button - replaces progress bar on hover (only if not all accepted) */}
+              {validatedProgress.current !== validatedProgress.total && (
+                <div
+                  className="absolute"
+                  style={{
+                    opacity: isHovered ? 1 : 0,
+                    visibility: isHovered ? 'visible' : 'hidden',
+                    transform: isHovered ? 'translateY(0)' : 'translateY(12px)',
+                    transition: 'opacity 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.25s cubic-bezier(0.34, 1.56, 0.34, 1), visibility 0.25s ease-out',
+                    pointerEvents: isHovered ? 'auto' : 'none'
+                  }}
+                >
+                  <ButtonWithHover />
+                </div>
+              )}
             </div>
           </div>
         </div>

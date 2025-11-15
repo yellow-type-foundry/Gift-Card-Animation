@@ -41,6 +41,95 @@ const ALL_MESSAGES = [
   'I wanted to thank you for being such a wonderful mentor and for always pushing me to be my best. Your support and encouragement have meant everything to me!'
 ]
 
+// All cover images
+const ALL_COVERS = [
+  '/assets/covers/Birthday01.png',
+  '/assets/covers/Birthday02.png',
+  '/assets/covers/Birthday03.png',
+  '/assets/covers/Birthday04.png',
+  '/assets/covers/Birthday05.png',
+  '/assets/covers/Birthday06.png',
+  '/assets/covers/Congratulations01.png',
+  '/assets/covers/Congratulations02.png',
+  '/assets/covers/Congratulations03.png',
+  '/assets/covers/Congratulations04.png',
+  '/assets/covers/Congratulations05.png',
+  '/assets/covers/Congratulations06.png',
+  '/assets/covers/Congratulations07.png',
+  '/assets/covers/Congratulations08.png',
+  '/assets/covers/Congratulations09.png',
+  '/assets/covers/Congratulations10.png',
+  '/assets/covers/Congratulations11.png',
+  '/assets/covers/Congratulations12.png',
+  '/assets/covers/Congratulations13.png',
+  '/assets/covers/Holiday 01.png',
+  '/assets/covers/Holiday 02.png',
+  '/assets/covers/Holiday 03.png',
+  '/assets/covers/Holiday 04.png',
+  '/assets/covers/Holiday 05.png',
+  '/assets/covers/Holiday 06.png',
+  '/assets/covers/Holiday 7.png',
+  '/assets/covers/Holiday 8.png',
+  '/assets/covers/Onboarding 03.png',
+  '/assets/covers/Onboarding 04.png',
+  '/assets/covers/Onboarding 05.png',
+  '/assets/covers/Onboarding 06.png',
+  '/assets/covers/Onboarding 07.png',
+  '/assets/covers/Onboarding 08.png',
+  '/assets/covers/Sales & Marketing 01.png',
+  '/assets/covers/Sales & Marketing 02.png',
+  '/assets/covers/Sales & Marketing 03.png',
+  '/assets/covers/Sales & Marketing 04.png',
+  '/assets/covers/Sales & Marketing 05.png',
+  '/assets/covers/Sales & Marketing 06.png',
+  '/assets/covers/Sales & Marketing 07.png',
+  '/assets/covers/Sales & Marketing 08.png',
+  '/assets/covers/Sales & Marketing 09.png',
+  '/assets/covers/Thank you 01.png',
+  '/assets/covers/Thank you 02.png',
+  '/assets/covers/Thank you 03.png',
+  '/assets/covers/Thank you 04.png',
+  '/assets/covers/Thank you 05.png',
+  '/assets/covers/Thank you 06 1.png',
+  '/assets/covers/Workiversary01.png',
+  '/assets/covers/Workiversary02.png',
+  '/assets/covers/Workiversary03.png',
+  '/assets/covers/Workiversary04.png',
+  '/assets/covers/Workiversary05.png',
+  '/assets/covers/Workiversary06.png',
+  '/assets/covers/Workiversary07.png'
+]
+
+// SentCard data
+const ALL_SENDERS = [
+  'Jim Pfiffer', 'Sarah Johnson', 'Michael Chen', 'Emily Rodriguez',
+  'David Kim', 'Olivia Martinez', 'James Wilson', 'Lisa Tran',
+  'Ryan Thompson', 'Jessica Brown', 'Daniel Lee', 'Amanda White'
+]
+
+const ALL_TITLES = [
+  'New Hires Onboarding', 'Birthday Celebration', 'Thank You', 'Workiversary Milestone',
+  'Sales Achievement', 'Team Recognition', 'Congratulations', 'Holiday Greetings',
+  'Project Success', 'Anniversary Special', 'Welcome Aboard', 'Appreciation Day'
+]
+
+const ALL_GIFT_TITLES = [
+  "Holiday's sparkles", "Birthday Bundle", "Appreciation Gift", "Anniversary Special",
+  "Thank You Collection", "Celebration Box", "Recognition Gift", "Welcome Package",
+  "Achievement Award", "Milestone Gift", "Success Collection", "Gratitude Box"
+]
+
+const ALL_GIFT_SUBTITLES = [
+  'Collection by Goody', 'Celebration Collection', 'Thank You Collection', 'Milestone Collection',
+  'Recognition Series', 'Appreciation Line', 'Success Series', 'Welcome Collection',
+  'Achievement Set', 'Holiday Collection', 'Gratitude Series', 'Special Edition'
+]
+
+const ALL_SENT_DATES = [
+  '1 day ago', '2 days ago', '3 days ago', '4 days ago', '5 days ago',
+  '1 week ago', '2 weeks ago', '3 weeks ago', '1 month ago'
+]
+
 // Helper function to shuffle array
 const shuffleArray = (array) => {
   const shuffled = [...array]
@@ -80,6 +169,20 @@ export default function Home() {
     return ALL_MESSAGES.slice(0, 8)
   })
   
+  // SentCard data state
+  const [sentCards, setSentCards] = useState(() => {
+    // Return default values for initial render (server and client will match)
+    return Array(8).fill(null).map((_, i) => ({
+      from: ALL_SENDERS[i % ALL_SENDERS.length],
+      title: ALL_TITLES[i % ALL_TITLES.length],
+      boxImage: ALL_COVERS[i % ALL_COVERS.length],
+      giftTitle: ALL_GIFT_TITLES[i % ALL_GIFT_TITLES.length],
+      giftSubtitle: ALL_GIFT_SUBTITLES[i % ALL_GIFT_SUBTITLES.length],
+      progress: { current: (i % 3) + 1, total: (i % 3) + 4 },
+      sentDate: ALL_SENT_DATES[i % ALL_SENT_DATES.length]
+    }))
+  })
+  
   // Randomize data only on client side after hydration
   useEffect(() => {
     const shuffled = shuffleArray(ALL_BOX_PAIRS)
@@ -89,6 +192,30 @@ export default function Home() {
     }
     setBoxPairs(shuffleArray(selected))
     setMessages(shuffleArray(ALL_MESSAGES).slice(0, 8))
+    
+    // Shuffle SentCard data
+    const shuffledCovers = shuffleArray(ALL_COVERS)
+    const shuffledSenders = shuffleArray(ALL_SENDERS)
+    const shuffledTitles = shuffleArray(ALL_TITLES)
+    const shuffledGiftTitles = shuffleArray(ALL_GIFT_TITLES)
+    const shuffledGiftSubtitles = shuffleArray(ALL_GIFT_SUBTITLES)
+    const shuffledDates = shuffleArray(ALL_SENT_DATES)
+    
+    setSentCards(
+      Array(8).fill(null).map(() => ({
+        from: shuffledSenders[Math.floor(Math.random() * shuffledSenders.length)],
+        title: shuffledTitles[Math.floor(Math.random() * shuffledTitles.length)],
+        boxImage: shuffledCovers[Math.floor(Math.random() * shuffledCovers.length)],
+        giftTitle: shuffledGiftTitles[Math.floor(Math.random() * shuffledGiftTitles.length)],
+        giftSubtitle: shuffledGiftSubtitles[Math.floor(Math.random() * shuffledGiftSubtitles.length)],
+        progress: (() => {
+          const total = Math.floor(Math.random() * 40) + 1
+          const current = Math.floor(Math.random() * total) + 1
+          return { current, total }
+        })(),
+        sentDate: shuffledDates[Math.floor(Math.random() * shuffledDates.length)]
+      }))
+    )
   }, [])
   
   const handleOpenGift = useCallback((cardId) => {
@@ -222,49 +349,19 @@ export default function Home() {
           onOpenGift={cardHandlers.card8}
         />
         
-        {/* SentCard 1 - Onboarding */}
-        <SentCard
-          from="Jim Pfiffer"
-          title="New Hires Onboarding"
-          boxImage="/assets/covers/Onboarding 03.png"
-          giftTitle="Holiday's sparkles"
-          giftSubtitle="Collection by Goody"
-          progress={{ current: 2, total: 4 }}
-          sentDate="1 day ago"
-        />
-        
-        {/* SentCard 2 - Birthday */}
-        <SentCard
-          from="Sarah Johnson"
-          title="Birthday Celebration"
-          boxImage="/assets/covers/Birthday02.png"
-          giftTitle="Birthday Bundle"
-          giftSubtitle="Celebration Collection"
-          progress={{ current: 3, total: 5 }}
-          sentDate="2 days ago"
-        />
-        
-        {/* SentCard 3 - Thank You */}
-        <SentCard
-          from="Michael Chen"
-          title="Thank You"
-          boxImage="/assets/covers/Thank you 04.png"
-          giftTitle="Appreciation Gift"
-          giftSubtitle="Thank You Collection"
-          progress={{ current: 1, total: 3 }}
-          sentDate="3 days ago"
-        />
-        
-        {/* SentCard 4 - Workiversary */}
-        <SentCard
-          from="Emily Rodriguez"
-          title="Workiversary Milestone"
-          boxImage="/assets/covers/Workiversary05.png"
-          giftTitle="Anniversary Special"
-          giftSubtitle="Milestone Collection"
-          progress={{ current: 4, total: 6 }}
-          sentDate="5 days ago"
-        />
+        {/* SentCards - Shuffled on every reload */}
+        {sentCards.map((card, index) => (
+          <SentCard
+            key={index}
+            from={card.from}
+            title={card.title}
+            boxImage={card.boxImage}
+            giftTitle={card.giftTitle}
+            giftSubtitle={card.giftSubtitle}
+            progress={card.progress}
+            sentDate={card.sentDate}
+          />
+        ))}
       </div>
     </div>
   )
