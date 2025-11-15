@@ -155,22 +155,21 @@ const SentCard = ({
   }, [isLoading, dominantColor, targetProgressPercentage, validatedProgress.current])
 
   return (
-    <div
-      className="border border-[#dde2e9] border-solid relative rounded-[24px] size-full"
-      style={{
-        width: '300px',
-        height: '321px',
-        borderRadius: TOKENS.sizes.borderRadius.card,
-        transform: isHovered ? 'translateY(-4px)' : 'translateY(0)',
-        boxShadow: isHovered 
-          ? '0 12px 40px -8px rgba(0, 0, 0, 0.15), 0 4px 12px -4px rgba(0, 0, 0, 0.1)' 
-          : 'none',
-        transition: `transform ${TOKENS.animation.duration.medium} ${TOKENS.animation.easing.easeOut}, box-shadow ${TOKENS.animation.duration.medium} ${TOKENS.animation.easing.easeOut}`
-      }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      data-name="Gift Card"
-    >
+          <div
+            className="border border-[#dde2e9] border-solid relative rounded-[24px] w-full md:w-[300px]"
+            style={{
+              height: '321px',
+              borderRadius: TOKENS.sizes.borderRadius.card,
+              transform: isHovered ? 'translateY(-4px)' : 'translateY(0)',
+              boxShadow: isHovered
+                ? '0 12px 40px -8px rgba(0, 0, 0, 0.15), 0 4px 12px -4px rgba(0, 0, 0, 0.1)'
+                : 'none',
+              transition: `transform ${TOKENS.animation.duration.medium} ${TOKENS.animation.easing.easeOut}, box-shadow ${TOKENS.animation.duration.medium} ${TOKENS.animation.easing.easeOut}`
+            }}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+            data-name="Gift Card"
+          >
       <div className="content-stretch flex flex-col items-start overflow-clip relative rounded-[inherit] size-full">
         {/* Header Section */}
         <div

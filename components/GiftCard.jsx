@@ -178,7 +178,7 @@ const GiftCard = ({
     borderWidth: TOKENS.sizes.borderWidth,
     borderColor: TOKENS.colors.border.default,
     borderRadius: TOKENS.sizes.borderRadius.card,
-    width: TOKENS.sizes.card.width,
+    width: '100%',
     height: TOKENS.sizes.card.height.closed,
     transform: isHovered ? 'translateY(-4px)' : 'translateY(0)',
     boxShadow: isHovered 
@@ -193,7 +193,7 @@ const GiftCard = ({
       onClick={handleCardClick}
       onMouseEnter={handleHoverEnter}
       onMouseLeave={handleHoverLeave}
-      className="border-solid relative overflow-hidden cursor-pointer"
+      className="border-solid relative overflow-hidden cursor-pointer w-full md:max-w-[300px]"
       style={cardContainerStyle}
       data-name="Default"
     >
@@ -218,7 +218,7 @@ const GiftCard = ({
           style={{
             ...whiteCardStyle,
             borderRadius: TOKENS.sizes.borderRadius.card,
-            width: TOKENS.sizes.card.width,
+            width: '100%',
             height: TOKENS.sizes.card.height.closed,
             left: '50%',
             transform: 'translateX(-50%)',
