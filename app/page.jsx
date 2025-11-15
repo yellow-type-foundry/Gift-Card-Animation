@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import GiftCard from '@/components/GiftCard'
+import SentCard from '@/components/SentCard'
 
 // Static data moved outside component to avoid recreation on every render
 const ALL_BOX_PAIRS = [
@@ -219,6 +220,50 @@ export default function Home() {
           boxImage={boxPairs[7].box1}
           box2Image={boxPairs[7].box2}
           onOpenGift={cardHandlers.card8}
+        />
+        
+        {/* SentCard 1 - Onboarding */}
+        <SentCard
+          from="Jim Pfiffer"
+          title="New Hires Onboarding"
+          boxImage="/assets/covers/Onboarding 03.png"
+          giftTitle="Holiday's sparkles"
+          giftSubtitle="Collection by Goody"
+          progress={{ current: 2, total: 4 }}
+          sentDate="1 day ago"
+        />
+        
+        {/* SentCard 2 - Birthday */}
+        <SentCard
+          from="Sarah Johnson"
+          title="Birthday Celebration"
+          boxImage="/assets/covers/Birthday02.png"
+          giftTitle="Birthday Bundle"
+          giftSubtitle="Celebration Collection"
+          progress={{ current: 3, total: 5 }}
+          sentDate="2 days ago"
+        />
+        
+        {/* SentCard 3 - Thank You */}
+        <SentCard
+          from="Michael Chen"
+          title="Thank You"
+          boxImage="/assets/covers/Thank you 04.png"
+          giftTitle="Appreciation Gift"
+          giftSubtitle="Thank You Collection"
+          progress={{ current: 1, total: 3 }}
+          sentDate="3 days ago"
+        />
+        
+        {/* SentCard 4 - Workiversary */}
+        <SentCard
+          from="Emily Rodriguez"
+          title="Workiversary Milestone"
+          boxImage="/assets/covers/Workiversary05.png"
+          giftTitle="Anniversary Special"
+          giftSubtitle="Milestone Collection"
+          progress={{ current: 4, total: 6 }}
+          sentDate="5 days ago"
         />
       </div>
     </div>
