@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import Image from 'next/image'
 import { TOKENS } from '@/constants/tokens'
+import Spinner from './Spinner'
 
 const GiftCard = ({ 
   state = 'unopened',
@@ -24,9 +25,9 @@ const GiftCard = ({
   const [isAcceptExpanded, setIsAcceptExpanded] = useState(false)
   const cardRef = useRef(null)
 
-  // Memoize computed state
-  const isOpening = useMemo(() => state === 'opening' || isOpen, [state, isOpen])
-  const isUnopened = useMemo(() => state !== 'opening' && !isOpen, [state, isOpen])
+  // Computed state
+  const isOpening = state === 'opening' || isOpen
+  const isUnopened = state !== 'opening' && !isOpen
 
   // Click outside handler
   useEffect(() => {
@@ -73,13 +74,8 @@ const GiftCard = ({
     })
   }, [])
 
-  const handleHoverEnter = useCallback(() => {
-    setIsHovered(true)
-  }, [])
-
-  const handleHoverLeave = useCallback(() => {
-    setIsHovered(false)
-  }, [])
+  const handleHoverEnter = () => setIsHovered(true)
+  const handleHoverLeave = () => setIsHovered(false)
 
   const handleSwapClick = useCallback((e) => {
     e.stopPropagation()
@@ -135,13 +131,14 @@ const GiftCard = ({
   const messageStyle = useMemo(() => ({
     color: TOKENS.colors.text.primary,
     transform: `scale(${isOpening ? TOKENS.transforms.message.scale.opening : TOKENS.transforms.message.scale.default})`,
-    transition: `transform ${TOKENS.animation.duration.fast} ${TOKENS.animation.easing.easeOut}, opacity ${TOKENS.animation.duration.fast} ${TOKENS.animation.easing.easeOut}, height ${TOKENS.animation.duration.fast} ${TOKENS.animation.easing.easeOut}`
+    filter: isOpening ? 'blur(4px)' : 'blur(0px)',
+    transition: `transform ${TOKENS.animation.duration.fast} ${TOKENS.animation.easing.easeOut}, opacity ${TOKENS.animation.duration.fast} ${TOKENS.animation.easing.easeOut}, height ${TOKENS.animation.duration.fast} ${TOKENS.animation.easing.easeOut}, filter ${TOKENS.animation.duration.fast} ${TOKENS.animation.easing.easeOut}`
   }), [isOpening])
 
-  const expiryTextStyle = useMemo(() => ({
-    marginBottom: isOpen ? '0' : '0',
+  const expiryTextStyle = {
+    marginBottom: '0',
     transition: `opacity ${TOKENS.animation.duration.fast} ${TOKENS.animation.easing.easeOut}, max-height ${TOKENS.animation.duration.fast} ${TOKENS.animation.easing.easeOut}`
-  }), [isOpen])
+  }
 
   const giftBoxContainerStyle = useMemo(() => ({
     height: isOpen ? '80%' : 'auto',
@@ -170,11 +167,11 @@ const GiftCard = ({
     willChange: 'transform'
   }), [box2Transform])
 
-  const actionsStyle = useMemo(() => ({
+  const actionsStyle = {
     width: '100%',
     transitionTimingFunction: TOKENS.animation.easing.easeOut,
     transition: `opacity ${TOKENS.animation.duration.medium} ${TOKENS.animation.easing.easeOut}, max-height ${TOKENS.animation.duration.medium} ${TOKENS.animation.easing.easeOut}, gap ${TOKENS.animation.duration.fast} ${TOKENS.animation.easing.easeOut}`
-  }), [])
+  }
 
   // Card container hover styles
   const cardContainerStyle = useMemo(() => ({
@@ -196,7 +193,7 @@ const GiftCard = ({
       onClick={handleCardClick}
       onMouseEnter={handleHoverEnter}
       onMouseLeave={handleHoverLeave}
-      className="border-solid relative overflow-hidden cursor-pointer gift-card-mobile-blur"
+      className="border-solid relative overflow-hidden cursor-pointer"
       style={cardContainerStyle}
       data-name="Default"
     >
@@ -210,7 +207,7 @@ const GiftCard = ({
           objectPosition: '50% 50%',
           borderRadius: TOKENS.sizes.borderRadius.card
         }}
-        unoptimized
+        priority
       />
       
       {/* Inner Container */}
@@ -293,14 +290,11 @@ const GiftCard = ({
                 fill
                 className="object-contain pointer-events-none"
                 style={{ objectPosition: '50% 50%' }}
-                unoptimized
               />
             </div>
             {/* Box 1 - Original illustration - higher z-index */}
             <div 
               className="absolute aspect-square w-full h-full"
-              onMouseEnter={handleHoverEnter}
-              onMouseLeave={handleHoverLeave}
               style={{
                 ...box1Style,
                 maxWidth: TOKENS.sizes.giftBox.maxWidth,
@@ -315,7 +309,6 @@ const GiftCard = ({
                 fill
                 className="object-contain pointer-events-none"
                 style={{ objectPosition: '50% 50%' }}
-                unoptimized
               />
             </div>
           </div>
@@ -419,31 +412,7 @@ const GiftCard = ({
                       justifyContent: 'center'
                     }}
                   >
-                    <svg
-                      className="animate-spin"
-                      style={{
-                        width: '16px',
-                        height: '16px',
-                        color: 'white'
-                      }}
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      />
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      />
-                    </svg>
+                    <Spinner size={16} color="white" />
                   </div>
                 )}
                 <div 
