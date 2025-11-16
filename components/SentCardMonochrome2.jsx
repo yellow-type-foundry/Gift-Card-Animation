@@ -14,6 +14,8 @@ export default function SentCardMonochrome2(props) {
     envelopeOffsetY={6}
     confettiWhiteOverlay={true}
     envelopeHighZ={true}
+    overlayProgressOnEnvelope={true}
+    showFooterProgress={false}
   />
 }
 

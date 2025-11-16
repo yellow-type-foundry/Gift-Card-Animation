@@ -26,7 +26,9 @@ const SentCard = ({
   envelopeScale = 1,
   envelopeOffsetY = 0,
   confettiWhiteOverlay = false,
-  envelopeHighZ = false
+  envelopeHighZ = false,
+  overlayProgressOnEnvelope = false,
+  showFooterProgress = true
 }) => {
   // Ensure current never exceeds total, and total never exceeds 40
   const validatedProgress = {
@@ -103,6 +105,15 @@ const SentCard = ({
   const gridCellBaseColor = useMemo(
     () => capSaturation(adjustToLuminance(headerBgColor, 95), 90),
     [headerBgColor]
+  )
+  // Progress colors themed to image/card
+  const progressStartColor = useMemo(
+    () => capSaturation(adjustToLuminance(dominantColor, 60), 50),
+    [dominantColor]
+  )
+  const progressEndColor = useMemo(
+    () => capSaturation(lightenHex(dominantColor, 1.2), 50),
+    [dominantColor]
   )
   
   // Animate progress bar and count after content is loaded
@@ -452,6 +463,70 @@ const SentCard = ({
                     </linearGradient>
                   </defs>
                 </svg>
+                {overlayProgressOnEnvelope && (
+                  <div
+                    className="absolute"
+                    style={{
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      bottom: '10px',
+                      height: '36px',
+                      zIndex: 3
+                    }}
+                    data-name="OverlayProgress"
+                  >
+                    <div
+                      className="bg-[#f0f1f5] border border-[rgba(221,226,233,0)] border-solid box-border content-stretch flex flex-col gap-[10px] items-start justify-center p-[2px] relative rounded-[100px] shrink-0"
+                      style={{
+                        borderRadius: PROGRESS_PILL_RADIUS,
+                        backgroundColor: '#f0f1f5',
+                        width: '120px'
+                      }}
+                    >
+                      <div
+                        className="bg-gradient-to-b box-border content-stretch flex flex-col from-[#5a3dff] gap-[10px] items-center justify-center px-[8px] py-[2px] relative rounded-[100px] shrink-0"
+                        style={{
+                          background: `linear-gradient(to bottom, ${progressStartColor}, ${progressEndColor})`,
+                          borderRadius: PROGRESS_PILL_RADIUS,
+                          width: isDone ? '100%' : `${animatedProgress}%`,
+                          maxWidth: '100%',
+                          minWidth: 'fit-content',
+                          transition: 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                          boxShadow: PROGRESS_GLOW_BOX_SHADOW
+                        }}
+                      >
+                        <p
+                          className="font-['Goody_Sans:Medium',sans-serif] leading-[1.4] not-italic relative shrink-0 text-[14px] text-white text-center w-full"
+                          style={{
+                            fontFamily: 'var(--font-goody-sans)',
+                            fontSize: '14px',
+                            fontWeight: 500,
+                            lineHeight: 1.4,
+                            color: '#ffffff',
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          {isDone ? 'Done' : `${animatedCurrent}/${validatedProgress.total}`}
+                        </p>
+                        <div className="absolute bg-gradient-to-b blur-[0.45px] filter from-[#e9e5ff] h-[10px] left-[10%] right-[10%] rounded-[100px] to-[rgba(229,245,255,0)] top-[3px]" />
+                        <div
+                          className="absolute inset-0 pointer-events-none"
+                          style={{
+                            boxShadow: '0px 3px 5px 2px inset rgba(255,255,255,0.5)',
+                            borderRadius: PROGRESS_PILL_RADIUS
+                          }}
+                        />
+                      </div>
+                      <div
+                        className="absolute inset-[-1px] pointer-events-none"
+                        style={{
+                          boxShadow: '0px 1px 2.25px 0px inset #c2c6d6, 0px -1px 2.25px 0px inset #ffffff',
+                          borderRadius: PROGRESS_PILL_RADIUS
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
             </div>
             {/* Rectangle 1790 (card shape container) - moved inside Envelope */}
             <div
@@ -881,6 +956,7 @@ const SentCard = ({
           infoTitle={giftTitle}
           infoSubtitle={giftSubtitle}
           equalPadding={footerPadEqual}
+          showProgress={showFooterProgress}
         />
       </div>
     </div>

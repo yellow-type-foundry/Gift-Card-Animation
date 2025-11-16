@@ -254,28 +254,31 @@ export default function Home() {
         className="w-full px-[60px] md:px-[240px] py-10"
       >
         {/* Tabs */}
-        <div className="w-full flex items-center justify-center gap-2 mb-6">
+        <div
+          className="w-full flex items-center md:justify-center justify-start gap-2 mb-6 overflow-x-auto whitespace-nowrap"
+          style={{ WebkitOverflowScrolling: 'touch' }}
+        >
           <button
             onClick={() => setActiveTab('gift')}
-            className={`px-3 py-1.5 rounded-[12px] outline outline-1 outline-offset-[-1px] ${activeTab==='gift' ? 'bg-white outline-zinc-300 text-black' : 'bg-[#f0f1f5] outline-zinc-200 text-[#525F7A]'}`}
+            className={`px-3 py-1.5 rounded-[12px] outline outline-1 outline-offset-[-1px] shrink-0 ${activeTab==='gift' ? 'bg-white outline-zinc-300 text-black' : 'bg-[#f0f1f5] outline-zinc-200 text-[#525F7A]'}`}
           >
             Gift Card
           </button>
           <button
             onClick={() => setActiveTab('sent')}
-            className={`px-3 py-1.5 rounded-[12px] outline outline-1 outline-offset-[-1px] ${activeTab==='sent' ? 'bg-white outline-zinc-300 text-black' : 'bg-[#f0f1f5] outline-zinc-200 text-[#525F7A]'}`}
+            className={`px-3 py-1.5 rounded-[12px] outline outline-1 outline-offset-[-1px] shrink-0 ${activeTab==='sent' ? 'bg-white outline-zinc-300 text-black' : 'bg-[#f0f1f5] outline-zinc-200 text-[#525F7A]'}`}
           >
             Sent Card
           </button>
           <button
             onClick={() => setActiveTab('mono')}
-            className={`px-3 py-1.5 rounded-[12px] outline outline-1 outline-offset-[-1px] ${activeTab==='mono' ? 'bg-white outline-zinc-300 text-black' : 'bg-[#f0f1f5] outline-zinc-200 text-[#525F7A]'}`}
+            className={`px-3 py-1.5 rounded-[12px] outline outline-1 outline-offset-[-1px] shrink-0 ${activeTab==='mono' ? 'bg-white outline-zinc-300 text-black' : 'bg-[#f0f1f5] outline-zinc-200 text-[#525F7A]'}`}
           >
             Monochrome
           </button>
           <button
             onClick={() => setActiveTab('mono2')}
-            className={`px-3 py-1.5 rounded-[12px] outline outline-1 outline-offset-[-1px] ${activeTab==='mono2' ? 'bg-white outline-zinc-300 text-black' : 'bg-[#f0f1f5] outline-zinc-200 text-[#525F7A]'}`}
+            className={`px-3 py-1.5 rounded-[12px] outline outline-1 outline-offset-[-1px] shrink-0 ${activeTab==='mono2' ? 'bg-white outline-zinc-300 text-black' : 'bg-[#f0f1f5] outline-zinc-200 text-[#525F7A]'}`}
           >
             Monochrome2
           </button>

@@ -13,7 +13,8 @@ export default function Footer({
   validatedTotal,
   infoTitle,
   infoSubtitle,
-  equalPadding = false
+  equalPadding = false,
+  showProgress = true
 }) {
   return (
     <div
@@ -71,6 +72,7 @@ export default function Footer({
           </div>
         )}
         {/* Progress second */}
+        {showProgress && (
         <div className="relative w-full flex items-center justify-center" style={{ height: '36px' }}>
           <div
             data-name="ProgressSlot"
@@ -184,6 +186,7 @@ export default function Footer({
             </div>
           )}
         </div>
+        )}
       </div>
     </div>
   )
