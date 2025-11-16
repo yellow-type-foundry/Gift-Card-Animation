@@ -159,24 +159,7 @@ const SentCard = ({
             />
           </div>
 
-          {/* Dots Pattern Overlay - behind envelope */}
-          <div
-            className="absolute pointer-events-none"
-            style={{
-              left: 0,
-              top: 0,
-              right: 0,
-              bottom: 0,
-              borderRadius: `${TOKENS.sizes.borderRadius.card} ${TOKENS.sizes.borderRadius.card} 0 0`,
-              backgroundImage: 'url(/assets/GiftSent/Dots.png)',
-              backgroundRepeat: 'repeat',
-              backgroundSize: 'auto',
-              opacity: 1,
-              zIndex: 0
-            }}
-            data-name="Dots"
-            data-node-id="1467:49216"
-          />
+          {/* Dots Pattern Overlay removed for now */}
 
           {/* Header Content */}
           <div
@@ -363,66 +346,7 @@ const SentCard = ({
               </div>
             </div>
 
-          {/* Dot Pattern (envelope dot pattern) - SVG - positioned relative to header (outside envelope container) */}
-          <div
-            className="absolute"
-            style={{
-              left: '52.25px',
-              top: '83px',
-              width: '195.5px',
-              height: '220.575px',
-              zIndex: 1,
-              pointerEvents: 'none'
-            }}
-            data-name="Dot Pattern"
-            data-node-id="1467:49193"
-          >
-              <div
-                className="absolute"
-                style={{
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  top: '1.09%',
-                  position: 'absolute'
-                }}
-              >
-                <svg
-                preserveAspectRatio="none"
-                width="100%"
-                height="100%"
-                overflow="visible"
-                style={{ display: 'block' }}
-                viewBox="0 0 196 219"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                xmlnsXlink="http://www.w3.org/1999/xlink"
-              >
-                <path
-                  d="M0 84.4092C0 80.8407 1.58824 77.4572 4.33359 75.1774L92.6391 1.84547C95.6021 -0.615154 99.8979 -0.615156 102.861 1.84546L191.166 75.1774C193.912 77.4572 195.5 80.8406 195.5 84.4092V206.176C195.5 212.804 190.127 218.176 183.5 218.176H12C5.37259 218.176 0 212.804 0 206.176V84.4092Z"
-                  fill={`url(#${ids.dotPatternId})`}
-                />
-                <defs>
-                  <pattern
-                    id={ids.dotPatternId}
-                    patternUnits="userSpaceOnUse"
-                    patternTransform="matrix(1.53 0 0 3.06 0 -2.39884)"
-                    preserveAspectRatio="none"
-                    viewBox="0 0 18 36"
-                    width="1"
-                    height="1"
-                  >
-                    <use xlinkHref={`#${ids.dotPatternInnerId}`} transform="translate(-18 0)" />
-                    <g id={ids.dotPatternInnerId}>
-                      <circle cx="3" cy="3" r="3" fill="white" />
-                    </g>
-                    <use xlinkHref={`#${ids.dotPatternInnerId}`} transform="translate(-9 18)" />
-                    <use xlinkHref={`#${ids.dotPatternInnerId}`} transform="translate(9 18)" />
-                  </pattern>
-                </defs>
-              </svg>
-              </div>
-            </div>
+          {/* Envelope Dot Pattern layer removed for now */}
 
           {/* Rectangle 1790 (card shape container) - positioned relative to header (outside envelope container) */}
           <div
