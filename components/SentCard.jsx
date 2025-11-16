@@ -158,15 +158,8 @@ const SentCard = ({
     canvas.height = Math.max(1, Math.floor(rect.height * dpr))
     canvas.style.width = `${rect.width}px`
     canvas.style.height = `${rect.height}px`
-    // Lighter shades based on card's dominant color for confetti particles
-    const baseConfetti = dominantColor
-    const colors = [
-      lightenHex(baseConfetti, 1.4),
-      lightenHex(baseConfetti, 1.55),
-      lightenHex(baseConfetti, 1.7),
-      lightenHex(baseConfetti, 1.85),
-      lightenHex(baseConfetti, 2.0)
-    ]
+    // Colorful confetti palette (multi-hue, soft pastels)
+    const colors = ['#7C66FF', '#5AD3FF', '#FF7AD9', '#FFD166', '#8CE99A']
     const maxParticles = 120
     const spawnParticle = () => {
       const speed = 2 + Math.random() * 3
