@@ -909,11 +909,11 @@ const SentCard = ({
           {/* Default InfoBar content (Reminder button swaps with progress when not Done) */}
           <div
             data-name="InfoBarContent"
-            className="content-stretch flex flex-col gap-[16px] items-center justify-center text-center transition-all"
+            className="content-stretch flex flex-col gap-[9px] items-center justify-center text-center transition-all"
             style={{ width: '100%' }}
           >
             {/* Swap slot: fixed 36px height so progress and button align perfectly */}
-            <div className="relative w-full flex items-center justify-center" style={{ height: '36px' }}>
+            <div className="relative w-full flex items-center justify-center" style={{ height: '36px', order: 2 }}>
               {/* Progress slot */}
               <div
                 data-name="ProgressSlot"
@@ -1036,6 +1036,7 @@ const SentCard = ({
             <div
               className="content-stretch flex flex-col gap-[4px] items-start leading-[1.4] not-italic relative shrink-0 text-center"
               data-name="Gift Message"
+              style={{ order: 1 }}
             >
               <p
                 className="[white-space-collapse:collapse] font-['Goody_Sans:Medium',sans-serif] h-[22px] overflow-ellipsis overflow-hidden relative shrink-0 text-[16px] text-black text-nowrap w-[268px]"
