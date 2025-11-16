@@ -1,7 +1,7 @@
-/* Header background on full card hover uses a grey gradient */
+/* Header background theming: darken on hover */
 [data-name="Gift Card"]:hover [data-name="HeaderBGBase"] {
-  filter: none;
-  background: linear-gradient(180deg, #E3E7ED 0%, #EDEEF3 100%);
+  filter: brightness(0.75) saturate(0.95);
+  background: none;
 }
 @tailwind base;
 @tailwind components;

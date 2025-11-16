@@ -308,7 +308,6 @@ export default function Home() {
                 giftSubtitle={card.giftSubtitle}
                 progress={card.progress}
                 sentDate={card.sentDate}
-                headerBgOverride="#E0E4EB"
               />
             ))}
           </div>

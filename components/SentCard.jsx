@@ -156,7 +156,7 @@ const SentCard = ({
   // Slightly lighter tone for hidden flap for contrast (with sat cap)
   const hiddenFlapColor = capSaturation(lightenHex(dominantColor, 4.0), 100)
   // Header background color: adjusted to luminance cap 60 (lighten if below, darken if above)
-  const headerBgColor = capSaturation(adjustToLuminance(dominantColor, 88), 25)
+  const headerBgColor = capSaturation(adjustToLuminance(dominantColor, 99), 25)
   const headerBgFinal = headerBgOverride || headerBgColor
   const headerTextClass = headerBgOverride ? 'text-black' : 'text-white'
   // Base tint and 1790 tint to theme the header envelope shapes
@@ -341,7 +341,7 @@ const SentCard = ({
             <div
               className="absolute inset-0"
               style={{
-                background: 'linear-gradient(to bottom, rgba(0, 0, 0, 0) 30%, rgba(255, 255, 255, 0.7) 95%)',
+                background: 'linear-gradient(to bottom, rgba(255, 253, 253, 0.3) 00%, rgba(255, 255, 255, 0.95) 95%)',
                 mixBlendMode: 'overlay'
               }}
             />
@@ -363,7 +363,7 @@ const SentCard = ({
                 fontWeight: 400,
                 lineHeight: 1.4,
                 opacity: 0.8,
-                color: TOKENS.colors.text.tertiary
+                color: '#ffffff'
               }}
               data-node-id="1467:49185"
             >
