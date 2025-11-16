@@ -162,6 +162,7 @@ const SentCard = ({
   const overlayDarkColor = capSaturation(darkenHex(dominantColor, 0.7), 90)
   // Grid cell base color with luminance capped at 90 and saturation capped at 70
   const gridCellBaseColor = capSaturation(adjustToLuminance(headerBgColor, 95), 90)
+  // (no grid glow color; breathing handled via CSS)
   
   // Animate progress bar and count after content is loaded
   useEffect(() => {
@@ -245,7 +246,7 @@ const SentCard = ({
         // Gravity pulls down a bit so confetti slows as it rises
         ay: 0.06 * dpr,
         rot: Math.random() * Math.PI,
-        vr: (Math.random() * 0.2 - 0.1),
+        vr: (Math.random() * 0.3 - 0.15),
         size: (4 + Math.random() * 4) * dpr,
         color: colors[(Math.random() * colors.length) | 0],
         shape: Math.random() < 0.5 ? 'rect' : 'tri'
