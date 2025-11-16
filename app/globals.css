@@ -107,7 +107,7 @@
 
   /* Gift Card Grid */
   .gift-card-grid {
-    grid-template-columns: repeat(4, 300px);
+    grid-template-columns: repeat(1, 300px);
     justify-content: center;
     justify-items: center;
   }
