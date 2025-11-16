@@ -160,8 +160,8 @@ const SentCard = ({
   const headerBgFinal = headerBgOverride || headerBgColor
   const headerTextClass = headerBgOverride ? 'text-black' : 'text-white'
   // Base tint and 1790 tint to theme the header envelope shapes
-  const baseTintColor = capSaturation(adjustToLuminance(dominantColor, 85), 50)
-  const base2TintColor = capSaturation(lightenHex(dominantColor, 1.35), 65)
+  const baseTintColor = capSaturation(adjustToLuminance(dominantColor, 85), 70)
+  const base2TintColor = capSaturation(lightenHex(dominantColor, 1.25), 65)
   // Themed darker overlay for image container fade
   const overlayDarkColor = capSaturation(darkenHex(dominantColor, 0.7), 90)
   // Grid cell base color with luminance capped at 90 and saturation capped at 70
