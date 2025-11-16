@@ -837,38 +837,9 @@ const SentCard = ({
           animatedProgress={animatedProgress}
           animatedCurrent={animatedCurrent}
           validatedTotal={validatedProgress.total}
+          infoTitle={giftTitle}
+          infoSubtitle={giftSubtitle}
         />
-        {/* Gift Message - original styling (restored) */}
-        <div
-          className="bg-white content-stretch flex flex-col gap-[4px] items-start leading-[1.4] not-italic relative shrink-0 text-center pb-[16px] pt-0 px-[16px] w-full"
-          data-name="Gift Message"
-          style={{ order: 1 }}
-        >
-          <p
-            className="[white-space-collapse:collapse] font-['Goody_Sans:Medium',sans-serif] h-[22px] overflow-ellipsis overflow-hidden relative shrink-0 text-[16px] text-black text-nowrap w-[268px]"
-            style={{
-              fontFamily: 'var(--font-goody-sans)',
-              fontSize: '16px',
-              fontWeight: 500,
-              lineHeight: 1.4,
-              color: TOKENS.colors.text.primary
-            }}
-          >
-            {giftTitle}
-          </p>
-          <p
-            className="font-['Goody_Sans:Regular',sans-serif] h-[22px] relative shrink-0 text-[#525f7a] text-[14px] w-[268px]"
-            style={{
-              fontFamily: 'var(--font-goody-sans)',
-              fontSize: '14px',
-              fontWeight: 400,
-              lineHeight: 1.4,
-              color: TOKENS.colors.text.secondary
-            }}
-          >
-            {giftSubtitle}
-          </p>
-        </div>
       </div>
     </div>
   )

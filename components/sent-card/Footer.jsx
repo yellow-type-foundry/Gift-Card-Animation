@@ -10,7 +10,9 @@ export default function Footer({
   isHovered,
   animatedProgress,
   animatedCurrent,
-  validatedTotal
+  validatedTotal,
+  infoTitle,
+  infoSubtitle
 }) {
   return (
     <div
@@ -23,7 +25,41 @@ export default function Footer({
         className="content-stretch flex flex-col gap-[9px] items-center justify-center text-center transition-all"
         style={{ width: '100%' }}
       >
-        <div className="relative w-full flex items-center justify-center" style={{ height: '36px', order: 2 }}>
+        {/* Info first */}
+        {infoTitle && (
+          <div
+            className="content-stretch flex flex-col gap-[4px] items-start leading-[1.4] not-italic relative shrink-0 text-center w-full"
+            data-name="Gift Message"
+          >
+            <p
+              className="[white-space-collapse:collapse] font-['Goody_Sans:Medium',sans-serif] h-[22px] overflow-ellipsis overflow-hidden relative shrink-0 text-[16px] text-black text-nowrap w-[268px]"
+              style={{
+                fontFamily: 'var(--font-goody-sans)',
+                fontSize: '16px',
+                fontWeight: 500,
+                lineHeight: 1.4,
+                color: '#000000'
+              }}
+            >
+              {infoTitle}
+            </p>
+            {infoSubtitle && (
+              <p
+                className="font-['Goody_Sans:Regular',sans-serif] h-[22px] relative shrink-0 text-[#525f7a] text-[14px] w-[268px]"
+                style={{
+                  fontFamily: 'var(--font-goody-sans)',
+                  fontSize: '14px',
+                  fontWeight: 400,
+                  lineHeight: 1.4
+                }}
+              >
+                {infoSubtitle}
+              </p>
+            )}
+          </div>
+        )}
+        {/* Progress second */}
+        <div className="relative w-full flex items-center justify-center" style={{ height: '36px' }}>
           <div
             data-name="ProgressSlot"
             className="absolute inset-0 flex items-center justify-center"
