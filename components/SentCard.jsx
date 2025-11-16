@@ -49,6 +49,7 @@ const SentCard = ({
       imageClipId: `clipImg-${idSuffix}`,
       imageGradientSoftLightId: `paintImgSoft-${idSuffix}`,
       imageGradientShadowId: `paintImgShadow-${idSuffix}`,
+      gridCellGradId: `paintGridCell-${idSuffix}`,
       dotPatternId: `patternDot-${idSuffix}`,
       dotPatternInnerId: `patternDotInner-${idSuffix}`,
       cardFilterId: `filterCard-${idSuffix}`,
@@ -155,6 +156,8 @@ const SentCard = ({
   const base2TintColor = capSaturation(lightenHex(dominantColor, 1.35), 65)
   // Themed darker overlay for image container fade
   const overlayDarkColor = capSaturation(darkenHex(dominantColor, 0.7), 90)
+  // Grid cell base color with luminance capped at 90 and saturation capped at 70
+  const gridCellBaseColor = capSaturation(adjustToLuminance(headerBgColor, 95), 90)
   
   // Animate progress bar and count after content is loaded
   useEffect(() => {
@@ -365,6 +368,26 @@ const SentCard = ({
                     d="M91.6152 149.22L12.7204 83.6651L12.7204 83.665C11.638 82.7656 11.0967 82.3159 10.7076 81.7641C10.3628 81.2753 10.1068 80.7295 9.95108 80.1519C9.77539 79.5 9.77539 78.7963 9.77539 77.3889V40.468C9.77539 35.9875 9.77539 33.7473 10.6473 32.036C11.4143 30.5308 12.6382 29.3069 14.1435 28.5399C15.8548 27.668 18.095 27.668 22.5754 27.668L172.925 27.668C177.406 27.668 179.646 27.6681 181.357 28.54C182.863 29.307 184.086 30.5308 184.853 32.0361C185.725 33.7474 185.725 35.9876 185.725 40.468V77.3889C185.725 78.7963 185.725 79.5 185.55 80.1519C185.394 80.7295 185.138 81.2753 184.793 81.7641C184.404 82.3159 183.863 82.7656 182.78 83.6651L103.886 149.22C101.703 151.034 100.611 151.941 99.3931 152.288C98.3193 152.593 97.1815 152.593 96.1077 152.288C94.8898 151.941 93.7983 151.034 91.6152 149.22Z"
                     fill="#FFFFFF"
                   />
+                {/* Themed 4-item grid clipped to image container */}
+                <g clipPath={`url(#${ids.imageClipId})`}>
+                  <rect x="17.75" y="83" width="36" height="36" rx="4" fill={gridCellBaseColor} fillOpacity="0.235" />
+                  <rect x="17.75" y="83" width="36" height="36" rx="4" fill={`url(#${ids.gridCellGradId})`} />
+                  <rect x="58.75" y="83" width="36" height="36" rx="4" fill={gridCellBaseColor} fillOpacity="0.235" />
+                  <rect x="58.75" y="83" width="36" height="36" rx="4" fill={`url(#${ids.gridCellGradId})`} />
+                  <rect x="99.75" y="83" width="36" height="36" rx="4" fill={gridCellBaseColor} fillOpacity="0.235" />
+                  <rect x="99.75" y="83" width="36" height="36" rx="4" fill={`url(#${ids.gridCellGradId})`} />
+                  <rect x="140.75" y="83" width="36" height="36" rx="4" fill={gridCellBaseColor} fillOpacity="0.235" />
+                  <rect x="140.75" y="83" width="36" height="36" rx="4" fill={`url(#${ids.gridCellGradId})`} />
+                  {/* second row with 5px vertical gap */}
+                  <rect x="17.75" y="124" width="36" height="36" rx="4" fill={gridCellBaseColor} fillOpacity="0.175" />
+                  <rect x="17.75" y="124" width="36" height="36" rx="4" fill={`url(#${ids.gridCellGradId})`} />
+                  <rect x="58.75" y="124" width="36" height="36" rx="4" fill={gridCellBaseColor} fillOpacity="0.175" />
+                  <rect x="58.75" y="124" width="36" height="36" rx="4" fill={`url(#${ids.gridCellGradId})`} />
+                  <rect x="99.75" y="124" width="36" height="36" rx="4" fill={gridCellBaseColor} fillOpacity="0.175" />
+                  <rect x="99.75" y="124" width="36" height="36" rx="4" fill={`url(#${ids.gridCellGradId})`} />
+                  <rect x="140.75" y="124" width="36" height="36" rx="4" fill={gridCellBaseColor} fillOpacity="0.175" />
+                  <rect x="140.75" y="124" width="36" height="36" rx="4" fill={`url(#${ids.gridCellGradId})`} />
+                </g>
                   <path
                     d="M91.6152 149.22L12.7204 83.6651L12.7204 83.665C11.638 82.7656 11.0967 82.3159 10.7076 81.7641C10.3628 81.2753 10.1068 80.7295 9.95108 80.1519C9.77539 79.5 9.77539 78.7963 9.77539 77.3889V40.468C9.77539 35.9875 9.77539 33.7473 10.6473 32.036C11.4143 30.5308 12.6382 29.3069 14.1435 28.5399C15.8548 27.668 18.095 27.668 22.5754 27.668L172.925 27.668C177.406 27.668 179.646 27.6681 181.357 28.54C182.863 29.307 184.086 30.5308 184.853 32.0361C185.725 33.7474 185.725 35.9876 185.725 40.468V77.3889C185.725 78.7963 185.725 79.5 185.55 80.1519C185.394 80.7295 185.138 81.2753 184.793 81.7641C184.404 82.3159 183.863 82.7656 182.78 83.6651L103.886 149.22C101.703 151.034 100.611 151.941 99.3931 152.288C98.3193 152.593 97.1815 152.593 96.1077 152.288C94.8898 151.941 93.7983 151.034 91.6152 149.22Z"
                     fill={`url(#${ids.imageGradientSoftLightId})`}
@@ -427,6 +450,17 @@ const SentCard = ({
                     <stop stopOpacity="0" />
                     <stop offset="1" />
                   </linearGradient>
+                  <linearGradient
+                    id={ids.gridCellGradId}
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                    gradientUnits="objectBoundingBox"
+                  >
+                    <stop offset="0" stopColor="white" stopOpacity="0.5" />
+                    <stop offset="1" stopColor="white" stopOpacity="0" />
+                  </linearGradient>
                 </defs>
               </svg>
             </div>
@@ -477,9 +511,9 @@ const SentCard = ({
             <div
               className="absolute"
               style={{
-                left: '70px',
-                top: '119px',
-                width: '160px',
+                left: '69px',
+                top: '118px',
+                width: '162px',
                 height: '42px',
                 borderRadius: '4px',
                 overflow: 'hidden',
@@ -501,7 +535,7 @@ const SentCard = ({
                 className="absolute inset-0"
                 style={{
                   background:
-                    'linear-gradient(to bottom, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 100%)',
+                    'linear-gradient(to bottom, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 20%)',
                 }}
               />
             </div>
