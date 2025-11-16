@@ -813,6 +813,30 @@ const SentCard = ({
                     <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1" />
                     <feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.5 0" />
                     <feBlend mode="normal" in2="shape" result="effect1_innerShadow" />
+                    {/* Inner shadow (white) toward top edge */}
+                    <feColorMatrix
+                      in="SourceAlpha"
+                      type="matrix"
+                      values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+                      result="hardAlpha2"
+                    />
+                    <feOffset dy="2" />
+                    <feGaussianBlur stdDeviation="2" />
+                    <feComposite in2="hardAlpha2" operator="arithmetic" k2="-1" k3="1" />
+                    <feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0" />
+                    <feBlend mode="normal" in2="effect1_innerShadow" result="effect2_innerShadow" />
+                    {/* Duplicate inner shadow */}
+                    <feColorMatrix
+                      in="SourceAlpha"
+                      type="matrix"
+                      values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+                      result="hardAlpha3"
+                    />
+                    <feOffset dy="2" />
+                    <feGaussianBlur stdDeviation="2" />
+                    <feComposite in2="hardAlpha3" operator="arithmetic" k2="-1" k3="1" />
+                    <feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0" />
+                    <feBlend mode="normal" in2="effect2_innerShadow" result="effect3_innerShadow" />
                   </filter>
                   <linearGradient
                     id={ids.unionGradientId}
