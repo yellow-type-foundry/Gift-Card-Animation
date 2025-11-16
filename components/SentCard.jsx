@@ -514,6 +514,7 @@ const SentCard = ({
                 </defs>
               </svg>
             </div>
+            
             {/* Image Container Fade (duplicate shape, black gradient fill) */}
             <div
               className="absolute"
@@ -573,10 +574,10 @@ const SentCard = ({
             <div
               className="absolute"
               style={{
-                left: '69px',
-                top: '118px',
-                width: '162px',
-                height: '42px',
+                left: '67px',
+                top: '115.5px',
+                width: '165px',
+                height: '45px',
                 borderRadius: '4px',
                 overflow: 'hidden',
                 zIndex: 100,
@@ -799,113 +800,109 @@ const SentCard = ({
           </div>
         </div>
 
-        {/* Footer Section - outside Header Section */}
+        {/* Footer Section - InfoBar content with hover-replacement Reminder button */}
         <div
-          className="bg-white box-border content-stretch flex flex-col gap-[16px] items-center justify-center pb-[20px] pt-0 px-[16px] relative shrink-0 w-full"
-          style={{
-            position: 'relative',
-            zIndex: 20,
-            width: '100%'
-          }}
-          data-name="InfoBar"
+          className="bg-white box-border flex items-center justify-center pb-[20px] pt-0 px-[16px] relative shrink-0 w-full"
+          style={{ position: 'relative', zIndex: 20, width: '100%' }}
           data-node-id="1467:49205"
         >
-          {/* Progress Bar Container - comes first */}
+          {/* Default InfoBar content (visible idle; hidden on hover) */}
           <div
-            className="bg-[#f0f1f5] border border-[rgba(221,226,233,0)] border-solid box-border content-stretch flex flex-col gap-[10px] items-start justify-center p-[2px] relative rounded-[100px] shrink-0 w-[120px]"
-            style={{
-              borderRadius: '100px',
-              backgroundColor: '#f0f1f5'
-            }}
-            data-name="Progress Bar Container"
-            data-node-id="1467:49206"
+            data-name="InfoBarContent"
+            className="content-stretch flex flex-col gap-[12px] items-center justify-center text-center transition-all"
+            style={{ width: '100%' }}
           >
-            {/* Progress Bar */}
+            {/* Progress Bar Container - original styling */}
             <div
-              className="bg-gradient-to-b box-border content-stretch flex flex-col from-[#5a3dff] gap-[10px] items-start justify-center px-[8px] py-[2px] relative rounded-[100px] shrink-0"
+              className="bg-[#f0f1f5] border border-[rgba(221,226,233,0)] border-solid box-border content-stretch flex flex-col gap-[10px] items-start justify-center p-[2px] relative rounded-[100px] shrink-0 w-[120px]"
               style={{
-                background: 'linear-gradient(to bottom, #5a3dff, #a799ff)',
                 borderRadius: '100px',
-                width: validatedProgress.current === validatedProgress.total ? '100%' : `${animatedProgress}%`,
-                maxWidth: '100%',
-                minWidth: 'fit-content',
-                transition: 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                boxShadow: '0px 2px 4px -8px rgba(46,10,255,0.1), 0px 2px 2px 0px rgba(90,61,255,0.08), 0px 4px 8px -4px rgba(16,0,112,0.15)'
+                backgroundColor: '#f0f1f5'
               }}
-              data-name="Progress Bar"
-              data-node-id="1467:49207"
+              data-name="Progress Bar Container"
             >
-              <p
-                className="font-['Goody_Sans:Medium',sans-serif] leading-[1.4] min-w-full not-italic relative shrink-0 text-[14px] text-white w-[min-content]"
+              {/* Progress Bar */}
+              <div
+                className="bg-gradient-to-b box-border content-stretch flex flex-col from-[#5a3dff] gap-[10px] items-start justify-center px-[8px] py-[2px] relative rounded-[100px] shrink-0"
                 style={{
-                  fontFamily: 'var(--font-goody-sans)',
-                  fontSize: '14px',
-                  fontWeight: 500,
-                  lineHeight: 1.4,
-                  color: '#ffffff',
-                  whiteSpace: 'nowrap'
+                  background: 'linear-gradient(to bottom, #5a3dff, #a799ff)',
+                  borderRadius: '100px',
+                  width: validatedProgress.current === validatedProgress.total ? '100%' : `${animatedProgress}%`,
+                  maxWidth: '100%',
+                  minWidth: 'fit-content',
+                  transition: 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                  boxShadow:
+                    '0px 2px 4px -8px rgba(46,10,255,0.1), 0px 2px 2px 0px rgba(90,61,255,0.08), 0px 4px 8px -4px rgba(16,0,112,0.15)'
                 }}
-                data-node-id="1467:49208"
+                data-name="Progress Bar"
               >
-                {validatedProgress.current === validatedProgress.total 
-                  ? 'All accepted' 
-                  : `${animatedCurrent}/${validatedProgress.total}`}
-              </p>
-              {/* Highlight gradient overlay */}
+                <p
+                  className="font-['Goody_Sans:Medium',sans-serif] leading-[1.4] min-w-full not-italic relative shrink-0 text-[14px] text-white w-[min-content]"
+                  style={{
+                    fontFamily: 'var(--font-goody-sans)',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    lineHeight: 1.4,
+                    color: '#ffffff',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  {validatedProgress.current === validatedProgress.total
+                    ? 'All accepted'
+                    : `${animatedCurrent}/${validatedProgress.total}`}
+                </p>
+                {/* Highlight gradient overlay */}
+                <div
+                  className="absolute bg-gradient-to-b blur-[0.45px] filter from-[#e9e5ff] h-[10px] left-[10%] right-[10%] rounded-[100px] to-[rgba(229,245,255,0)] top-[3px]"
+                />
+                <div
+                  className="absolute inset-0 pointer-events-none"
+                  style={{
+                    boxShadow: '0px 3px 5px 2px inset rgba(255,255,255,0.5)',
+                    borderRadius: '100px'
+                  }}
+                />
+              </div>
               <div
-                className="absolute bg-gradient-to-b blur-[0.25px] filter from-[#e9e5ff] h-[10px] left-[10%] right-[10%] rounded-[100px] to-[rgba(229,245,255,0)] top-[3px]"
-                data-node-id="1467:49209"
-              />
-              <div
-                className="absolute inset-0 pointer-events-none"
+                className="absolute inset-[-1px] pointer-events-none"
                 style={{
-                  boxShadow: '0px 3px 5px 2px inset rgba(255,255,255,0.5)',
+                  boxShadow: '0px 1px 2.25px 0px inset #c2c6d6, 0px -1px 2.25px 0px inset #ffffff',
                   borderRadius: '100px'
                 }}
               />
             </div>
+            {/* Gift Message - original styling */}
             <div
-              className="absolute inset-[-1px] pointer-events-none"
-              style={{
-                boxShadow: '0px 1px 2.25px 0px inset #c2c6d6, 0px -1px 2.25px 0px inset #ffffff',
-                borderRadius: '100px'
-              }}
-            />
-          </div>
-
-          {/* Gift Message - comes second */}
-          <div
-            className="content-stretch flex flex-col gap-[4px] items-start leading-[1.4] not-italic relative shrink-0 text-center"
-            data-name="Gift Message"
-            data-node-id="1467:49210"
-          >
-            <p
-              className="[white-space-collapse:collapse] font-['Goody_Sans:Medium',sans-serif] h-[22px] overflow-ellipsis overflow-hidden relative shrink-0 text-[16px] text-black text-nowrap w-[268px]"
-              style={{
-                fontFamily: 'var(--font-goody-sans)',
-                fontSize: '16px',
-                fontWeight: 500,
-                lineHeight: 1.4,
-                color: TOKENS.colors.text.primary
-              }}
-              data-node-id="1467:49211"
+              className="content-stretch flex flex-col gap-[4px] items-start leading-[1.4] not-italic relative shrink-0 text-center"
+              data-name="Gift Message"
             >
-              {giftTitle}
-            </p>
-            <p
-              className="font-['Goody_Sans:Regular',sans-serif] h-[22px] relative shrink-0 text-[#525f7a] text-[14px] w-[268px]"
-              style={{
-                fontFamily: 'var(--font-goody-sans)',
-                fontSize: '14px',
-                fontWeight: 400,
-                lineHeight: 1.4,
-                color: TOKENS.colors.text.secondary
-              }}
-              data-node-id="1467:49212"
-            >
-              {giftSubtitle}
-            </p>
+              <p
+                className="[white-space-collapse:collapse] font-['Goody_Sans:Medium',sans-serif] h-[22px] overflow-ellipsis overflow-hidden relative shrink-0 text-[16px] text-black text-nowrap w-[268px]"
+                style={{
+                  fontFamily: 'var(--font-goody-sans)',
+                  fontSize: '16px',
+                  fontWeight: 500,
+                  lineHeight: 1.4,
+                  color: TOKENS.colors.text.primary
+                }}
+              >
+                {giftTitle}
+              </p>
+              <p
+                className="font-['Goody_Sans:Regular',sans-serif] h-[22px] relative shrink-0 text-[#525f7a] text-[14px] w-[268px]"
+                style={{
+                  fontFamily: 'var(--font-goody-sans)',
+                  fontSize: '14px',
+                  fontWeight: 400,
+                  lineHeight: 1.4,
+                  color: TOKENS.colors.text.secondary
+                }}
+              >
+                {giftSubtitle}
+              </p>
+            </div>
           </div>
+          {/* Reminder button removed */}
         </div>
       </div>
     </div>
