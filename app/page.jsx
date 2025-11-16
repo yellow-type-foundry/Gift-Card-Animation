@@ -249,13 +249,13 @@ export default function Home() {
   }), [handleOpenGift])
   
   return (
-    <div className="min-h-screen bg-[#f0f1f5] flex items-start">
+    <div className="min-h-screen bg-[#f0f1f5] flex items-start overflow-hidden md:overflow-visible">
       <div 
         className="w-full px-[20px] md:px-[240px] py-10"
       >
         {/* Tabs */}
         <div
-          className="w-full flex items-center md:justify-center justify-start gap-2 mb-6 overflow-visible whitespace-nowrap"
+          className="w-full flex items-center md:justify-center justify-start gap-2 mb-6 overflow-x-auto md:overflow-visible whitespace-nowrap"
           style={{ WebkitOverflowScrolling: 'touch' }}
         >
           <button
