@@ -233,8 +233,10 @@ const SentCard = ({
             {/* Base color - dynamic from dominant color */}
             <div
               className="absolute inset-0"
+                data-name="HeaderBGBase"
               style={{
-                backgroundColor: headerBgColor
+                  backgroundColor: headerBgColor,
+                  transition: 'filter 240ms ease'
               }}
             />
             {/* Gradient overlay with blend mode */}
