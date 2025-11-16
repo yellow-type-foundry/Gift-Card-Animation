@@ -294,6 +294,7 @@ const SentCard = ({
 
   return (
     <div
+      data-variant={headerBgOverride ? 'mono' : 'themed'}
       ref={cardRef}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -363,7 +364,7 @@ const SentCard = ({
                 fontWeight: 400,
                 lineHeight: 1.4,
                 opacity: 0.8,
-                color: '#ffffff'
+                color: headerBgOverride ? TOKENS.colors.text.tertiary : '#ffffff'
               }}
               data-node-id="1467:49185"
             >

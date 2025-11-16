@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import GiftCard from '@/components/GiftCard'
 import SentCard from '@/components/SentCard'
+import SentCardMonochrome from '@/components/SentCardMonochrome'
 
 // Static data moved outside component to avoid recreation on every render
 const ALL_BOX_PAIRS = [
@@ -141,7 +142,7 @@ const shuffleArray = (array) => {
 }
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState('gift') // 'gift' | 'sent'
+  const [activeTab, setActiveTab] = useState('gift') // 'gift' | 'sent' | 'mono'
   const [cardStates, setCardStates] = useState({
     card1: 'unopened',
     card2: 'unopened',
@@ -265,6 +266,12 @@ export default function Home() {
           >
             Sent Card
           </button>
+          <button
+            onClick={() => setActiveTab('mono')}
+            className={`px-3 py-1.5 rounded-[12px] outline outline-1 outline-offset-[-1px] ${activeTab==='mono' ? 'bg-white outline-zinc-300 text-black' : 'bg-[#f0f1f5] outline-zinc-200 text-[#525F7A]'}`}
+          >
+            Monochrome
+          </button>
         </div>
         {/* Content */}
         {activeTab === 'gift' ? (
@@ -296,11 +303,26 @@ export default function Home() {
             {/* Card 8 */}
             <GiftCard state={cardStates.card8} from="Ryan Thompson" message={messages[7]} expiryText={cardStates.card8 === 'unopened' ? 'Expiring in 19 days' : undefined} giftTitle="Gourmet Chocolate Truffles" giftSubtitle="Vosges Haut-Chocolat" boxImage={boxPairs[7].box1} box2Image={boxPairs[7].box2} onOpenGift={cardHandlers.card8} />
           </div>
-        ) : (
+        ) : activeTab === 'sent' ? (
           <div className="grid gift-card-grid gap-[24px]">
             {sentCards.map((card, index) => (
               <SentCard
                 key={index}
+                from={card.from}
+                title={card.title}
+                boxImage={card.boxImage}
+                giftTitle={card.giftTitle}
+                giftSubtitle={card.giftSubtitle}
+                progress={card.progress}
+                sentDate={card.sentDate}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="grid gift-card-grid gap-[24px]">
+            {sentCards.map((card, index) => (
+              <SentCardMonochrome
+                key={`mono-${index}`}
                 from={card.from}
                 title={card.title}
                 boxImage={card.boxImage}
