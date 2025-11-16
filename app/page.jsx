@@ -141,6 +141,7 @@ const shuffleArray = (array) => {
 }
 
 export default function Home() {
+  const [activeTab, setActiveTab] = useState('gift') // 'gift' | 'sent'
   const [cardStates, setCardStates] = useState({
     card1: 'unopened',
     card2: 'unopened',
@@ -246,128 +247,72 @@ export default function Home() {
   }), [handleOpenGift])
   
   return (
-    <div className="min-h-screen bg-[#f0f1f5] flex items-center">
+    <div className="min-h-screen bg-[#f0f1f5] flex items-start">
       <div 
-        className="w-full grid gift-card-grid px-[60px] md:px-[240px] py-10 gap-[24px]"
+        className="w-full px-[60px] md:px-[240px] py-10"
       >
-        {/* Card 1 - Original */}
-        <GiftCard
-          state={cardStates.card1}
-          from="Lisa Tran"
-          message={messages[0]}
-          expiryText={cardStates.card1 === 'unopened' ? 'Expiring in 21 days' : undefined}
-          giftTitle="24 Pack of Cookies"
-          giftSubtitle="Levain Cookies"
-          boxImage={boxPairs[0].box1}
-          box2Image={boxPairs[0].box2}
-          onOpenGift={cardHandlers.card1}
-        />
-        
-        {/* Card 2 - Different sender and gift */}
-        <GiftCard
-          state={cardStates.card2}
-          from="Michael Chen"
-          message={messages[1]}
-          expiryText={cardStates.card2 === 'unopened' ? 'Expiring in 18 days' : undefined}
-          giftTitle="Coffee Gift Set"
-          giftSubtitle="Blue Bottle Coffee"
-          boxImage={boxPairs[1].box1}
-          box2Image={boxPairs[1].box2}
-          onOpenGift={cardHandlers.card2}
-        />
-        
-        {/* Card 3 - Another variation */}
-        <GiftCard
-          state={cardStates.card3}
-          from="Sarah Johnson"
-          message={messages[2]}
-          expiryText={cardStates.card3 === 'unopened' ? 'Expiring in 15 days' : undefined}
-          giftTitle="Chocolate Box Collection"
-          giftSubtitle="Godiva Chocolates"
-          boxImage={boxPairs[2].box1}
-          box2Image={boxPairs[2].box2}
-          onOpenGift={cardHandlers.card3}
-        />
-        
-        {/* Card 4 - Final variation */}
-        <GiftCard
-          state={cardStates.card4}
-          from="David Kim"
-          message={messages[3]}
-          expiryText={cardStates.card4 === 'unopened' ? 'Expiring in 30 days' : undefined}
-          giftTitle="Gourmet Tea Selection"
-          giftSubtitle="TWG Tea"
-          boxImage={boxPairs[3].box1}
-          box2Image={boxPairs[3].box2}
-          onOpenGift={cardHandlers.card4}
-        />
-        
-        {/* Card 5 */}
-        <GiftCard
-          state={cardStates.card5}
-          from="Emily Rodriguez"
-          message={messages[4]}
-          expiryText={cardStates.card5 === 'unopened' ? 'Expiring in 12 days' : undefined}
-          giftTitle="Artisan Cheese Board"
-          giftSubtitle="Murray's Cheese"
-          boxImage={boxPairs[4].box1}
-          box2Image={boxPairs[4].box2}
-          onOpenGift={cardHandlers.card5}
-        />
-        
-        {/* Card 6 */}
-        <GiftCard
-          state={cardStates.card6}
-          from="James Wilson"
-          message={messages[5]}
-          expiryText={cardStates.card6 === 'unopened' ? 'Expiring in 25 days' : undefined}
-          giftTitle="Wine Collection"
-          giftSubtitle="Napa Valley Wines"
-          boxImage={boxPairs[5].box1}
-          box2Image={boxPairs[5].box2}
-          onOpenGift={cardHandlers.card6}
-        />
-        
-        {/* Card 7 */}
-        <GiftCard
-          state={cardStates.card7}
-          from="Olivia Martinez"
-          message={messages[6]}
-          expiryText={cardStates.card7 === 'unopened' ? 'Expiring in 7 days' : undefined}
-          giftTitle="Spa Gift Certificate"
-          giftSubtitle="Bliss Spa"
-          boxImage={boxPairs[6].box1}
-          box2Image={boxPairs[6].box2}
-          onOpenGift={cardHandlers.card7}
-        />
-        
-        {/* Card 8 */}
-        <GiftCard
-          state={cardStates.card8}
-          from="Ryan Thompson"
-          message={messages[7]}
-          expiryText={cardStates.card8 === 'unopened' ? 'Expiring in 19 days' : undefined}
-          giftTitle="Gourmet Chocolate Truffles"
-          giftSubtitle="Vosges Haut-Chocolat"
-          boxImage={boxPairs[7].box1}
-          box2Image={boxPairs[7].box2}
-          onOpenGift={cardHandlers.card8}
-        />
-        
-        {/* SentCards - Shuffled on every reload */}
-        {sentCards.map((card, index) => (
-          <SentCard
-            key={index}
-            from={card.from}
-            title={card.title}
-            boxImage={card.boxImage}
-            giftTitle={card.giftTitle}
-            giftSubtitle={card.giftSubtitle}
-            progress={card.progress}
-            sentDate={card.sentDate}
-            headerBgOverride="#E0E4EB"
-          />
-        ))}
+        {/* Tabs */}
+        <div className="w-full flex items-center justify-center gap-2 mb-6">
+          <button
+            onClick={() => setActiveTab('gift')}
+            className={`px-3 py-1.5 rounded-[12px] outline outline-1 outline-offset-[-1px] ${activeTab==='gift' ? 'bg-white outline-zinc-300 text-black' : 'bg-[#f0f1f5] outline-zinc-200 text-[#525F7A]'}`}
+          >
+            Gift Card
+          </button>
+          <button
+            onClick={() => setActiveTab('sent')}
+            className={`px-3 py-1.5 rounded-[12px] outline outline-1 outline-offset-[-1px] ${activeTab==='sent' ? 'bg-white outline-zinc-300 text-black' : 'bg-[#f0f1f5] outline-zinc-200 text-[#525F7A]'}`}
+          >
+            Sent Card
+          </button>
+        </div>
+        {/* Content */}
+        {activeTab === 'gift' ? (
+          <div className="grid gift-card-grid gap-[24px]">
+            {/* Card 1 - Original */}
+            <GiftCard
+              state={cardStates.card1}
+              from="Lisa Tran"
+              message={messages[0]}
+              expiryText={cardStates.card1 === 'unopened' ? 'Expiring in 21 days' : undefined}
+              giftTitle="24 Pack of Cookies"
+              giftSubtitle="Levain Cookies"
+              boxImage={boxPairs[0].box1}
+              box2Image={boxPairs[0].box2}
+              onOpenGift={cardHandlers.card1}
+            />
+            {/* Card 2 */}
+            <GiftCard state={cardStates.card2} from="Michael Chen" message={messages[1]} expiryText={cardStates.card2 === 'unopened' ? 'Expiring in 18 days' : undefined} giftTitle="Coffee Gift Set" giftSubtitle="Blue Bottle Coffee" boxImage={boxPairs[1].box1} box2Image={boxPairs[1].box2} onOpenGift={cardHandlers.card2} />
+            {/* Card 3 */}
+            <GiftCard state={cardStates.card3} from="Sarah Johnson" message={messages[2]} expiryText={cardStates.card3 === 'unopened' ? 'Expiring in 15 days' : undefined} giftTitle="Chocolate Box Collection" giftSubtitle="Godiva Chocolates" boxImage={boxPairs[2].box1} box2Image={boxPairs[2].box2} onOpenGift={cardHandlers.card3} />
+            {/* Card 4 */}
+            <GiftCard state={cardStates.card4} from="David Kim" message={messages[3]} expiryText={cardStates.card4 === 'unopened' ? 'Expiring in 30 days' : undefined} giftTitle="Gourmet Tea Selection" giftSubtitle="TWG Tea" boxImage={boxPairs[3].box1} box2Image={boxPairs[3].box2} onOpenGift={cardHandlers.card4} />
+            {/* Card 5 */}
+            <GiftCard state={cardStates.card5} from="Emily Rodriguez" message={messages[4]} expiryText={cardStates.card5 === 'unopened' ? 'Expiring in 12 days' : undefined} giftTitle="Artisan Cheese Board" giftSubtitle="Murray's Cheese" boxImage={boxPairs[4].box1} box2Image={boxPairs[4].box2} onOpenGift={cardHandlers.card5} />
+            {/* Card 6 */}
+            <GiftCard state={cardStates.card6} from="James Wilson" message={messages[5]} expiryText={cardStates.card6 === 'unopened' ? 'Expiring in 25 days' : undefined} giftTitle="Wine Collection" giftSubtitle="Napa Valley Wines" boxImage={boxPairs[5].box1} box2Image={boxPairs[5].box2} onOpenGift={cardHandlers.card6} />
+            {/* Card 7 */}
+            <GiftCard state={cardStates.card7} from="Olivia Martinez" message={messages[6]} expiryText={cardStates.card7 === 'unopened' ? 'Expiring in 7 days' : undefined} giftTitle="Spa Gift Certificate" giftSubtitle="Bliss Spa" boxImage={boxPairs[6].box1} box2Image={boxPairs[6].box2} onOpenGift={cardHandlers.card7} />
+            {/* Card 8 */}
+            <GiftCard state={cardStates.card8} from="Ryan Thompson" message={messages[7]} expiryText={cardStates.card8 === 'unopened' ? 'Expiring in 19 days' : undefined} giftTitle="Gourmet Chocolate Truffles" giftSubtitle="Vosges Haut-Chocolat" boxImage={boxPairs[7].box1} box2Image={boxPairs[7].box2} onOpenGift={cardHandlers.card8} />
+          </div>
+        ) : (
+          <div className="grid gift-card-grid gap-[24px]">
+            {sentCards.map((card, index) => (
+              <SentCard
+                key={index}
+                from={card.from}
+                title={card.title}
+                boxImage={card.boxImage}
+                giftTitle={card.giftTitle}
+                giftSubtitle={card.giftSubtitle}
+                progress={card.progress}
+                sentDate={card.sentDate}
+                headerBgOverride="#E0E4EB"
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )
