@@ -1,9 +1,16 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useMemo } from 'react'
 import Image from 'next/image'
 import { TOKENS } from '@/constants/tokens'
 import useDominantColor from '@/hooks/useDominantColor'
+import { darkenHex, lightenHex, computeLuminance, adjustToLuminance, capSaturation } from '@/utils/colors'
+import Footer from '@/components/sent-card/Footer'
+
+// Stable style constants
+const PROGRESS_PILL_RADIUS = '100px'
+const HEADER_OVERLAY_BG = 'linear-gradient(to bottom, rgba(255, 253, 253, 0.3) 00%, rgba(255, 255, 255, 0.95) 95%)'
+const PROGRESS_GLOW_BOX_SHADOW = '0px 2px 4px -8px rgba(46,10,255,0.1), 0px 2px 2px 0px rgba(90,61,255,0.08), 0px 4px 8px -4px rgba(16,0,112,0.15)'
 
 const SentCard = ({
   from = 'Alex Torres',
@@ -40,14 +47,11 @@ const SentCard = ({
   const [isHovered, setIsHovered] = useState(false)
   const isDone = validatedProgress.current === validatedProgress.total
   
-  // Generate stable IDs using ref - use props-based approach to avoid hydration mismatch
-  // These IDs are scoped to this component instance to avoid conflicts with multiple cards
+  // Generate stable IDs scoped to this component instance
   const idRef = useRef(null)
   if (idRef.current === null) {
-    // Generate simple stable IDs based on props only once on first render
     const idSuffix = `${boxImage.replace(/[^a-zA-Z0-9]/g, '')}-${from.replace(/[^a-zA-Z0-9]/g, '')}`
     idRef.current = {
-      maskId: `hexagonMask-${idSuffix}`,
       baseFilterId: `filterBase-${idSuffix}`,
       baseGradient1Id: `paintBase1-${idSuffix}`,
       baseGradient2Id: `paintBase2-${idSuffix}`,
@@ -56,8 +60,6 @@ const SentCard = ({
       imageGradientSoftLightId: `paintImgSoft-${idSuffix}`,
       imageGradientShadowId: `paintImgShadow-${idSuffix}`,
       gridCellGradId: `paintGridCell-${idSuffix}`,
-      dotPatternId: `patternDot-${idSuffix}`,
-      dotPatternInnerId: `patternDotInner-${idSuffix}`,
       cardFilterId: `filterCard-${idSuffix}`,
       cardGradientId: `paintCard-${idSuffix}`,
       unionFilterId: `filterUnion-${idSuffix}`,
@@ -65,108 +67,36 @@ const SentCard = ({
     }
   }
   const ids = idRef.current
-  
-  // (Image mask removed)
-  // Extract dominant color from the masked image (boxImage)
+
+  // Extract dominant color from the image
   const { dominantColor } = useDominantColor(boxImage, '#f4c6fa')
-  // Utilities to adjust color brightness
-  const darkenHex = (hex, factor = 0.85) => {
-    const clean = hex.replace('#', '')
-    const r = parseInt(clean.substring(0, 2), 16)
-    const g = parseInt(clean.substring(2, 4), 16)
-    const b = parseInt(clean.substring(4, 6), 16)
-    const toHex = (v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')
-    return `#${toHex(r * factor)}${toHex(g * factor)}${toHex(b * factor)}`
-  }
-  const lightenHex = (hex, factor = 1.15) => {
-    const clean = hex.replace('#', '')
-    const r = parseInt(clean.substring(0, 2), 16)
-    const g = parseInt(clean.substring(2, 4), 16)
-    const b = parseInt(clean.substring(4, 6), 16)
-    const toHex = (v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')
-    return `#${toHex(r * factor)}${toHex(g * factor)}${toHex(b * factor)}`
-  }
-  const computeLuminance = (hex) => {
-    const clean = hex.replace('#', '')
-    const r = parseInt(clean.substring(0, 2), 16)
-    const g = parseInt(clean.substring(2, 4), 16)
-    const b = parseInt(clean.substring(4, 6), 16)
-    return ((r * 299 + g * 587 + b * 114) / 1000) * (100 / 255)
-  }
-  // Adjust color so its perceived luminance is capped at target (and lifted up if below)
-  const adjustToLuminance = (hex, target = 60) => {
-    const clean = hex.replace('#', '')
-    let r = parseInt(clean.substring(0, 2), 16)
-    let g = parseInt(clean.substring(2, 4), 16)
-    let b = parseInt(clean.substring(4, 6), 16)
-    const current = ((r * 299 + g * 587 + b * 114) / 1000) * (100 / 255)
-    const toHex = (v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')
-    if (current === 0) return hex
-    const factor = target / current
-    r = r * factor
-    g = g * factor
-    b = b * factor
-    return `#${toHex(r)}${toHex(g)}${toHex(b)}`
-  }
-  // Cap saturation at a given percent using HSL conversion
-  const capSaturation = (hex, capPercent = 30) => {
-    const clean = hex.replace('#', '')
-    let r = parseInt(clean.substring(0, 2), 16) / 255
-    let g = parseInt(clean.substring(2, 4), 16) / 255
-    let b = parseInt(clean.substring(4, 6), 16) / 255
-    const max = Math.max(r, g, b)
-    const min = Math.min(r, g, b)
-    let h, s, l
-    l = (max - min) / 2 + min / 2 // equivalent to (max + min) / 2
-    const d = max - min
-    if (d === 0) {
-      h = 0
-      s = 0
-    } else {
-      s = d / (1 - Math.abs(2 * l - 1))
-      switch (max) {
-        case r:
-          h = ((g - b) / d) % 6
-          break
-        case g:
-          h = (b - r) / d + 2
-          break
-        default:
-          h = (r - g) / d + 4
-      }
-      h *= 60
-      if (h < 0) h += 360
-    }
-    // cap saturation
-    s = Math.min(s, capPercent / 100)
-    // convert back to RGB
-    const c = (1 - Math.abs(2 * l - 1)) * s
-    const x = c * (1 - Math.abs(((h / 60) % 2) - 1))
-    const m = l - c / 2
-    let r1, g1, b1
-    if (h >= 0 && h < 60) [r1, g1, b1] = [c, x, 0]
-    else if (h >= 60 && h < 120) [r1, g1, b1] = [x, c, 0]
-    else if (h >= 120 && h < 180) [r1, g1, b1] = [0, c, x]
-    else if (h >= 180 && h < 240) [r1, g1, b1] = [0, x, c]
-    else if (h >= 240 && h < 300) [r1, g1, b1] = [x, 0, c]
-    else [r1, g1, b1] = [c, 0, x]
-    const toHex2 = (v) => Math.max(0, Math.min(255, Math.round((v + m) * 255))).toString(16).padStart(2, '0')
-    return `#${toHex2(r1)}${toHex2(g1)}${toHex2(b1)}`
-  }
-  // Slightly lighter tone for hidden flap for contrast (with sat cap)
-  const hiddenFlapColor = capSaturation(lightenHex(dominantColor, 4.0), 100)
-  // Header background color: adjusted to luminance cap 60 (lighten if below, darken if above)
-  const headerBgColor = capSaturation(adjustToLuminance(dominantColor, 99), 25)
+  // Derived theme colors (memoized)
+  const hiddenFlapColor = useMemo(
+    () => capSaturation(lightenHex(dominantColor, 4.0), 100),
+    [dominantColor]
+  )
+  const headerBgColor = useMemo(
+    () => capSaturation(adjustToLuminance(dominantColor, 99), 25),
+    [dominantColor]
+  )
   const headerBgFinal = headerBgOverride || headerBgColor
   const headerTextClass = headerBgOverride ? 'text-black' : 'text-white'
-  // Base tint and 1790 tint to theme the header envelope shapes
-  const baseTintColor = capSaturation(adjustToLuminance(dominantColor, 85), 70)
-  const base2TintColor = capSaturation(lightenHex(dominantColor, 1.25), 65)
-  // Themed darker overlay for image container fade
-  const overlayDarkColor = capSaturation(darkenHex(dominantColor, 0.7), 90)
-  // Grid cell base color with luminance capped at 90 and saturation capped at 70
-  const gridCellBaseColor = capSaturation(adjustToLuminance(headerBgColor, 95), 90)
-  // (no grid glow color; breathing handled via CSS)
+  const baseTintColor = useMemo(
+    () => capSaturation(adjustToLuminance(dominantColor, 85), 70),
+    [dominantColor]
+  )
+  const base2TintColor = useMemo(
+    () => capSaturation(lightenHex(dominantColor, 1.25), 65),
+    [dominantColor]
+  )
+  const overlayDarkColor = useMemo(
+    () => capSaturation(darkenHex(dominantColor, 0.7), 90),
+    [dominantColor]
+  )
+  const gridCellBaseColor = useMemo(
+    () => capSaturation(adjustToLuminance(headerBgColor, 95), 90),
+    [headerBgColor]
+  )
   
   // Animate progress bar and count after content is loaded
   useEffect(() => {
@@ -342,7 +272,7 @@ const SentCard = ({
             <div
               className="absolute inset-0"
               style={{
-                background: 'linear-gradient(to bottom, rgba(255, 253, 253, 0.3) 00%, rgba(255, 255, 255, 0.95) 95%)',
+                background: HEADER_OVERLAY_BG,
                 mixBlendMode: 'overlay'
               }}
             />
@@ -901,171 +831,43 @@ const SentCard = ({
           </div>
         </div>
 
-        {/* Footer Section - InfoBar content with hover-replacement Reminder button */}
+        <Footer
+          isDone={isDone}
+          isHovered={isHovered}
+          animatedProgress={animatedProgress}
+          animatedCurrent={animatedCurrent}
+          validatedTotal={validatedProgress.total}
+        />
+        {/* Gift Message - original styling (restored) */}
         <div
-          className="bg-white box-border flex items-center justify-center pb-[16px] pt-0 px-[16px] relative shrink-0 w-full"
-          style={{ position: 'relative', zIndex: 20, width: '100%' }}
-          data-node-id="1467:49205"
+          className="bg-white content-stretch flex flex-col gap-[4px] items-start leading-[1.4] not-italic relative shrink-0 text-center pb-[16px] pt-0 px-[16px] w-full"
+          data-name="Gift Message"
+          style={{ order: 1 }}
         >
-          {/* Default InfoBar content (Reminder button swaps with progress when not Done) */}
-          <div
-            data-name="InfoBarContent"
-            className="content-stretch flex flex-col gap-[9px] items-center justify-center text-center transition-all"
-            style={{ width: '100%' }}
+          <p
+            className="[white-space-collapse:collapse] font-['Goody_Sans:Medium',sans-serif] h-[22px] overflow-ellipsis overflow-hidden relative shrink-0 text-[16px] text-black text-nowrap w-[268px]"
+            style={{
+              fontFamily: 'var(--font-goody-sans)',
+              fontSize: '16px',
+              fontWeight: 500,
+              lineHeight: 1.4,
+              color: TOKENS.colors.text.primary
+            }}
           >
-            {/* Swap slot: fixed 36px height so progress and button align perfectly */}
-            <div className="relative w-full flex items-center justify-center" style={{ height: '36px', order: 2 }}>
-              {/* Progress slot */}
-              <div
-                data-name="ProgressSlot"
-                className="absolute inset-0 flex items-center justify-center"
-                style={{
-                  opacity: isHovered && !isDone ? 0 : 1,
-                  transform: isHovered && !isDone ? 'translateY(4px)' : 'translateY(0)',
-                  transition: 'opacity 200ms ease-out, transform 200ms ease-out',
-                  pointerEvents: isHovered && !isDone ? 'none' : 'auto'
-                }}
-              >
-                {/* Progress Bar Container - original styling */}
-                <div
-                  className="bg-[#f0f1f5] border border-[rgba(221,226,233,0)] border-solid box-border content-stretch flex flex-col gap-[10px] items-start justify-center p-[2px] relative rounded-[100px] shrink-0 w-[120px]"
-                  style={{
-                    borderRadius: '100px',
-                    backgroundColor: '#f0f1f5'
-                  }}
-                  data-name="Progress Bar Container"
-                >
-                  {/* Progress Bar */}
-                  <div
-                    className="bg-gradient-to-b box-border content-stretch flex flex-col from-[#5a3dff] gap-[10px] items-center justify-center px-[8px] py-[2px] relative rounded-[100px] shrink-0"
-                    style={{
-                      background: 'linear-gradient(to bottom, #5a3dff, #a799ff)',
-                      borderRadius: '100px',
-                      width: isDone ? '100%' : `${animatedProgress}%`,
-                      maxWidth: '100%',
-                      minWidth: 'fit-content',
-                      transition: 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                      boxShadow:
-                        '0px 2px 4px -8px rgba(46,10,255,0.1), 0px 2px 2px 0px rgba(90,61,255,0.08), 0px 4px 8px -4px rgba(16,0,112,0.15)'
-                    }}
-                    data-name="Progress Bar"
-                  >
-                    <p
-                      className="font-['Goody_Sans:Medium',sans-serif] leading-[1.4] not-italic relative shrink-0 text-[14px] text-white text-center w-full"
-                      style={{
-                        fontFamily: 'var(--font-goody-sans)',
-                        fontSize: '14px',
-                        fontWeight: 500,
-                        lineHeight: 1.4,
-                        color: '#ffffff',
-                        whiteSpace: 'nowrap'
-                      }}
-                    >
-                      {isDone ? 'Done' : `${animatedCurrent}/${validatedProgress.total}`}
-                    </p>
-                    {/* Highlight gradient overlay */}
-                    <div
-                      className="absolute bg-gradient-to-b blur-[0.45px] filter from-[#e9e5ff] h-[10px] left-[10%] right-[10%] rounded-[100px] to-[rgba(229,245,255,0)] top-[3px]"
-                    />
-                    <div
-                      className="absolute inset-0 pointer-events-none"
-                      style={{
-                        boxShadow: '0px 3px 5px 2px inset rgba(255,255,255,0.5)',
-                        borderRadius: '100px'
-                      }}
-                    />
-                  </div>
-                  <div
-                    className="absolute inset-[-1px] pointer-events-none"
-                    style={{
-                      boxShadow: '0px 1px 2.25px 0px inset #c2c6d6, 0px -1px 2.25px 0px inset #ffffff',
-                      borderRadius: '100px'
-                    }}
-                  />
-                </div>
-              </div>
-              {/* Reminder button: only for not-done cards */}
-              {!isDone && (
-                <div
-                  data-name="ReminderBar"
-                  className="absolute inset-0 flex items-center justify-center"
-                  style={{
-                    opacity: isHovered ? 1 : 0,
-                    transform: isHovered ? 'translateY(0)' : 'translateY(4px)',
-                    transition: 'opacity 200ms ease-out, transform 200ms ease-out',
-                    pointerEvents: isHovered ? 'auto' : 'none'
-                  }}
-                >
-                  <button
-                    data-name="ReminderButton"
-                    className="px-3.5 py-1 bg-white rounded-[12px] text-[#525F7A]"
-                    style={{
-                      outlineOffset: '-1px',
-                      outlineWidth: '1px',
-                      outlineStyle: 'solid',
-                      outlineColor: 'var(--color-border)',
-                      borderRadius: '12px',
-                      height: '36px',
-                      transition: 'transform 200ms ease-out, box-shadow 200ms ease-out, outline-color 200ms ease-out, background-color 200ms ease-out'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = 'translateY(-2px)'
-                      e.currentTarget.style.boxShadow = '0 8px 24px -8px rgba(0,0,0,0.15), 0 3px 10px -4px rgba(0,0,0,0.10)'
-                      e.currentTarget.style.outlineColor = '#cfd6e2'
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = 'translateY(0)'
-                      e.currentTarget.style.boxShadow = 'none'
-                      e.currentTarget.style.outlineColor = 'var(--color-border)'
-                    }}
-                    onMouseDown={(e) => {
-                      e.currentTarget.style.transform = 'translateY(-1px)'
-                      e.currentTarget.style.boxShadow = '0 6px 18px -8px rgba(0,0,0,0.15), 0 2px 8px -4px rgba(0,0,0,0.10)'
-                    }}
-                    onMouseUp={(e) => {
-                      e.currentTarget.style.transform = 'translateY(-2px)'
-                      e.currentTarget.style.boxShadow = '0 8px 24px -8px rgba(0,0,0,0.15), 0 3px 10px -4px rgba(0,0,0,0.10)'
-                    }}
-                    type="button"
-                  >
-                    Send a reminder
-                  </button>
-                </div>
-              )}
-            </div>
-            {/* Gift Message - original styling */}
-            <div
-              className="content-stretch flex flex-col gap-[4px] items-start leading-[1.4] not-italic relative shrink-0 text-center"
-              data-name="Gift Message"
-              style={{ order: 1 }}
-            >
-              <p
-                className="[white-space-collapse:collapse] font-['Goody_Sans:Medium',sans-serif] h-[22px] overflow-ellipsis overflow-hidden relative shrink-0 text-[16px] text-black text-nowrap w-[268px]"
-                style={{
-                  fontFamily: 'var(--font-goody-sans)',
-                  fontSize: '16px',
-                  fontWeight: 500,
-                  lineHeight: 1.4,
-                  color: TOKENS.colors.text.primary
-                }}
-              >
-                {giftTitle}
-              </p>
-              <p
-                className="font-['Goody_Sans:Regular',sans-serif] h-[22px] relative shrink-0 text-[#525f7a] text-[14px] w-[268px]"
-                style={{
-                  fontFamily: 'var(--font-goody-sans)',
-                  fontSize: '14px',
-                  fontWeight: 400,
-                  lineHeight: 1.4,
-                  color: TOKENS.colors.text.secondary
-                }}
-              >
-                {giftSubtitle}
-              </p>
-            </div>
-          </div>
-          {/* Reminder button removed */}
+            {giftTitle}
+          </p>
+          <p
+            className="font-['Goody_Sans:Regular',sans-serif] h-[22px] relative shrink-0 text-[#525f7a] text-[14px] w-[268px]"
+            style={{
+              fontFamily: 'var(--font-goody-sans)',
+              fontSize: '14px',
+              fontWeight: 400,
+              lineHeight: 1.4,
+              color: TOKENS.colors.text.secondary
+            }}
+          >
+            {giftSubtitle}
+          </p>
         </div>
       </div>
     </div>

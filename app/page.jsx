@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import GiftCard from '@/components/GiftCard'
 import SentCard from '@/components/SentCard'
 import SentCardMonochrome from '@/components/SentCardMonochrome'
+import SentCardMonochrome2 from '@/components/SentCardMonochrome2'
 
 // Static data moved outside component to avoid recreation on every render
 const ALL_BOX_PAIRS = [
@@ -142,7 +143,7 @@ const shuffleArray = (array) => {
 }
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState('gift') // 'gift' | 'sent' | 'mono'
+  const [activeTab, setActiveTab] = useState('gift') // 'gift' | 'sent' | 'mono' | 'mono2'
   const [cardStates, setCardStates] = useState({
     card1: 'unopened',
     card2: 'unopened',
@@ -272,6 +273,12 @@ export default function Home() {
           >
             Monochrome
           </button>
+          <button
+            onClick={() => setActiveTab('mono2')}
+            className={`px-3 py-1.5 rounded-[12px] outline outline-1 outline-offset-[-1px] ${activeTab==='mono2' ? 'bg-white outline-zinc-300 text-black' : 'bg-[#f0f1f5] outline-zinc-200 text-[#525F7A]'}`}
+          >
+            Monochrome2
+          </button>
         </div>
         {/* Content */}
         {activeTab === 'gift' ? (
@@ -318,11 +325,26 @@ export default function Home() {
               />
             ))}
           </div>
-        ) : (
+        ) : activeTab === 'mono' ? (
           <div className="grid gift-card-grid gap-[24px]">
             {sentCards.map((card, index) => (
               <SentCardMonochrome
                 key={`mono-${index}`}
+                from={card.from}
+                title={card.title}
+                boxImage={card.boxImage}
+                giftTitle={card.giftTitle}
+                giftSubtitle={card.giftSubtitle}
+                progress={card.progress}
+                sentDate={card.sentDate}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="grid gift-card-grid gap-[24px]">
+            {sentCards.map((card, index) => (
+              <SentCardMonochrome2
+                key={`mono2-${index}`}
                 from={card.from}
                 title={card.title}
                 boxImage={card.boxImage}

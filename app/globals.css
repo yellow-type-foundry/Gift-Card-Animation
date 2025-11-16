@@ -1,6 +1,6 @@
 /* Header background theming: darken on hover */
 [data-name="Gift Card"]:hover [data-name="HeaderBGBase"] {
-  filter: brightness(0.75) saturate(0.95);
+  filter: brightness(.9) saturate(1);
   background: none;
 }
 
@@ -25,8 +25,7 @@
   box-shadow: 0 12px 40px -8px rgba(0, 0, 0, 0.15), 0 4px 12px -4px rgba(0, 0, 0, 0.10);
 }
 
-/* Reminder button removed; keep progress visible */
-/* (removed ReminderButton styles) */
+/* (progress styles are in component; no reminder button global styles) */
 /* Font Face Declarations */
 @font-face {
   font-family: 'Goody Sans';
