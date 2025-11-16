@@ -12,14 +12,26 @@ export default function Footer({
   animatedCurrent,
   validatedTotal,
   infoTitle,
-  infoSubtitle
+  infoSubtitle,
+  equalPadding = false
 }) {
   return (
     <div
       className="bg-white box-border flex items-center justify-center pb-[16px] pt-0 px-[16px] relative shrink-0 w-full"
-      style={{ position: 'relative', zIndex: 20, width: '100%' }}
+      style={{ position: 'relative', zIndex: 20, width: '100%', paddingTop: equalPadding ? '16px' : undefined }}
       data-node-id="1467:49205"
     >
+      {/* Background blur + white gradient (bottom -> top) */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backdropFilter: 'blur(00px)',
+          WebkitBackdropFilter: 'blur(00px)',
+          background: 'linear-gradient(to top, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.75) 60%, rgba(255,255,255,0.0) 100%)',
+          zIndex: -1
+        }}
+      />
       <div
         data-name="InfoBarContent"
         className="content-stretch flex flex-col gap-[9px] items-center justify-center text-center transition-all"

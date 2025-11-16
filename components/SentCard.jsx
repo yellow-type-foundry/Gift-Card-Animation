@@ -20,7 +20,13 @@ const SentCard = ({
   giftSubtitle = 'Collection by Goody',
   progress = { current: 3, total: 6 },
   sentDate = '1 week ago',
-  headerBgOverride = null
+  headerBgOverride = null,
+  hideUnion = false,
+  footerPadEqual = false,
+  envelopeScale = 1,
+  envelopeOffsetY = 0,
+  confettiWhiteOverlay = false,
+  envelopeHighZ = false
 }) => {
   // Ensure current never exceeds total, and total never exceeds 40
   const validatedProgress = {
@@ -80,6 +86,7 @@ const SentCard = ({
     [dominantColor]
   )
   const headerBgFinal = headerBgOverride || headerBgColor
+  const isMonochromeVariant = Boolean(headerBgOverride)
   const headerTextClass = headerBgOverride ? 'text-black' : 'text-white'
   const baseTintColor = useMemo(
     () => capSaturation(adjustToLuminance(dominantColor, 85), 70),
@@ -228,7 +235,7 @@ const SentCard = ({
       data-name="Gift Card"
       data-node-id="1467:49182"
     >
-      <div className="content-stretch flex flex-col items-start overflow-hidden relative rounded-[inherit] size-full">
+      <div className={`content-stretch flex flex-col items-start ${isMonochromeVariant ? 'overflow-visible' : 'overflow-hidden'} relative rounded-[inherit] size-full`}>
         {/* Header Section - 280px tall */}
         <div
           className="box-border content-stretch flex flex-col h-[280px] items-center justify-between pb-0 pt-[20px] px-0 relative shrink-0 w-full overflow-visible"
@@ -252,6 +259,17 @@ const SentCard = ({
               className="absolute inset-0"
               style={{ zIndex: 1, pointerEvents: 'none', filter: 'blur(2.5px)' }}
             />
+            {confettiWhiteOverlay && (
+              <div
+                aria-hidden="true"
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  zIndex: 2,
+                  background:
+                    'linear-gradient(to top, rgba(255,255,255,0.8) 0%, rgba(255, 255, 255, 0.33) 30%, rgba(255,255,255,0.0) 100%)'
+                }}
+              />
+            )}
             {/* Base color - dynamic from dominant color */}
             <div
               className="absolute inset-0"
@@ -266,7 +284,8 @@ const SentCard = ({
               className="absolute inset-0"
               style={{
                 background: HEADER_OVERLAY_BG,
-                mixBlendMode: 'overlay'
+                mixBlendMode: 'overlay',
+                zIndex: 0
               }}
             />
           </div>
@@ -315,9 +334,12 @@ const SentCard = ({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              top: '4px',
+              top: `${4 + envelopeOffsetY}px`,
               left: '-2px',
-              right: '2px'
+              right: '2px',
+              zIndex: envelopeHighZ ? 50 : 2,
+              transform: `scale(${envelopeScale})`,
+              transformOrigin: 'center top'
             }}
             data-name="Envelope"
             data-node-id="1467:49190"
@@ -744,6 +766,7 @@ const SentCard = ({
           
 
           {/* Union Shape - wavy bottom border */}
+          {!hideUnion && (
           <div
             className="absolute"
             style={{
@@ -846,6 +869,7 @@ const SentCard = ({
               </svg>
             </div>
           </div>
+          )}
         </div>
 
         <Footer
@@ -856,6 +880,7 @@ const SentCard = ({
           validatedTotal={validatedProgress.total}
           infoTitle={giftTitle}
           infoSubtitle={giftSubtitle}
+          equalPadding={footerPadEqual}
         />
       </div>
     </div>
