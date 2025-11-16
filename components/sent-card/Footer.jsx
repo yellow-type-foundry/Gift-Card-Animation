@@ -14,12 +14,16 @@ export default function Footer({
   infoTitle,
   infoSubtitle,
   equalPadding = false,
-  showProgress = true
+  showProgress = true,
+  showReminder = true,
+  infoInSlot = false,
+  bottomPadding = 16,
+  topPadding
 }) {
   return (
     <div
-      className="bg-white box-border flex items-center justify-center pb-[16px] pt-0 px-[16px] relative shrink-0 w-full"
-      style={{ position: 'relative', zIndex: 20, width: '100%', paddingTop: equalPadding ? '16px' : undefined }}
+      className="bg-white box-border flex items-center justify-center pt-0 px-[16px] relative shrink-0 w-full"
+      style={{ position: 'relative', zIndex: 20, width: '100%', paddingTop: topPadding !== undefined ? `${topPadding}px` : (equalPadding ? '16px' : undefined), paddingBottom: `${bottomPadding}px` }}
       data-node-id="1467:49205"
     >
       {/* Background blur + white gradient (bottom -> top) */}
@@ -39,7 +43,7 @@ export default function Footer({
         style={{ width: '100%' }}
       >
         {/* Info first */}
-        {infoTitle && (
+        {infoTitle && !infoInSlot && (
           <div
             className="content-stretch flex flex-col gap-[4px] items-start leading-[1.4] not-italic relative shrink-0 text-center w-full"
             data-name="Gift Message"
@@ -58,10 +62,10 @@ export default function Footer({
             </p>
             {infoSubtitle && (
               <p
-                className="font-['Goody_Sans:Regular',sans-serif] h-[22px] relative shrink-0 text-[#525f7a] text-[14px] w-[268px]"
+                className="font-['Goody_Sans:Regular',sans-serif] h-[22px] relative shrink-0 text-[#525f7a] text-[16px] w-[268px]"
                 style={{
                   fontFamily: 'var(--font-goody-sans)',
-                  fontSize: '14px',
+                  fontSize: '16px',
                   fontWeight: 400,
                   lineHeight: 1.4
                 }}
@@ -71,9 +75,49 @@ export default function Footer({
             )}
           </div>
         )}
-        {/* Progress second */}
-        {showProgress && (
-        <div className="relative w-full flex items-center justify-center" style={{ height: '36px' }}>
+        {/* Progress / Reminder slot (also hosts info when infoInSlot) */}
+        <div className="relative w-full flex items-center justify-center" style={{ height: infoInSlot ? '44px' : '36px' }}>
+          {infoInSlot && (infoTitle || infoSubtitle) && (
+            <div
+              className="absolute inset-0 flex items-center justify-center"
+              style={{
+                opacity: isHovered && !isDone ? 0 : 1,
+                transform: isHovered && !isDone ? 'translateY(4px)' : 'translateY(0)',
+                transition: 'opacity 200ms ease-out, transform 200ms ease-out',
+                pointerEvents: isHovered && !isDone ? 'none' : 'auto'
+              }}
+              data-name="InfoSlot"
+            >
+              <div className="flex flex-col items-center justify-center gap-[4px] px-2" style={{ height: '44px' }}>
+                {infoTitle && (
+                  <p
+                    className="font-['Goody_Sans:Medium',sans-serif] text-[16px] leading-[1.4] truncate text-black"
+                    style={{
+                      fontFamily: 'var(--font-goody-sans)',
+                      fontSize: '16px',
+                      fontWeight: 500,
+                      lineHeight: 1.4
+                    }}
+                  >
+                    {infoTitle}
+                  </p>
+                )}
+                {infoSubtitle && (
+                  <p
+                    className="font-['Goody_Sans:Regular',sans-serif] text-[16px] leading-[1.4] text-[#525F7A] truncate"
+                    style={{
+                      fontFamily: 'var(--font-goody-sans)',
+                      fontSize: '16px',
+                      lineHeight: 1.4
+                    }}
+                  >
+                    {infoSubtitle}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+          {showProgress && (
           <div
             data-name="ProgressSlot"
             className="absolute inset-0 flex items-center justify-center"
@@ -119,9 +163,6 @@ export default function Footer({
                   {isDone ? 'Done' : `${animatedCurrent}/${validatedTotal}`}
                 </p>
                 <div
-                  className="absolute bg-gradient-to-b blur-[0.45px] filter from-[#e9e5ff] h-[10px] left-[10%] right-[10%] rounded-[100px] to-[rgba(229,245,255,0)] top-[3px]"
-                />
-                <div
                   className="absolute inset-0 pointer-events-none"
                   style={{
                     boxShadow: '0px 3px 5px 2px inset rgba(255,255,255,0.5)',
@@ -138,7 +179,8 @@ export default function Footer({
               />
             </div>
           </div>
-          {!isDone && (
+          )}
+          {showReminder && !isDone && (
             <div
               data-name="ReminderBar"
               className="absolute inset-0 flex items-center justify-center"
@@ -158,7 +200,7 @@ export default function Footer({
                   outlineStyle: 'solid',
                   outlineColor: 'var(--color-border)',
                   borderRadius: '12px',
-                  height: '36px',
+                  height: infoInSlot ? '44px' : '36px',
                   transition: 'transform 200ms ease-out, box-shadow 200ms ease-out, outline-color 200ms ease-out, background-color 200ms ease-out'
                 }}
                 onMouseEnter={(e) => {
@@ -186,7 +228,6 @@ export default function Footer({
             </div>
           )}
         </div>
-        )}
       </div>
     </div>
   )

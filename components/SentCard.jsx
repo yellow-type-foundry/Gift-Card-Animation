@@ -28,7 +28,10 @@ const SentCard = ({
   confettiWhiteOverlay = false,
   envelopeHighZ = false,
   overlayProgressOnEnvelope = false,
-  showFooterProgress = true
+  showFooterProgress = true,
+  showFooterReminder = true,
+  footerBottomPadding = 16,
+  footerTopPadding
 }) => {
   // Ensure current never exceeds total, and total never exceeds 40
   const validatedProgress = {
@@ -508,7 +511,7 @@ const SentCard = ({
                         >
                           {isDone ? 'Done' : `${animatedCurrent}/${validatedProgress.total}`}
                         </p>
-                        <div className="absolute bg-gradient-to-b blur-[0.45px] filter from-[#e9e5ff] h-[10px] left-[10%] right-[10%] rounded-[100px] to-[rgba(229,245,255,0)] top-[3px]" />
+                        {/* highlight removed */}
                         <div
                           className="absolute inset-0 pointer-events-none"
                           style={{
@@ -957,6 +960,10 @@ const SentCard = ({
           infoSubtitle={giftSubtitle}
           equalPadding={footerPadEqual}
           showProgress={showFooterProgress}
+          showReminder={showFooterReminder}
+          infoInSlot={overlayProgressOnEnvelope}
+          bottomPadding={footerBottomPadding}
+          topPadding={footerTopPadding}
         />
       </div>
     </div>

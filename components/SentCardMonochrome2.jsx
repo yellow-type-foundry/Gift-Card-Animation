@@ -10,12 +10,16 @@ export default function SentCardMonochrome2(props) {
     headerBgOverride="#E3E7ED"
     hideUnion={true}
     footerPadEqual={true}
+    footerTopPadding={20}
+    footerBottomPadding={24}
     envelopeScale={0.9}
     envelopeOffsetY={6}
     confettiWhiteOverlay={true}
     envelopeHighZ={true}
     overlayProgressOnEnvelope={true}
     showFooterProgress={false}
+    // Ensure reminder button shows in footer even if progress hidden
+    showFooterReminder={true}
   />
 }
 
