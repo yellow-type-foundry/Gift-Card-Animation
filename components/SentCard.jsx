@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { TOKENS } from '@/constants/tokens'
+import useDominantColor from '@/hooks/useDominantColor'
 
 const SentCard = ({
   from = 'Alex Torres',
@@ -59,6 +60,99 @@ const SentCard = ({
   const ids = idRef.current
   
   // (Image mask removed)
+  // Extract dominant color from the masked image (boxImage)
+  const { dominantColor } = useDominantColor(boxImage, '#f4c6fa')
+  // Utilities to adjust color brightness
+  const darkenHex = (hex, factor = 0.85) => {
+    const clean = hex.replace('#', '')
+    const r = parseInt(clean.substring(0, 2), 16)
+    const g = parseInt(clean.substring(2, 4), 16)
+    const b = parseInt(clean.substring(4, 6), 16)
+    const toHex = (v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')
+    return `#${toHex(r * factor)}${toHex(g * factor)}${toHex(b * factor)}`
+  }
+  const lightenHex = (hex, factor = 1.15) => {
+    const clean = hex.replace('#', '')
+    const r = parseInt(clean.substring(0, 2), 16)
+    const g = parseInt(clean.substring(2, 4), 16)
+    const b = parseInt(clean.substring(4, 6), 16)
+    const toHex = (v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')
+    return `#${toHex(r * factor)}${toHex(g * factor)}${toHex(b * factor)}`
+  }
+  const computeLuminance = (hex) => {
+    const clean = hex.replace('#', '')
+    const r = parseInt(clean.substring(0, 2), 16)
+    const g = parseInt(clean.substring(2, 4), 16)
+    const b = parseInt(clean.substring(4, 6), 16)
+    return ((r * 299 + g * 587 + b * 114) / 1000) * (100 / 255)
+  }
+  // Adjust color so its perceived luminance is capped at target (and lifted up if below)
+  const adjustToLuminance = (hex, target = 60) => {
+    const clean = hex.replace('#', '')
+    let r = parseInt(clean.substring(0, 2), 16)
+    let g = parseInt(clean.substring(2, 4), 16)
+    let b = parseInt(clean.substring(4, 6), 16)
+    const current = ((r * 299 + g * 587 + b * 114) / 1000) * (100 / 255)
+    const toHex = (v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')
+    if (current === 0) return hex
+    const factor = target / current
+    r = r * factor
+    g = g * factor
+    b = b * factor
+    return `#${toHex(r)}${toHex(g)}${toHex(b)}`
+  }
+  // Cap saturation at a given percent using HSL conversion
+  const capSaturation = (hex, capPercent = 30) => {
+    const clean = hex.replace('#', '')
+    let r = parseInt(clean.substring(0, 2), 16) / 255
+    let g = parseInt(clean.substring(2, 4), 16) / 255
+    let b = parseInt(clean.substring(4, 6), 16) / 255
+    const max = Math.max(r, g, b)
+    const min = Math.min(r, g, b)
+    let h, s, l
+    l = (max - min) / 2 + min / 2 // equivalent to (max + min) / 2
+    const d = max - min
+    if (d === 0) {
+      h = 0
+      s = 0
+    } else {
+      s = d / (1 - Math.abs(2 * l - 1))
+      switch (max) {
+        case r:
+          h = ((g - b) / d) % 6
+          break
+        case g:
+          h = (b - r) / d + 2
+          break
+        default:
+          h = (r - g) / d + 4
+      }
+      h *= 60
+      if (h < 0) h += 360
+    }
+    // cap saturation
+    s = Math.min(s, capPercent / 100)
+    // convert back to RGB
+    const c = (1 - Math.abs(2 * l - 1)) * s
+    const x = c * (1 - Math.abs(((h / 60) % 2) - 1))
+    const m = l - c / 2
+    let r1, g1, b1
+    if (h >= 0 && h < 60) [r1, g1, b1] = [c, x, 0]
+    else if (h >= 60 && h < 120) [r1, g1, b1] = [x, c, 0]
+    else if (h >= 120 && h < 180) [r1, g1, b1] = [0, c, x]
+    else if (h >= 180 && h < 240) [r1, g1, b1] = [0, x, c]
+    else if (h >= 240 && h < 300) [r1, g1, b1] = [x, 0, c]
+    else [r1, g1, b1] = [c, 0, x]
+    const toHex2 = (v) => Math.max(0, Math.min(255, Math.round((v + m) * 255))).toString(16).padStart(2, '0')
+    return `#${toHex2(r1)}${toHex2(g1)}${toHex2(b1)}`
+  }
+  // Slightly lighter tone for hidden flap for contrast (with sat cap)
+  const hiddenFlapColor = capSaturation(lightenHex(dominantColor, 1.4), 90)
+  // Header background color: adjusted to luminance cap 60 (lighten if below, darken if above)
+  const headerBgColor = capSaturation(adjustToLuminance(dominantColor, 50), 45)
+  // Base tint and 1790 tint to theme the header envelope shapes
+  const baseTintColor = capSaturation(adjustToLuminance(dominantColor, 80), 55)
+  const base2TintColor = capSaturation(lightenHex(dominantColor, 1.15), 65)
   
   // Animate progress bar and count after content is loaded
   useEffect(() => {
@@ -131,24 +225,24 @@ const SentCard = ({
               borderRadius: `${TOKENS.sizes.borderRadius.card} ${TOKENS.sizes.borderRadius.card} 0 0`
             }}
           >
-            {/* Base color - fixed pink background */}
+            {/* Base color - dynamic from dominant color */}
             <div
               className="absolute inset-0"
               style={{
-                backgroundColor: '#f4c6fa'
+                backgroundColor: headerBgColor
               }}
             />
             {/* Gradient overlay with blend mode */}
             <div
               className="absolute inset-0"
               style={{
-                background: 'linear-gradient(to bottom, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0) 65%)',
+                background: 'linear-gradient(to bottom, rgba(0, 0, 0, 0.30) 0%, rgb(255, 255, 255) 75%)',
                 mixBlendMode: 'overlay'
               }}
             />
           </div>
 
-          {/* Dots Pattern Overlay removed for now */}
+          {/* Dots pattern removed */}
 
           {/* Header Content */}
           <div
@@ -221,10 +315,11 @@ const SentCard = ({
               >
                 <path
                   d="M0 6.8C0 3.04447 3.04446 0 6.8 0H163.2C166.956 0 170 3.04446 170 6.8V119C170 122.756 166.956 125.8 163.2 125.8H6.8C3.04447 125.8 0 122.756 0 119V6.8Z"
-                  fill="#F4C6FA"
+                  fill={hiddenFlapColor}
                 />
               </svg>
             </div>
+            
             {/* Image Container (hosts image) */}
             <div
               className="absolute"
@@ -238,6 +333,25 @@ const SentCard = ({
               }}
               data-name="Image Container"
             >
+              {/* High-DPI cover with Next/Image, clipped to the same path */}
+              <div
+                className="absolute inset-0"
+                style={{
+                  clipPath:
+                    'path("M91.6152 149.22L12.7204 83.6651L12.7204 83.665C11.638 82.7656 11.0967 82.3159 10.7076 81.7641C10.3628 81.2753 10.1068 80.7295 9.95108 80.1519C9.77539 79.5 9.77539 78.7963 9.77539 77.3889V40.468C9.77539 35.9875 9.77539 33.7473 10.6473 32.036C11.4143 30.5308 12.6382 29.3069 14.1435 28.5399C15.8548 27.668 18.095 27.668 22.5754 27.668L172.925 27.668C177.406 27.668 179.646 27.6681 181.357 28.54C182.863 29.307 184.086 30.5308 184.853 32.0361C185.725 33.7474 185.725 35.9876 185.725 40.468V77.3889C185.725 78.7963 185.725 79.5 185.55 80.1519C185.394 80.7295 185.138 81.2753 184.793 81.7641C184.404 82.3159 183.863 82.7656 182.78 83.6651L103.886 149.22C101.703 151.034 100.611 151.941 99.3931 152.288C98.3193 152.593 97.1815 152.593 96.1077 152.288C94.8898 151.941 93.7983 151.034 91.6152 149.22Z")',
+                  WebkitClipPath:
+                    'path("M91.6152 149.22L12.7204 83.6651L12.7204 83.665C11.638 82.7656 11.0967 82.3159 10.7076 81.7641C10.3628 81.2753 10.1068 80.7295 9.95108 80.1519C9.77539 79.5 9.77539 78.7963 9.77539 77.3889V40.468C9.77539 35.9875 9.77539 33.7473 10.6473 32.036C11.4143 30.5308 12.6382 29.3069 14.1435 28.5399C15.8548 27.668 18.095 27.668 22.5754 27.668L172.925 27.668C177.406 27.668 179.646 27.6681 181.357 28.54C182.863 29.307 184.086 30.5308 184.853 32.0361C185.725 33.7474 185.725 35.9876 185.725 40.468V77.3889C185.725 78.7963 185.725 79.5 185.55 80.1519C185.394 80.7295 185.138 81.2753 184.793 81.7641C184.404 82.3159 183.863 82.7656 182.78 83.6651L103.886 149.22C101.703 151.034 100.611 151.941 99.3931 152.288C98.3193 152.593 97.1815 152.593 96.1077 152.288C94.8898 151.941 93.7983 151.034 91.6152 149.22Z")'
+                }}
+              >
+                <Image
+                  src={boxImage}
+                  alt=""
+                  fill
+                  priority={false}
+                  sizes="195.5px"
+                  style={{ objectFit: 'cover' }}
+                />
+              </div>
               <svg
                 preserveAspectRatio="none"
                 width="100%"
@@ -249,19 +363,10 @@ const SentCard = ({
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <g filter={`url(#${ids.imageFilterId})`}>
+                  {/* Base red fill under overlays for consistent tint */}
                   <path
                     d="M91.6152 149.22L12.7204 83.6651L12.7204 83.665C11.638 82.7656 11.0967 82.3159 10.7076 81.7641C10.3628 81.2753 10.1068 80.7295 9.95108 80.1519C9.77539 79.5 9.77539 78.7963 9.77539 77.3889V40.468C9.77539 35.9875 9.77539 33.7473 10.6473 32.036C11.4143 30.5308 12.6382 29.3069 14.1435 28.5399C15.8548 27.668 18.095 27.668 22.5754 27.668L172.925 27.668C177.406 27.668 179.646 27.6681 181.357 28.54C182.863 29.307 184.086 30.5308 184.853 32.0361C185.725 33.7474 185.725 35.9876 185.725 40.468V77.3889C185.725 78.7963 185.725 79.5 185.55 80.1519C185.394 80.7295 185.138 81.2753 184.793 81.7641C184.404 82.3159 183.863 82.7656 182.78 83.6651L103.886 149.22C101.703 151.034 100.611 151.941 99.3931 152.288C98.3193 152.593 97.1815 152.593 96.1077 152.288C94.8898 151.941 93.7983 151.034 91.6152 149.22Z"
                     fill="#FF3535"
-                  />
-                  {/* Cover image clipped to red container shape */}
-                  <image
-                    href={boxImage}
-                    x="0"
-                    y="0"
-                    width="196"
-                    height="221"
-                    preserveAspectRatio="xMidYMid slice"
-                    clipPath={`url(#${ids.imageClipId})`}
                   />
                   <path
                     d="M91.6152 149.22L12.7204 83.6651L12.7204 83.665C11.638 82.7656 11.0967 82.3159 10.7076 81.7641C10.3628 81.2753 10.1068 80.7295 9.95108 80.1519C9.77539 79.5 9.77539 78.7963 9.77539 77.3889V40.468C9.77539 35.9875 9.77539 33.7473 10.6473 32.036C11.4143 30.5308 12.6382 29.3069 14.1435 28.5399C15.8548 27.668 18.095 27.668 22.5754 27.668L172.925 27.668C177.406 27.668 179.646 27.6681 181.357 28.54C182.863 29.307 184.086 30.5308 184.853 32.0361C185.725 33.7474 185.725 35.9876 185.725 40.468V77.3889C185.725 78.7963 185.725 79.5 185.55 80.1519C185.394 80.7295 185.138 81.2753 184.793 81.7641C184.404 82.3159 183.863 82.7656 182.78 83.6651L103.886 149.22C101.703 151.034 100.611 151.941 99.3931 152.288C98.3193 152.593 97.1815 152.593 96.1077 152.288C94.8898 151.941 93.7983 151.034 91.6152 149.22Z"
@@ -289,47 +394,84 @@ const SentCard = ({
                     colorInterpolationFilters="sRGB"
                   >
                     <feFlood floodOpacity="0" result="BackgroundImageFix" />
+                    <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
                     <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
-                    <feOffset dy="3.4" />
-                    <feGaussianBlur stdDeviation="1.7" />
-                    <feComposite in2="hardAlpha" operator="out" />
-                    <feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.5 0" />
-                    <feBlend mode="overlay" in2="BackgroundImageFix" result="effect1_dropShadow" />
-                    <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow" result="shape" />
-                    <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
-                    <feOffset dy="-0.85" />
-                    <feGaussianBlur stdDeviation="1.7" />
+                    <feOffset dy="0" />
+                    <feGaussianBlur stdDeviation="2" />
                     <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1" />
-                    <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0" />
+                    <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.2 0" />
                     <feBlend mode="normal" in2="shape" result="effect2_innerShadow" />
                     <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
-                    <feOffset dy="2.55" />
-                    <feGaussianBlur stdDeviation="4.25" />
+                    <feOffset dy="0" />
+                    <feGaussianBlur stdDeviation="2" />
                     <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1" />
                     <feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.2 0" />
                     <feBlend mode="normal" in2="effect2_innerShadow" result="effect3_innerShadow" />
                   </filter>
                   <linearGradient
                     id={ids.imageGradientSoftLightId}
-                    x1="21.5054"
-                    y1="28.3507"
-                    x2="140.972"
-                    y2="191.551"
+                    x1="21"
+                    y1="28"
+                    x2="140"
+                    y2="191"
                     gradientUnits="userSpaceOnUse"
                   >
-                    <stop stopColor="white" stopOpacity="0.5" />
+                    <stop stopColor="white" stopOpacity="0.1" />
                     <stop offset="1" stopColor="white" stopOpacity="0" />
                   </linearGradient>
                   <linearGradient
                     id={ids.imageGradientShadowId}
-                    x1="97.7504"
-                    y1="83.6425"
-                    x2="97.7504"
-                    y2="154.296"
+                    x1="97"
+                    y1="83"
+                    x2="97"
+                    y2="154"
                     gradientUnits="userSpaceOnUse"
                   >
                     <stop stopOpacity="0" />
                     <stop offset="1" />
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+            {/* Image Container Fade (duplicate shape, black gradient fill) */}
+            <div
+              className="absolute"
+              style={{
+                left: '52.25px',
+                top: '83px',
+                width: '195.5px',
+                height: '220.575px',
+                zIndex: 99,
+                pointerEvents: 'none'
+              }}
+              data-name="Image Container Fade"
+            >
+              <svg
+                preserveAspectRatio="none"
+                width="100%"
+                height="100%"
+                overflow="visible"
+                style={{ display: 'block' }}
+                viewBox="0 0 196 221"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M91.6152 149.22L12.7204 83.6651L12.7204 83.665C11.638 82.7656 11.0967 82.3159 10.7076 81.7641C10.3628 81.2753 10.1068 80.7295 9.95108 80.1519C9.77539 79.5 9.77539 78.7963 9.77539 77.3889V40.468C9.77539 35.9875 9.77539 33.7473 10.6473 32.036C11.4143 30.5308 12.6382 29.3069 14.1435 28.5399C15.8548 27.668 18.095 27.668 22.5754 27.668L172.925 27.668C177.406 27.668 179.646 27.6681 181.357 28.54C182.863 29.307 184.086 30.5308 184.853 32.0361C185.725 33.7474 185.725 35.9876 185.725 40.468V77.3889C185.725 78.7963 185.725 79.5 185.55 80.1519C185.394 80.7295 185.138 81.2753 184.793 81.7641C184.404 82.3159 183.863 82.7656 182.78 83.6651L103.886 149.22C101.703 151.034 100.611 151.941 99.3931 152.288C98.3193 152.593 97.1815 152.593 96.1077 152.288C94.8898 151.941 93.7983 151.034 91.6152 149.22Z"
+                  fill="url(#paintImgFadeOverlay)"
+                  style={{ mixBlendMode: 'overlay' }}
+                />
+                <defs>
+                  <linearGradient
+                    id="paintImgFadeOverlay"
+                    x1="98"
+                    y1="300"
+                    x2="98"
+                    y2="0"
+                    gradientUnits="userSpaceOnUse"
+                  >
+                    <stop offset="0" stopColor="black" stopOpacity="0.5" />
+                    <stop offset="1" stopColor="black" stopOpacity="0" />
                   </linearGradient>
                 </defs>
               </svg>
@@ -350,46 +492,47 @@ const SentCard = ({
             data-name="Base"
             data-node-id="1467:49192"
           >
+              {/* Background blur layer (like Union) */}
               <div
-                className="absolute"
+                className="absolute inset-0"
                 style={{
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  top: '1.09%',
-                  position: 'absolute'
+                  backdropFilter: 'blur(4px)',
+                  WebkitBackdropFilter: 'blur(4px)',
+                  top: '-8px',
+                  left: '-8px',
+                  right: '-8px',
+                  bottom: '-8px',
+                  pointerEvents: 'none',
+                  zIndex: 0
                 }}
-              >
-                {/* Background blur layer for envelope base */}
-                <div
-                  className="absolute inset-0"
-                  style={{
-                    backdropFilter: 'blur(.075px)',
-                    WebkitBackdropFilter: 'blur(.075px)',
-                    pointerEvents: 'none'
-                  }}
-                  aria-hidden="true"
-                />
-                <svg
-                preserveAspectRatio="none"
+                aria-hidden="true"
+              />
+              <svg
+                preserveAspectRatio="true"
                 width="100%"
                 height="100%"
                 overflow="visible"
-                style={{ display: 'block' }}
+                style={{ display: 'block', position: 'relative', zIndex: 1 }}
                 viewBox="0 0 196 219"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <g filter={`url(#${ids.baseFilterId})`}>
+                  {/* Themed base fill */}
+                  <path
+                    d="M0 84.4092C0 80.8407 1.58824 77.4572 4.33359 75.1774L92.6391 1.84547C95.6021 -0.615154 99.8979 -0.615156 102.861 1.84546L191.166 75.1774C193.912 77.4572 195.5 80.8406 195.5 84.4092V206.176C195.5 212.804 190.127 218.176 183.5 218.176H12C5.37259 218.176 0 212.804 0 206.176V84.4092Z"
+                    fill={baseTintColor}
+                  />
+                  {/* Highlight gradient overlay */}
                   <path
                     d="M0 84.4092C0 80.8407 1.58824 77.4572 4.33359 75.1774L92.6391 1.84547C95.6021 -0.615154 99.8979 -0.615156 102.861 1.84546L191.166 75.1774C193.912 77.4572 195.5 80.8406 195.5 84.4092V206.176C195.5 212.804 190.127 218.176 183.5 218.176H12C5.37259 218.176 0 212.804 0 206.176V84.4092Z"
                     fill={`url(#${ids.baseGradient1Id})`}
-                    fillOpacity="0.5"
+                    fillOpacity="0.35"
                   />
                   <path
                     d="M92.7988 2.03769C95.6693 -0.345946 99.8307 -0.345947 102.701 2.03769L191.007 75.3697C193.695 77.602 195.25 80.9148 195.25 84.4088V206.176C195.25 212.666 189.989 217.926 183.5 217.926H12C5.51072 217.926 0.250108 212.666 0.25 206.176V84.4088C0.250125 80.9148 1.80517 77.602 4.49316 75.3697L92.7988 2.03769Z"
                     stroke={`url(#${ids.baseGradient2Id})`}
-                    strokeOpacity="0.5"
+                    strokeOpacity="0.3"
                     strokeWidth="0.5"
                   />
                 </g>
@@ -399,7 +542,7 @@ const SentCard = ({
                     x="-8"
                     y="-8"
                     width="211.5"
-                    height="234.176"
+                    height="334.176"
                     filterUnits="userSpaceOnUse"
                     colorInterpolationFilters="sRGB"
                   >
@@ -411,29 +554,29 @@ const SentCard = ({
                       values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
                       result="hardAlpha"
                     />
-                    <feOffset dy="1.7" />
-                    <feGaussianBlur stdDeviation="1.7" />
+                    <feOffset dy="0" />
+                    <feGaussianBlur stdDeviation="5" />
                     <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1" />
-                    <feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.65 0" />
+                    <feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.95 0" />
                     <feBlend mode="normal" in2="shape" result="effect1_innerShadow" />
                   </filter>
                   <linearGradient
                     id={ids.baseGradient1Id}
-                    x1="97.6329"
-                    y1="10.3613"
-                    x2="97.6329"
-                    y2="217.769"
+                    x1="90"
+                    y1="100"
+                    x2="90"
+                    y2="200"
                     gradientUnits="userSpaceOnUse"
                   >
                     <stop stopColor="white" />
-                    <stop offset="1" stopColor="white" stopOpacity="0" />
+                    <stop offset="1" stopColor="grey" stopOpacity="0.2" />
                   </linearGradient>
                   <linearGradient
                     id={ids.baseGradient2Id}
-                    x1="97.633"
-                    y1="10.3613"
-                    x2="97.633"
-                    y2="131.502"
+                    x1="97"
+                    y1="10"
+                    x2="97"
+                    y2="131"
                     gradientUnits="userSpaceOnUse"
                   >
                     <stop stopColor="white" stopOpacity="0" />
@@ -441,8 +584,8 @@ const SentCard = ({
                   </linearGradient>
                 </defs>
               </svg>
-              </div>
             </div>
+          
 
           {/* Envelope Dot Pattern layer removed for now */}
 
@@ -483,8 +626,8 @@ const SentCard = ({
                   <g filter={`url(#${ids.cardFilterId})`}>
                     <path
                       d="M81.2603 1.38519L1.84066 67.3763C-0.613553 69.4155 -0.613553 73.1822 1.84066 75.2214L81.2603 141.213C83.4831 143.059 86.7066 143.059 88.9294 141.213L168.349 75.2214C170.803 73.1822 170.803 69.4155 168.349 67.3763L88.9294 1.38519C86.7066 -0.461729 83.4831 -0.461731 81.2603 1.38519Z"
-                      fill={`url(#${ids.cardGradientId})`}
-                      fillOpacity="0.2"
+                      fill={base2TintColor}
+                      fillOpacity="0.18"
                     />
                   </g>
                   <defs>
@@ -505,8 +648,8 @@ const SentCard = ({
                         values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
                         result="hardAlpha"
                       />
-                      <feOffset dy="1.7" />
-                      <feGaussianBlur stdDeviation="1.7" />
+                      <feOffset dy="0" />
+                      <feGaussianBlur stdDeviation="2" />
                       <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1" />
                       <feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.65 0" />
                       <feBlend mode="normal" in2="shape" result="effect1_innerShadow" />
@@ -527,9 +670,9 @@ const SentCard = ({
               </div>
             </div>
 
-          {/* Image removed (mask + image container removed) */}
+          
 
-          {/* Shadow overlay removed for now */}
+          
 
           {/* Union Shape - wavy bottom border */}
           <div
@@ -548,8 +691,8 @@ const SentCard = ({
             <div
               className="absolute inset-0"
               style={{
-                backdropFilter: 'blur(8px)',
-                WebkitBackdropFilter: 'blur(8px)',
+                backdropFilter: 'blur(4px)',
+                WebkitBackdropFilter: 'blur(4px)',
                 pointerEvents: 'none'
               }}
               aria-hidden="true"
@@ -589,8 +732,8 @@ const SentCard = ({
                       values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
                       result="hardAlpha"
                     />
-                    <feOffset dy="3" />
-                    <feGaussianBlur stdDeviation="4" />
+                    <feOffset dy="0" />
+                    <feGaussianBlur stdDeviation="0" />
                     <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1" />
                     <feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.5 0" />
                     <feBlend mode="normal" in2="shape" result="effect1_innerShadow" />
@@ -672,7 +815,7 @@ const SentCard = ({
               <div
                 className="absolute inset-0 pointer-events-none"
                 style={{
-                  boxShadow: '0px 1px 2px 0px inset rgba(255,255,255,0.5)',
+                  boxShadow: '0px 3px 5px 2px inset rgba(255,255,255,0.5)',
                   borderRadius: '100px'
                 }}
               />

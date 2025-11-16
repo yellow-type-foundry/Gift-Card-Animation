@@ -1,74 +1,137 @@
 import { useState, useEffect } from 'react'
 
 /**
- * Extracts the dominant color from an image by sampling pixels
- * and returning the average RGB color
+ * Extracts the dominant color from an image using downscaled sampling +
+ * simple K-Means clustering (k=5). Filters out near-white/near-black/grayscale
+ * pixels and weights clusters by saturation to avoid highlights.
  */
 const extractDominantColor = (imageSrc) => {
   return new Promise((resolve, reject) => {
     const img = new Image()
+    // For local/public assets, crossOrigin isn't needed; for remote, allow CORS when possible
     img.crossOrigin = 'anonymous'
     
     img.onload = () => {
       try {
+        // Downscale for performance and robustness
+        const targetW = 128
+        const scale = Math.max(1, Math.min(img.width / targetW, img.height / targetW))
         const canvas = document.createElement('canvas')
-        const ctx = canvas.getContext('2d')
-        
-        // Sample the top portion of the image (30% for header background)
-        canvas.width = img.width
-        canvas.height = Math.floor(img.height * 0.3)
-        
-        // Draw the image on canvas (only top portion)
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height)
-        
-        // Get pixel data
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
-        const pixels = imageData.data
-        
-        // Sample pixels (every 16th pixel for performance)
-        const colors = []
-        for (let i = 0; i < pixels.length; i += 16) {
-          colors.push({
-            r: pixels[i],
-            g: pixels[i + 1],
-            b: pixels[i + 2]
-          })
+        const ctx = canvas.getContext('2d', { willReadFrequently: true })
+
+        const sampleW = Math.max(16, Math.min(targetW, Math.round(img.width / scale)))
+        const sampleH = Math.max(16, Math.round((img.height / img.width) * sampleW))
+        canvas.width = sampleW
+        canvas.height = sampleH
+
+        // Draw entire image into downscaled canvas
+        ctx.drawImage(img, 0, 0, sampleW, sampleH)
+
+        const { data } = ctx.getImageData(0, 0, sampleW, sampleH)
+
+        // Utility: RGB -> HSL
+        const rgbToHsl = (r, g, b) => {
+          r /= 255; g /= 255; b /= 255
+          const max = Math.max(r, g, b), min = Math.min(r, g, b)
+          let h, s, l = (max + min) / 2
+          const d = max - min
+          if (d === 0) {
+            h = 0; s = 0
+          } else {
+            s = d / (1 - Math.abs(2 * l - 1))
+            switch (max) {
+              case r: h = ((g - b) / d) % 6; break
+              case g: h = (b - r) / d + 2; break
+              default: h = (r - g) / d + 4
+            }
+            h *= 60
+            if (h < 0) h += 360
+          }
+          return [h, s, l]
         }
-        
-        // Calculate average color
-        const avg = colors.reduce(
-          (acc, color) => ({
-            r: acc.r + color.r / colors.length,
-            g: acc.g + color.g / colors.length,
-            b: acc.b + color.b / colors.length
-          }),
-          { r: 0, g: 0, b: 0 }
-        )
-        
-        // Calculate perceived brightness (luminance) on 0-100 scale
-        // Formula: (R * 299 + G * 587 + B * 114) / 1000 gives 0-255, convert to 0-100
-        const brightness = ((avg.r * 299 + avg.g * 587 + avg.b * 114) / 1000) * (100 / 255)
-        
-        // Cap luminance at 50 - darken if above 50
-        let finalColor = { r: avg.r, g: avg.g, b: avg.b }
-        if (brightness > 50) {
-          // Darken the color by scaling down proportionally
-          const darkenFactor = 50 / brightness
-          finalColor = {
-            r: avg.r * darkenFactor,
-            g: avg.g * darkenFactor,
-            b: avg.b * darkenFactor
+
+        // Collect candidate pixels (skip very bright/dark, low saturation)
+        const samples = []
+        for (let i = 0; i < data.length; i += 4) {
+          const r = data[i], g = data[i + 1], b = data[i + 2], a = data[i + 3]
+          if (a < 200) continue // ignore transparent/semi
+          const [h, s, l] = rgbToHsl(r, g, b)
+          // ignore near-white or near-black and very low saturation
+          if (l > 0.95 || l < 0.06 || s < 0.08) continue
+          samples.push([r, g, b, s]) // keep saturation for weighting
+        }
+        if (samples.length === 0) {
+          // Fallback: average color of the whole image
+          let rSum = 0, gSum = 0, bSum = 0, n = 0
+          for (let i = 0; i < data.length; i += 4) {
+            rSum += data[i]; gSum += data[i + 1]; bSum += data[i + 2]; n++
+          }
+          const r = rSum / n, g = gSum / n, b = bSum / n
+          const toHex = (v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')
+          resolve(`#${toHex(r)}${toHex(g)}${toHex(b)}`)
+          return
+        }
+
+        // K-Means clustering (k=5)
+        const K = Math.min(5, Math.max(2, Math.floor(samples.length / 100))) // adaptive k
+        // Initialize centroids by picking random samples
+        const centroids = []
+        const usedIdx = new Set()
+        while (centroids.length < K) {
+          const idx = Math.floor(Math.random() * samples.length)
+          if (!usedIdx.has(idx)) {
+            usedIdx.add(idx)
+            centroids.push(samples[idx].slice(0, 3))
           }
         }
-        
-        // Convert to hex
-        const toHex = (value) => {
-          const clamped = Math.max(0, Math.min(255, Math.round(value)))
-          const hex = clamped.toString(16).padStart(2, '0')
-          return hex
+
+        const MAX_ITERS = 8
+        for (let it = 0; it < MAX_ITERS; it++) {
+          const clusters = Array.from({ length: K }, () => ({ sum: [0, 0, 0], wsum: 0 }))
+          // Assign
+          for (const [r, g, b, s] of samples) {
+            let best = 0, bestDist = Infinity
+            for (let c = 0; c < K; c++) {
+              const cr = centroids[c][0], cg = centroids[c][1], cb = centroids[c][2]
+              const dr = r - cr, dg = g - cg, db = b - cb
+              const dist = dr * dr + dg * dg + db * db
+              if (dist < bestDist) { bestDist = dist; best = c }
+            }
+            // Weight by saturation to bias toward vivid colors
+            const w = 0.5 + s // 0.5..1.5
+            clusters[best].sum[0] += r * w
+            clusters[best].sum[1] += g * w
+            clusters[best].sum[2] += b * w
+            clusters[best].wsum += w
+          }
+          // Update
+          let moved = 0
+          for (let c = 0; c < K; c++) {
+            if (clusters[c].wsum > 0) {
+              const nr = clusters[c].sum[0] / clusters[c].wsum
+              const ng = clusters[c].sum[1] / clusters[c].wsum
+              const nb = clusters[c].sum[2] / clusters[c].wsum
+              if (Math.abs(nr - centroids[c][0]) > 0.5 ||
+                  Math.abs(ng - centroids[c][1]) > 0.5 ||
+                  Math.abs(nb - centroids[c][2]) > 0.5) moved++
+              centroids[c] = [nr, ng, nb]
+            }
+          }
+          if (moved === 0) break
         }
-        
-        const hex = `#${toHex(finalColor.r)}${toHex(finalColor.g)}${toHex(finalColor.b)}`
+
+        // Choose the cluster whose color has the highest saturation and member weight
+        const scoreCluster = (rgb) => {
+          const [h, s, l] = rgbToHsl(rgb[0], rgb[1], rgb[2])
+          // prefer mid luminance and higher saturation
+          const lumScore = 1 - Math.abs(l - 0.5) // 0..1
+          return s * 0.7 + lumScore * 0.3
+        }
+        centroids.sort((a, b) => scoreCluster(b) - scoreCluster(a))
+        const [dr, dg, db] = centroids[0]
+
+        const toHex = (v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')
+        const hex = `#${toHex(dr)}${toHex(dg)}${toHex(db)}`
         resolve(hex)
       } catch (error) {
         reject(error)
