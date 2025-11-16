@@ -391,7 +391,7 @@ const SentCard = ({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              top: '0px',
+              top: '4px',
               left: '-2px',
               right: '2px'
             }}
@@ -511,7 +511,7 @@ const SentCard = ({
             <div
               className="absolute"
               style={{
-                left: '62px',
+                left: '60px',
                 top: '91.117px',
                 width: '175.95px',
                 height: '146.2px',
@@ -600,7 +600,7 @@ const SentCard = ({
             <div
               className="absolute"
               style={{
-                left: '52px',
+                left: '50px',
                 top: '83px',
                 width: '195.5px',
                 height: '220.575px',
@@ -726,7 +726,7 @@ const SentCard = ({
             <div
               className="absolute"
               style={{
-                left: '52.25px',
+                left: '51.25px',
                 top: '83px',
                 width: '195.5px',
                 height: '220.575px',
@@ -781,7 +781,7 @@ const SentCard = ({
             <div
               className="absolute"
               style={{
-                left: '67px',
+                left: '65px',
                 top: '115.5px',
                 width: '165px',
                 height: '45px',
@@ -836,8 +836,8 @@ const SentCard = ({
             <div
               className="absolute inset-0"
               style={{
-                backdropFilter: 'blur(4px)',
-                WebkitBackdropFilter: 'blur(4px)',
+                backdropFilter: 'blur(1.5px)',
+                WebkitBackdropFilter: 'blur(2px)',
                 pointerEvents: 'none'
               }}
               aria-hidden="true"
