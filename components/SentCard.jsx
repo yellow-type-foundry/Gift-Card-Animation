@@ -44,6 +44,10 @@ const SentCard = ({
       baseFilterId: `filterBase-${idSuffix}`,
       baseGradient1Id: `paintBase1-${idSuffix}`,
       baseGradient2Id: `paintBase2-${idSuffix}`,
+      imageFilterId: `filterImg-${idSuffix}`,
+      imageClipId: `clipImg-${idSuffix}`,
+      imageGradientSoftLightId: `paintImgSoft-${idSuffix}`,
+      imageGradientShadowId: `paintImgShadow-${idSuffix}`,
       dotPatternId: `patternDot-${idSuffix}`,
       dotPatternInnerId: `patternDotInner-${idSuffix}`,
       cardFilterId: `filterCard-${idSuffix}`,
@@ -54,22 +58,7 @@ const SentCard = ({
   }
   const ids = idRef.current
   
-  // Custom image clipping path (rounded diamond) to match Figma's Image shape
-  // ViewBox basis: 171 (w) x 143 (h)
-  const imageClipPath = [
-    'M85.5 2',                  // start slightly below the top
-    'Q82 5 72 14',              // smooth curve into the top-left edge
-    'L4 71.5',                  // left tip
-    'Q2 74 4 76',               // round the left tip
-    'L72 129',                  // bottom-left edge
-    'Q82 139 85.5 141',         // bottom rounding
-    'Q89 139 99 129',           // bottom-right rounding
-    'L167 76',                  // right edge
-    'Q169 74 167 71.5',         // right tip rounding
-    'L99 14',                   // top-right edge
-    'Q89 5 85.5 2',             // top rounding back to start
-    'Z'
-  ].join(' ')
+  // (Image mask removed)
   
   // Animate progress bar and count after content is loaded
   useEffect(() => {
@@ -236,6 +225,115 @@ const SentCard = ({
                 />
               </svg>
             </div>
+            {/* Image Container (hosts image) */}
+            <div
+              className="absolute"
+              style={{
+                left: '52.25px',
+                top: '83px',
+                width: '195.5px',
+                height: '220.575px',
+                zIndex: 2,
+                pointerEvents: 'none'
+              }}
+              data-name="Image Container"
+            >
+              <svg
+                preserveAspectRatio="none"
+                width="100%"
+                height="100%"
+                overflow="visible"
+                style={{ display: 'block' }}
+                viewBox="0 0 196 221"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <g filter={`url(#${ids.imageFilterId})`}>
+                  <path
+                    d="M91.6152 149.22L12.7204 83.6651L12.7204 83.665C11.638 82.7656 11.0967 82.3159 10.7076 81.7641C10.3628 81.2753 10.1068 80.7295 9.95108 80.1519C9.77539 79.5 9.77539 78.7963 9.77539 77.3889V40.468C9.77539 35.9875 9.77539 33.7473 10.6473 32.036C11.4143 30.5308 12.6382 29.3069 14.1435 28.5399C15.8548 27.668 18.095 27.668 22.5754 27.668L172.925 27.668C177.406 27.668 179.646 27.6681 181.357 28.54C182.863 29.307 184.086 30.5308 184.853 32.0361C185.725 33.7474 185.725 35.9876 185.725 40.468V77.3889C185.725 78.7963 185.725 79.5 185.55 80.1519C185.394 80.7295 185.138 81.2753 184.793 81.7641C184.404 82.3159 183.863 82.7656 182.78 83.6651L103.886 149.22C101.703 151.034 100.611 151.941 99.3931 152.288C98.3193 152.593 97.1815 152.593 96.1077 152.288C94.8898 151.941 93.7983 151.034 91.6152 149.22Z"
+                    fill="#FF3535"
+                  />
+                  {/* Cover image clipped to red container shape */}
+                  <image
+                    href={boxImage}
+                    x="0"
+                    y="0"
+                    width="196"
+                    height="221"
+                    preserveAspectRatio="xMidYMid slice"
+                    clipPath={`url(#${ids.imageClipId})`}
+                  />
+                  <path
+                    d="M91.6152 149.22L12.7204 83.6651L12.7204 83.665C11.638 82.7656 11.0967 82.3159 10.7076 81.7641C10.3628 81.2753 10.1068 80.7295 9.95108 80.1519C9.77539 79.5 9.77539 78.7963 9.77539 77.3889V40.468C9.77539 35.9875 9.77539 33.7473 10.6473 32.036C11.4143 30.5308 12.6382 29.3069 14.1435 28.5399C15.8548 27.668 18.095 27.668 22.5754 27.668L172.925 27.668C177.406 27.668 179.646 27.6681 181.357 28.54C182.863 29.307 184.086 30.5308 184.853 32.0361C185.725 33.7474 185.725 35.9876 185.725 40.468V77.3889C185.725 78.7963 185.725 79.5 185.55 80.1519C185.394 80.7295 185.138 81.2753 184.793 81.7641C184.404 82.3159 183.863 82.7656 182.78 83.6651L103.886 149.22C101.703 151.034 100.611 151.941 99.3931 152.288C98.3193 152.593 97.1815 152.593 96.1077 152.288C94.8898 151.941 93.7983 151.034 91.6152 149.22Z"
+                    fill={`url(#${ids.imageGradientSoftLightId})`}
+                    style={{ mixBlendMode: 'soft-light' }}
+                  />
+                  <path
+                    d="M91.6152 149.22L12.7204 83.6651L12.7204 83.665C11.638 82.7656 11.0967 82.3159 10.7076 81.7641C10.3628 81.2753 10.1068 80.7295 9.95108 80.1519C9.77539 79.5 9.77539 78.7963 9.77539 77.3889V40.468C9.77539 35.9875 9.77539 33.7473 10.6473 32.036C11.4143 30.5308 12.6382 29.3069 14.1435 28.5399C15.8548 27.668 18.095 27.668 22.5754 27.668L172.925 27.668C177.406 27.668 179.646 27.6681 181.357 28.54C182.863 29.307 184.086 30.5308 184.853 32.0361C185.725 33.7474 185.725 35.9876 185.725 40.468V77.3889C185.725 78.7963 185.725 79.5 185.55 80.1519C185.394 80.7295 185.138 81.2753 184.793 81.7641C184.404 82.3159 183.863 82.7656 182.78 83.6651L103.886 149.22C101.703 151.034 100.611 151.941 99.3931 152.288C98.3193 152.593 97.1815 152.593 96.1077 152.288C94.8898 151.941 93.7983 151.034 91.6152 149.22Z"
+                    fill={`url(#${ids.imageGradientShadowId})`}
+                    fillOpacity="0.35"
+                  />
+                </g>
+                <defs>
+                  {/* Define a clipPath that matches the container shape for masking the cover image */}
+                  <clipPath id={ids.imageClipId}>
+                    <path d="M91.6152 149.22L12.7204 83.6651L12.7204 83.665C11.638 82.7656 11.0967 82.3159 10.7076 81.7641C10.3628 81.2753 10.1068 80.7295 9.95108 80.1519C9.77539 79.5 9.77539 78.7963 9.77539 77.3889V40.468C9.77539 35.9875 9.77539 33.7473 10.6473 32.036C11.4143 30.5308 12.6382 29.3069 14.1435 28.5399C15.8548 27.668 18.095 27.668 22.5754 27.668L172.925 27.668C177.406 27.668 179.646 27.6681 181.357 28.54C182.863 29.307 184.086 30.5308 184.853 32.0361C185.725 33.7474 185.725 35.9876 185.725 40.468V77.3889C185.725 78.7963 185.725 79.5 185.55 80.1519C185.394 80.7295 185.138 81.2753 184.793 81.7641C184.404 82.3159 183.863 82.7656 182.78 83.6651L103.886 149.22C101.703 151.034 100.611 151.941 99.3931 152.288C98.3193 152.593 97.1815 152.593 96.1077 152.288C94.8898 151.941 93.7983 151.034 91.6152 149.22Z" />
+                  </clipPath>
+                  <filter
+                    id={ids.imageFilterId}
+                    x="6.37539"
+                    y="26.818"
+                    width="182.75"
+                    height="132.499"
+                    filterUnits="userSpaceOnUse"
+                    colorInterpolationFilters="sRGB"
+                  >
+                    <feFlood floodOpacity="0" result="BackgroundImageFix" />
+                    <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
+                    <feOffset dy="3.4" />
+                    <feGaussianBlur stdDeviation="1.7" />
+                    <feComposite in2="hardAlpha" operator="out" />
+                    <feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.5 0" />
+                    <feBlend mode="overlay" in2="BackgroundImageFix" result="effect1_dropShadow" />
+                    <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow" result="shape" />
+                    <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
+                    <feOffset dy="-0.85" />
+                    <feGaussianBlur stdDeviation="1.7" />
+                    <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1" />
+                    <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0" />
+                    <feBlend mode="normal" in2="shape" result="effect2_innerShadow" />
+                    <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
+                    <feOffset dy="2.55" />
+                    <feGaussianBlur stdDeviation="4.25" />
+                    <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1" />
+                    <feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.2 0" />
+                    <feBlend mode="normal" in2="effect2_innerShadow" result="effect3_innerShadow" />
+                  </filter>
+                  <linearGradient
+                    id={ids.imageGradientSoftLightId}
+                    x1="21.5054"
+                    y1="28.3507"
+                    x2="140.972"
+                    y2="191.551"
+                    gradientUnits="userSpaceOnUse"
+                  >
+                    <stop stopColor="white" stopOpacity="0.5" />
+                    <stop offset="1" stopColor="white" stopOpacity="0" />
+                  </linearGradient>
+                  <linearGradient
+                    id={ids.imageGradientShadowId}
+                    x1="97.7504"
+                    y1="83.6425"
+                    x2="97.7504"
+                    y2="154.296"
+                    gradientUnits="userSpaceOnUse"
+                  >
+                    <stop stopOpacity="0" />
+                    <stop offset="1" />
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
           </div>
 
           {/* Base (envelope base) - SVG - positioned relative to header (outside envelope container) */}
@@ -266,8 +364,8 @@ const SentCard = ({
                 <div
                   className="absolute inset-0"
                   style={{
-                    backdropFilter: 'blur(6px)',
-                    WebkitBackdropFilter: 'blur(6px)',
+                    backdropFilter: 'blur(.075px)',
+                    WebkitBackdropFilter: 'blur(.075px)',
                     pointerEvents: 'none'
                   }}
                   aria-hidden="true"
@@ -356,7 +454,7 @@ const SentCard = ({
               top: '91.117px',
               width: '175.95px',
               height: '146.2px',
-              zIndex: 2,
+              zIndex: 1,
               pointerEvents: 'none'
             }}
             data-node-id="1467:49194"
@@ -429,7 +527,7 @@ const SentCard = ({
               </div>
             </div>
 
-          {/* Image removed for now */}
+          {/* Image removed (mask + image container removed) */}
 
           {/* Shadow overlay removed for now */}
 
