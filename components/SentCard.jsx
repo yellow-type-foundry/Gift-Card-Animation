@@ -296,6 +296,95 @@ const SentCard = ({
           >
             
             
+            {/* Rectangle 1790 (card shape container) - moved inside Envelope */}
+            <div
+              className="absolute"
+              style={{
+                left: '62.025px',
+                top: '91.117px',
+                width: '175.95px',
+                height: '146.2px',
+                zIndex: 2,
+                pointerEvents: 'none'
+              }}
+              data-node-id="1467:49194"
+            >
+                {/* Card shape overlay (hexagon shape) with inset wrapper */}
+                <div
+                  className="absolute"
+                  style={{
+                    left: '1.64%',
+                    top: '1.23%',
+                    right: '1.64%',
+                    bottom: '1.23%',
+                    position: 'absolute'
+                  }}
+                >
+                  <svg
+                    preserveAspectRatio="none"
+                    width="100%"
+                    height="100%"
+                    overflow="visible"
+                    style={{ display: 'block' }}
+                    viewBox="0 0 171 143"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <g filter={`url(#${ids.cardFilterId})`}>
+                      <path
+                        d="M81.2603 1.38519L1.84066 67.3763C-0.613553 69.4155 -0.613553 73.1822 1.84066 75.2214L81.2603 141.213C83.4831 143.059 86.7066 143.059 88.9294 141.213L168.349 75.2214C170.803 73.1822 170.803 69.4155 168.349 67.3763L88.9294 1.38519C86.7066 -0.461729 83.4831 -0.461731 81.2603 1.38519Z"
+                        fill={base2TintColor}
+                        fillOpacity="0.2"
+                      />
+                    </g>
+                    <defs>
+                      <filter
+                        id={ids.cardFilterId}
+                        x="-40"
+                        y="-40"
+                        width="260"
+                        height="220"
+                        filterUnits="userSpaceOnUse"
+                        colorInterpolationFilters="sRGB"
+                      >
+                        <feFlood floodOpacity="0" result="BackgroundImageFix" />
+                        <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
+                        <feColorMatrix
+                          in="SourceAlpha"
+                          type="matrix"
+                          values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+                          result="hardAlpha"
+                        />
+                        <feOffset dy="0" />
+                        <feGaussianBlur stdDeviation="3" />
+                        <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1" />
+                        <feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.65 0" />
+                        <feBlend mode="normal" in2="shape" result="effect1_innerShadow" />
+                        {/* White outer drop shadows for 1790 */}
+                        <feDropShadow in="SourceGraphic" dx="0" dy="8" stdDeviation="3" floodColor="#FFFFFF" floodOpacity="1" result="cardOuterShadow1" />
+                        <feDropShadow in="SourceGraphic" dx="0" dy="8" stdDeviation="3" floodColor="#FFFFFF" floodOpacity="1" result="cardOuterShadow2" />
+                        <feMerge>
+                          <feMergeNode in="cardOuterShadow1" />
+                          <feMergeNode in="cardOuterShadow2" />
+                          <feMergeNode in="effect1_innerShadow" />
+                          <feMergeNode in="SourceGraphic" />
+                        </feMerge>
+                      </filter>
+                      <linearGradient
+                        id={ids.cardGradientId}
+                        x1="85"
+                        y1="-0.7"
+                        x2="85"
+                        y2="152"
+                        gradientUnits="userSpaceOnUse"
+                      >
+                        <stop stopColor="white" />
+                        <stop offset="1" stopColor="white" stopOpacity="0" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                </div>
+              </div>
             {/* Image Container (hosts image) */}
             <div
               className="absolute"
@@ -304,8 +393,7 @@ const SentCard = ({
                 top: '83px',
                 width: '195.5px',
                 height: '220.575px',
-                zIndex: 2,
-                pointerEvents: 'none'
+                zIndex: 2
               }}
               data-name="Image Container"
             >
@@ -326,24 +414,24 @@ const SentCard = ({
                     fill="#FFFFFF"
                   />
                 {/* Themed 4-item grid clipped to image container */}
-                <g clipPath={`url(#${ids.imageClipId})`}>
-                  <rect x="17.75" y="83" width="36" height="36" rx="4" fill={gridCellBaseColor} fillOpacity="0.235" />
-                  <rect x="17.75" y="83" width="36" height="36" rx="4" fill={`url(#${ids.gridCellGradId})`} />
-                  <rect x="58.75" y="83" width="36" height="36" rx="4" fill={gridCellBaseColor} fillOpacity="0.235" />
-                  <rect x="58.75" y="83" width="36" height="36" rx="4" fill={`url(#${ids.gridCellGradId})`} />
-                  <rect x="99.75" y="83" width="36" height="36" rx="4" fill={gridCellBaseColor} fillOpacity="0.235" />
-                  <rect x="99.75" y="83" width="36" height="36" rx="4" fill={`url(#${ids.gridCellGradId})`} />
-                  <rect x="140.75" y="83" width="36" height="36" rx="4" fill={gridCellBaseColor} fillOpacity="0.235" />
-                  <rect x="140.75" y="83" width="36" height="36" rx="4" fill={`url(#${ids.gridCellGradId})`} />
+                  <g clipPath={`url(#${ids.imageClipId})`}>
+                    <rect className="grid-cell-base gc-1" x="17.75" y="83" width="36" height="36" rx="4" fill={gridCellBaseColor} />
+                    <rect className="grid-cell-overlay gc-1" x="17.75" y="83" width="36" height="36" rx="4" fill={`url(#${ids.gridCellGradId})`} />
+                    <rect className="grid-cell-base gc-2" x="58.75" y="83" width="36" height="36" rx="4" fill={gridCellBaseColor} />
+                    <rect className="grid-cell-overlay gc-2" x="58.75" y="83" width="36" height="36" rx="4" fill={`url(#${ids.gridCellGradId})`} />
+                    <rect className="grid-cell-base gc-3" x="99.75" y="83" width="36" height="36" rx="4" fill={gridCellBaseColor} />
+                    <rect className="grid-cell-overlay gc-3" x="99.75" y="83" width="36" height="36" rx="4" fill={`url(#${ids.gridCellGradId})`} />
+                    <rect className="grid-cell-base gc-4" x="140.75" y="83" width="36" height="36" rx="4" fill={gridCellBaseColor} />
+                    <rect className="grid-cell-overlay gc-4" x="140.75" y="83" width="36" height="36" rx="4" fill={`url(#${ids.gridCellGradId})`} />
                   {/* second row with 5px vertical gap */}
-                  <rect x="17.75" y="124" width="36" height="36" rx="4" fill={gridCellBaseColor} fillOpacity="0.175" />
-                  <rect x="17.75" y="124" width="36" height="36" rx="4" fill={`url(#${ids.gridCellGradId})`} />
-                  <rect x="58.75" y="124" width="36" height="36" rx="4" fill={gridCellBaseColor} fillOpacity="0.175" />
-                  <rect x="58.75" y="124" width="36" height="36" rx="4" fill={`url(#${ids.gridCellGradId})`} />
-                  <rect x="99.75" y="124" width="36" height="36" rx="4" fill={gridCellBaseColor} fillOpacity="0.175" />
-                  <rect x="99.75" y="124" width="36" height="36" rx="4" fill={`url(#${ids.gridCellGradId})`} />
-                  <rect x="140.75" y="124" width="36" height="36" rx="4" fill={gridCellBaseColor} fillOpacity="0.175" />
-                  <rect x="140.75" y="124" width="36" height="36" rx="4" fill={`url(#${ids.gridCellGradId})`} />
+                    <rect className="grid-cell-base gc-5" x="17.75" y="124" width="36" height="36" rx="4" fill={gridCellBaseColor} />
+                    <rect className="grid-cell-overlay gc-5" x="17.75" y="124" width="36" height="36" rx="4" fill={`url(#${ids.gridCellGradId})`} />
+                    <rect className="grid-cell-base gc-6" x="58.75" y="124" width="36" height="36" rx="4" fill={gridCellBaseColor} />
+                    <rect className="grid-cell-overlay gc-6" x="58.75" y="124" width="36" height="36" rx="4" fill={`url(#${ids.gridCellGradId})`} />
+                    <rect className="grid-cell-base gc-7" x="99.75" y="124" width="36" height="36" rx="4" fill={gridCellBaseColor} />
+                    <rect className="grid-cell-overlay gc-7" x="99.75" y="124" width="36" height="36" rx="4" fill={`url(#${ids.gridCellGradId})`} />
+                    <rect className="grid-cell-base gc-8" x="140.75" y="124" width="36" height="36" rx="4" fill={gridCellBaseColor} />
+                    <rect className="grid-cell-overlay gc-8" x="140.75" y="124" width="36" height="36" rx="4" fill={`url(#${ids.gridCellGradId})`} />
                 </g>
                   <path
                     d="M91.6152 149.22L12.7204 83.6651L12.7204 83.665C11.638 82.7656 11.0967 82.3159 10.7076 81.7641C10.3628 81.2753 10.1068 80.7295 9.95108 80.1519C9.77539 79.5 9.77539 78.7963 9.77539 77.3889V40.468C9.77539 35.9875 9.77539 33.7473 10.6473 32.036C11.4143 30.5308 12.6382 29.3069 14.1435 28.5399C15.8548 27.668 18.095 27.668 22.5754 27.668L172.925 27.668C177.406 27.668 179.646 27.6681 181.357 28.54C182.863 29.307 184.086 30.5308 184.853 32.0361C185.725 33.7474 185.725 35.9876 185.725 40.468V77.3889C185.725 78.7963 185.725 79.5 185.55 80.1519C185.394 80.7295 185.138 81.2753 184.793 81.7641C184.404 82.3159 183.863 82.7656 182.78 83.6651L103.886 149.22C101.703 151.034 100.611 151.941 99.3931 152.288C98.3193 152.593 97.1815 152.593 96.1077 152.288C94.8898 151.941 93.7983 151.034 91.6152 149.22Z"
@@ -621,96 +709,6 @@ const SentCard = ({
           
 
           {/* Envelope Dot Pattern layer removed for now */}
-
-          {/* Rectangle 1790 (card shape container) - positioned relative to header (outside envelope container) */}
-          <div
-            className="absolute"
-            style={{
-              left: '62.025px',
-              top: '91.117px',
-              width: '175.95px',
-              height: '146.2px',
-              zIndex: 1,
-              pointerEvents: 'none'
-            }}
-            data-node-id="1467:49194"
-          >
-              {/* Card shape overlay (hexagon shape) with inset wrapper */}
-              <div
-                className="absolute"
-                style={{
-                  left: '1.64%',
-                  top: '1.23%',
-                  right: '1.64%',
-                  bottom: '1.23%',
-                  position: 'absolute'
-                }}
-              >
-                <svg
-                  preserveAspectRatio="none"
-                  width="100%"
-                  height="100%"
-                  overflow="visible"
-                  style={{ display: 'block' }}
-                  viewBox="0 0 171 143"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <g filter={`url(#${ids.cardFilterId})`}>
-                    <path
-                      d="M81.2603 1.38519L1.84066 67.3763C-0.613553 69.4155 -0.613553 73.1822 1.84066 75.2214L81.2603 141.213C83.4831 143.059 86.7066 143.059 88.9294 141.213L168.349 75.2214C170.803 73.1822 170.803 69.4155 168.349 67.3763L88.9294 1.38519C86.7066 -0.461729 83.4831 -0.461731 81.2603 1.38519Z"
-                      fill={base2TintColor}
-                      fillOpacity="0.18"
-                    />
-                  </g>
-                  <defs>
-                    <filter
-                      id={ids.cardFilterId}
-                      x="-40"
-                      y="-40"
-                      width="260"
-                      height="220"
-                      filterUnits="userSpaceOnUse"
-                      colorInterpolationFilters="sRGB"
-                    >
-                      <feFlood floodOpacity="0" result="BackgroundImageFix" />
-                    <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
-                      <feColorMatrix
-                        in="SourceAlpha"
-                        type="matrix"
-                        values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
-                        result="hardAlpha"
-                      />
-                      <feOffset dy="0" />
-                      <feGaussianBlur stdDeviation="2" />
-                      <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1" />
-                      <feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.65 0" />
-                      <feBlend mode="normal" in2="shape" result="effect1_innerShadow" />
-                      {/* White outer drop shadows for 1790 */}
-                      <feDropShadow in="SourceGraphic" dx="0" dy="8" stdDeviation="3" floodColor="#FFFFFF" floodOpacity="1" result="cardOuterShadow1" />
-                      <feDropShadow in="SourceGraphic" dx="0" dy="8" stdDeviation="3" floodColor="#FFFFFF" floodOpacity="1" result="cardOuterShadow2" />
-                      <feMerge>
-                        <feMergeNode in="cardOuterShadow1" />
-                        <feMergeNode in="cardOuterShadow2" />
-                        <feMergeNode in="effect1_innerShadow" />
-                        <feMergeNode in="SourceGraphic" />
-                      </feMerge>
-                    </filter>
-                    <linearGradient
-                      id={ids.cardGradientId}
-                      x1="85"
-                      y1="-0.7"
-                      x2="85"
-                      y2="152"
-                      gradientUnits="userSpaceOnUse"
-                    >
-                      <stop stopColor="white" />
-                      <stop offset="1" stopColor="white" stopOpacity="0" />
-                    </linearGradient>
-                  </defs>
-                </svg>
-              </div>
-            </div>
 
           
 

@@ -127,3 +127,49 @@
   }
 
 }
+
+/* Grid cell breathing animation on hover */
+@keyframes grid-breathe-base {
+  0% { opacity: 0.16; }
+  50% { opacity: 0.30; }
+  100% { opacity: 0.16; }
+}
+@keyframes grid-breathe-overlay {
+  0% { opacity: 0.10; }
+  50% { opacity: 0.00; }
+  100% { opacity: 0.10; }
+}
+
+/* Trigger animation only when hovering the Image Container block */
+[data-name="Image Container"] .grid-cell-base {
+  opacity: 0.16; /* default idle opacity */
+  will-change: opacity;
+}
+[data-name="Image Container"] .grid-cell-overlay {
+  opacity: 0.10;
+  will-change: opacity;
+}
+[data-name="Image Container"]:hover .grid-cell-base,
+[data-name="Envelope"]:hover .grid-cell-base {
+  animation-name: grid-breathe-base;
+  animation-duration: 2400ms;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+[data-name="Image Container"]:hover .grid-cell-overlay,
+[data-name="Envelope"]:hover .grid-cell-overlay {
+  animation-name: grid-breathe-overlay;
+  animation-duration: 2400ms;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+/* Staggered delays for a gentle wave */
+.gc-1 { animation-delay: 0ms; }
+.gc-2 { animation-delay: 150ms; }
+.gc-3 { animation-delay: 300ms; }
+.gc-4 { animation-delay: 450ms; }
+.gc-5 { animation-delay: 600ms; }
+.gc-6 { animation-delay: 750ms; }
+.gc-7 { animation-delay: 900ms; }
+.gc-8 { animation-delay: 1050ms; }
