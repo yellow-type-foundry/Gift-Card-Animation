@@ -12,7 +12,8 @@ const SentCard = ({
   giftTitle = "Biggest Thanks",
   giftSubtitle = 'Collection by Goody',
   progress = { current: 3, total: 6 },
-  sentDate = '1 week ago'
+  sentDate = '1 week ago',
+  headerBgOverride = null
 }) => {
   // Ensure current never exceeds total, and total never exceeds 40
   const validatedProgress = {
@@ -37,6 +38,7 @@ const SentCard = ({
   const cardRef = useRef(null)
   const confettiCanvasRef = useRef(null)
   const [isHovered, setIsHovered] = useState(false)
+  const isDone = validatedProgress.current === validatedProgress.total
   
   // Generate stable IDs using ref - use props-based approach to avoid hydration mismatch
   // These IDs are scoped to this component instance to avoid conflicts with multiple cards
@@ -155,6 +157,8 @@ const SentCard = ({
   const hiddenFlapColor = capSaturation(lightenHex(dominantColor, 4.0), 100)
   // Header background color: adjusted to luminance cap 60 (lighten if below, darken if above)
   const headerBgColor = capSaturation(adjustToLuminance(dominantColor, 88), 25)
+  const headerBgFinal = headerBgOverride || headerBgColor
+  const headerTextClass = headerBgOverride ? 'text-black' : 'text-white'
   // Base tint and 1790 tint to theme the header envelope shapes
   const baseTintColor = capSaturation(adjustToLuminance(dominantColor, 85), 50)
   const base2TintColor = capSaturation(lightenHex(dominantColor, 1.35), 65)
@@ -329,15 +333,15 @@ const SentCard = ({
               className="absolute inset-0"
                 data-name="HeaderBGBase"
               style={{
-                  backgroundColor: headerBgColor,
-                  transition: 'filter 200ms ease-out'
+                  backgroundColor: headerBgFinal,
+                  transition: 'background 200ms ease-out, filter 200ms ease-out'
               }}
             />
             {/* Gradient overlay with blend mode */}
             <div
               className="absolute inset-0"
               style={{
-                background: 'linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(255, 255, 255, 0.95) 95%)',
+                background: 'linear-gradient(to bottom, rgba(0, 0, 0, 0) 30%, rgba(255, 255, 255, 0.7) 95%)',
                 mixBlendMode: 'overlay'
               }}
             />
@@ -347,7 +351,7 @@ const SentCard = ({
 
           {/* Header Content */}
           <div
-            className="box-border content-stretch flex flex-col gap-[8px] items-center not-italic px-[16px] py-0 relative shrink-0 text-center text-nowrap text-white w-full z-10"
+            className={`box-border content-stretch flex flex-col gap-[8px] items-center not-italic px-[16px] py-0 relative shrink-0 text-center text-nowrap ${headerTextClass} w-full z-10`}
             data-name="Header"
             data-node-id="1467:49184"
           >
@@ -358,7 +362,8 @@ const SentCard = ({
                 fontSize: '16px',
                 fontWeight: 400,
                 lineHeight: 1.4,
-                opacity: 0.8
+                opacity: 0.8,
+                color: TOKENS.colors.text.tertiary
               }}
               data-node-id="1467:49185"
             >
@@ -900,70 +905,131 @@ const SentCard = ({
           style={{ position: 'relative', zIndex: 20, width: '100%' }}
           data-node-id="1467:49205"
         >
-          {/* Default InfoBar content (visible idle; hidden on hover) */}
+          {/* Default InfoBar content (Reminder button swaps with progress when not Done) */}
           <div
             data-name="InfoBarContent"
             className="content-stretch flex flex-col gap-[16px] items-center justify-center text-center transition-all"
             style={{ width: '100%' }}
           >
-            {/* Progress Bar Container - original styling */}
-            <div
-              className="bg-[#f0f1f5] border border-[rgba(221,226,233,0)] border-solid box-border content-stretch flex flex-col gap-[10px] items-start justify-center p-[2px] relative rounded-[100px] shrink-0 w-[120px]"
-              style={{
-                borderRadius: '100px',
-                backgroundColor: '#f0f1f5'
-              }}
-              data-name="Progress Bar Container"
-            >
-              {/* Progress Bar */}
+            {/* Swap slot: fixed 36px height so progress and button align perfectly */}
+            <div className="relative w-full flex items-center justify-center" style={{ height: '36px' }}>
+              {/* Progress slot */}
+              <div
+                data-name="ProgressSlot"
+                className="absolute inset-0 flex items-center justify-center"
+                style={{
+                  opacity: isHovered && !isDone ? 0 : 1,
+                  transform: isHovered && !isDone ? 'translateY(4px)' : 'translateY(0)',
+                  transition: 'opacity 200ms ease-out, transform 200ms ease-out',
+                  pointerEvents: isHovered && !isDone ? 'none' : 'auto'
+                }}
+              >
+                {/* Progress Bar Container - original styling */}
+                <div
+                  className="bg-[#f0f1f5] border border-[rgba(221,226,233,0)] border-solid box-border content-stretch flex flex-col gap-[10px] items-start justify-center p-[2px] relative rounded-[100px] shrink-0 w-[120px]"
+                  style={{
+                    borderRadius: '100px',
+                    backgroundColor: '#f0f1f5'
+                  }}
+                  data-name="Progress Bar Container"
+                >
+                  {/* Progress Bar */}
                   <div
                     className="bg-gradient-to-b box-border content-stretch flex flex-col from-[#5a3dff] gap-[10px] items-center justify-center px-[8px] py-[2px] relative rounded-[100px] shrink-0"
-                style={{
-                  background: 'linear-gradient(to bottom, #5a3dff, #a799ff)',
-                  borderRadius: '100px',
-                  width: validatedProgress.current === validatedProgress.total ? '100%' : `${animatedProgress}%`,
-                  maxWidth: '100%',
-                  minWidth: 'fit-content',
-                  transition: 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                  boxShadow:
-                    '0px 2px 4px -8px rgba(46,10,255,0.1), 0px 2px 2px 0px rgba(90,61,255,0.08), 0px 4px 8px -4px rgba(16,0,112,0.15)'
-                }}
-                data-name="Progress Bar"
-              >
+                    style={{
+                      background: 'linear-gradient(to bottom, #5a3dff, #a799ff)',
+                      borderRadius: '100px',
+                      width: isDone ? '100%' : `${animatedProgress}%`,
+                      maxWidth: '100%',
+                      minWidth: 'fit-content',
+                      transition: 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                      boxShadow:
+                        '0px 2px 4px -8px rgba(46,10,255,0.1), 0px 2px 2px 0px rgba(90,61,255,0.08), 0px 4px 8px -4px rgba(16,0,112,0.15)'
+                    }}
+                    data-name="Progress Bar"
+                  >
                     <p
                       className="font-['Goody_Sans:Medium',sans-serif] leading-[1.4] not-italic relative shrink-0 text-[14px] text-white text-center w-full"
+                      style={{
+                        fontFamily: 'var(--font-goody-sans)',
+                        fontSize: '14px',
+                        fontWeight: 500,
+                        lineHeight: 1.4,
+                        color: '#ffffff',
+                        whiteSpace: 'nowrap'
+                      }}
+                    >
+                      {isDone ? 'Done' : `${animatedCurrent}/${validatedProgress.total}`}
+                    </p>
+                    {/* Highlight gradient overlay */}
+                    <div
+                      className="absolute bg-gradient-to-b blur-[0.45px] filter from-[#e9e5ff] h-[10px] left-[10%] right-[10%] rounded-[100px] to-[rgba(229,245,255,0)] top-[3px]"
+                    />
+                    <div
+                      className="absolute inset-0 pointer-events-none"
+                      style={{
+                        boxShadow: '0px 3px 5px 2px inset rgba(255,255,255,0.5)',
+                        borderRadius: '100px'
+                      }}
+                    />
+                  </div>
+                  <div
+                    className="absolute inset-[-1px] pointer-events-none"
+                    style={{
+                      boxShadow: '0px 1px 2.25px 0px inset #c2c6d6, 0px -1px 2.25px 0px inset #ffffff',
+                      borderRadius: '100px'
+                    }}
+                  />
+                </div>
+              </div>
+              {/* Reminder button: only for not-done cards */}
+              {!isDone && (
+                <div
+                  data-name="ReminderBar"
+                  className="absolute inset-0 flex items-center justify-center"
                   style={{
-                    fontFamily: 'var(--font-goody-sans)',
-                    fontSize: '14px',
-                    fontWeight: 500,
-                    lineHeight: 1.4,
-                    color: '#ffffff',
-                    whiteSpace: 'nowrap'
+                    opacity: isHovered ? 1 : 0,
+                    transform: isHovered ? 'translateY(0)' : 'translateY(4px)',
+                    transition: 'opacity 200ms ease-out, transform 200ms ease-out',
+                    pointerEvents: isHovered ? 'auto' : 'none'
                   }}
                 >
-                      {validatedProgress.current === validatedProgress.total
-                        ? 'Done'
-                    : `${animatedCurrent}/${validatedProgress.total}`}
-                </p>
-                {/* Highlight gradient overlay */}
-                <div
-                  className="absolute bg-gradient-to-b blur-[0.45px] filter from-[#e9e5ff] h-[10px] left-[10%] right-[10%] rounded-[100px] to-[rgba(229,245,255,0)] top-[3px]"
-                />
-                <div
-                  className="absolute inset-0 pointer-events-none"
-                  style={{
-                    boxShadow: '0px 3px 5px 2px inset rgba(255,255,255,0.5)',
-                    borderRadius: '100px'
-                  }}
-                />
-              </div>
-              <div
-                className="absolute inset-[-1px] pointer-events-none"
-                style={{
-                  boxShadow: '0px 1px 2.25px 0px inset #c2c6d6, 0px -1px 2.25px 0px inset #ffffff',
-                  borderRadius: '100px'
-                }}
-              />
+                  <button
+                    data-name="ReminderButton"
+                    className="px-3.5 py-1 bg-white rounded-[12px] text-[#525F7A]"
+                    style={{
+                      outlineOffset: '-1px',
+                      outlineWidth: '1px',
+                      outlineStyle: 'solid',
+                      outlineColor: 'var(--color-border)',
+                      borderRadius: '12px',
+                      height: '36px',
+                      transition: 'transform 200ms ease-out, box-shadow 200ms ease-out, outline-color 200ms ease-out, background-color 200ms ease-out'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-2px)'
+                      e.currentTarget.style.boxShadow = '0 8px 24px -8px rgba(0,0,0,0.15), 0 3px 10px -4px rgba(0,0,0,0.10)'
+                      e.currentTarget.style.outlineColor = '#cfd6e2'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)'
+                      e.currentTarget.style.boxShadow = 'none'
+                      e.currentTarget.style.outlineColor = 'var(--color-border)'
+                    }}
+                    onMouseDown={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-1px)'
+                      e.currentTarget.style.boxShadow = '0 6px 18px -8px rgba(0,0,0,0.15), 0 2px 8px -4px rgba(0,0,0,0.10)'
+                    }}
+                    onMouseUp={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-2px)'
+                      e.currentTarget.style.boxShadow = '0 8px 24px -8px rgba(0,0,0,0.15), 0 3px 10px -4px rgba(0,0,0,0.10)'
+                    }}
+                    type="button"
+                  >
+                    Send a reminder
+                  </button>
+                </div>
+              )}
             </div>
             {/* Gift Message - original styling */}
             <div

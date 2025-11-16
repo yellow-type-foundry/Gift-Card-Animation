@@ -201,8 +201,7 @@ export default function Home() {
     const shuffledGiftSubtitles = shuffleArray(ALL_GIFT_SUBTITLES)
     const shuffledDates = shuffleArray(ALL_SENT_DATES)
     
-    setSentCards(
-      Array(8).fill(null).map(() => ({
+    const randomized = Array(8).fill(null).map(() => ({
         from: shuffledSenders[Math.floor(Math.random() * shuffledSenders.length)],
         title: shuffledTitles[Math.floor(Math.random() * shuffledTitles.length)],
         boxImage: shuffledCovers[Math.floor(Math.random() * shuffledCovers.length)],
@@ -215,7 +214,16 @@ export default function Home() {
         })(),
         sentDate: shuffledDates[Math.floor(Math.random() * shuffledDates.length)]
       }))
-    )
+    // Ensure at least 2 "Done" cards (current === total)
+    let doneCount = randomized.filter(c => c.progress.current === c.progress.total).length
+    let i = 0
+    while (doneCount < 2 && i < randomized.length) {
+      const total = randomized[i].progress.total
+      randomized[i].progress.current = total
+      doneCount++
+      i++
+    }
+    setSentCards(randomized)
   }, [])
   
   const handleOpenGift = useCallback((cardId) => {
@@ -357,6 +365,7 @@ export default function Home() {
             giftSubtitle={card.giftSubtitle}
             progress={card.progress}
             sentDate={card.sentDate}
+            headerBgOverride="#E0E4EB"
           />
         ))}
       </div>
