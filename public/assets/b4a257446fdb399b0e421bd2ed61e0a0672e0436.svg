@@ -1,0 +1,19 @@
+<svg preserveAspectRatio="none" width="100%" height="100%" overflow="visible" style="display: block;" viewBox="0 0 300 280" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="Dots">
+<mask id="mask0_1467_49239" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="149" width="300" height="121">
+<ellipse id="Ellipse 37" cx="150" cy="209.5" rx="150" ry="60.5" fill="var(--fill-0, #D9D9D9)"/>
+</mask>
+<g mask="url(#mask0_1467_49239)">
+<path id="Rectangle 1777" d="M0 0H300V280H0V0Z" fill="url(#pattern0_1467_49239)"/>
+</g>
+</g>
+<defs>
+<pattern id="pattern0_1467_49239" patternUnits="userSpaceOnUse" patternTransform="matrix(4.5 0 0 9 0 0)" preserveAspectRatio="none" viewBox="0 0 15 30" width="1" height="1">
+<use xlink:href="#pattern0_1467_49239_inner" transform="translate(-15 0)"/>
+<g id="pattern0_1467_49239_inner">
+<circle id="Ellipse 36" cx="3" cy="3" r="3" fill="var(--fill-0, white)"/>
+</g>
+<use xlink:href="#pattern0_1467_49239_inner" transform="translate(-7.5 15)"/>
+<use xlink:href="#pattern0_1467_49239_inner" transform="translate(7.5 15)"/>
+</pattern></defs>
+</svg>

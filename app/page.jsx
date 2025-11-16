@@ -240,10 +240,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-[#f0f1f5] flex items-center">
       <div 
-        className="w-full grid gift-card-grid px-[60px] md:px-[240px] py-10" 
-        style={{ 
-          gap: '24px'
-        }}
+        className="w-full grid gift-card-grid px-[240px] py-10 gap-[24px]"
       >
         {/* Card 1 - Original */}
         <GiftCard

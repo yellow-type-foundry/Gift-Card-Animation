@@ -3,82 +3,15 @@
 import React, { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { TOKENS } from '@/constants/tokens'
-import useDominantColor from '@/hooks/useDominantColor'
-
-// Button component with hover/pressed states
-const ButtonWithHover = () => {
-  const [isButtonHovered, setIsButtonHovered] = useState(false)
-  const [isButtonPressed, setIsButtonPressed] = useState(false)
-
-  return (
-    <div
-      data-icon-leading="false"
-      data-icon-trailing="true"
-      data-label="true"
-      data-state={isButtonPressed ? 'Pressed' : 'Default'}
-      data-style="Accent 2"
-      className="px-2 py-1.5 rounded-lg outline outline-1 outline-offset-[-1px] outline-violet-600 inline-flex justify-center items-center cursor-pointer"
-      style={{
-        borderRadius: '12px',
-        borderColor: '#7c3aed',
-        backgroundColor: (isButtonHovered || isButtonPressed) ? '#7c3aed' : 'transparent',
-        whiteSpace: 'nowrap',
-        transition: 'background-color 300ms ease-out'
-      }}
-      onMouseEnter={() => setIsButtonHovered(true)}
-      onMouseLeave={() => {
-        setIsButtonHovered(false)
-        setIsButtonPressed(false)
-      }}
-      onMouseDown={() => setIsButtonPressed(true)}
-      onMouseUp={() => setIsButtonPressed(false)}
-    >
-      <div className="self-stretch min-h-6 px-1 flex justify-center items-center gap-2.5">
-        <div
-          className="text-center justify-start text-sm font-medium font-['Goody_Sans'] leading-5 line-clamp-1"
-          style={{
-            fontFamily: 'var(--font-goody-sans)',
-            fontSize: '14px',
-            fontWeight: 500,
-            lineHeight: 1.4,
-            color: (isButtonHovered || isButtonPressed) ? '#ffffff' : '#7c3aed',
-            transition: 'color 300ms ease-out'
-          }}
-        >
-          Send a reminder
-        </div>
-      </div>
-      <div
-        data-size="M"
-        className="w-6 h-6 max-w-6 max-h-6 inline-flex flex-col justify-center items-center"
-      >
-        <div className="w-6 h-6 flex flex-col justify-center items-center">
-          <div
-            className="self-stretch h-5 text-center justify-center text-sm font-['SF_Pro'] leading-4"
-            style={{
-              fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro", sans-serif',
-              fontSize: '14px',
-              lineHeight: 1.4,
-              color: (isButtonHovered || isButtonPressed) ? '#ffffff' : '#7c3aed',
-              transition: 'color 0.2s ease-out'
-            }}
-          >
-            􀋙
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
 
 const SentCard = ({
-  from = 'Jim Pfiffer',
-  title = 'New Hires Onboarding',
+  from = 'Alex Torres',
+  title = 'Marketing Strategy Update',
   boxImage = '/assets/covers/Onboarding 03.png',
-  giftTitle = "Holiday's sparkles",
+  giftTitle = "Biggest Thanks",
   giftSubtitle = 'Collection by Goody',
-  progress = { current: 2, total: 4 },
-  sentDate = '1 day ago'
+  progress = { current: 3, total: 6 },
+  sentDate = '1 week ago'
 }) => {
   // Ensure current never exceeds total, and total never exceeds 40
   const validatedProgress = {
@@ -87,7 +20,6 @@ const SentCard = ({
   }
   
   // Calculate target progress percentage precisely (will never exceed 100% since current <= total)
-  // For example: 9/22 = 0.409090909... = 40.909090909...%
   const targetProgressPercentage = validatedProgress.total > 0 
     ? (validatedProgress.current / validatedProgress.total) * 100 
     : 0
@@ -101,84 +33,106 @@ const SentCard = ({
   const countIntervalRef = useRef(null)
   const timerRef = useRef(null)
   
-  // Hover state
-  const [isHovered, setIsHovered] = useState(false)
+  // Generate stable IDs using ref - use props-based approach to avoid hydration mismatch
+  // These IDs are scoped to this component instance to avoid conflicts with multiple cards
+  const idRef = useRef(null)
+  if (idRef.current === null) {
+    // Generate simple stable IDs based on props only once on first render
+    const idSuffix = `${boxImage.replace(/[^a-zA-Z0-9]/g, '')}-${from.replace(/[^a-zA-Z0-9]/g, '')}`
+    idRef.current = {
+      maskId: `hexagonMask-${idSuffix}`,
+      baseFilterId: `filterBase-${idSuffix}`,
+      baseGradient1Id: `paintBase1-${idSuffix}`,
+      baseGradient2Id: `paintBase2-${idSuffix}`,
+      dotPatternId: `patternDot-${idSuffix}`,
+      dotPatternInnerId: `patternDotInner-${idSuffix}`,
+      cardFilterId: `filterCard-${idSuffix}`,
+      cardGradientId: `paintCard-${idSuffix}`,
+      unionFilterId: `filterUnion-${idSuffix}`,
+      unionGradientId: `paintUnion-${idSuffix}`
+    }
+  }
+  const ids = idRef.current
   
-  // Extract dominant color from cover image
-  const { dominantColor, isLoading } = useDominantColor(boxImage, '#47caeb')
+  // Custom image clipping path (rounded diamond) to match Figma's Image shape
+  // ViewBox basis: 171 (w) x 143 (h)
+  const imageClipPath = [
+    'M85.5 2',                  // start slightly below the top
+    'Q82 5 72 14',              // smooth curve into the top-left edge
+    'L4 71.5',                  // left tip
+    'Q2 74 4 76',               // round the left tip
+    'L72 129',                  // bottom-left edge
+    'Q82 139 85.5 141',         // bottom rounding
+    'Q89 139 99 129',           // bottom-right rounding
+    'L167 76',                  // right edge
+    'Q169 74 167 71.5',         // right tip rounding
+    'L99 14',                   // top-right edge
+    'Q89 5 85.5 2',             // top rounding back to start
+    'Z'
+  ].join(' ')
   
   // Animate progress bar and count after content is loaded
   useEffect(() => {
-    // Wait for image to load and color extraction to complete
-    if (!isLoading && dominantColor) {
-      // Small delay before animation starts
-      timerRef.current = setTimeout(() => {
-        const targetCurrent = validatedProgress.current
-        const duration = 500 // 0.5s to match CSS transition
-        const steps = 30 // Number of animation steps
-        const stepDuration = duration / steps
-        const increment = targetCurrent / steps
-        let currentStep = 0
-        
-        // Animate progress bar width immediately
-        setAnimatedProgress(targetProgressPercentage)
-        
-        // Animate counting number
-        countIntervalRef.current = setInterval(() => {
-          currentStep++
-          const newValue = Math.min(
-            targetCurrent,
-            Math.floor(increment * currentStep)
-          )
-          setAnimatedCurrent(newValue)
-          
-          if (currentStep >= steps) {
-            // Ensure final value is exact
-            setAnimatedCurrent(targetCurrent)
-            if (countIntervalRef.current) {
-              clearInterval(countIntervalRef.current)
-              countIntervalRef.current = null
-            }
-          }
-        }, stepDuration)
-      }, 100)
+    // Small delay before animation starts
+    timerRef.current = setTimeout(() => {
+      const targetCurrent = validatedProgress.current
+      const duration = 500 // 0.5s to match CSS transition
+      const steps = 30 // Number of animation steps
+      const stepDuration = duration / steps
+      const increment = targetCurrent / steps
+      let currentStep = 0
       
-      return () => {
-        if (timerRef.current) {
-          clearTimeout(timerRef.current)
+      // Animate progress bar width immediately
+      setAnimatedProgress(targetProgressPercentage)
+      
+      // Animate counting number
+      countIntervalRef.current = setInterval(() => {
+        currentStep++
+        const newValue = Math.min(
+          targetCurrent,
+          Math.floor(increment * currentStep)
+        )
+        setAnimatedCurrent(newValue)
+        
+        if (currentStep >= steps) {
+          // Ensure final value is exact
+          setAnimatedCurrent(targetCurrent)
+          if (countIntervalRef.current) {
+            clearInterval(countIntervalRef.current)
+            countIntervalRef.current = null
+          }
         }
-        if (countIntervalRef.current) {
-          clearInterval(countIntervalRef.current)
-        }
+      }, stepDuration)
+    }, 100)
+    
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current)
+      }
+      if (countIntervalRef.current) {
+        clearInterval(countIntervalRef.current)
       }
     }
-  }, [isLoading, dominantColor, targetProgressPercentage, validatedProgress.current])
+  }, [targetProgressPercentage, validatedProgress.current])
 
   return (
-          <div
-            className="border border-[#dde2e9] border-solid relative rounded-[24px] w-full md:w-[300px]"
-            style={{
-              height: '321px',
-              borderRadius: TOKENS.sizes.borderRadius.card,
-              transform: isHovered ? 'translateY(-4px)' : 'translateY(0)',
-              boxShadow: isHovered
-                ? '0 12px 40px -8px rgba(0, 0, 0, 0.15), 0 4px 12px -4px rgba(0, 0, 0, 0.1)'
-                : 'none',
-              transition: `transform ${TOKENS.animation.duration.medium} ${TOKENS.animation.easing.easeOut}, box-shadow ${TOKENS.animation.duration.medium} ${TOKENS.animation.easing.easeOut}`
-            }}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-            data-name="Gift Card"
-          >
-      <div className="content-stretch flex flex-col items-start overflow-clip relative rounded-[inherit] size-full">
-        {/* Header Section */}
+    <div
+      className="border border-[#dde2e9] border-solid relative rounded-[24px] w-full md:w-[300px] overflow-hidden"
+      style={{
+        borderRadius: TOKENS.sizes.borderRadius.card
+      }}
+      data-name="Gift Card"
+      data-node-id="1467:49182"
+    >
+      <div className="content-stretch flex flex-col items-start overflow-hidden relative rounded-[inherit] size-full">
+        {/* Header Section - 280px tall */}
         <div
-          className="box-border content-stretch flex flex-col gap-[24px] items-center pb-0 pt-[20px] px-0 relative shrink-0 w-full"
+          className="box-border content-stretch flex flex-col h-[280px] items-center justify-between pb-0 pt-[20px] px-0 relative shrink-0 w-full overflow-visible"
           style={{
-            height: '197px',
             position: 'relative'
           }}
-          data-name="Unopened Gift"
+          data-name="Header"
+          data-node-id="1467:49183"
         >
           {/* Background with gradient overlay */}
           <div
@@ -188,12 +142,11 @@ const SentCard = ({
               borderRadius: `${TOKENS.sizes.borderRadius.card} ${TOKENS.sizes.borderRadius.card} 0 0`
             }}
           >
-            {/* Base color - dynamically extracted from cover image */}
+            {/* Base color - fixed pink background */}
             <div
               className="absolute inset-0"
               style={{
-                backgroundColor: dominantColor,
-                transition: 'background-color 0.3s ease-out'
+                backgroundColor: '#f4c6fa'
               }}
             />
             {/* Gradient overlay with blend mode */}
@@ -206,16 +159,33 @@ const SentCard = ({
             />
           </div>
 
+          {/* Dots Pattern Overlay - behind envelope */}
+          <div
+            className="absolute pointer-events-none"
+            style={{
+              left: 0,
+              top: 0,
+              right: 0,
+              bottom: 0,
+              borderRadius: `${TOKENS.sizes.borderRadius.card} ${TOKENS.sizes.borderRadius.card} 0 0`,
+              backgroundImage: 'url(/assets/GiftSent/Dots.png)',
+              backgroundRepeat: 'repeat',
+              backgroundSize: 'auto',
+              opacity: 1,
+              zIndex: 0
+            }}
+            data-name="Dots"
+            data-node-id="1467:49216"
+          />
+
           {/* Header Content */}
           <div
-            className="box-border content-stretch flex flex-col gap-[8px] items-center not-italic px-[16px] py-0 relative shrink-0 text-center text-white w-full"
-            style={{
-              zIndex: 1
-            }}
+            className="box-border content-stretch flex flex-col gap-[8px] items-center not-italic px-[16px] py-0 relative shrink-0 text-center text-nowrap text-white w-full z-10"
             data-name="Header"
+            data-node-id="1467:49184"
           >
             <p
-              className="font-['Goody_Sans:Regular',sans-serif] leading-[1.4] opacity-80 relative shrink-0 text-[16px] text-nowrap whitespace-pre"
+              className="font-['Goody_Sans:Regular',sans-serif] leading-[1.4] opacity-80 relative shrink-0 text-[16px] whitespace-pre"
               style={{
                 fontFamily: 'var(--font-goody-sans)',
                 fontSize: '16px',
@@ -223,11 +193,12 @@ const SentCard = ({
                 lineHeight: 1.4,
                 opacity: 0.8
               }}
+              data-node-id="1467:49185"
             >
-              {sentDate} by {from}
+              {sentDate} • {from}
             </p>
             <p
-              className="font-['HW_Cigars:Regular',sans-serif] leading-[1.2] min-w-full relative shrink-0 text-[24px] tracking-[-0.36px] w-[min-content]"
+              className="[white-space-collapse:collapse] font-['HW_Cigars:Regular',sans-serif] leading-[1.2] min-w-full overflow-ellipsis overflow-hidden relative shrink-0 text-[24px] tracking-[-0.36px] w-[min-content]"
               style={{
                 fontFamily: 'var(--font-hw-cigars)',
                 fontSize: '24px',
@@ -235,155 +206,469 @@ const SentCard = ({
                 lineHeight: 1.2,
                 letterSpacing: '-0.36px'
               }}
+              data-node-id="1467:49186"
             >
               {title}
             </p>
           </div>
 
-          {/* Gift Image Container */}
+          {/* Envelope Container - children positioned relative to header */}
           <div
-            className="box-border content-stretch flex flex-col items-center justify-end pb-[40px] pt-0 px-0 relative shrink-0 w-full"
+            className="absolute inset-0 pointer-events-none"
             style={{
-              position: 'relative',
-              zIndex: 1
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
             }}
-            data-name="Gift Image Container"
+            data-name="Envelope"
+            data-node-id="1467:49190"
           >
-            {/* Box Image */}
+            {/* Hidden part (envelope flap) - SVG - positioned relative to header */}
             <div
-              className="box-border content-stretch flex gap-[10px] h-[90px] items-end justify-center mb-[-40px] relative shrink-0 w-full"
-              data-name="Box 03"
+              className="absolute"
+              style={{
+                left: '65px',
+                top: '165.025px',
+                width: '170px',
+                height: '125.8px',
+                zIndex: 0,
+                pointerEvents: 'none'
+              }}
+              data-name="Hidden part"
+              data-node-id="1467:49191"
             >
-              <div
-                className="absolute bottom-0 contents left-1/2 translate-x-[-50%]"
-                data-name="Gift Image"
+              <svg
+                preserveAspectRatio="none"
+                width="100%"
+                height="100%"
+                overflow="visible"
+                style={{ display: 'block' }}
+                viewBox="0 0 170 126"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
               >
+                <path
+                  d="M0 6.8C0 3.04447 3.04446 0 6.8 0H163.2C166.956 0 170 3.04446 170 6.8V119C170 122.756 166.956 125.8 163.2 125.8H6.8C3.04447 125.8 0 122.756 0 119V6.8Z"
+                  fill="#F4C6FA"
+                />
+              </svg>
+            </div>
+          </div>
+
+          {/* Base (envelope base) - SVG - positioned relative to header (outside envelope container) */}
+          <div
+            className="absolute"
+            style={{
+              left: '52.25px',
+              top: '83px',
+              width: '195.5px',
+              height: '220.575px',
+              zIndex: 1,
+              pointerEvents: 'none'
+            }}
+            data-name="Base"
+            data-node-id="1467:49192"
+          >
+              <div
+                className="absolute"
+                style={{
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  top: '1.09%',
+                  position: 'absolute'
+                }}
+              >
+                {/* Background blur layer for envelope base */}
                 <div
-                  className="absolute bottom-0 h-[90px] left-1/2 pointer-events-none rounded-tl-[12px] rounded-tr-[12px] translate-x-[-50%] w-[260px]"
-                  data-name="Box"
+                  className="absolute inset-0"
                   style={{
-                    borderRadius: '12px 12px 0 0'
+                    backdropFilter: 'blur(6px)',
+                    WebkitBackdropFilter: 'blur(6px)',
+                    pointerEvents: 'none'
                   }}
-                >
-                  <div
-                    aria-hidden="true"
-                    className="absolute inset-0"
-                    style={{
-                      borderRadius: '12px 12px 0 0'
-                    }}
-                  >
-                    <Image
-                      alt=""
-                      src={boxImage}
-                      fill
-                      className="object-cover"
-                      style={{
-                        objectPosition: '50% 50%',
-                        borderRadius: '12px 12px 0 0'
-                      }}
-                      unoptimized
-                    />
-                    <div
-                      className="absolute inset-0"
-                      style={{
-                        mixBlendMode: 'soft-light',
-                        borderRadius: '12px 12px 0 0'
-                      }}
-                    />
-                  </div>
-                  <div
-                    className="absolute inset-0 pointer-events-none"
-                    style={{
-                      boxShadow: `
-                        0px 3px 10px 0px inset rgba(255,255,255,0.2),
-                        0px 0px 3px 0px inset rgba(0,0,0,0.15),
-                        0px 2px 4px 0px inset rgba(245,246,248,0.3)
-                      `,
-                      borderRadius: '12px 12px 0 0'
-                    }}
+                  aria-hidden="true"
+                />
+                <svg
+                preserveAspectRatio="none"
+                width="100%"
+                height="100%"
+                overflow="visible"
+                style={{ display: 'block' }}
+                viewBox="0 0 196 219"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <g filter={`url(#${ids.baseFilterId})`}>
+                  <path
+                    d="M0 84.4092C0 80.8407 1.58824 77.4572 4.33359 75.1774L92.6391 1.84547C95.6021 -0.615154 99.8979 -0.615156 102.861 1.84546L191.166 75.1774C193.912 77.4572 195.5 80.8406 195.5 84.4092V206.176C195.5 212.804 190.127 218.176 183.5 218.176H12C5.37259 218.176 0 212.804 0 206.176V84.4092Z"
+                    fill={`url(#${ids.baseGradient1Id})`}
+                    fillOpacity="0.5"
                   />
-                </div>
+                  <path
+                    d="M92.7988 2.03769C95.6693 -0.345946 99.8307 -0.345947 102.701 2.03769L191.007 75.3697C193.695 77.602 195.25 80.9148 195.25 84.4088V206.176C195.25 212.666 189.989 217.926 183.5 217.926H12C5.51072 217.926 0.250108 212.666 0.25 206.176V84.4088C0.250125 80.9148 1.80517 77.602 4.49316 75.3697L92.7988 2.03769Z"
+                    stroke={`url(#${ids.baseGradient2Id})`}
+                    strokeOpacity="0.5"
+                    strokeWidth="0.5"
+                  />
+                </g>
+                <defs>
+                  <filter
+                    id={ids.baseFilterId}
+                    x="-8"
+                    y="-8"
+                    width="211.5"
+                    height="234.176"
+                    filterUnits="userSpaceOnUse"
+                    colorInterpolationFilters="sRGB"
+                  >
+                    <feFlood floodOpacity="0" result="BackgroundImageFix" />
+                    <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
+                    <feColorMatrix
+                      in="SourceAlpha"
+                      type="matrix"
+                      values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+                      result="hardAlpha"
+                    />
+                    <feOffset dy="1.7" />
+                    <feGaussianBlur stdDeviation="1.7" />
+                    <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1" />
+                    <feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.65 0" />
+                    <feBlend mode="normal" in2="shape" result="effect1_innerShadow" />
+                  </filter>
+                  <linearGradient
+                    id={ids.baseGradient1Id}
+                    x1="97.6329"
+                    y1="10.3613"
+                    x2="97.6329"
+                    y2="217.769"
+                    gradientUnits="userSpaceOnUse"
+                  >
+                    <stop stopColor="white" />
+                    <stop offset="1" stopColor="white" stopOpacity="0" />
+                  </linearGradient>
+                  <linearGradient
+                    id={ids.baseGradient2Id}
+                    x1="97.633"
+                    y1="10.3613"
+                    x2="97.633"
+                    y2="131.502"
+                    gradientUnits="userSpaceOnUse"
+                  >
+                    <stop stopColor="white" stopOpacity="0" />
+                    <stop offset="0.6" stopColor="white" />
+                  </linearGradient>
+                </defs>
+              </svg>
               </div>
             </div>
 
-            {/* Union Shape - wavy bottom border with backdrop-filter */}
-            <div
-              className="h-[44px] relative shrink-0 w-[300px]"
-              data-name="Union"
-              style={{
-                position: 'relative',
-                marginBottom: '-44px'
-              }}
-            >
-              {/* Backdrop blur layer with custom shape mask */}
+          {/* Dot Pattern (envelope dot pattern) - SVG - positioned relative to header (outside envelope container) */}
+          <div
+            className="absolute"
+            style={{
+              left: '52.25px',
+              top: '83px',
+              width: '195.5px',
+              height: '220.575px',
+              zIndex: 1,
+              pointerEvents: 'none'
+            }}
+            data-name="Dot Pattern"
+            data-node-id="1467:49193"
+          >
               <div
-                className="absolute inset-0"
+                className="absolute"
                 style={{
-                  backdropFilter: 'blur(12px)',
-                  WebkitBackdropFilter: 'blur(12px)',
-                  maskImage: `url("data:image/svg+xml,%3Csvg width='301' height='45' viewBox='0 0 301 45' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M89.7744 0.5C93.4057 0.5 95.2217 0.49966 96.4062 0.876953C97.9552 1.37031 98.0273 1.41117 99.25 2.48242C100.185 3.30169 101.92 6.17595 105.389 11.9238C109.765 19.1749 117.718 24.0234 126.806 24.0234H172.806C181.893 24.0234 189.847 19.1749 194.223 11.9238C197.692 6.17595 199.426 3.30169 200.361 2.48242C201.584 1.41117 201.656 1.37031 203.205 0.876953C204.39 0.499659 206.206 0.5 209.837 0.5H300.5V44.5H0.5V0.5H89.7744Z' fill='black'/%3E%3C/svg%3E")`,
-                  WebkitMaskImage: `url("data:image/svg+xml,%3Csvg width='301' height='45' viewBox='0 0 301 45' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M89.7744 0.5C93.4057 0.5 95.2217 0.49966 96.4062 0.876953C97.9552 1.37031 98.0273 1.41117 99.25 2.48242C100.185 3.30169 101.92 6.17595 105.389 11.9238C109.765 19.1749 117.718 24.0234 126.806 24.0234H172.806C181.893 24.0234 189.847 19.1749 194.223 11.9238C197.692 6.17595 199.426 3.30169 200.361 2.48242C201.584 1.41117 201.656 1.37031 203.205 0.876953C204.39 0.499659 206.206 0.5 209.837 0.5H300.5V44.5H0.5V0.5H89.7744Z' fill='black'/%3E%3C/svg%3E")`,
-                  maskSize: 'cover',
-                  maskRepeat: 'no-repeat',
-                  maskPosition: 'center',
-                  WebkitMaskSize: 'cover',
-                  WebkitMaskRepeat: 'no-repeat',
-                  WebkitMaskPosition: 'center'
-                }}
-              />
-              
-              {/* White gradient overlay - 100% white at bottom (y1=44.5), 50% white at top (y2=0.5) */}
-              <div
-                className="absolute inset-0"
-                style={{
-                  background: 'linear-gradient(to top, white, rgba(255,255,255,0.5))',
-                  maskImage: `url("data:image/svg+xml,%3Csvg width='301' height='45' viewBox='0 0 301 45' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M89.7744 0.5C93.4057 0.5 95.2217 0.49966 96.4062 0.876953C97.9552 1.37031 98.0273 1.41117 99.25 2.48242C100.185 3.30169 101.92 6.17595 105.389 11.9238C109.765 19.1749 117.718 24.0234 126.806 24.0234H172.806C181.893 24.0234 189.847 19.1749 194.223 11.9238C197.692 6.17595 199.426 3.30169 200.361 2.48242C201.584 1.41117 201.656 1.37031 203.205 0.876953C204.39 0.499659 206.206 0.5 209.837 0.5H300.5V44.5H0.5V0.5H89.7744Z' fill='black'/%3E%3C/svg%3E")`,
-                  WebkitMaskImage: `url("data:image/svg+xml,%3Csvg width='301' height='45' viewBox='0 0 301 45' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M89.7744 0.5C93.4057 0.5 95.2217 0.49966 96.4062 0.876953C97.9552 1.37031 98.0273 1.41117 99.25 2.48242C100.185 3.30169 101.92 6.17595 105.389 11.9238C109.765 19.1749 117.718 24.0234 126.806 24.0234H172.806C181.893 24.0234 189.847 19.1749 194.223 11.9238C197.692 6.17595 199.426 3.30169 200.361 2.48242C201.584 1.41117 201.656 1.37031 203.205 0.876953C204.39 0.499659 206.206 0.5 209.837 0.5H300.5V44.5H0.5V0.5H89.7744Z' fill='black'/%3E%3C/svg%3E")`,
-                  maskSize: 'cover',
-                  maskRepeat: 'no-repeat',
-                  maskPosition: 'center',
-                  WebkitMaskSize: 'cover',
-                  WebkitMaskRepeat: 'no-repeat',
-                  WebkitMaskPosition: 'center'
-                }}
-              />
-              
-              {/* Fallback SVG for browsers that don't support backdrop-filter */}
-              <div
-                className="absolute inset-[-1.14%_-0.17%]"
-                style={{
-                  opacity: 0,
-                  pointerEvents: 'none'
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  top: '1.09%',
+                  position: 'absolute'
                 }}
               >
-                <Image
-                  alt=""
-                  src="/assets/c38a0055529756f72aeda5844281908c377ee640.svg"
-                  fill
-                  className="block max-w-none size-full"
-                  style={{
-                    objectFit: 'fill'
-                  }}
-                  unoptimized
+                <svg
+                preserveAspectRatio="none"
+                width="100%"
+                height="100%"
+                overflow="visible"
+                style={{ display: 'block' }}
+                viewBox="0 0 196 219"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                xmlnsXlink="http://www.w3.org/1999/xlink"
+              >
+                <path
+                  d="M0 84.4092C0 80.8407 1.58824 77.4572 4.33359 75.1774L92.6391 1.84547C95.6021 -0.615154 99.8979 -0.615156 102.861 1.84546L191.166 75.1774C193.912 77.4572 195.5 80.8406 195.5 84.4092V206.176C195.5 212.804 190.127 218.176 183.5 218.176H12C5.37259 218.176 0 212.804 0 206.176V84.4092Z"
+                  fill={`url(#${ids.dotPatternId})`}
                 />
+                <defs>
+                  <pattern
+                    id={ids.dotPatternId}
+                    patternUnits="userSpaceOnUse"
+                    patternTransform="matrix(1.53 0 0 3.06 0 -2.39884)"
+                    preserveAspectRatio="none"
+                    viewBox="0 0 18 36"
+                    width="1"
+                    height="1"
+                  >
+                    <use xlinkHref={`#${ids.dotPatternInnerId}`} transform="translate(-18 0)" />
+                    <g id={ids.dotPatternInnerId}>
+                      <circle cx="3" cy="3" r="3" fill="white" />
+                    </g>
+                    <use xlinkHref={`#${ids.dotPatternInnerId}`} transform="translate(-9 18)" />
+                    <use xlinkHref={`#${ids.dotPatternInnerId}`} transform="translate(9 18)" />
+                  </pattern>
+                </defs>
+              </svg>
               </div>
+            </div>
+
+          {/* Rectangle 1790 (card shape container) - positioned relative to header (outside envelope container) */}
+          <div
+            className="absolute"
+            style={{
+              left: '62.025px',
+              top: '91.117px',
+              width: '175.95px',
+              height: '146.2px',
+              zIndex: 2,
+              pointerEvents: 'none'
+            }}
+            data-node-id="1467:49194"
+          >
+              {/* Card shape overlay (hexagon shape) with inset wrapper */}
+              <div
+                className="absolute"
+                style={{
+                  left: '1.64%',
+                  top: '1.23%',
+                  right: '1.64%',
+                  bottom: '1.23%',
+                  position: 'absolute'
+                }}
+              >
+                <svg
+                  preserveAspectRatio="none"
+                  width="100%"
+                  height="100%"
+                  overflow="visible"
+                  style={{ display: 'block' }}
+                  viewBox="0 0 171 143"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <g filter={`url(#${ids.cardFilterId})`}>
+                    <path
+                      d="M81.2603 1.38519L1.84066 67.3763C-0.613553 69.4155 -0.613553 73.1822 1.84066 75.2214L81.2603 141.213C83.4831 143.059 86.7066 143.059 88.9294 141.213L168.349 75.2214C170.803 73.1822 170.803 69.4155 168.349 67.3763L88.9294 1.38519C86.7066 -0.461729 83.4831 -0.461731 81.2603 1.38519Z"
+                      fill={`url(#${ids.cardGradientId})`}
+                      fillOpacity="0.2"
+                    />
+                  </g>
+                  <defs>
+                    <filter
+                      id={ids.cardFilterId}
+                      x="-15.0363"
+                      y="-15.0363"
+                      width="200.262"
+                      height="172.67"
+                      filterUnits="userSpaceOnUse"
+                      colorInterpolationFilters="sRGB"
+                    >
+                      <feFlood floodOpacity="0" result="BackgroundImageFix" />
+                      <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
+                      <feColorMatrix
+                        in="SourceAlpha"
+                        type="matrix"
+                        values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+                        result="hardAlpha"
+                      />
+                      <feOffset dy="1.7" />
+                      <feGaussianBlur stdDeviation="1.7" />
+                      <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1" />
+                      <feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.65 0" />
+                      <feBlend mode="normal" in2="shape" result="effect1_innerShadow" />
+                    </filter>
+                    <linearGradient
+                      id={ids.cardGradientId}
+                      x1="84.9769"
+                      y1="-0.736785"
+                      x2="84.9769"
+                      y2="152.362"
+                      gradientUnits="userSpaceOnUse"
+                    >
+                      <stop stopColor="white" />
+                      <stop offset="1" stopColor="white" stopOpacity="0" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+              </div>
+            </div>
+
+          {/* Image removed for now */}
+
+          {/* Shadow overlay removed for now */}
+
+          {/* Union Shape - wavy bottom border */}
+          <div
+            className="absolute"
+            style={{
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: '36px',
+              zIndex: 10
+            }}
+            data-name="Union"
+            data-node-id="1467:49199"
+          >
+            {/* Background blur layer */}
+            <div
+              className="absolute inset-0"
+              style={{
+                backdropFilter: 'blur(8px)',
+                WebkitBackdropFilter: 'blur(8px)',
+                pointerEvents: 'none'
+              }}
+              aria-hidden="true"
+            />
+            <div className="absolute" style={{ left: '-1.39%', top: '-1.39%', right: '-0.17%', bottom: '-1.39%' }}>
+              <svg
+                preserveAspectRatio="none"
+                width="100%"
+                height="100%"
+                overflow="visible"
+                style={{ display: 'block' }}
+                viewBox="0 0 301 37"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <g filter={`url(#${ids.unionFilterId})`}>
+                  <path
+                    d="M90.9043 0.5C94.3036 0.5 96.0037 0.500074 97.1426 0.84668C98.6143 1.29459 98.7142 1.34859 99.9014 2.32715C100.82 3.08449 102.535 5.66737 105.964 10.833C110.441 17.5773 118.103 22.0234 126.805 22.0234H172.805C181.507 22.0234 189.169 17.5773 193.646 10.833C197.074 5.66737 198.789 3.08449 199.708 2.32715C200.895 1.3486 200.995 1.29459 202.467 0.84668C203.606 0.500074 205.306 0.5 208.705 0.5H300.5V36.5H0.5V0.5H90.9043Z"
+                    fill={`url(#${ids.unionGradientId})`}
+                  />
+                </g>
+                <defs>
+                  <filter
+                    id={ids.unionFilterId}
+                    x="-24"
+                    y="-24"
+                    width="349"
+                    height="85"
+                    filterUnits="userSpaceOnUse"
+                    colorInterpolationFilters="sRGB"
+                  >
+                    <feFlood floodOpacity="0" result="BackgroundImageFix" />
+                    <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
+                    <feColorMatrix
+                      in="SourceAlpha"
+                      type="matrix"
+                      values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+                      result="hardAlpha"
+                    />
+                    <feOffset dy="3" />
+                    <feGaussianBlur stdDeviation="4" />
+                    <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1" />
+                    <feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.5 0" />
+                    <feBlend mode="normal" in2="shape" result="effect1_innerShadow" />
+                  </filter>
+                  <linearGradient
+                    id={ids.unionGradientId}
+                    x1="150.5"
+                    y1="36.5"
+                    x2="150.5"
+                    y2="-7.5"
+                    gradientUnits="userSpaceOnUse"
+                  >
+                    <stop stopColor="white" />
+                    <stop offset="1" stopColor="white" stopOpacity="0.5" />
+                  </linearGradient>
+                </defs>
+              </svg>
             </div>
           </div>
         </div>
 
-        {/* Footer Section */}
+        {/* Footer Section - outside Header Section */}
         <div
-          className="bg-white box-border content-stretch flex flex-col gap-[16px] items-center justify-center pb-[20px] pt-[4px] px-[16px] relative shrink-0 w-full"
+          className="bg-white box-border content-stretch flex flex-col gap-[16px] items-center justify-center pb-[20px] pt-0 px-[16px] relative shrink-0 w-full"
           style={{
-            marginTop: '-44px',
-            paddingTop: '48px'
+            position: 'relative',
+            zIndex: 20,
+            width: '100%'
           }}
-          data-name="Gift Message Container"
+          data-name="InfoBar"
+          data-node-id="1467:49205"
         >
-          {/* Gift Message */}
+          {/* Progress Bar Container - comes first */}
+          <div
+            className="bg-[#f0f1f5] border border-[rgba(221,226,233,0)] border-solid box-border content-stretch flex flex-col gap-[10px] items-start justify-center p-[2px] relative rounded-[100px] shrink-0 w-[120px]"
+            style={{
+              borderRadius: '100px',
+              backgroundColor: '#f0f1f5'
+            }}
+            data-name="Progress Bar Container"
+            data-node-id="1467:49206"
+          >
+            {/* Progress Bar */}
+            <div
+              className="bg-gradient-to-b box-border content-stretch flex flex-col from-[#5a3dff] gap-[10px] items-start justify-center px-[8px] py-[2px] relative rounded-[100px] shrink-0"
+              style={{
+                background: 'linear-gradient(to bottom, #5a3dff, #a799ff)',
+                borderRadius: '100px',
+                width: validatedProgress.current === validatedProgress.total ? '100%' : `${animatedProgress}%`,
+                maxWidth: '100%',
+                minWidth: 'fit-content',
+                transition: 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                boxShadow: '0px 2px 4px -8px rgba(46,10,255,0.1), 0px 2px 2px 0px rgba(90,61,255,0.08), 0px 4px 8px -4px rgba(16,0,112,0.15)'
+              }}
+              data-name="Progress Bar"
+              data-node-id="1467:49207"
+            >
+              <p
+                className="font-['Goody_Sans:Medium',sans-serif] leading-[1.4] min-w-full not-italic relative shrink-0 text-[14px] text-white w-[min-content]"
+                style={{
+                  fontFamily: 'var(--font-goody-sans)',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  lineHeight: 1.4,
+                  color: '#ffffff',
+                  whiteSpace: 'nowrap'
+                }}
+                data-node-id="1467:49208"
+              >
+                {validatedProgress.current === validatedProgress.total 
+                  ? 'All accepted' 
+                  : `${animatedCurrent}/${validatedProgress.total}`}
+              </p>
+              {/* Highlight gradient overlay */}
+              <div
+                className="absolute bg-gradient-to-b blur-[0.25px] filter from-[#e9e5ff] h-[10px] left-[10%] right-[10%] rounded-[100px] to-[rgba(229,245,255,0)] top-[3px]"
+                data-node-id="1467:49209"
+              />
+              <div
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  boxShadow: '0px 1px 2px 0px inset rgba(255,255,255,0.5)',
+                  borderRadius: '100px'
+                }}
+              />
+            </div>
+            <div
+              className="absolute inset-[-1px] pointer-events-none"
+              style={{
+                boxShadow: '0px 1px 2.25px 0px inset #c2c6d6, 0px -1px 2.25px 0px inset #ffffff',
+                borderRadius: '100px'
+              }}
+            />
+          </div>
+
+          {/* Gift Message - comes second */}
           <div
             className="content-stretch flex flex-col gap-[4px] items-start leading-[1.4] not-italic relative shrink-0 text-center"
             data-name="Gift Message"
+            data-node-id="1467:49210"
           >
             <p
               className="[white-space-collapse:collapse] font-['Goody_Sans:Medium',sans-serif] h-[22px] overflow-ellipsis overflow-hidden relative shrink-0 text-[16px] text-black text-nowrap w-[268px]"
@@ -394,6 +679,7 @@ const SentCard = ({
                 lineHeight: 1.4,
                 color: TOKENS.colors.text.primary
               }}
+              data-node-id="1467:49211"
             >
               {giftTitle}
             </p>
@@ -406,101 +692,10 @@ const SentCard = ({
                 lineHeight: 1.4,
                 color: TOKENS.colors.text.secondary
               }}
+              data-node-id="1467:49212"
             >
               {giftSubtitle}
             </p>
-          </div>
-
-          {/* Progress Bar Container */}
-          <div
-            className="content-stretch flex flex-col gap-[10px] h-[36px] items-center justify-center relative shrink-0 w-full"
-            data-name="Bottom"
-          >
-            <div
-              className="flex items-center justify-center relative w-full"
-              style={{
-                height: '36px'
-              }}
-            >
-              {/* Progress Bar - hidden on hover only if not all accepted */}
-              <div
-                className="bg-[#f0f1f5] border border-[rgba(221,226,233,0)] border-solid box-border content-stretch flex flex-col gap-[10px] items-start justify-center p-[2px] relative rounded-[100px] absolute"
-                style={{
-                  borderRadius: '100px',
-                  backgroundColor: '#f0f1f5',
-                  width: '120px',
-                  opacity: (isHovered && validatedProgress.current !== validatedProgress.total) ? 0 : 1,
-                  visibility: (isHovered && validatedProgress.current !== validatedProgress.total) ? 'hidden' : 'visible',
-                  transition: 'opacity 0.3s ease-out, visibility 0.3s ease-out',
-                  pointerEvents: (isHovered && validatedProgress.current !== validatedProgress.total) ? 'none' : 'auto'
-                }}
-                data-name="Progress Bar Container"
-              >
-                {/* Progress Bar */}
-                <div
-                  className="bg-gradient-to-b box-border content-stretch flex flex-col from-[#5a3dff] gap-[10px] items-start justify-center px-[8px] py-[2px] relative rounded-[100px] shrink-0"
-                  style={{
-                    background: 'linear-gradient(to bottom, #5a3dff, #a799ff)',
-                    borderRadius: '100px',
-                    width: validatedProgress.current === validatedProgress.total ? '100%' : `${animatedProgress}%`,
-                    maxWidth: '100%',
-                    minWidth: 'fit-content',
-                    transition: 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
-                  }}
-                  data-name="Progress Bar"
-                >
-                  <p
-                    className={`font-['Goody_Sans:Medium',sans-serif] leading-[1.4] not-italic relative shrink-0 text-[14px] text-white ${
-                      validatedProgress.current === validatedProgress.total ? 'text-center' : ''
-                    }`}
-                    style={{
-                      fontFamily: 'var(--font-goody-sans)',
-                      fontSize: '14px',
-                      fontWeight: 500,
-                      lineHeight: 1.4,
-                      color: '#ffffff',
-                      whiteSpace: 'nowrap',
-                      width: '100%',
-                      textAlign: validatedProgress.current === validatedProgress.total ? 'center' : 'left'
-                    }}
-                  >
-                    {validatedProgress.current === validatedProgress.total 
-                      ? 'All accepted' 
-                      : `${animatedCurrent}/${validatedProgress.total}`}
-                  </p>
-                  <div
-                    className="absolute inset-0 pointer-events-none"
-                    style={{
-                      boxShadow: '0px 1px 2px 0px inset rgba(255,255,255,0.5)',
-                      borderRadius: '100px'
-                    }}
-                  />
-                </div>
-                <div
-                  className="absolute inset-[-1px] pointer-events-none"
-                  style={{
-                    boxShadow: '0px 1px 2.25px 0px inset #c2c6d6, 0px -1px 2.25px 0px inset #ffffff',
-                    borderRadius: '100px'
-                  }}
-                />
-              </div>
-              
-              {/* Send a reminder button - replaces progress bar on hover (only if not all accepted) */}
-              {validatedProgress.current !== validatedProgress.total && (
-                <div
-                  className="absolute"
-                  style={{
-                    opacity: isHovered ? 1 : 0,
-                    visibility: isHovered ? 'visible' : 'hidden',
-                    transform: isHovered ? 'translateY(0)' : 'translateY(12px)',
-                    transition: 'opacity 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.25s cubic-bezier(0.34, 1.56, 0.34, 1), visibility 0.25s ease-out',
-                    pointerEvents: isHovered ? 'auto' : 'none'
-                  }}
-                >
-                  <ButtonWithHover />
-                </div>
-              )}
-            </div>
           </div>
         </div>
       </div>
@@ -509,4 +704,3 @@ const SentCard = ({
 }
 
 export default React.memo(SentCard)
-
