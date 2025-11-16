@@ -371,7 +371,7 @@ const SentCard = ({
                     colorInterpolationFilters="sRGB"
                   >
                     <feFlood floodOpacity="0" result="BackgroundImageFix" />
-                    <feDropShadow dx="0" dy="-2" stdDeviation="3" floodColor="#FFFFFF" floodOpacity="0.5" result="ds" />
+                    <feDropShadow dx="0" dy="-2" stdDeviation="3" floodColor="#FFFFFF" floodOpacity="1" result="ds" />
                     <feBlend mode="normal" in="SourceGraphic" in2="ds" result="shape" />
                     <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
                     <feOffset dy="0" />
@@ -446,11 +446,23 @@ const SentCard = ({
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
+                  filter={`url(#${ids.imageFadeFilterId})`}
                   d="M91.6152 149.22L12.7204 83.6651L12.7204 83.665C11.638 82.7656 11.0967 82.3159 10.7076 81.7641C10.3628 81.2753 10.1068 80.7295 9.95108 80.1519C9.77539 79.5 9.77539 78.7963 9.77539 77.3889V40.468C9.77539 35.9875 9.77539 33.7473 10.6473 32.036C11.4143 30.5308 12.6382 29.3069 14.1435 28.5399C15.8548 27.668 18.095 27.668 22.5754 27.668L172.925 27.668C177.406 27.668 179.646 27.6681 181.357 28.54C182.863 29.307 184.086 30.5308 184.853 32.0361C185.725 33.7474 185.725 35.9876 185.725 40.468V77.3889C185.725 78.7963 185.725 79.5 185.55 80.1519C185.394 80.7295 185.138 81.2753 184.793 81.7641C184.404 82.3159 183.863 82.7656 182.78 83.6651L103.886 149.22C101.703 151.034 100.611 151.941 99.3931 152.288C98.3193 152.593 97.1815 152.593 96.1077 152.288C94.8898 151.941 93.7983 151.034 91.6152 149.22Z"
                   fill="url(#paintImgFadeOverlay)"
                   style={{ mixBlendMode: 'normal' }}
                 />
                 <defs>
+                  <filter
+                    id={ids.imageFadeFilterId}
+                    x="-60"
+                    y="-60"
+                    width="316"
+                    height="341"
+                    filterUnits="userSpaceOnUse"
+                    colorInterpolationFilters="sRGB"
+                  >
+                    <feDropShadow dx="0" dy="-2" stdDeviation="4" floodColor="#FFFFFF" floodOpacity="0.65" />
+                  </filter>
                   <linearGradient
                     id="paintImgFadeOverlay"
                     x1="98"
@@ -654,10 +666,10 @@ const SentCard = ({
                   <defs>
                     <filter
                       id={ids.cardFilterId}
-                      x="-15.0363"
-                      y="-15.0363"
-                      width="200.262"
-                      height="172.67"
+                      x="-40"
+                      y="-40"
+                      width="260"
+                      height="220"
                       filterUnits="userSpaceOnUse"
                       colorInterpolationFilters="sRGB"
                     >
@@ -673,12 +685,15 @@ const SentCard = ({
                       <feGaussianBlur stdDeviation="2" />
                       <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1" />
                       <feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.65 0" />
-                    <feBlend mode="normal" in2="shape" result="effect1_innerShadow" />
-                      {/* White outer drop shadow for 1790 */}
-                      <feDropShadow in="shape" dx="0" dy="-2" stdDeviation="3" floodColor="#FFFFFF" floodOpacity="0.5" result="cardOuterShadow" />
+                      <feBlend mode="normal" in2="shape" result="effect1_innerShadow" />
+                      {/* White outer drop shadows for 1790 */}
+                      <feDropShadow in="SourceGraphic" dx="0" dy="8" stdDeviation="3" floodColor="#FFFFFF" floodOpacity="1" result="cardOuterShadow1" />
+                      <feDropShadow in="SourceGraphic" dx="0" dy="8" stdDeviation="3" floodColor="#FFFFFF" floodOpacity="1" result="cardOuterShadow2" />
                       <feMerge>
-                        <feMergeNode in="cardOuterShadow"/>
-                        <feMergeNode in="effect1_innerShadow"/>
+                        <feMergeNode in="cardOuterShadow1" />
+                        <feMergeNode in="cardOuterShadow2" />
+                        <feMergeNode in="effect1_innerShadow" />
+                        <feMergeNode in="SourceGraphic" />
                       </feMerge>
                     </filter>
                     <linearGradient
