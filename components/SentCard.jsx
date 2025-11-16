@@ -291,7 +291,9 @@ const SentCard = ({
             style={{
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
+              left: '-2px',
+              right: '2px'
             }}
             data-name="Envelope"
             data-node-id="1467:49190"
@@ -302,7 +304,7 @@ const SentCard = ({
             <div
               className="absolute"
               style={{
-                left: '62.025px',
+                left: '62px',
                 top: '91.117px',
                 width: '175.95px',
                 height: '146.2px',
@@ -391,7 +393,7 @@ const SentCard = ({
             <div
               className="absolute"
               style={{
-                left: '52.25px',
+                left: '52px',
                 top: '83px',
                 width: '195.5px',
                 height: '220.575px',
@@ -605,7 +607,7 @@ const SentCard = ({
           <div
             className="absolute"
             style={{
-              left: '52.25px',
+              left: '50px',
               top: '83px',
               width: '195.5px',
               height: '220.575px',

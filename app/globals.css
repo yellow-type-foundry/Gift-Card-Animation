@@ -6,6 +6,18 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Card hover shadow (applies to SentCard container with data-name="Gift Card") */
+[data-name="Gift Card"] {
+  transition: transform 200ms ease-out, box-shadow 200ms ease-out;
+  will-change: transform, box-shadow;
+  transform: translateY(0);
+  box-shadow: none;
+}
+[data-name="Gift Card"]:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px -8px rgba(0, 0, 0, 0.15), 0 4px 12px -4px rgba(0, 0, 0, 0.10);
+}
+
 /* Font Face Declarations */
 @font-face {
   font-family: 'Goody Sans';
