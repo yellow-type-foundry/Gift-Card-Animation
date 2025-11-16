@@ -294,50 +294,7 @@ const SentCard = ({
             data-name="Envelope"
             data-node-id="1467:49190"
           >
-            {/* Hidden part (envelope flap) - SVG - positioned relative to header */}
-            <div
-              className="absolute"
-              style={{
-                left: '65px',
-                top: '165.025px',
-                width: '170px',
-                height: '125.8px',
-                zIndex: 0,
-                pointerEvents: 'none'
-              }}
-              data-name="Hidden part"
-              data-node-id="1467:49191"
-            >
-              <svg
-                preserveAspectRatio="none"
-                width="100%"
-                height="100%"
-                overflow="visible"
-                style={{ display: 'block' }}
-                viewBox="0 0 170 126"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M0 6.8C0 3.04447 3.04446 0 6.8 0H163.2C166.956 0 170 3.04446 170 6.8V119C170 122.756 166.956 125.8 163.2 125.8H6.8C3.04447 125.8 0 122.756 0 119V6.8Z"
-                  fill={hiddenFlapColor}
-                />
-              </svg>
-              {/* Top badge rectangle inside image container */}
-              <div
-                className="absolute"
-                style={{
-                  top: '8px',
-                  left: '8px',
-                  width: '160px',
-                  height: '44px',
-                  backgroundColor: '#FF3535',
-                  borderRadius: '4px',
-                  zIndex: 100,
-                  pointerEvents: 'none'
-                }}
-              />
-            </div>
+            
             
             {/* Image Container (hosts image) */}
             <div
@@ -414,7 +371,8 @@ const SentCard = ({
                     colorInterpolationFilters="sRGB"
                   >
                     <feFlood floodOpacity="0" result="BackgroundImageFix" />
-                    <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
+                    <feDropShadow dx="0" dy="-2" stdDeviation="3" floodColor="#FFFFFF" floodOpacity="0.5" result="ds" />
+                    <feBlend mode="normal" in="SourceGraphic" in2="ds" result="shape" />
                     <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
                     <feOffset dy="0" />
                     <feGaussianBlur stdDeviation="2" />
@@ -498,7 +456,7 @@ const SentCard = ({
                     x1="98"
                     y1="300"
                     x2="98"
-                    y2="0"
+                    y2="150"
                     gradientUnits="userSpaceOnUse"
                   >
                     <stop offset="0" stopColor={overlayDarkColor} stopOpacity="0.45" />
@@ -590,12 +548,12 @@ const SentCard = ({
                   <path
                     d="M0 84.4092C0 80.8407 1.58824 77.4572 4.33359 75.1774L92.6391 1.84547C95.6021 -0.615154 99.8979 -0.615156 102.861 1.84546L191.166 75.1774C193.912 77.4572 195.5 80.8406 195.5 84.4092V206.176C195.5 212.804 190.127 218.176 183.5 218.176H12C5.37259 218.176 0 212.804 0 206.176V84.4092Z"
                     fill={`url(#${ids.baseGradient1Id})`}
-                    fillOpacity="0.65"
+                    fillOpacity="0.5"
                   />
                   <path
                     d="M92.7988 2.03769C95.6693 -0.345946 99.8307 -0.345947 102.701 2.03769L191.007 75.3697C193.695 77.602 195.25 80.9148 195.25 84.4088V206.176C195.25 212.666 189.989 217.926 183.5 217.926H12C5.51072 217.926 0.250108 212.666 0.25 206.176V84.4088C0.250125 80.9148 1.80517 77.602 4.49316 75.3697L92.7988 2.03769Z"
                     stroke={`url(#${ids.baseGradient2Id})`}
-                    strokeOpacity="0.3"
+                    strokeOpacity="0.8"
                     strokeWidth="0.5"
                   />
                 </g>
@@ -628,7 +586,7 @@ const SentCard = ({
                     x1="90"
                     y1="100"
                     x2="90"
-                    y2="200"
+                    y2="-200"
                     gradientUnits="userSpaceOnUse"
                   >
                     <stop stopColor="white" />
@@ -704,7 +662,7 @@ const SentCard = ({
                       colorInterpolationFilters="sRGB"
                     >
                       <feFlood floodOpacity="0" result="BackgroundImageFix" />
-                      <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
+                    <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
                       <feColorMatrix
                         in="SourceAlpha"
                         type="matrix"
@@ -715,7 +673,13 @@ const SentCard = ({
                       <feGaussianBlur stdDeviation="2" />
                       <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1" />
                       <feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.65 0" />
-                      <feBlend mode="normal" in2="shape" result="effect1_innerShadow" />
+                    <feBlend mode="normal" in2="shape" result="effect1_innerShadow" />
+                      {/* White outer drop shadow for 1790 */}
+                      <feDropShadow in="shape" dx="0" dy="-2" stdDeviation="3" floodColor="#FFFFFF" floodOpacity="0.5" result="cardOuterShadow" />
+                      <feMerge>
+                        <feMergeNode in="cardOuterShadow"/>
+                        <feMergeNode in="effect1_innerShadow"/>
+                      </feMerge>
                     </filter>
                     <linearGradient
                       id={ids.cardGradientId}
