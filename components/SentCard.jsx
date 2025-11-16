@@ -150,7 +150,7 @@ const SentCard = ({
   // Slightly lighter tone for hidden flap for contrast (with sat cap)
   const hiddenFlapColor = capSaturation(lightenHex(dominantColor, 4.0), 100)
   // Header background color: adjusted to luminance cap 60 (lighten if below, darken if above)
-  const headerBgColor = capSaturation(adjustToLuminance(dominantColor, 48), 32)
+  const headerBgColor = capSaturation(adjustToLuminance(dominantColor, 88), 25)
   // Base tint and 1790 tint to theme the header envelope shapes
   const baseTintColor = capSaturation(adjustToLuminance(dominantColor, 85), 50)
   const base2TintColor = capSaturation(lightenHex(dominantColor, 1.35), 65)
@@ -241,7 +241,7 @@ const SentCard = ({
             <div
               className="absolute inset-0"
               style={{
-                background: 'linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(255, 255, 255, 0.75) 65%)',
+                background: 'linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(255, 255, 255, 0.95) 95%)',
                 mixBlendMode: 'overlay'
               }}
             />
