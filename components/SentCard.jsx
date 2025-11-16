@@ -320,6 +320,20 @@ const SentCard = ({
                   fill={hiddenFlapColor}
                 />
               </svg>
+              {/* Top badge rectangle inside image container */}
+              <div
+                className="absolute"
+                style={{
+                  top: '8px',
+                  left: '8px',
+                  width: '160px',
+                  height: '44px',
+                  backgroundColor: '#FF3535',
+                  borderRadius: '4px',
+                  zIndex: 100,
+                  pointerEvents: 'none'
+                }}
+              />
             </div>
             
             {/* Image Container (hosts image) */}
@@ -458,6 +472,38 @@ const SentCard = ({
                   </linearGradient>
                 </defs>
               </svg>
+            </div>
+            {/* Image Badge - positioned above fade overlay */}
+            <div
+              className="absolute"
+              style={{
+                left: '70px',
+                top: '119px',
+                width: '160px',
+                height: '42px',
+                borderRadius: '4px',
+                overflow: 'hidden',
+                zIndex: 100,
+                pointerEvents: 'none'
+              }}
+            >
+              {/* Cover image under gradient */}
+              <Image
+                src={boxImage}
+                alt=""
+                fill
+                sizes="160px"
+                priority={false}
+                style={{ objectFit: 'cover' }}
+              />
+              {/* Gradient overlay on top */}
+              <div
+                className="absolute inset-0"
+                style={{
+                  background:
+                    'linear-gradient(to bottom, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 100%)',
+                }}
+              />
             </div>
           </div>
 
