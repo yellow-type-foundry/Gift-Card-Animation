@@ -896,14 +896,14 @@ const SentCard = ({
 
         {/* Footer Section - InfoBar content with hover-replacement Reminder button */}
         <div
-          className="bg-white box-border flex items-center justify-center pb-[20px] pt-0 px-[16px] relative shrink-0 w-full"
+          className="bg-white box-border flex items-center justify-center pb-[16px] pt-0 px-[16px] relative shrink-0 w-full"
           style={{ position: 'relative', zIndex: 20, width: '100%' }}
           data-node-id="1467:49205"
         >
           {/* Default InfoBar content (visible idle; hidden on hover) */}
           <div
             data-name="InfoBarContent"
-            className="content-stretch flex flex-col gap-[12px] items-center justify-center text-center transition-all"
+            className="content-stretch flex flex-col gap-[16px] items-center justify-center text-center transition-all"
             style={{ width: '100%' }}
           >
             {/* Progress Bar Container - original styling */}
