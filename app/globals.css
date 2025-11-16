@@ -131,7 +131,7 @@
 /* Grid cell breathing animation on hover */
 @keyframes grid-breathe-base {
   0% { opacity: 0.16; }
-  50% { opacity: 0.30; }
+  50% { opacity: 0.38; }
   100% { opacity: 0.16; }
 }
 @keyframes grid-breathe-overlay {
@@ -141,35 +141,39 @@
 }
 
 /* Trigger animation only when hovering the Image Container block */
-[data-name="Image Container"] .grid-cell-base {
-  opacity: 0.16; /* default idle opacity */
-  will-change: opacity;
-}
-[data-name="Image Container"] .grid-cell-overlay {
-  opacity: 0.10;
-  will-change: opacity;
-}
-[data-name="Image Container"]:hover .grid-cell-base,
+[data-name="Envelope"] .grid-cell-base { opacity: 0.16; will-change: opacity; }
+[data-name="Envelope"] .grid-cell-overlay { opacity: 0.10; will-change: opacity; }
 [data-name="Envelope"]:hover .grid-cell-base {
   animation-name: grid-breathe-base;
   animation-duration: 2400ms;
   animation-timing-function: ease-in-out;
   animation-iteration-count: infinite;
+  animation-direction: normal;
 }
-[data-name="Image Container"]:hover .grid-cell-overlay,
 [data-name="Envelope"]:hover .grid-cell-overlay {
   animation-name: grid-breathe-overlay;
   animation-duration: 2400ms;
   animation-timing-function: ease-in-out;
   animation-iteration-count: infinite;
+  animation-direction: normal;
 }
 
 /* Staggered delays for a gentle wave */
-.gc-1 { animation-delay: 0ms; }
-.gc-2 { animation-delay: 150ms; }
-.gc-3 { animation-delay: 300ms; }
-.gc-4 { animation-delay: 450ms; }
-.gc-5 { animation-delay: 600ms; }
-.gc-6 { animation-delay: 750ms; }
-.gc-7 { animation-delay: 900ms; }
-.gc-8 { animation-delay: 1050ms; }
+.gc-1 { animation-delay: 420ms; }
+.gc-2 { animation-delay: 30ms; }
+.gc-3 { animation-delay: 780ms; }
+.gc-4 { animation-delay: 210ms; }
+.gc-5 { animation-delay: 1260ms; }
+.gc-6 { animation-delay: 540ms; }
+.gc-7 { animation-delay: 960ms; }
+.gc-8 { animation-delay: 1170ms; }
+
+/* Vary animation durations per cell for more organic breathing */
+.gc-1 { animation-duration: 2350ms; animation-direction: alternate; animation-timing-function: ease-in-out; }
+.gc-2 { animation-duration: 2950ms; animation-direction: alternate-reverse; animation-timing-function: ease-in; }
+.gc-3 { animation-duration: 2050ms; animation-direction: alternate; animation-timing-function: ease-out; }
+.gc-4 { animation-duration: 3150ms; animation-direction: alternate-reverse; animation-timing-function: ease-in-out; }
+.gc-5 { animation-duration: 2450ms; animation-direction: alternate; animation-timing-function: ease-in; }
+.gc-6 { animation-duration: 3250ms; animation-direction: alternate-reverse; animation-timing-function: ease-out; }
+.gc-7 { animation-duration: 2150ms; animation-direction: alternate; animation-timing-function: ease-in-out; }
+.gc-8 { animation-duration: 2850ms; animation-direction: alternate-reverse; animation-timing-function: ease; }

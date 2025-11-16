@@ -285,7 +285,7 @@ const SentCard = ({
 
           {/* Envelope Container - children positioned relative to header */}
           <div
-            className="absolute inset-0 pointer-events-none"
+            className="absolute inset-0"
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -356,7 +356,7 @@ const SentCard = ({
                           result="hardAlpha"
                         />
                         <feOffset dy="0" />
-                        <feGaussianBlur stdDeviation="3" />
+                        <feGaussianBlur stdDeviation="5" />
                         <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1" />
                         <feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.65 0" />
                         <feBlend mode="normal" in2="shape" result="effect1_innerShadow" />
