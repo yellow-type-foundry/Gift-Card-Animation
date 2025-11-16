@@ -33,6 +33,10 @@ const SentCard = ({
   // Refs to store timers for cleanup
   const countIntervalRef = useRef(null)
   const timerRef = useRef(null)
+  // Hover + confetti refs
+  const cardRef = useRef(null)
+  const confettiCanvasRef = useRef(null)
+  const [isHovered, setIsHovered] = useState(false)
   
   // Generate stable IDs using ref - use props-based approach to avoid hydration mismatch
   // These IDs are scoped to this component instance to avoid conflicts with multiple cards
@@ -203,8 +207,91 @@ const SentCard = ({
     }
   }, [targetProgressPercentage, validatedProgress.current])
 
+  const allAccepted = validatedProgress.current === validatedProgress.total
+
+  // Lightweight confetti behind the envelope on hover when all accepted
+  useEffect(() => {
+    if (!isHovered || !allAccepted) return
+    const canvas = confettiCanvasRef.current
+    const headerEl = cardRef.current?.querySelector('[data-name="Header"]')
+    if (!canvas || !headerEl) return
+    const ctx = canvas.getContext('2d')
+    let animId
+    const dpr = window.devicePixelRatio || 1
+    const rect = headerEl.getBoundingClientRect()
+    canvas.width = Math.max(1, Math.floor(rect.width * dpr))
+    canvas.height = Math.max(1, Math.floor(rect.height * dpr))
+    canvas.style.width = `${rect.width}px`
+    canvas.style.height = `${rect.height}px`
+    // Lighter shades based on card's dominant color for confetti particles
+    const baseConfetti = dominantColor
+    const colors = [
+      lightenHex(baseConfetti, 1.4),
+      lightenHex(baseConfetti, 1.55),
+      lightenHex(baseConfetti, 1.7),
+      lightenHex(baseConfetti, 1.85),
+      lightenHex(baseConfetti, 2.0)
+    ]
+    const maxParticles = 120
+    const spawnParticle = () => {
+      const speed = 2 + Math.random() * 3
+      return {
+        // Start near bottom with slight horizontal randomness across width
+        x: Math.random() * (rect.width * dpr),
+        y: (rect.height * dpr) - 2 * dpr,
+        // Shoot upwards with slight horizontal drift
+        vx: (Math.random() * 2 - 1) * 1.5 * dpr,
+        vy: -speed * dpr,
+        // Gravity pulls down a bit so confetti slows as it rises
+        ay: 0.06 * dpr,
+        rot: Math.random() * Math.PI,
+        vr: (Math.random() * 0.2 - 0.1),
+        size: (4 + Math.random() * 4) * dpr,
+        color: colors[(Math.random() * colors.length) | 0],
+        shape: Math.random() < 0.5 ? 'rect' : 'tri'
+      }
+    }
+    const particles = Array.from({ length: maxParticles }).map(spawnParticle)
+    const recycleIfOut = (p) => {
+      const outOfBounds = p.y < -20 * dpr || p.y > canvas.height + 20 * dpr || p.x < -20 * dpr || p.x > canvas.width + 20 * dpr
+      if (outOfBounds) {
+        const np = spawnParticle()
+        p.x = np.x; p.y = np.y; p.vx = np.vx; p.vy = np.vy; p.ay = np.ay; p.rot = np.rot; p.vr = np.vr; p.size = np.size; p.color = np.color; p.shape = np.shape
+      }
+    }
+    const draw = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      particles.forEach(p => {
+        p.vy += p.ay
+        p.x += p.vx
+        p.y += p.vy
+        p.rot += p.vr
+        recycleIfOut(p)
+        ctx.save()
+        ctx.translate(p.x, p.y)
+        ctx.rotate(p.rot)
+        ctx.fillStyle = p.color
+        // Draw circle only
+        ctx.beginPath()
+        ctx.arc(0, 0, p.size / 2, 0, Math.PI * 2)
+        ctx.closePath()
+        ctx.fill()
+        ctx.restore()
+      })
+      animId = requestAnimationFrame(draw)
+    }
+    animId = requestAnimationFrame(draw)
+    return () => {
+      if (animId) cancelAnimationFrame(animId)
+      ctx && ctx.clearRect(0, 0, canvas.width, canvas.height)
+    }
+  }, [isHovered, allAccepted])
+
   return (
     <div
+      ref={cardRef}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       className="border border-[#dde2e9] border-solid relative rounded-[24px] w-full md:w-[300px] overflow-hidden"
       style={{
         borderRadius: TOKENS.sizes.borderRadius.card
@@ -230,13 +317,19 @@ const SentCard = ({
               borderRadius: `${TOKENS.sizes.borderRadius.card} ${TOKENS.sizes.borderRadius.card} 0 0`
             }}
           >
+            {/* Confetti canvas (behind envelope) */}
+            <canvas
+              ref={confettiCanvasRef}
+              className="absolute inset-0"
+              style={{ zIndex: 1, pointerEvents: 'none', filter: 'blur(2.5px)' }}
+            />
             {/* Base color - dynamic from dominant color */}
             <div
               className="absolute inset-0"
                 data-name="HeaderBGBase"
               style={{
                   backgroundColor: headerBgColor,
-                  transition: 'filter 240ms ease'
+                  transition: 'filter 200ms ease-out'
               }}
             />
             {/* Gradient overlay with blend mode */}
@@ -622,8 +715,8 @@ const SentCard = ({
               <div
                 className="absolute inset-0"
                 style={{
-                  backdropFilter: 'blur(4px)',
-                  WebkitBackdropFilter: 'blur(4px)',
+                  backdropFilter: 'blur(0px)',
+                  WebkitBackdropFilter: 'blur(0px)',
                   top: '-8px',
                   left: '-8px',
                   right: '-8px',
@@ -822,8 +915,8 @@ const SentCard = ({
               data-name="Progress Bar Container"
             >
               {/* Progress Bar */}
-              <div
-                className="bg-gradient-to-b box-border content-stretch flex flex-col from-[#5a3dff] gap-[10px] items-start justify-center px-[8px] py-[2px] relative rounded-[100px] shrink-0"
+                  <div
+                    className="bg-gradient-to-b box-border content-stretch flex flex-col from-[#5a3dff] gap-[10px] items-center justify-center px-[8px] py-[2px] relative rounded-[100px] shrink-0"
                 style={{
                   background: 'linear-gradient(to bottom, #5a3dff, #a799ff)',
                   borderRadius: '100px',
@@ -836,8 +929,8 @@ const SentCard = ({
                 }}
                 data-name="Progress Bar"
               >
-                <p
-                  className="font-['Goody_Sans:Medium',sans-serif] leading-[1.4] min-w-full not-italic relative shrink-0 text-[14px] text-white w-[min-content]"
+                    <p
+                      className="font-['Goody_Sans:Medium',sans-serif] leading-[1.4] not-italic relative shrink-0 text-[14px] text-white text-center w-full"
                   style={{
                     fontFamily: 'var(--font-goody-sans)',
                     fontSize: '14px',
@@ -847,8 +940,8 @@ const SentCard = ({
                     whiteSpace: 'nowrap'
                   }}
                 >
-                  {validatedProgress.current === validatedProgress.total
-                    ? 'All accepted'
+                      {validatedProgress.current === validatedProgress.total
+                        ? 'Done'
                     : `${animatedCurrent}/${validatedProgress.total}`}
                 </p>
                 {/* Highlight gradient overlay */}
