@@ -165,8 +165,8 @@ const SentCard4 = ({
               width: '100%',
               flex: 1,
               pointerEvents: 'none',
-              marginTop: 0,
-              marginBottom: '-12px',
+              marginTop: '12px',
+              marginBottom: '-8px',
               position: 'relative',
               minHeight: '150px'
             }}
