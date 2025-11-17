@@ -684,7 +684,7 @@ const SentCard1 = ({
           infoTitle={giftTitle}
           infoSubtitle={giftSubtitle}
           equalPadding={progressOutsideEnvelope && footerPadEqual2 !== undefined ? footerPadEqual2 : footerPadEqual}
-          showProgress={showFooterProgress}
+          showProgress={progressOutsideEnvelope ? false : showFooterProgress}
           showReminder={progressOutsideEnvelope ? false : showFooterReminder}
           infoInSlot={overlayProgressOnEnvelope}
           bottomPadding={progressOutsideEnvelope && footerBottomPadding2 !== undefined ? footerBottomPadding2 : footerBottomPadding}
@@ -737,7 +737,9 @@ const SentCard1 = ({
                   <div
                     className="bg-gradient-to-b box-border content-stretch flex flex-col from-[#5a3dff] gap-[10px] items-center justify-center px-[8px] py-[3px] relative rounded-[100px] shrink-0"
                     style={{
-                      background: 'linear-gradient(to bottom, #5a3dff, #a799ff)',
+                      background: headerBgOverride === null 
+                        ? `linear-gradient(to bottom, ${progressStartColor}, ${progressEndColor})`
+                        : 'linear-gradient(to bottom, #5a3dff, #a799ff)',
                       borderRadius: PROGRESS_PILL_RADIUS,
                       width: isDone ? '100%' : `${animatedProgress}%`,
                       maxWidth: '100%',

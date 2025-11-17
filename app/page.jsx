@@ -136,9 +136,8 @@ const ALL_SENT_DATES = [
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState('gift') // 'gift' | 'sent1' (Batch) | 'sent4' (Single)
-  const [useColoredBackground, setUseColoredBackground] = useState(false) // Toggle for Sent Card 1 background
-  const [useSentCard3Layout, setUseSentCard3Layout] = useState(false) // Toggle for SentCard3 design layout
-  const [useSentCard3Layout2, setUseSentCard3Layout2] = useState(false) // Toggle for Altered Layout 2
+  const [useColoredBackground, setUseColoredBackground] = useState(false) // Toggle for theming
+  const [layout, setLayout] = useState('default') // 'default' | 'altered1' | 'altered2'
   const [cardStates, setCardStates] = useState({
     card1: 'unopened',
     card2: 'unopened',
@@ -245,17 +244,17 @@ export default function Home() {
           style={{ WebkitOverflowScrolling: 'touch' }}
         >
           <TabButton
-            label="Gift Card"
+            label="Gift Received"
             isActive={activeTab === 'gift'}
             onClick={handleGiftTab}
           />
           <TabButton
-            label="Sent Card (Batch)"
+            label="Gift Sent (Batch)"
             isActive={activeTab === 'sent1'}
             onClick={handleSent1Tab}
           />
           <TabButton
-            label="Sent Card (Single)"
+            label="Gift Sent (Single)"
             isActive={activeTab === 'sent4'}
             onClick={handleSent4Tab}
           />
@@ -296,7 +295,7 @@ export default function Home() {
             <div className="flex items-center justify-center gap-6 mb-6">
               {/* Background color toggle */}
               <div className="flex items-center gap-3">
-                <span className="text-sm text-[#525F7A]">Colored Background</span>
+                <span className="text-sm text-[#525F7A]">Theming</span>
                 <button
                   onClick={() => setUseColoredBackground(!useColoredBackground)}
                   className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
@@ -304,7 +303,7 @@ export default function Home() {
                   }`}
                   role="switch"
                   aria-checked={useColoredBackground}
-                  aria-label="Toggle colored background"
+                  aria-label="Toggle theming"
                 >
                   <span
                     className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
@@ -313,61 +312,35 @@ export default function Home() {
                   />
                 </button>
               </div>
-              {/* SentCard3 layout toggle */}
+              {/* Layout dropdown */}
               <div className="flex items-center gap-3">
-                <span className="text-sm text-[#525F7A]">Altered Layout</span>
-                <button
-                  onClick={() => {
-                    const newValue = !useSentCard3Layout
-                    setUseSentCard3Layout(newValue)
-                    if (newValue) {
-                      setUseSentCard3Layout2(false) // Turn off Altered Layout 2 when Altered Layout is enabled
-                    }
-                  }}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
-                    useSentCard3Layout ? 'bg-[#5a3dff]' : 'bg-gray-300'
-                  }`}
-                  role="switch"
-                  aria-checked={useSentCard3Layout}
-                  aria-label="Toggle SentCard3 design"
-                >
-                  <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                      useSentCard3Layout ? 'translate-x-6' : 'translate-x-1'
-                    }`}
-                  />
-                </button>
-              </div>
-              {/* Altered Layout 2 toggle */}
-              <div className="flex items-center gap-3">
-                <span className="text-sm text-[#525F7A]">Altered Layout 2</span>
-                <button
-                  onClick={() => {
-                    const newValue = !useSentCard3Layout2
-                    setUseSentCard3Layout2(newValue)
-                    if (newValue) {
-                      setUseSentCard3Layout(false) // Turn off Altered Layout when Altered Layout 2 is enabled
-                    }
-                  }}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
-                    useSentCard3Layout2 ? 'bg-[#5a3dff]' : 'bg-gray-300'
-                  }`}
-                  role="switch"
-                  aria-checked={useSentCard3Layout2}
-                  aria-label="Toggle Altered Layout 2"
-                >
-                  <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                      useSentCard3Layout2 ? 'translate-x-6' : 'translate-x-1'
-                    }`}
-                  />
-                </button>
+                <label htmlFor="layout-select" className="text-sm text-[#525F7A]">Layout</label>
+                <div className="relative inline-block">
+                  <select
+                    id="layout-select"
+                    value={layout}
+                    onChange={(e) => setLayout(e.target.value)}
+                    className="py-2 pl-3 pr-8 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0 appearance-none cursor-pointer"
+                    style={{ width: 'auto', minWidth: '80px' }}
+                  >
+                    <option value="default">Layout 1</option>
+                    <option value="altered1">Layout 2</option>
+                    <option value="altered2">Layout 3</option>
+                  </select>
+                  <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M3 4.5L6 7.5L9 4.5" stroke="#525F7A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                </div>
               </div>
             </div>
             <div className="grid gift-card-grid gap-[24px]">
               {sentCards.map((card, index) => {
-                // Determine which layout to use: Altered Layout 1 and Altered Layout 2 are mutually exclusive
-                const useAlteredLayout = useSentCard3Layout2 || useSentCard3Layout
+                // Determine which layout to use based on dropdown selection
+                const useAlteredLayout1 = layout === 'altered1'
+                const useAlteredLayout2 = layout === 'altered2'
+                const useAlteredLayout = useAlteredLayout1 || useAlteredLayout2
                 
                 return (
                   <SentCard1
@@ -384,7 +357,7 @@ export default function Home() {
                     footerPadEqual={useAlteredLayout}
                     footerTopPadding={useAlteredLayout ? 28 : undefined}
                     footerBottomPadding={useAlteredLayout ? 24 : 16}
-                    envelopeScale={useSentCard3Layout2 ? 0.8 : (useSentCard3Layout ? 0.9 : 1)}
+                    envelopeScale={useAlteredLayout2 ? 0.8 : (useAlteredLayout1 ? 0.9 : 1)}
                     envelopeOffsetY={useAlteredLayout ? 8 : 0}
                     confettiWhiteOverlay={useAlteredLayout}
                     envelopeHighZ={useAlteredLayout}
@@ -392,21 +365,21 @@ export default function Home() {
                     showFooterProgress={useAlteredLayout ? false : true}
                     showFooterReminder={true}
                     footerTransparent={useAlteredLayout}
-                    progressOutsideEnvelope={useSentCard3Layout2}
+                    progressOutsideEnvelope={useAlteredLayout2}
                     // Altered Layout 2 specific envelope controls
-                    envelopeScale2={useSentCard3Layout2 ? 0.75 : undefined}
-                    envelopeOffsetY2={useSentCard3Layout2 ? 24 : undefined}
-                    envelopeLeft2={useSentCard3Layout2 ? 0 : undefined}
-                    envelopeRight2={useSentCard3Layout2 ? 0 : undefined}
-                    envelopeTopBase2={useSentCard3Layout2 ? 0 : undefined}
-                    headerHeight2={useSentCard3Layout2 ? 240 : undefined}
-                    transformOrigin2={useSentCard3Layout2 ? 'center top' : undefined}
+                    envelopeScale2={useAlteredLayout2 ? 0.75 : undefined}
+                    envelopeOffsetY2={useAlteredLayout2 ? 24 : undefined}
+                    envelopeLeft2={useAlteredLayout2 ? 0 : undefined}
+                    envelopeRight2={useAlteredLayout2 ? 0 : undefined}
+                    envelopeTopBase2={useAlteredLayout2 ? 0 : undefined}
+                    headerHeight2={useAlteredLayout2 ? 240 : undefined}
+                    transformOrigin2={useAlteredLayout2 ? 'center top' : undefined}
                     // Altered Layout 2 specific footer controls
-                    footerTopPadding2={useSentCard3Layout2 ? 28 : undefined}
-                    footerBottomPadding2={useSentCard3Layout2 ? 16 : undefined}
-                    footerPadEqual2={useSentCard3Layout2 ? true : undefined}
-                    footerTransparent2={useSentCard3Layout2 ? true : undefined}
-                    progressBottomPadding2={useSentCard3Layout2 ? 20 : undefined}
+                    footerTopPadding2={useAlteredLayout2 ? 28 : undefined}
+                    footerBottomPadding2={useAlteredLayout2 ? 16 : undefined}
+                    footerPadEqual2={useAlteredLayout2 ? true : undefined}
+                    footerTransparent2={useAlteredLayout2 ? true : undefined}
+                    progressBottomPadding2={useAlteredLayout2 ? 20 : undefined}
                   />
                 )
               })}
