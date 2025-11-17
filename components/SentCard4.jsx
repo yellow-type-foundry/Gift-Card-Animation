@@ -76,12 +76,13 @@ const SentCard4 = ({
       onMouseLeave={handleHoverLeave}
       className="border border-[#dde2e9] border-solid relative rounded-[24px] w-full md:w-[300px] overflow-hidden"
       style={{
-        borderRadius: TOKENS.sizes.borderRadius.card
+        borderRadius: TOKENS.sizes.borderRadius.card,
+        minHeight: '400px'
       }}
       data-name="Gift Card"
       data-card-type="sent-single"
     >
-      <div className="content-stretch flex flex-col items-start overflow-hidden relative rounded-[inherit] size-full">
+      <div className="content-stretch flex flex-col items-start overflow-hidden relative rounded-[inherit] h-full">
         {/* Background with gradient overlay - extends to full card */}
         <div
           aria-hidden="true"
@@ -111,12 +112,13 @@ const SentCard4 = ({
 
         {/* Header Section */}
         <div
-          className="box-border content-stretch flex flex-col items-center justify-start px-0 relative shrink-0 w-full overflow-visible"
+          className="box-border content-stretch flex flex-col items-center justify-between px-0 relative w-full overflow-visible"
           style={{
             position: 'relative',
             paddingTop: '20px',
             paddingBottom: '0',
-            height: '240px'
+            flex: 1,
+            minHeight: '200px'
           }}
           data-name="Header"
         >
@@ -166,10 +168,10 @@ const SentCard4 = ({
               width: '100%',
               flex: 1,
               pointerEvents: 'none',
-              marginTop: '12px',
-              marginBottom: '-8px',
+              marginTop: '0px',
+              marginBottom: '-20px',
               position: 'relative',
-              minHeight: '150px'
+              minHeight: '100px'
             }}
             data-name="Gift Container"
           >
@@ -181,7 +183,7 @@ const SentCard4 = ({
                 top: '50%',
                 transform: 'translate(-50%, -50%)',
                 width: '300px',
-                height: '300pxx',
+                height: '300px',
                 zIndex: 1,
                 pointerEvents: 'none',
                 opacity: 1,
@@ -211,7 +213,7 @@ const SentCard4 = ({
               className="relative"
               style={{
                 width: '250px',
-                height: '250px',
+                height: '200px',
                 zIndex: 1,
                 pointerEvents: 'none',
                 position: 'relative'
@@ -222,7 +224,7 @@ const SentCard4 = ({
                 src={giftContainerImage}
                 alt="Gift Container"
                 fill
-                sizes="210px"
+                sizes="200px"
                 priority={true}
                 quality={100}
                 unoptimized={true}

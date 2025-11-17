@@ -82,7 +82,7 @@ export const FOOTER_CONFIG = {
     hideInfoOnHover: false, // Info stays visible on hover
     // Progress bar outside footer
     progressOutside: {
-      bottomPadding: 20,
+      bottomPadding: 16,
     },
   },
   

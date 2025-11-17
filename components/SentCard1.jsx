@@ -105,7 +105,8 @@ const SentCard1 = ({
       <div 
         className={`content-stretch flex flex-col items-start ${isMonochromeVariant ? 'overflow-visible' : 'overflow-hidden'} relative rounded-[inherit] w-full`} 
         style={{ 
-          paddingBottom: progressOutsideEnvelope ? '0px' : undefined
+          paddingBottom: progressOutsideEnvelope ? '0px' : undefined,
+          ...(progressOutsideEnvelope && headerHeight2 !== undefined ? { minHeight: '400px', height: '100%' } : {})
         }}
       >
         {/* Full card background when overlayProgressOnEnvelope is true */}
@@ -157,11 +158,13 @@ const SentCard1 = ({
         )}
         {/* Header Section - 280px tall */}
         <div
-          className="box-border content-stretch flex flex-col items-center justify-between pb-0 pt-[20px] px-0 relative shrink-0 w-full overflow-visible"
+          className={`box-border content-stretch flex flex-col items-center justify-between pb-0 pt-[20px] px-0 relative w-full overflow-visible ${progressOutsideEnvelope && headerHeight2 !== undefined ? '' : 'shrink-0'}`}
           style={{
             position: 'relative',
             zIndex: overlayProgressOnEnvelope ? 1 : 'auto',
-            height: progressOutsideEnvelope && headerHeight2 !== undefined ? `${headerHeight2}px` : '280px'
+            ...(progressOutsideEnvelope && headerHeight2 !== undefined 
+              ? { flex: 1, minHeight: `${headerHeight2}px` }
+              : { height: '280px' })
           }}
           data-name="Header"
           data-node-id="1467:49183"
@@ -252,16 +255,24 @@ const SentCard1 = ({
 
           {/* Envelope Container - children positioned relative to header */}
           <div
-            className="absolute inset-0"
+            className={`absolute ${progressOutsideEnvelope && envelopeTopBase2 !== undefined ? '' : 'inset-0'}`}
             style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              top: progressOutsideEnvelope && envelopeTopBase2 !== undefined 
-                ? `${envelopeTopBase2 + (envelopeOffsetY2 !== undefined ? envelopeOffsetY2 : envelopeOffsetY)}px`
-                : `${4 + envelopeOffsetY}px`,
-              left: progressOutsideEnvelope && envelopeLeft2 !== undefined ? `${envelopeLeft2}px` : '-2px',
-              right: progressOutsideEnvelope && envelopeRight2 !== undefined ? `${envelopeRight2}px` : '2px',
+              ...(progressOutsideEnvelope && envelopeTopBase2 !== undefined 
+                ? {
+                    top: `${envelopeTopBase2 + (envelopeOffsetY2 !== undefined ? envelopeOffsetY2 : envelopeOffsetY)}px`,
+                    left: envelopeLeft2 !== undefined ? `${envelopeLeft2}px` : '0px',
+                    right: envelopeRight2 !== undefined ? `${envelopeRight2}px` : '0px',
+                    bottom: 'auto'
+                  }
+                : {
+                    top: `${4 + envelopeOffsetY}px`,
+                    left: '-2px',
+                    right: '2px',
+                    bottom: '0px'
+                  }),
               zIndex: envelopeHighZ ? 50 : (overlayProgressOnEnvelope ? 2 : 2),
               transform: `scale(${progressOutsideEnvelope && envelopeScale2 !== undefined ? envelopeScale2 : envelopeScale})`,
               transformOrigin: progressOutsideEnvelope && transformOrigin2 !== undefined ? transformOrigin2 : 'center top'

@@ -223,6 +223,47 @@ export default function Home() {
   // Determine if current layout is single
   const isSingleLayout = layout === 'single'
   
+  // Helper function to get SentCard1 props based on layout
+  const getSentCard1Props = useCallback((card, useAlteredLayout1, useAlteredLayout2, useAlteredLayout, useColoredBackground) => {
+    return {
+      from: card.from,
+      title: card.title,
+      boxImage: card.boxImage,
+      giftTitle: card.giftTitle,
+      giftSubtitle: card.giftSubtitle,
+      progress: card.progress,
+      sentDate: card.sentDate,
+      headerBgOverride: useColoredBackground ? null : "#E3E7ED",
+      hideUnion: useAlteredLayout,
+      footerPadEqual: useAlteredLayout1 ? FOOTER_CONFIG.altered1.equalPadding : (useAlteredLayout2 ? FOOTER_CONFIG.altered2.equalPadding : FOOTER_CONFIG.default.equalPadding),
+      footerTopPadding: useAlteredLayout1 ? FOOTER_CONFIG.altered1.topPadding : (useAlteredLayout2 ? FOOTER_CONFIG.altered2.topPadding : FOOTER_CONFIG.default.topPadding),
+      footerBottomPadding: useAlteredLayout1 ? FOOTER_CONFIG.altered1.bottomPadding : (useAlteredLayout2 ? FOOTER_CONFIG.altered2.bottomPadding : FOOTER_CONFIG.default.bottomPadding),
+      envelopeScale: useAlteredLayout2 ? 0.8 : (useAlteredLayout1 ? 0.9 : 1),
+      envelopeOffsetY: useAlteredLayout ? 8 : 0,
+      confettiWhiteOverlay: useAlteredLayout,
+      envelopeHighZ: useAlteredLayout,
+      overlayProgressOnEnvelope: useAlteredLayout,
+      showFooterProgress: useAlteredLayout1 ? FOOTER_CONFIG.altered1.showProgress : (useAlteredLayout2 ? FOOTER_CONFIG.altered2.showProgress : FOOTER_CONFIG.default.showProgress),
+      showFooterReminder: useAlteredLayout1 ? FOOTER_CONFIG.altered1.showReminder : (useAlteredLayout2 ? FOOTER_CONFIG.altered2.showReminder : FOOTER_CONFIG.default.showReminder),
+      footerTransparent: useAlteredLayout1 ? FOOTER_CONFIG.altered1.transparent : (useAlteredLayout2 ? FOOTER_CONFIG.altered2.transparent : FOOTER_CONFIG.default.transparent),
+      progressOutsideEnvelope: useAlteredLayout2,
+      // Altered Layout 2 specific envelope controls
+      envelopeScale2: useAlteredLayout2 ? 0.75 : undefined,
+      envelopeOffsetY2: useAlteredLayout2 ? 24 : undefined,
+      envelopeLeft2: useAlteredLayout2 ? 0 : undefined,
+      envelopeRight2: useAlteredLayout2 ? 0 : undefined,
+      envelopeTopBase2: useAlteredLayout2 ? 0 : undefined,
+      headerHeight2: useAlteredLayout2 ? 240 : undefined,
+      transformOrigin2: useAlteredLayout2 ? 'center top' : undefined,
+      // Altered Layout 2 specific footer controls
+      footerTopPadding2: useAlteredLayout2 ? FOOTER_CONFIG.altered2.topPadding : undefined,
+      footerBottomPadding2: useAlteredLayout2 ? FOOTER_CONFIG.altered2.bottomPadding : undefined,
+      footerPadEqual2: useAlteredLayout2 ? FOOTER_CONFIG.altered2.equalPadding : undefined,
+      footerTransparent2: useAlteredLayout2 ? FOOTER_CONFIG.altered2.transparent : undefined,
+      progressBottomPadding2: useAlteredLayout2 ? FOOTER_CONFIG.altered2.progressOutside.bottomPadding : undefined,
+    }
+  }, [])
+  
   const handleOpenGift = useCallback((cardId) => {
     setCardStates(prev => ({
       ...prev,
@@ -258,7 +299,7 @@ export default function Home() {
       >
         {/* Tabs and Controls Row */}
         <div
-          className="w-full flex items-center justify-between gap-4 mb-6 overflow-x-auto md:overflow-visible whitespace-nowrap"
+          className="w-full flex items-center justify-between gap-4 mb-6 overflow-x-auto md:overflow-visible whitespace-nowrap px-5 md:px-0"
           style={{ 
             WebkitOverflowScrolling: 'touch', 
             height: '40px',
@@ -493,41 +534,7 @@ export default function Home() {
                     return (
                       <SentCard1
                         key={index}
-                        from={card.from}
-                        title={card.title}
-                        boxImage={card.boxImage}
-                        giftTitle={card.giftTitle}
-                        giftSubtitle={card.giftSubtitle}
-                        progress={card.progress}
-                        sentDate={card.sentDate}
-                        headerBgOverride={useColoredBackground ? null : "#E3E7ED"}
-                        hideUnion={useAlteredLayout}
-                        footerPadEqual={useAlteredLayout1 ? FOOTER_CONFIG.altered1.equalPadding : (useAlteredLayout2 ? FOOTER_CONFIG.altered2.equalPadding : FOOTER_CONFIG.default.equalPadding)}
-                        footerTopPadding={useAlteredLayout1 ? FOOTER_CONFIG.altered1.topPadding : (useAlteredLayout2 ? FOOTER_CONFIG.altered2.topPadding : FOOTER_CONFIG.default.topPadding)}
-                        footerBottomPadding={useAlteredLayout1 ? FOOTER_CONFIG.altered1.bottomPadding : (useAlteredLayout2 ? FOOTER_CONFIG.altered2.bottomPadding : FOOTER_CONFIG.default.bottomPadding)}
-                        envelopeScale={useAlteredLayout2 ? 0.8 : (useAlteredLayout1 ? 0.9 : 1)}
-                        envelopeOffsetY={useAlteredLayout ? 8 : 0}
-                        confettiWhiteOverlay={useAlteredLayout}
-                        envelopeHighZ={useAlteredLayout}
-                        overlayProgressOnEnvelope={useAlteredLayout}
-                        showFooterProgress={useAlteredLayout1 ? FOOTER_CONFIG.altered1.showProgress : (useAlteredLayout2 ? FOOTER_CONFIG.altered2.showProgress : FOOTER_CONFIG.default.showProgress)}
-                        showFooterReminder={useAlteredLayout1 ? FOOTER_CONFIG.altered1.showReminder : (useAlteredLayout2 ? FOOTER_CONFIG.altered2.showReminder : FOOTER_CONFIG.default.showReminder)}
-                        footerTransparent={useAlteredLayout1 ? FOOTER_CONFIG.altered1.transparent : (useAlteredLayout2 ? FOOTER_CONFIG.altered2.transparent : FOOTER_CONFIG.default.transparent)}
-                        progressOutsideEnvelope={useAlteredLayout2}
-                        // Altered Layout 2 specific envelope controls
-                        envelopeScale2={useAlteredLayout2 ? 0.75 : undefined}
-                        envelopeOffsetY2={useAlteredLayout2 ? 24 : undefined}
-                        envelopeLeft2={useAlteredLayout2 ? 0 : undefined}
-                        envelopeRight2={useAlteredLayout2 ? 0 : undefined}
-                        envelopeTopBase2={useAlteredLayout2 ? 0 : undefined}
-                        headerHeight2={useAlteredLayout2 ? 240 : undefined}
-                        transformOrigin2={useAlteredLayout2 ? 'center top' : undefined}
-                        // Altered Layout 2 specific footer controls
-                        footerTopPadding2={useAlteredLayout2 ? 28 : undefined}
-                        footerBottomPadding2={useAlteredLayout2 ? 16 : undefined}
-                        footerPadEqual2={useAlteredLayout2 ? true : undefined}
-                        footerTransparent2={useAlteredLayout2 ? true : undefined}
-                        progressBottomPadding2={useAlteredLayout2 ? 20 : undefined}
+                        {...getSentCard1Props(card, useAlteredLayout1, useAlteredLayout2, useAlteredLayout, useColoredBackground)}
                       />
                     )
                   } else {
@@ -565,41 +572,7 @@ export default function Home() {
                 return (
                   <SentCard1
                     key={index}
-                    from={card.from}
-                    title={card.title}
-                    boxImage={card.boxImage}
-                    giftTitle={card.giftTitle}
-                    giftSubtitle={card.giftSubtitle}
-                    progress={card.progress}
-                    sentDate={card.sentDate}
-                    headerBgOverride={useColoredBackground ? null : "#E3E7ED"}
-                    hideUnion={useAlteredLayout}
-                    footerPadEqual={useAlteredLayout1 ? FOOTER_CONFIG.altered1.equalPadding : (useAlteredLayout2 ? FOOTER_CONFIG.altered2.equalPadding : FOOTER_CONFIG.default.equalPadding)}
-                    footerTopPadding={useAlteredLayout1 ? FOOTER_CONFIG.altered1.topPadding : (useAlteredLayout2 ? FOOTER_CONFIG.altered2.topPadding : FOOTER_CONFIG.default.topPadding)}
-                    footerBottomPadding={useAlteredLayout1 ? FOOTER_CONFIG.altered1.bottomPadding : (useAlteredLayout2 ? FOOTER_CONFIG.altered2.bottomPadding : FOOTER_CONFIG.default.bottomPadding)}
-                    envelopeScale={useAlteredLayout2 ? 0.8 : (useAlteredLayout1 ? 0.9 : 1)}
-                    envelopeOffsetY={useAlteredLayout ? 8 : 0}
-                    confettiWhiteOverlay={useAlteredLayout}
-                    envelopeHighZ={useAlteredLayout}
-                    overlayProgressOnEnvelope={useAlteredLayout}
-                    showFooterProgress={useAlteredLayout1 ? FOOTER_CONFIG.altered1.showProgress : (useAlteredLayout2 ? FOOTER_CONFIG.altered2.showProgress : FOOTER_CONFIG.default.showProgress)}
-                    showFooterReminder={useAlteredLayout1 ? FOOTER_CONFIG.altered1.showReminder : (useAlteredLayout2 ? FOOTER_CONFIG.altered2.showReminder : FOOTER_CONFIG.default.showReminder)}
-                    footerTransparent={useAlteredLayout1 ? FOOTER_CONFIG.altered1.transparent : (useAlteredLayout2 ? FOOTER_CONFIG.altered2.transparent : FOOTER_CONFIG.default.transparent)}
-                    progressOutsideEnvelope={useAlteredLayout2}
-                    // Altered Layout 2 specific envelope controls
-                    envelopeScale2={useAlteredLayout2 ? 0.75 : undefined}
-                    envelopeOffsetY2={useAlteredLayout2 ? 24 : undefined}
-                    envelopeLeft2={useAlteredLayout2 ? 0 : undefined}
-                    envelopeRight2={useAlteredLayout2 ? 0 : undefined}
-                    envelopeTopBase2={useAlteredLayout2 ? 0 : undefined}
-                    headerHeight2={useAlteredLayout2 ? 240 : undefined}
-                    transformOrigin2={useAlteredLayout2 ? 'center top' : undefined}
-                    // Altered Layout 2 specific footer controls
-                    footerTopPadding2={useAlteredLayout2 ? FOOTER_CONFIG.altered2.topPadding : undefined}
-                    footerBottomPadding2={useAlteredLayout2 ? FOOTER_CONFIG.altered2.bottomPadding : undefined}
-                    footerPadEqual2={useAlteredLayout2 ? FOOTER_CONFIG.altered2.equalPadding : undefined}
-                    footerTransparent2={useAlteredLayout2 ? FOOTER_CONFIG.altered2.transparent : undefined}
-                    progressBottomPadding2={useAlteredLayout2 ? FOOTER_CONFIG.altered2.progressOutside.bottomPadding : undefined}
+                    {...getSentCard1Props(card, useAlteredLayout1, useAlteredLayout2, useAlteredLayout, useColoredBackground)}
                   />
                 )
               })}
