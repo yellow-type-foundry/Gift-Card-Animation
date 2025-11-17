@@ -700,7 +700,7 @@ const SentCard1 = ({
             style={{
               width: '100%',
               display: 'block',
-              marginTop: '8px',
+              marginTop: '0px',
               paddingTop: '0px',
               paddingBottom: progressBottomPadding2 !== undefined ? `${progressBottomPadding2}px` : '20px',
               zIndex: 0,
