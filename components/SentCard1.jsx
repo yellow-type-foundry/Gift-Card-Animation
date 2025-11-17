@@ -31,10 +31,24 @@ const SentCard1 = ({
   envelopeHighZ = false,
   overlayProgressOnEnvelope = false,
   showFooterProgress = true,
+  progressOutsideEnvelope = false,
   showFooterReminder = true,
   footerBottomPadding = 16,
   footerTopPadding,
-  footerTransparent = false
+  footerTransparent = false,
+  // Altered Layout 2 specific envelope controls
+  envelopeScale2,
+  envelopeOffsetY2,
+  envelopeLeft2,
+  envelopeRight2,
+  envelopeTopBase2,
+  headerHeight2,
+  transformOrigin2,
+  // Altered Layout 2 specific footer controls
+  footerTopPadding2,
+  footerBottomPadding2,
+  footerPadEqual2,
+  footerTransparent2
 }) => {
   // Hooks
   const cardRef = useRef(null)
@@ -135,10 +149,11 @@ const SentCard1 = ({
         )}
         {/* Header Section - 280px tall */}
         <div
-          className="box-border content-stretch flex flex-col h-[280px] items-center justify-between pb-0 pt-[20px] px-0 relative shrink-0 w-full overflow-visible"
+          className="box-border content-stretch flex flex-col items-center justify-between pb-0 pt-[20px] px-0 relative shrink-0 w-full overflow-visible"
           style={{
             position: 'relative',
-            zIndex: overlayProgressOnEnvelope ? 1 : 'auto'
+            zIndex: overlayProgressOnEnvelope ? 1 : 'auto',
+            height: progressOutsideEnvelope && headerHeight2 !== undefined ? `${headerHeight2}px` : '280px'
           }}
           data-name="Header"
           data-node-id="1467:49183"
@@ -234,12 +249,14 @@ const SentCard1 = ({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              top: `${4 + envelopeOffsetY}px`,
-              left: '-2px',
-              right: '2px',
+              top: progressOutsideEnvelope && envelopeTopBase2 !== undefined 
+                ? `${envelopeTopBase2 + (envelopeOffsetY2 !== undefined ? envelopeOffsetY2 : envelopeOffsetY)}px`
+                : `${4 + envelopeOffsetY}px`,
+              left: progressOutsideEnvelope && envelopeLeft2 !== undefined ? `${envelopeLeft2}px` : '-2px',
+              right: progressOutsideEnvelope && envelopeRight2 !== undefined ? `${envelopeRight2}px` : '2px',
               zIndex: envelopeHighZ ? 50 : (overlayProgressOnEnvelope ? 2 : 2),
-              transform: `scale(${envelopeScale})`,
-              transformOrigin: 'center top'
+              transform: `scale(${progressOutsideEnvelope && envelopeScale2 !== undefined ? envelopeScale2 : envelopeScale})`,
+              transformOrigin: progressOutsideEnvelope && transformOrigin2 !== undefined ? transformOrigin2 : 'center top'
             }}
             data-name="Envelope"
             data-node-id="1467:49190"
@@ -249,7 +266,7 @@ const SentCard1 = ({
             {/* Base (envelope base) - moved inside Envelope so it moves together */}
             <div style={{ position: 'relative', width: '100%', height: '100%' }}>
               <EnvelopeBase ids={ids} baseTintColor={baseTintColor} />
-              {overlayProgressOnEnvelope && (
+              {overlayProgressOnEnvelope && !progressOutsideEnvelope && (
                 <div
                   className="absolute"
                   style={{
@@ -658,14 +675,83 @@ const SentCard1 = ({
           validatedTotal={validatedProgress.total}
           infoTitle={giftTitle}
           infoSubtitle={giftSubtitle}
-          equalPadding={footerPadEqual}
+          equalPadding={progressOutsideEnvelope && footerPadEqual2 !== undefined ? footerPadEqual2 : footerPadEqual}
           showProgress={showFooterProgress}
           showReminder={showFooterReminder}
           infoInSlot={overlayProgressOnEnvelope}
-          bottomPadding={footerBottomPadding}
-          topPadding={footerTopPadding}
-          transparent={footerTransparent}
+          bottomPadding={progressOutsideEnvelope && footerBottomPadding2 !== undefined ? footerBottomPadding2 : footerBottomPadding}
+          topPadding={progressOutsideEnvelope && footerTopPadding2 !== undefined ? footerTopPadding2 : footerTopPadding}
+          transparent={progressOutsideEnvelope && footerTransparent2 !== undefined ? footerTransparent2 : footerTransparent}
         />
+
+        {/* Progress bar outside envelope (for Altered Layout 2) - positioned relatively under gift info */}
+        {overlayProgressOnEnvelope && progressOutsideEnvelope && (
+          <div
+            className="relative"
+            style={{
+              width: '100%',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              paddingTop: '0px',
+              paddingBottom: '20px',
+              zIndex: 3
+            }}
+            data-name="OutsideProgress"
+          >
+            <div
+              className="bg-[#f0f1f5] border border-[rgba(221,226,233,0)] border-solid box-border content-stretch flex flex-col gap-[10px] items-start justify-center p-[2px] relative rounded-[100px] shrink-0"
+              style={{
+                borderRadius: PROGRESS_PILL_RADIUS,
+                backgroundColor: '#f0f1f5',
+                width: '120px'
+              }}
+            >
+              <div
+                className="bg-gradient-to-b box-border content-stretch flex flex-col from-[#5a3dff] gap-[10px] items-center justify-center px-[8px] py-[3px] relative rounded-[100px] shrink-0"
+                style={{
+                  background: 'linear-gradient(to bottom, #5a3dff, #a799ff)',
+                  borderRadius: PROGRESS_PILL_RADIUS,
+                  width: isDone ? '100%' : `${animatedProgress}%`,
+                  maxWidth: '100%',
+                  minWidth: 'fit-content',
+                  transition: 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                  boxShadow: PROGRESS_GLOW_BOX_SHADOW
+                }}
+              >
+                <p
+                  className="font-['Goody_Sans:Medium',sans-serif] leading-[1.4] not-italic relative shrink-0 text-[14px] text-white text-center w-full"
+                  style={{
+                    fontFamily: 'var(--font-goody-sans)',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    lineHeight: 1.4,
+                    color: '#ffffff',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  {isDone ? 'Done' : `${animatedCurrent}/${validatedProgress.total}`}
+                </p>
+                {/* highlight removed */}
+                <div
+                  className="absolute inset-0 pointer-events-none"
+                  style={{
+                    boxShadow: '0px 3px 5px 2px inset rgba(255,255,255,0.5)',
+                    borderRadius: PROGRESS_PILL_RADIUS
+                  }}
+                />
+              </div>
+              <div
+                className="absolute inset-[-1px] pointer-events-none"
+                style={{
+                  boxShadow: '0px 1px 2.25px 0px inset #c2c6d6, 0px -1px 2.25px 0px inset #ffffff',
+                  borderRadius: PROGRESS_PILL_RADIUS
+                }}
+              />
+            </div>
+          </div>
+        )}
+
       </div>
     </div>
   )
