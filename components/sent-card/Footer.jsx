@@ -153,7 +153,7 @@ export default function Footer({
               data-name="Progress Bar Container"
             >
               <div
-                className="bg-gradient-to-b box-border content-stretch flex flex-col from-[#5a3dff] gap-[10px] items-center justify-center px-[8px] py-[2px] relative rounded-[100px] shrink-0"
+                className="bg-gradient-to-b box-border content-stretch flex flex-col from-[#5a3dff] gap-[10px] items-center justify-center px-[8px] py-[3px] relative rounded-[100px] shrink-0"
                 style={{
                   background: 'linear-gradient(to bottom, #5a3dff, #a799ff)',
                   borderRadius: PROGRESS_PILL_RADIUS,

@@ -3,8 +3,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import GiftCard from '@/components/GiftCard'
 import SentCard1 from '@/components/SentCard1'
-import SentCard2 from '@/components/SentCard2'
-import SentCard3 from '@/components/SentCard3'
 import SentCard4 from '@/components/SentCard4'
 
 // Static data moved outside component to avoid recreation on every render
@@ -144,7 +142,9 @@ const shuffleArray = (array) => {
 }
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState('gift') // 'gift' | 'sent1' | 'sent2' | 'sent3' | 'sent4'
+  const [activeTab, setActiveTab] = useState('gift') // 'gift' | 'sent1' | 'sent4'
+  const [useColoredBackground, setUseColoredBackground] = useState(false) // Toggle for Sent Card 1 background
+  const [useSentCard3Layout, setUseSentCard3Layout] = useState(false) // Toggle for SentCard3 design layout
   const [cardStates, setCardStates] = useState({
     card1: 'unopened',
     card2: 'unopened',
@@ -272,18 +272,6 @@ export default function Home() {
             Sent Card (1)
           </button>
           <button
-            onClick={() => setActiveTab('sent2')}
-            className={`px-3 py-1.5 rounded-[12px] outline outline-1 outline-offset-[-1px] shrink-0 ${activeTab==='sent2' ? 'bg-white outline-zinc-300 text-black' : 'bg-[#f0f1f5] outline-zinc-200 text-[#525F7A]'}`}
-          >
-            Sent Card (2)
-          </button>
-          <button
-            onClick={() => setActiveTab('sent3')}
-            className={`px-3 py-1.5 rounded-[12px] outline outline-1 outline-offset-[-1px] shrink-0 ${activeTab==='sent3' ? 'bg-white outline-zinc-300 text-black' : 'bg-[#f0f1f5] outline-zinc-200 text-[#525F7A]'}`}
-          >
-            Sent Card (3)
-          </button>
-          <button
             onClick={() => setActiveTab('sent4')}
             className={`px-3 py-1.5 rounded-[12px] outline outline-1 outline-offset-[-1px] shrink-0 ${activeTab==='sent4' ? 'bg-white outline-zinc-300 text-black' : 'bg-[#f0f1f5] outline-zinc-200 text-[#525F7A]'}`}
           >
@@ -321,49 +309,75 @@ export default function Home() {
             <GiftCard state={cardStates.card8} from="Ryan Thompson" message={messages[7]} expiryText={cardStates.card8 === 'unopened' ? 'Expiring in 19 days' : undefined} giftTitle="Gourmet Chocolate Truffles" giftSubtitle="Vosges Haut-Chocolat" boxImage={boxPairs[7].box1} box2Image={boxPairs[7].box2} onOpenGift={cardHandlers.card8} />
           </div>
         ) : activeTab === 'sent1' ? (
-          <div className="grid gift-card-grid gap-[24px]">
-            {sentCards.map((card, index) => (
-              <SentCard1
-                key={index}
-                from={card.from}
-                title={card.title}
-                boxImage={card.boxImage}
-                giftTitle={card.giftTitle}
-                giftSubtitle={card.giftSubtitle}
-                progress={card.progress}
-                sentDate={card.sentDate}
-              />
-            ))}
-          </div>
-        ) : activeTab === 'sent2' ? (
-          <div className="grid gift-card-grid gap-[24px]">
-            {sentCards.map((card, index) => (
-              <SentCard2
-                key={`sent2-${index}`}
-                from={card.from}
-                title={card.title}
-                boxImage={card.boxImage}
-                giftTitle={card.giftTitle}
-                giftSubtitle={card.giftSubtitle}
-                progress={card.progress}
-                sentDate={card.sentDate}
-              />
-            ))}
-          </div>
-        ) : activeTab === 'sent3' ? (
-          <div className="grid gift-card-grid gap-[24px]">
-            {sentCards.map((card, index) => (
-              <SentCard3
-                key={`sent3-${index}`}
-                from={card.from}
-                title={card.title}
-                boxImage={card.boxImage}
-                giftTitle={card.giftTitle}
-                giftSubtitle={card.giftSubtitle}
-                progress={card.progress}
-                sentDate={card.sentDate}
-              />
-            ))}
+          <div>
+            {/* Toggles */}
+            <div className="flex items-center justify-center gap-6 mb-6">
+              {/* Background color toggle */}
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-[#525F7A]">Colored Background</span>
+                <button
+                  onClick={() => setUseColoredBackground(!useColoredBackground)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
+                    useColoredBackground ? 'bg-[#5a3dff]' : 'bg-gray-300'
+                  }`}
+                  role="switch"
+                  aria-checked={useColoredBackground}
+                  aria-label="Toggle colored background"
+                  disabled={useSentCard3Layout}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      useColoredBackground ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+              {/* SentCard3 layout toggle */}
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-[#525F7A]">Altered Layout</span>
+                <button
+                  onClick={() => setUseSentCard3Layout(!useSentCard3Layout)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
+                    useSentCard3Layout ? 'bg-[#5a3dff]' : 'bg-gray-300'
+                  }`}
+                  role="switch"
+                  aria-checked={useSentCard3Layout}
+                  aria-label="Toggle SentCard3 design"
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      useSentCard3Layout ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+            </div>
+            <div className="grid gift-card-grid gap-[24px]">
+              {sentCards.map((card, index) => (
+                <SentCard1
+                  key={index}
+                  from={card.from}
+                  title={card.title}
+                  boxImage={card.boxImage}
+                  giftTitle={card.giftTitle}
+                  giftSubtitle={card.giftSubtitle}
+                  progress={card.progress}
+                  sentDate={card.sentDate}
+                  headerBgOverride={useSentCard3Layout ? "#E3E7ED" : (useColoredBackground ? null : "#E3E7ED")}
+                  hideUnion={useSentCard3Layout}
+                  footerPadEqual={useSentCard3Layout}
+                  footerTopPadding={useSentCard3Layout ? 20 : undefined}
+                  footerBottomPadding={useSentCard3Layout ? 24 : 16}
+                  envelopeScale={useSentCard3Layout ? 0.9 : 1}
+                  envelopeOffsetY={useSentCard3Layout ? 6 : 0}
+                  confettiWhiteOverlay={useSentCard3Layout}
+                  envelopeHighZ={useSentCard3Layout}
+                  overlayProgressOnEnvelope={useSentCard3Layout}
+                  showFooterProgress={useSentCard3Layout ? false : true}
+                  showFooterReminder={true}
+                />
+              ))}
+            </div>
           </div>
         ) : (
           <div className="grid gift-card-grid gap-[24px]">
