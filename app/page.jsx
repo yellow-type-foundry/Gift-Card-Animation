@@ -5,6 +5,7 @@ import GiftCard from '@/components/GiftCard'
 import SentCard1 from '@/components/SentCard1'
 import SentCard2 from '@/components/SentCard2'
 import SentCard3 from '@/components/SentCard3'
+import SentCard4 from '@/components/SentCard4'
 
 // Static data moved outside component to avoid recreation on every render
 const ALL_BOX_PAIRS = [
@@ -143,7 +144,7 @@ const shuffleArray = (array) => {
 }
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState('gift') // 'gift' | 'sent1' | 'sent2' | 'sent3'
+  const [activeTab, setActiveTab] = useState('gift') // 'gift' | 'sent1' | 'sent2' | 'sent3' | 'sent4'
   const [cardStates, setCardStates] = useState({
     card1: 'unopened',
     card2: 'unopened',
@@ -282,6 +283,12 @@ export default function Home() {
           >
             Sent Card (3)
           </button>
+          <button
+            onClick={() => setActiveTab('sent4')}
+            className={`px-3 py-1.5 rounded-[12px] outline outline-1 outline-offset-[-1px] shrink-0 ${activeTab==='sent4' ? 'bg-white outline-zinc-300 text-black' : 'bg-[#f0f1f5] outline-zinc-200 text-[#525F7A]'}`}
+          >
+            Sent Card (4)
+          </button>
         </div>
         {/* Content */}
         {activeTab === 'gift' ? (
@@ -343,11 +350,26 @@ export default function Home() {
               />
             ))}
           </div>
-        ) : (
+        ) : activeTab === 'sent3' ? (
           <div className="grid gift-card-grid gap-[24px]">
             {sentCards.map((card, index) => (
               <SentCard3
                 key={`sent3-${index}`}
+                from={card.from}
+                title={card.title}
+                boxImage={card.boxImage}
+                giftTitle={card.giftTitle}
+                giftSubtitle={card.giftSubtitle}
+                progress={card.progress}
+                sentDate={card.sentDate}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="grid gift-card-grid gap-[24px]">
+            {sentCards.map((card, index) => (
+              <SentCard4
+                key={`sent4-${index}`}
                 from={card.from}
                 title={card.title}
                 boxImage={card.boxImage}

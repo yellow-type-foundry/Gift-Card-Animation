@@ -18,28 +18,38 @@ export default function Footer({
   showReminder = true,
   infoInSlot = false,
   bottomPadding = 16,
-  topPadding
+  topPadding,
+  transparent = false
 }) {
   return (
     <div
-      className="bg-white box-border flex items-center justify-center pt-0 px-[16px] relative shrink-0 w-full"
-      style={{ position: 'relative', zIndex: 20, width: '100%', paddingTop: topPadding !== undefined ? `${topPadding}px` : (equalPadding ? '16px' : undefined), paddingBottom: `${bottomPadding}px` }}
+      className="box-border flex items-center justify-center pt-0 px-[16px] relative shrink-0 w-full"
+      style={{ 
+        position: 'relative', 
+        zIndex: 20, 
+        width: '100%', 
+        paddingTop: topPadding !== undefined ? `${topPadding}px` : (equalPadding ? '16px' : undefined), 
+        paddingBottom: `${bottomPadding}px`,
+        backgroundColor: transparent ? 'transparent' : 'white'
+      }}
       data-node-id="1467:49205"
     >
       {/* Background blur + white gradient (bottom -> top) */}
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          backdropFilter: 'blur(00px)',
-          WebkitBackdropFilter: 'blur(00px)',
-          background: 'linear-gradient(to top, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.75) 60%, rgba(255,255,255,0.0) 100%)',
-          zIndex: -1
-        }}
-      />
+      {!transparent && (
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backdropFilter: 'blur(00px)',
+            WebkitBackdropFilter: 'blur(00px)',
+            background: 'linear-gradient(to top, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.75) 60%, rgba(255,255,255,0.0) 100%)',
+            zIndex: -1
+          }}
+        />
+      )}
       <div
         data-name="InfoBarContent"
-        className="content-stretch flex flex-col gap-[9px] items-center justify-center text-center transition-all"
+        className="content-stretch flex flex-col gap-[12px] items-center justify-center text-center transition-all"
         style={{ width: '100%' }}
       >
         {/* Info first */}
@@ -128,10 +138,10 @@ export default function Footer({
             data-name="ProgressSlot"
             className="absolute inset-0 flex items-center justify-center"
             style={{
-              opacity: isHovered && !isDone ? 0 : 1,
-              transform: isHovered && !isDone ? 'translateY(4px)' : 'translateY(0)',
-              transition: 'opacity 200ms ease-out, transform 200ms ease-out',
-              pointerEvents: isHovered && !isDone ? 'none' : 'auto'
+              opacity: transparent ? 1 : (isHovered && !isDone ? 0 : 1),
+              transform: transparent ? 'translateY(0)' : (isHovered && !isDone ? 'translateY(4px)' : 'translateY(0)'),
+              transition: transparent ? 'none' : 'opacity 200ms ease-out, transform 200ms ease-out',
+              pointerEvents: transparent ? 'auto' : (isHovered && !isDone ? 'none' : 'auto')
             }}
           >
             <div
