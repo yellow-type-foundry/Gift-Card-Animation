@@ -30,7 +30,7 @@ const SentCard4 = ({
   overlayProgressOnEnvelope = true,
   showFooterProgress = false,
   showFooterReminder = true,
-  footerBottomPadding = 24,
+  footerBottomPadding = 20,
   footerTopPadding = 0
 }) => {
   // Hooks
