@@ -100,6 +100,117 @@ export const FOOTER_CONFIG = {
   },
 }
 
+// Unified layout configuration for all Gift Sent card variants
+// All layout controls (header, envelope, footer) are centralized here
+// 
+// To modify any layout's settings, edit the values in this object:
+// - header.height: Header height in pixels (fixed height or minHeight when useFlex is true)
+// - header.useFlex: Whether header should use flex: 1 to fill available height
+// - envelope.scale: Scale factor for envelope/gift container (0.5 = 50%, 1 = 100%, 1.5 = 150%)
+// - envelope.offsetY: Vertical offset in pixels
+// - envelope.left/right/top: Positioning overrides (undefined = use default)
+// - envelope.transformOrigin: CSS transform-origin value
+// - Layout flags: Boolean flags for various layout behaviors
+//
+// Footer settings are in FOOTER_CONFIG above
+export const LAYOUT_CONFIG = {
+  // Default layout (Batch - Layout 1)
+  default: {
+    // Header settings
+    header: {
+      height: 280, // minHeight when useFlex is true
+      useFlex: true, // Whether to use flex: 1 for fill height
+    },
+    // Envelope settings
+    envelope: {
+      scale: 1,
+      offsetY: 0,
+      left: undefined, // Uses default positioning
+      right: undefined,
+      top: undefined,
+      transformOrigin: undefined,
+    },
+    // Layout flags
+    hideUnion: false,
+    confettiWhiteOverlay: false,
+    envelopeHighZ: false,
+    overlayProgressOnEnvelope: false,
+    progressOutsideEnvelope: false,
+  },
+  
+  // Altered Layout 1 (Batch - Layout 2)
+  altered1: {
+    // Header settings
+    header: {
+      height: 280, // minHeight when useFlex is true
+      useFlex: true, // Fill available height
+    },
+    // Envelope settings
+    envelope: {
+      scale: 0.9,
+      offsetY: 8,
+      left: undefined,
+      right: undefined,
+      top: undefined,
+      transformOrigin: undefined,
+    },
+    // Layout flags
+    hideUnion: true,
+    confettiWhiteOverlay: true,
+    envelopeHighZ: true,
+    overlayProgressOnEnvelope: true,
+    progressOutsideEnvelope: false,
+  },
+  
+  // Altered Layout 2 (Batch - Layout 3)
+  altered2: {
+    // Header settings
+    header: {
+      height: 240, // minHeight when useFlex is true
+      useFlex: true, // Fill available height
+    },
+    // Envelope settings
+    envelope: {
+      scale: 0.75,
+      offsetY: 24,
+      left: 0,
+      right: 0,
+      top: 0,
+      transformOrigin: 'center top',
+    },
+    // Layout flags
+    hideUnion: true,
+    confettiWhiteOverlay: true,
+    envelopeHighZ: true,
+    overlayProgressOnEnvelope: true,
+    progressOutsideEnvelope: true,
+  },
+  
+  // Single card layout (SentCard4)
+  single: {
+    // Header settings
+    header: {
+      height: 240, // minHeight when useFlex is true
+      useFlex: true, // Fill available height
+    },
+    // Gift container settings (similar to envelope)
+    envelope: {
+      scale: 1, // Not used for single, but kept for consistency
+      offsetY: 0,
+      left: undefined,
+      right: undefined,
+      top: undefined,
+      transformOrigin: undefined,
+    },
+    // Layout flags
+    hideUnion: false, // Not applicable
+    confettiWhiteOverlay: false,
+    envelopeHighZ: false,
+    overlayProgressOnEnvelope: true,
+    progressOutsideEnvelope: false,
+  },
+}
+
 // Envelope dimensions
 export const ENVELOPE_DIMENSIONS = {
   base: {

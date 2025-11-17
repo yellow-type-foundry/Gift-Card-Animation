@@ -6,7 +6,7 @@ import SentCard1 from '@/components/SentCard1'
 import SentCard4 from '@/components/SentCard4'
 import TabButton from '@/components/TabButton'
 import { shuffleArray, generateRandomSentCardData } from '@/utils/cardData'
-import { FOOTER_CONFIG } from '@/constants/sentCardConstants'
+import { FOOTER_CONFIG, LAYOUT_CONFIG } from '@/constants/sentCardConstants'
 
 // Static data moved outside component to avoid recreation on every render
 const ALL_BOX_PAIRS = [
@@ -225,6 +225,11 @@ export default function Home() {
   
   // Helper function to get SentCard1 props based on layout
   const getSentCard1Props = useCallback((card, useAlteredLayout1, useAlteredLayout2, useAlteredLayout, useColoredBackground) => {
+    // Determine which layout config to use
+    const layoutKey = useAlteredLayout2 ? 'altered2' : (useAlteredLayout1 ? 'altered1' : 'default')
+    const layoutConfig = LAYOUT_CONFIG[layoutKey]
+    const footerConfig = useAlteredLayout1 ? FOOTER_CONFIG.altered1 : (useAlteredLayout2 ? FOOTER_CONFIG.altered2 : FOOTER_CONFIG.default)
+    
     return {
       from: card.from,
       title: card.title,
@@ -234,27 +239,37 @@ export default function Home() {
       progress: card.progress,
       sentDate: card.sentDate,
       headerBgOverride: useColoredBackground ? null : "#E3E7ED",
-      hideUnion: useAlteredLayout,
-      footerPadEqual: useAlteredLayout1 ? FOOTER_CONFIG.altered1.equalPadding : (useAlteredLayout2 ? FOOTER_CONFIG.altered2.equalPadding : FOOTER_CONFIG.default.equalPadding),
-      footerTopPadding: useAlteredLayout1 ? FOOTER_CONFIG.altered1.topPadding : (useAlteredLayout2 ? FOOTER_CONFIG.altered2.topPadding : FOOTER_CONFIG.default.topPadding),
-      footerBottomPadding: useAlteredLayout1 ? FOOTER_CONFIG.altered1.bottomPadding : (useAlteredLayout2 ? FOOTER_CONFIG.altered2.bottomPadding : FOOTER_CONFIG.default.bottomPadding),
-      envelopeScale: useAlteredLayout2 ? 0.8 : (useAlteredLayout1 ? 0.9 : 1),
-      envelopeOffsetY: useAlteredLayout ? 8 : 0,
-      confettiWhiteOverlay: useAlteredLayout,
-      envelopeHighZ: useAlteredLayout,
-      overlayProgressOnEnvelope: useAlteredLayout,
-      showFooterProgress: useAlteredLayout1 ? FOOTER_CONFIG.altered1.showProgress : (useAlteredLayout2 ? FOOTER_CONFIG.altered2.showProgress : FOOTER_CONFIG.default.showProgress),
-      showFooterReminder: useAlteredLayout1 ? FOOTER_CONFIG.altered1.showReminder : (useAlteredLayout2 ? FOOTER_CONFIG.altered2.showReminder : FOOTER_CONFIG.default.showReminder),
-      footerTransparent: useAlteredLayout1 ? FOOTER_CONFIG.altered1.transparent : (useAlteredLayout2 ? FOOTER_CONFIG.altered2.transparent : FOOTER_CONFIG.default.transparent),
-      progressOutsideEnvelope: useAlteredLayout2,
+      // Layout config values
+      hideUnion: layoutConfig.hideUnion,
+      confettiWhiteOverlay: layoutConfig.confettiWhiteOverlay,
+      envelopeHighZ: layoutConfig.envelopeHighZ,
+      overlayProgressOnEnvelope: layoutConfig.overlayProgressOnEnvelope,
+      progressOutsideEnvelope: layoutConfig.progressOutsideEnvelope,
+      // Envelope settings
+      envelopeScale: layoutConfig.envelope.scale,
+      envelopeOffsetY: layoutConfig.envelope.offsetY,
+      // Header settings (for all layouts)
+      headerHeight: layoutConfig.header.height,
+      headerUseFlex: layoutConfig.header.useFlex,
+      // Altered Layout 1 specific header settings
+      headerHeight1: useAlteredLayout1 ? layoutConfig.header.height : undefined,
+      headerUseFlex1: useAlteredLayout1 ? layoutConfig.header.useFlex : undefined,
       // Altered Layout 2 specific envelope controls
-      envelopeScale2: useAlteredLayout2 ? 0.75 : undefined,
-      envelopeOffsetY2: useAlteredLayout2 ? 24 : undefined,
-      envelopeLeft2: useAlteredLayout2 ? 0 : undefined,
-      envelopeRight2: useAlteredLayout2 ? 0 : undefined,
-      envelopeTopBase2: useAlteredLayout2 ? 0 : undefined,
-      headerHeight2: useAlteredLayout2 ? 240 : undefined,
-      transformOrigin2: useAlteredLayout2 ? 'center top' : undefined,
+      envelopeScale2: useAlteredLayout2 ? layoutConfig.envelope.scale : undefined,
+      envelopeOffsetY2: useAlteredLayout2 ? layoutConfig.envelope.offsetY : undefined,
+      envelopeLeft2: useAlteredLayout2 ? layoutConfig.envelope.left : undefined,
+      envelopeRight2: useAlteredLayout2 ? layoutConfig.envelope.right : undefined,
+      envelopeTopBase2: useAlteredLayout2 ? layoutConfig.envelope.top : undefined,
+      headerHeight2: useAlteredLayout2 ? layoutConfig.header.height : undefined,
+      headerUseFlex2: useAlteredLayout2 ? layoutConfig.header.useFlex : undefined,
+      transformOrigin2: useAlteredLayout2 ? layoutConfig.envelope.transformOrigin : undefined,
+      // Footer settings
+      footerPadEqual: footerConfig.equalPadding,
+      footerTopPadding: footerConfig.topPadding,
+      footerBottomPadding: footerConfig.bottomPadding,
+      footerTransparent: footerConfig.transparent,
+      showFooterProgress: footerConfig.showProgress,
+      showFooterReminder: footerConfig.showReminder,
       // Altered Layout 2 specific footer controls
       footerTopPadding2: useAlteredLayout2 ? FOOTER_CONFIG.altered2.topPadding : undefined,
       footerBottomPadding2: useAlteredLayout2 ? FOOTER_CONFIG.altered2.bottomPadding : undefined,

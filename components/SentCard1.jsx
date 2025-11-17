@@ -36,6 +36,12 @@ const SentCard1 = ({
   footerBottomPadding = 16,
   footerTopPadding,
   footerTransparent = false,
+  // Header controls (for all layouts)
+  headerHeight, // Default layout header height
+  headerUseFlex, // Default layout header useFlex
+  // Altered Layout 1 specific controls
+  headerHeight1,
+  headerUseFlex1,
   // Altered Layout 2 specific envelope controls
   envelopeScale2,
   envelopeOffsetY2,
@@ -43,6 +49,7 @@ const SentCard1 = ({
   envelopeRight2,
   envelopeTopBase2,
   headerHeight2,
+  headerUseFlex2,
   transformOrigin2,
   // Altered Layout 2 specific footer controls
   footerTopPadding2,
@@ -97,16 +104,23 @@ const SentCard1 = ({
       className="border border-[#dde2e9] border-solid relative rounded-[24px] w-full md:w-[300px] overflow-hidden"
       style={{
         borderRadius: TOKENS.sizes.borderRadius.card,
-        height: 'auto'
+        height: 'auto',
+        ...(headerUseFlex && headerHeight !== undefined && !overlayProgressOnEnvelope && !progressOutsideEnvelope
+          ? { minHeight: '400px' }
+          : {})
       }}
       data-name="Gift Card"
       data-node-id="1467:49182"
     >
       <div 
-        className={`content-stretch flex flex-col items-start ${isMonochromeVariant ? 'overflow-visible' : 'overflow-hidden'} relative rounded-[inherit] w-full`} 
+        className={`content-stretch flex flex-col items-start ${isMonochromeVariant ? 'overflow-visible' : 'overflow-hidden'} relative rounded-[inherit] w-full ${(progressOutsideEnvelope && headerHeight2 !== undefined) || (headerUseFlex && headerHeight !== undefined && !overlayProgressOnEnvelope && !progressOutsideEnvelope) ? 'h-full' : ''}`} 
         style={{ 
           paddingBottom: progressOutsideEnvelope ? '0px' : undefined,
-          ...(progressOutsideEnvelope && headerHeight2 !== undefined ? { minHeight: '400px', height: '100%' } : {})
+          ...(progressOutsideEnvelope && headerHeight2 !== undefined 
+            ? { minHeight: '400px' } 
+            : headerUseFlex && headerHeight !== undefined && !overlayProgressOnEnvelope && !progressOutsideEnvelope
+            ? { minHeight: '400px' }
+            : {})
         }}
       >
         {/* Full card background when overlayProgressOnEnvelope is true */}
@@ -158,13 +172,19 @@ const SentCard1 = ({
         )}
         {/* Header Section - 280px tall */}
         <div
-          className={`box-border content-stretch flex flex-col items-center justify-between pb-0 pt-[20px] px-0 relative w-full overflow-visible ${progressOutsideEnvelope && headerHeight2 !== undefined ? '' : 'shrink-0'}`}
+          className={`box-border content-stretch flex flex-col items-center justify-between pb-0 pt-[20px] px-0 relative w-full overflow-visible ${(progressOutsideEnvelope && headerUseFlex2) || (overlayProgressOnEnvelope && headerUseFlex1) || headerUseFlex ? '' : 'shrink-0'}`}
           style={{
             position: 'relative',
             zIndex: overlayProgressOnEnvelope ? 1 : 'auto',
-            ...(progressOutsideEnvelope && headerHeight2 !== undefined 
+            ...(progressOutsideEnvelope && headerHeight2 !== undefined && headerUseFlex2
               ? { flex: 1, minHeight: `${headerHeight2}px` }
-              : { height: '280px' })
+              : overlayProgressOnEnvelope && headerHeight1 !== undefined && headerUseFlex1
+              ? { flex: 1, minHeight: `${headerHeight1}px` }
+              : overlayProgressOnEnvelope && headerUseFlex1
+              ? { flex: 1, minHeight: '280px' }
+              : headerUseFlex && headerHeight !== undefined
+              ? { flex: 1, minHeight: `${headerHeight}px` }
+              : { height: headerHeight !== undefined ? `${headerHeight}px` : '280px' })
           }}
           data-name="Header"
           data-node-id="1467:49183"
@@ -617,7 +637,7 @@ const SentCard1 = ({
           <div
             className="absolute"
             style={{
-              bottom: 0,
+              bottom: -.5,
               left: 0,
               right: 0,
               height: '36px',
