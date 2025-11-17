@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import GiftCard from '@/components/GiftCard'
 import SentCard1 from '@/components/SentCard1'
 import SentCard4 from '@/components/SentCard4'
+import TabButton from '@/components/TabButton'
+import { shuffleArray, generateRandomSentCardData } from '@/utils/cardData'
 
 // Static data moved outside component to avoid recreation on every render
 const ALL_BOX_PAIRS = [
@@ -131,15 +133,6 @@ const ALL_SENT_DATES = [
   '1 week ago', '2 weeks ago', '3 weeks ago', '1 month ago'
 ]
 
-// Helper function to shuffle array
-const shuffleArray = (array) => {
-  const shuffled = [...array]
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
-  }
-  return shuffled
-}
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState('gift') // 'gift' | 'sent1' (Batch) | 'sent4' (Single)
@@ -197,36 +190,17 @@ export default function Home() {
     setBoxPairs(shuffleArray(selected))
     setMessages(shuffleArray(ALL_MESSAGES).slice(0, 8))
     
-    // Shuffle SentCard data
-    const shuffledCovers = shuffleArray(ALL_COVERS)
-    const shuffledSenders = shuffleArray(ALL_SENDERS)
-    const shuffledTitles = shuffleArray(ALL_TITLES)
-    const shuffledGiftTitles = shuffleArray(ALL_GIFT_TITLES)
-    const shuffledGiftSubtitles = shuffleArray(ALL_GIFT_SUBTITLES)
-    const shuffledDates = shuffleArray(ALL_SENT_DATES)
-    
-    const randomized = Array(8).fill(null).map(() => ({
-        from: shuffledSenders[Math.floor(Math.random() * shuffledSenders.length)],
-        title: shuffledTitles[Math.floor(Math.random() * shuffledTitles.length)],
-        boxImage: shuffledCovers[Math.floor(Math.random() * shuffledCovers.length)],
-        giftTitle: shuffledGiftTitles[Math.floor(Math.random() * shuffledGiftTitles.length)],
-        giftSubtitle: shuffledGiftSubtitles[Math.floor(Math.random() * shuffledGiftSubtitles.length)],
-        progress: (() => {
-          const total = Math.floor(Math.random() * 40) + 1
-          const current = Math.floor(Math.random() * total) + 1
-          return { current, total }
-        })(),
-        sentDate: shuffledDates[Math.floor(Math.random() * shuffledDates.length)]
-      }))
-    // Ensure at least 2 "Done" cards (current === total)
-    let doneCount = randomized.filter(c => c.progress.current === c.progress.total).length
-    let i = 0
-    while (doneCount < 2 && i < randomized.length) {
-      const total = randomized[i].progress.total
-      randomized[i].progress.current = total
-      doneCount++
-      i++
-    }
+    // Generate randomized SentCard data
+    const randomized = generateRandomSentCardData({
+      covers: ALL_COVERS,
+      senders: ALL_SENDERS,
+      titles: ALL_TITLES,
+      giftTitles: ALL_GIFT_TITLES,
+      giftSubtitles: ALL_GIFT_SUBTITLES,
+      dates: ALL_SENT_DATES,
+      count: 8,
+      minDoneCards: 2
+    })
     setSentCards(randomized)
   }, [])
   
@@ -249,6 +223,16 @@ export default function Home() {
     card8: () => handleOpenGift('card8'),
   }), [handleOpenGift])
   
+  // Memoize tab button handlers
+  const handleTabChange = useCallback((tab) => {
+    setActiveTab(tab)
+  }, [])
+  
+  // Memoize individual tab handlers
+  const handleGiftTab = useCallback(() => handleTabChange('gift'), [handleTabChange])
+  const handleSent1Tab = useCallback(() => handleTabChange('sent1'), [handleTabChange])
+  const handleSent4Tab = useCallback(() => handleTabChange('sent4'), [handleTabChange])
+  
   return (
     <div className="min-h-screen bg-[#f0f1f5] flex items-start overflow-visible">
       <div 
@@ -259,24 +243,21 @@ export default function Home() {
           className="w-full flex items-center justify-center gap-2 mb-6 overflow-x-auto md:overflow-visible whitespace-nowrap px-[20px] md:px-0"
           style={{ WebkitOverflowScrolling: 'touch' }}
         >
-          <button
-            onClick={() => setActiveTab('gift')}
-            className={`px-3 py-1.5 rounded-[12px] outline outline-1 outline-offset-[-1px] shrink-0 ${activeTab==='gift' ? 'bg-white outline-zinc-300 text-black' : 'bg-[#f0f1f5] outline-zinc-200 text-[#525F7A]'}`}
-          >
-            Gift Card
-          </button>
-          <button
-            onClick={() => setActiveTab('sent1')}
-            className={`px-3 py-1.5 rounded-[12px] outline outline-1 outline-offset-[-1px] shrink-0 ${activeTab==='sent1' ? 'bg-white outline-zinc-300 text-black' : 'bg-[#f0f1f5] outline-zinc-200 text-[#525F7A]'}`}
-          >
-            Sent Card (Batch)
-          </button>
-          <button
-            onClick={() => setActiveTab('sent4')}
-            className={`px-3 py-1.5 rounded-[12px] outline outline-1 outline-offset-[-1px] shrink-0 ${activeTab==='sent4' ? 'bg-white outline-zinc-300 text-black' : 'bg-[#f0f1f5] outline-zinc-200 text-[#525F7A]'}`}
-          >
-            Sent Card (Single)
-          </button>
+          <TabButton
+            label="Gift Card"
+            isActive={activeTab === 'gift'}
+            onClick={handleGiftTab}
+          />
+          <TabButton
+            label="Sent Card (Batch)"
+            isActive={activeTab === 'sent1'}
+            onClick={handleSent1Tab}
+          />
+          <TabButton
+            label="Sent Card (Single)"
+            isActive={activeTab === 'sent4'}
+            onClick={handleSent4Tab}
+          />
         </div>
         {/* Content */}
         {activeTab === 'gift' ? (

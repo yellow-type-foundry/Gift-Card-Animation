@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import Image from 'next/image'
 import { TOKENS } from '@/constants/tokens'
 import Spinner from './Spinner'
+import useHover from '@/hooks/useHover'
 
 const GiftCard = ({ 
   state = 'unopened',
@@ -20,7 +21,7 @@ const GiftCard = ({
   onOpenGift
 }) => {
   const [isOpen, setIsOpen] = useState(false)
-  const [isHovered, setIsHovered] = useState(false)
+  const { isHovered, handleHoverEnter, handleHoverLeave } = useHover()
   const [isAcceptLoading, setIsAcceptLoading] = useState(false)
   const [isAcceptExpanded, setIsAcceptExpanded] = useState(false)
   const cardRef = useRef(null)
@@ -73,9 +74,6 @@ const GiftCard = ({
       return newValue
     })
   }, [])
-
-  const handleHoverEnter = () => setIsHovered(true)
-  const handleHoverLeave = () => setIsHovered(false)
 
   const handleSwapClick = useCallback((e) => {
     e.stopPropagation()

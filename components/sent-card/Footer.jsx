@@ -1,11 +1,8 @@
 import React from 'react'
 import { TOKENS } from '@/constants/tokens'
+import { PROGRESS_PILL_RADIUS, PROGRESS_GLOW_BOX_SHADOW } from '@/constants/sentCardConstants'
 
-const PROGRESS_PILL_RADIUS = '100px'
-const PROGRESS_GLOW_BOX_SHADOW =
-  '0px 2px 4px -8px rgba(46,10,255,0.1), 0px 2px 2px 0px rgba(90,61,255,0.08), 0px 4px 8px -4px rgba(16,0,112,0.15)'
-
-export default function Footer({
+function Footer({
   isDone,
   isHovered,
   animatedProgress,
@@ -252,4 +249,5 @@ export default function Footer({
   )
 }
 
+export default React.memo(Footer)
 

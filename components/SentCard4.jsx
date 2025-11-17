@@ -1,9 +1,10 @@
 'use client'
 
-import React, { useRef, useMemo, useState } from 'react'
+import React, { useRef, useMemo } from 'react'
 import Image from 'next/image'
 import { TOKENS } from '@/constants/tokens'
 import useProgressAnimation from '@/hooks/useProgressAnimation'
+import useHover from '@/hooks/useHover'
 import Footer from '@/components/sent-card/Footer'
 import { HEADER_OVERLAY_BG } from '@/constants/sentCardConstants'
 
@@ -35,7 +36,7 @@ const SentCard4 = ({
 }) => {
   // Hooks
   const cardRef = useRef(null)
-  const [isHovered, setIsHovered] = useState(false)
+  const { isHovered, handleHoverEnter, handleHoverLeave } = useHover()
   
   // Progress animation
   const {
@@ -54,7 +55,10 @@ const SentCard4 = ({
     return Math.min(6, Math.floor(progressRatio * 7))
   }, [validatedProgress.current, validatedProgress.total])
   
-  const giftContainerImage = GIFT_CONTAINER_IMAGES[giftContainerIndex]
+  const giftContainerImage = useMemo(
+    () => GIFT_CONTAINER_IMAGES[giftContainerIndex],
+    [giftContainerIndex]
+  )
   
   // Extract brand name from image path
   const brandName = useMemo(() => {
@@ -68,8 +72,8 @@ const SentCard4 = ({
   return (
     <div
       ref={cardRef}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseEnter={handleHoverEnter}
+      onMouseLeave={handleHoverLeave}
       className="border border-[#dde2e9] border-solid relative rounded-[24px] w-full md:w-[300px] overflow-hidden"
       style={{
         borderRadius: TOKENS.sizes.borderRadius.card

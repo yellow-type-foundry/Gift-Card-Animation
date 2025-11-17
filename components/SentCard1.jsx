@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useRef } from 'react'
+import React, { useRef } from 'react'
 import Image from 'next/image'
 import { TOKENS } from '@/constants/tokens'
 import useDominantColor from '@/hooks/useDominantColor'
@@ -8,6 +8,7 @@ import useCardTheme from '@/hooks/useCardTheme'
 import useProgressAnimation from '@/hooks/useProgressAnimation'
 import useConfetti from '@/hooks/useConfetti'
 import useComponentIds from '@/hooks/useComponentIds'
+import useHover from '@/hooks/useHover'
 import Footer from '@/components/sent-card/Footer'
 import EnvelopeBase from '@/components/sent-card/EnvelopeBase'
 import CardShape from '@/components/sent-card/CardShape'
@@ -38,7 +39,7 @@ const SentCard1 = ({
   // Hooks
   const cardRef = useRef(null)
   const confettiCanvasRef = useRef(null)
-  const [isHovered, setIsHovered] = useState(false)
+  const { isHovered, handleHoverEnter, handleHoverLeave } = useHover()
   
   // Generate stable IDs for SVG elements
   const ids = useComponentIds(boxImage, from)
@@ -75,8 +76,8 @@ const SentCard1 = ({
     <div
       data-variant={headerBgOverride ? 'mono' : 'themed'}
       ref={cardRef}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseEnter={handleHoverEnter}
+      onMouseLeave={handleHoverLeave}
       className="border border-[#dde2e9] border-solid relative rounded-[24px] w-full md:w-[300px] overflow-hidden"
       style={{
         borderRadius: TOKENS.sizes.borderRadius.card
