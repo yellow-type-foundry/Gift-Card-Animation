@@ -406,6 +406,7 @@ export default function Home() {
                     footerBottomPadding2={useSentCard3Layout2 ? 16 : undefined}
                     footerPadEqual2={useSentCard3Layout2 ? true : undefined}
                     footerTransparent2={useSentCard3Layout2 ? true : undefined}
+                    progressBottomPadding2={useSentCard3Layout2 ? 20 : undefined}
                   />
                 )
               })}

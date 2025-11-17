@@ -48,7 +48,9 @@ const SentCard1 = ({
   footerTopPadding2,
   footerBottomPadding2,
   footerPadEqual2,
-  footerTransparent2
+  footerTransparent2,
+  // Altered Layout 2 specific progress bar controls
+  progressBottomPadding2
 }) => {
   // Hooks
   const cardRef = useRef(null)
@@ -94,12 +96,18 @@ const SentCard1 = ({
       onMouseLeave={handleHoverLeave}
       className="border border-[#dde2e9] border-solid relative rounded-[24px] w-full md:w-[300px] overflow-hidden"
       style={{
-        borderRadius: TOKENS.sizes.borderRadius.card
+        borderRadius: TOKENS.sizes.borderRadius.card,
+        height: 'auto'
       }}
       data-name="Gift Card"
       data-node-id="1467:49182"
     >
-      <div className={`content-stretch flex flex-col items-start ${isMonochromeVariant ? 'overflow-visible' : 'overflow-hidden'} relative rounded-[inherit] size-full`}>
+      <div 
+        className={`content-stretch flex flex-col items-start ${isMonochromeVariant ? 'overflow-visible' : 'overflow-hidden'} relative rounded-[inherit] w-full`} 
+        style={{ 
+          paddingBottom: progressOutsideEnvelope ? '0px' : undefined
+        }}
+      >
         {/* Full card background when overlayProgressOnEnvelope is true */}
         {overlayProgressOnEnvelope && (
           <div
@@ -677,78 +685,150 @@ const SentCard1 = ({
           infoSubtitle={giftSubtitle}
           equalPadding={progressOutsideEnvelope && footerPadEqual2 !== undefined ? footerPadEqual2 : footerPadEqual}
           showProgress={showFooterProgress}
-          showReminder={showFooterReminder}
+          showReminder={progressOutsideEnvelope ? false : showFooterReminder}
           infoInSlot={overlayProgressOnEnvelope}
           bottomPadding={progressOutsideEnvelope && footerBottomPadding2 !== undefined ? footerBottomPadding2 : footerBottomPadding}
           topPadding={progressOutsideEnvelope && footerTopPadding2 !== undefined ? footerTopPadding2 : footerTopPadding}
           transparent={progressOutsideEnvelope && footerTransparent2 !== undefined ? footerTransparent2 : footerTransparent}
+          hideInfoOnHover={!progressOutsideEnvelope}
         />
 
         {/* Progress bar outside envelope (for Altered Layout 2) - positioned relatively under gift info */}
         {overlayProgressOnEnvelope && progressOutsideEnvelope && (
           <div
-            className="relative"
+            className="relative shrink-0"
             style={{
               width: '100%',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
+              display: 'block',
+              marginTop: '8px',
               paddingTop: '0px',
-              paddingBottom: '20px',
-              zIndex: 3
+              paddingBottom: progressBottomPadding2 !== undefined ? `${progressBottomPadding2}px` : '20px',
+              zIndex: 0,
+              minHeight: '36px',
+              flexShrink: 0
             }}
             data-name="OutsideProgress"
           >
+            {/* Spacer to ensure container height includes padding */}
+            <div style={{ height: '36px', width: '100%', pointerEvents: 'none' }} />
+            {/* Progress bar */}
             <div
-              className="bg-[#f0f1f5] border border-[rgba(221,226,233,0)] border-solid box-border content-stretch flex flex-col gap-[10px] items-start justify-center p-[2px] relative rounded-[100px] shrink-0"
               style={{
-                borderRadius: PROGRESS_PILL_RADIUS,
-                backgroundColor: '#f0f1f5',
-                width: '120px'
+                opacity: (isHovered && !isDone) ? 0 : 1,
+                transition: 'opacity 200ms ease-out, transform 200ms ease-out',
+                pointerEvents: (isHovered && !isDone) ? 'none' : 'auto',
+                position: 'absolute',
+                top: '0',
+                left: '50%',
+                transform: (isHovered && !isDone) ? 'translate(-50%, 4px)' : 'translate(-50%, 0)',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center'
               }}
             >
-              <div
-                className="bg-gradient-to-b box-border content-stretch flex flex-col from-[#5a3dff] gap-[10px] items-center justify-center px-[8px] py-[3px] relative rounded-[100px] shrink-0"
-                style={{
-                  background: 'linear-gradient(to bottom, #5a3dff, #a799ff)',
-                  borderRadius: PROGRESS_PILL_RADIUS,
-                  width: isDone ? '100%' : `${animatedProgress}%`,
-                  maxWidth: '100%',
-                  minWidth: 'fit-content',
-                  transition: 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                  boxShadow: PROGRESS_GLOW_BOX_SHADOW
-                }}
-              >
-                <p
-                  className="font-['Goody_Sans:Medium',sans-serif] leading-[1.4] not-italic relative shrink-0 text-[14px] text-white text-center w-full"
+                <div
+                  className="bg-[#f0f1f5] border border-[rgba(221,226,233,0)] border-solid box-border content-stretch flex flex-col gap-[10px] items-start justify-center p-[2px] relative rounded-[100px] shrink-0"
                   style={{
-                    fontFamily: 'var(--font-goody-sans)',
-                    fontSize: '14px',
-                    fontWeight: 500,
-                    lineHeight: 1.4,
-                    color: '#ffffff',
-                    whiteSpace: 'nowrap'
+                    borderRadius: PROGRESS_PILL_RADIUS,
+                    backgroundColor: '#f0f1f5',
+                    width: '120px'
                   }}
                 >
-                  {isDone ? 'Done' : `${animatedCurrent}/${validatedProgress.total}`}
-                </p>
-                {/* highlight removed */}
-                <div
-                  className="absolute inset-0 pointer-events-none"
-                  style={{
-                    boxShadow: '0px 3px 5px 2px inset rgba(255,255,255,0.5)',
-                    borderRadius: PROGRESS_PILL_RADIUS
-                  }}
-                />
+                  <div
+                    className="bg-gradient-to-b box-border content-stretch flex flex-col from-[#5a3dff] gap-[10px] items-center justify-center px-[8px] py-[3px] relative rounded-[100px] shrink-0"
+                    style={{
+                      background: 'linear-gradient(to bottom, #5a3dff, #a799ff)',
+                      borderRadius: PROGRESS_PILL_RADIUS,
+                      width: isDone ? '100%' : `${animatedProgress}%`,
+                      maxWidth: '100%',
+                      minWidth: 'fit-content',
+                      transition: 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                      boxShadow: PROGRESS_GLOW_BOX_SHADOW
+                    }}
+                  >
+                    <p
+                      className="font-['Goody_Sans:Medium',sans-serif] leading-[1.4] not-italic relative shrink-0 text-[14px] text-white text-center w-full"
+                      style={{
+                        fontFamily: 'var(--font-goody-sans)',
+                        fontSize: '14px',
+                        fontWeight: 500,
+                        lineHeight: 1.4,
+                        color: '#ffffff',
+                        whiteSpace: 'nowrap'
+                      }}
+                    >
+                      {isDone ? 'Done' : `${animatedCurrent}/${validatedProgress.total}`}
+                    </p>
+                    <div
+                      className="absolute inset-0 pointer-events-none"
+                      style={{
+                        boxShadow: '0px 3px 5px 2px inset rgba(255,255,255,0.5)',
+                        borderRadius: PROGRESS_PILL_RADIUS
+                      }}
+                    />
+                  </div>
+                  <div
+                    className="absolute inset-[-1px] pointer-events-none"
+                    style={{
+                      boxShadow: '0px 1px 2.25px 0px inset #c2c6d6, 0px -1px 2.25px 0px inset #ffffff',
+                      borderRadius: PROGRESS_PILL_RADIUS
+                    }}
+                  />
+                </div>
               </div>
+            {/* Reminder button - replaces progress bar on hover */}
+            {showFooterReminder && !isDone && (
               <div
-                className="absolute inset-[-1px] pointer-events-none"
                 style={{
-                  boxShadow: '0px 1px 2.25px 0px inset #c2c6d6, 0px -1px 2.25px 0px inset #ffffff',
-                  borderRadius: PROGRESS_PILL_RADIUS
+                  opacity: isHovered ? 1 : 0,
+                  transform: isHovered ? 'translate(-50%, 0)' : 'translate(-50%, 4px)',
+                  transition: 'opacity 200ms ease-out, transform 200ms ease-out',
+                  pointerEvents: isHovered ? 'auto' : 'none',
+                  position: 'absolute',
+                  top: '0',
+                  left: '50%',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  width: '100%'
                 }}
-              />
-            </div>
+              >
+                <button
+                  data-name="ReminderButton"
+                  className="px-3.5 py-1 bg-white rounded-[12px] text-[#525F7A]"
+                  style={{
+                    outlineOffset: '-1px',
+                    outlineWidth: '1px',
+                    outlineStyle: 'solid',
+                    outlineColor: 'var(--color-border)',
+                    borderRadius: '12px',
+                    height: '36px',
+                    transition: 'transform 200ms ease-out, box-shadow 200ms ease-out, outline-color 200ms ease-out, background-color 200ms ease-out'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-2px)'
+                    e.currentTarget.style.boxShadow = '0 8px 24px -8px rgba(0,0,0,0.15), 0 3px 10px -4px rgba(0,0,0,0.10)'
+                    e.currentTarget.style.outlineColor = '#cfd6e2'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)'
+                    e.currentTarget.style.boxShadow = 'none'
+                    e.currentTarget.style.outlineColor = 'var(--color-border)'
+                  }}
+                  onMouseDown={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-1px)'
+                    e.currentTarget.style.boxShadow = '0 6px 18px -8px rgba(0,0,0,0.15), 0 2px 8px -4px rgba(0,0,0,0.10)'
+                  }}
+                  onMouseUp={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-2px)'
+                    e.currentTarget.style.boxShadow = '0 8px 24px -8px rgba(0,0,0,0.15), 0 3px 10px -4px rgba(0,0,0,0.10)'
+                  }}
+                  type="button"
+                >
+                  Send a reminder
+                </button>
+              </div>
+            )}
           </div>
         )}
 

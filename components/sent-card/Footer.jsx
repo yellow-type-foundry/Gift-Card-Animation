@@ -16,14 +16,15 @@ function Footer({
   infoInSlot = false,
   bottomPadding = 16,
   topPadding,
-  transparent = false
+  transparent = false,
+  hideInfoOnHover = true
 }) {
   return (
     <div
       className="box-border flex items-center justify-center pt-0 px-[16px] relative shrink-0 w-full"
       style={{ 
         position: 'relative', 
-        zIndex: transparent ? 1 : 20, 
+        zIndex: transparent ? 2 : 20, 
         width: '100%', 
         paddingTop: topPadding !== undefined ? `${topPadding}px` : (equalPadding ? '16px' : undefined), 
         paddingBottom: `${bottomPadding}px`,
@@ -89,10 +90,10 @@ function Footer({
             <div
               className="absolute inset-0 flex items-center justify-center"
               style={{
-                opacity: isHovered && !isDone ? 0 : 1,
-                transform: isHovered && !isDone ? 'translateY(4px)' : 'translateY(0)',
+                opacity: (hideInfoOnHover && isHovered && !isDone) ? 0 : 1,
+                transform: (hideInfoOnHover && isHovered && !isDone) ? 'translateY(4px)' : 'translateY(0)',
                 transition: 'opacity 200ms ease-out, transform 200ms ease-out',
-                pointerEvents: isHovered && !isDone ? 'none' : 'auto'
+                pointerEvents: (hideInfoOnHover && isHovered && !isDone) ? 'none' : 'auto'
               }}
               data-name="InfoSlot"
             >
