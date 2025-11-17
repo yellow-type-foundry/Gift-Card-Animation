@@ -6,7 +6,7 @@ import { TOKENS } from '@/constants/tokens'
 import useProgressAnimation from '@/hooks/useProgressAnimation'
 import useHover from '@/hooks/useHover'
 import Footer from '@/components/sent-card/Footer'
-import { HEADER_OVERLAY_BG } from '@/constants/sentCardConstants'
+import { HEADER_OVERLAY_BG, FOOTER_CONFIG } from '@/constants/sentCardConstants'
 
 // Gift container images (brand names)
 const GIFT_CONTAINER_IMAGES = [
@@ -240,13 +240,14 @@ const SentCard4 = ({
           validatedTotal={validatedProgress.total}
           infoTitle={brandName}
           infoSubtitle={giftSubtitle}
-          equalPadding={footerPadEqual}
+          equalPadding={FOOTER_CONFIG.single.equalPadding}
           showProgress={overlayProgressOnEnvelope}
-          showReminder={showFooterReminder}
-          infoInSlot={false}
-          bottomPadding={footerBottomPadding}
-          topPadding={footerTopPadding}
-          transparent={true}
+          showReminder={FOOTER_CONFIG.single.showReminder}
+          infoInSlot={FOOTER_CONFIG.single.infoInSlot}
+          bottomPadding={FOOTER_CONFIG.single.bottomPadding}
+          topPadding={FOOTER_CONFIG.single.topPadding}
+          transparent={FOOTER_CONFIG.single.transparent}
+          hideInfoOnHover={FOOTER_CONFIG.single.hideInfoOnHover}
         />
       </div>
     </div>

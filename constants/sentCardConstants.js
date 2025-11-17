@@ -3,6 +3,103 @@ export const PROGRESS_PILL_RADIUS = '100px'
 export const HEADER_OVERLAY_BG = 'linear-gradient(to bottom, rgba(255, 253, 253, 0.3) 00%, rgba(255, 255, 255, 0.95) 95%)'
 export const PROGRESS_GLOW_BOX_SHADOW = '0px 2px 4px -8px rgba(46,10,255,0.1), 0px 2px 2px 0px rgba(90,61,255,0.08), 0px 4px 8px -4px rgba(16,0,112,0.15)'
 
+// Confetti animation configuration
+// All confetti animations use these unified settings
+export const CONFETTI_CONFIG = {
+  // Color palette (multi-hue, soft pastels)
+  colors: ['#7C66FF', '#5AD3FF', '#FF7AD9', '#FFD166', '#8CE99A'],
+  
+  // Particle count
+  maxParticles: 120,
+  
+  // Speed configuration
+  speed: {
+    min: 2,
+    max: 3, // Random speed will be: min + Math.random() * max
+  },
+  
+  // Horizontal drift
+  horizontalDrift: 1.5,
+  
+  // Gravity/acceleration (affects how fast particles slow down and fall)
+  gravity: 0.06,
+  
+  // Particle size (in pixels, before device pixel ratio)
+  size: {
+    min: 4,
+    max: 4, // Random size will be: (min + Math.random() * max) * dpr
+  },
+  
+  // Rotation
+  rotation: {
+    initial: Math.PI, // Random initial rotation: 0 to Math.PI
+    velocity: {
+      min: -0.15,
+      max: 0.15, // Random rotation velocity: min + Math.random() * (max - min)
+    },
+  },
+  
+  // Boundary offset for recycling particles (in pixels, before device pixel ratio)
+  boundaryOffset: 20,
+}
+
+// Footer configuration for Gift Sent cards
+// All footer settings are unified here for easy management
+export const FOOTER_CONFIG = {
+  // Default layout (Batch - Layout 1)
+  default: {
+    equalPadding: false,
+    topPadding: undefined, // Uses default from Footer component
+    bottomPadding: 16,
+    transparent: false,
+    showProgress: true,
+    showReminder: true,
+    infoInSlot: false,
+    hideInfoOnHover: true,
+  },
+  
+  // Altered Layout 1 (Batch - Layout 2)
+  altered1: {
+    equalPadding: true,
+    topPadding: 28,
+    bottomPadding: 24,
+    transparent: true,
+    showProgress: false,
+    showReminder: true,
+    infoInSlot: true,
+    hideInfoOnHover: true,
+  },
+  
+  // Altered Layout 2 (Batch - Layout 3)
+  altered2: {
+    equalPadding: true,
+    topPadding: 28,
+    bottomPadding: 20,
+    transparent: true,
+    showProgress: false, // Progress is shown outside footer
+    showReminder: true, // Reminder is shown outside footer (prop must be true for outside button to render)
+    infoInSlot: true,
+    hideInfoOnHover: false, // Info stays visible on hover
+    // Progress bar outside footer
+    progressOutside: {
+      bottomPadding: 20,
+    },
+  },
+  
+  // Single card layout (SentCard4)
+  single: {
+    equalPadding: true,
+    topPadding: 0,
+    bottomPadding: 20,
+    transparent: true,
+    // Note: showProgress is controlled by overlayProgressOnEnvelope prop (true) in SentCard4
+    // This config provides other footer settings
+    showReminder: true,
+    infoInSlot: false,
+    hideInfoOnHover: true,
+  },
+}
+
 // Envelope dimensions
 export const ENVELOPE_DIMENSIONS = {
   base: {

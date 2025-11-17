@@ -12,7 +12,7 @@ import useHover from '@/hooks/useHover'
 import Footer from '@/components/sent-card/Footer'
 import EnvelopeBase from '@/components/sent-card/EnvelopeBase'
 import CardShape from '@/components/sent-card/CardShape'
-import { PROGRESS_PILL_RADIUS, HEADER_OVERLAY_BG, PROGRESS_GLOW_BOX_SHADOW, ENVELOPE_DIMENSIONS } from '@/constants/sentCardConstants'
+import { PROGRESS_PILL_RADIUS, HEADER_OVERLAY_BG, PROGRESS_GLOW_BOX_SHADOW, ENVELOPE_DIMENSIONS, FOOTER_CONFIG } from '@/constants/sentCardConstants'
 
 const SentCard1 = ({
   from = 'Alex Torres',
@@ -683,13 +683,45 @@ const SentCard1 = ({
           validatedTotal={validatedProgress.total}
           infoTitle={giftTitle}
           infoSubtitle={giftSubtitle}
-          equalPadding={progressOutsideEnvelope && footerPadEqual2 !== undefined ? footerPadEqual2 : footerPadEqual}
+          equalPadding={
+            progressOutsideEnvelope && footerPadEqual2 !== undefined
+              ? footerPadEqual2
+              : overlayProgressOnEnvelope
+              ? FOOTER_CONFIG.altered1.equalPadding
+              : footerPadEqual !== undefined
+              ? footerPadEqual
+              : FOOTER_CONFIG.default.equalPadding
+          }
           showProgress={progressOutsideEnvelope ? false : showFooterProgress}
           showReminder={progressOutsideEnvelope ? false : showFooterReminder}
           infoInSlot={overlayProgressOnEnvelope}
-          bottomPadding={progressOutsideEnvelope && footerBottomPadding2 !== undefined ? footerBottomPadding2 : footerBottomPadding}
-          topPadding={progressOutsideEnvelope && footerTopPadding2 !== undefined ? footerTopPadding2 : footerTopPadding}
-          transparent={progressOutsideEnvelope && footerTransparent2 !== undefined ? footerTransparent2 : footerTransparent}
+          bottomPadding={
+            progressOutsideEnvelope && footerBottomPadding2 !== undefined
+              ? footerBottomPadding2
+              : overlayProgressOnEnvelope
+              ? FOOTER_CONFIG.altered1.bottomPadding
+              : footerBottomPadding !== undefined
+              ? footerBottomPadding
+              : FOOTER_CONFIG.default.bottomPadding
+          }
+          topPadding={
+            progressOutsideEnvelope && footerTopPadding2 !== undefined
+              ? footerTopPadding2
+              : overlayProgressOnEnvelope
+              ? FOOTER_CONFIG.altered1.topPadding
+              : footerTopPadding !== undefined
+              ? footerTopPadding
+              : FOOTER_CONFIG.default.topPadding
+          }
+          transparent={
+            progressOutsideEnvelope && footerTransparent2 !== undefined
+              ? footerTransparent2
+              : overlayProgressOnEnvelope
+              ? FOOTER_CONFIG.altered1.transparent
+              : footerTransparent !== undefined
+              ? footerTransparent
+              : FOOTER_CONFIG.default.transparent
+          }
           hideInfoOnHover={!progressOutsideEnvelope}
         />
 
@@ -702,7 +734,7 @@ const SentCard1 = ({
               display: 'block',
               marginTop: '0px',
               paddingTop: '0px',
-              paddingBottom: progressBottomPadding2 !== undefined ? `${progressBottomPadding2}px` : '20px',
+              paddingBottom: progressBottomPadding2 !== undefined ? `${progressBottomPadding2}px` : `${FOOTER_CONFIG.altered2.progressOutside.bottomPadding}px`,
               zIndex: 0,
               minHeight: '36px',
               flexShrink: 0

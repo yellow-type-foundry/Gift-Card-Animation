@@ -1,7 +1,9 @@
 import { useEffect, useRef } from 'react'
+import { CONFETTI_CONFIG } from '@/constants/sentCardConstants'
 
 /**
  * Custom hook for confetti animation on canvas
+ * Uses unified configuration from CONFETTI_CONFIG
  * @param {boolean} isHovered - Whether the card is hovered
  * @param {boolean} allAccepted - Whether all items are accepted
  * @param {React.RefObject} confettiCanvasRef - Ref to the canvas element
@@ -23,24 +25,23 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
     canvas.style.width = `${rect.width}px`
     canvas.style.height = `${rect.height}px`
     
-    // Colorful confetti palette (multi-hue, soft pastels)
-    const colors = ['#7C66FF', '#5AD3FF', '#FF7AD9', '#FFD166', '#8CE99A']
-    const maxParticles = 120
+    // Use unified confetti configuration
+    const { colors, maxParticles, speed, horizontalDrift, gravity, size, rotation, boundaryOffset } = CONFETTI_CONFIG
     
     const spawnParticle = () => {
-      const speed = 2 + Math.random() * 3
+      const particleSpeed = speed.min + Math.random() * speed.max
       return {
         // Start near bottom with slight horizontal randomness across width
         x: Math.random() * (rect.width * dpr),
         y: (rect.height * dpr) - 2 * dpr,
         // Shoot upwards with slight horizontal drift
-        vx: (Math.random() * 2 - 1) * 1.5 * dpr,
-        vy: -speed * dpr,
+        vx: (Math.random() * 2 - 1) * horizontalDrift * dpr,
+        vy: -particleSpeed * dpr,
         // Gravity pulls down a bit so confetti slows as it rises
-        ay: 0.06 * dpr,
-        rot: Math.random() * Math.PI,
-        vr: (Math.random() * 0.3 - 0.15),
-        size: (4 + Math.random() * 4) * dpr,
+        ay: gravity * dpr,
+        rot: Math.random() * rotation.initial,
+        vr: rotation.velocity.min + Math.random() * (rotation.velocity.max - rotation.velocity.min),
+        size: (size.min + Math.random() * size.max) * dpr,
         color: colors[(Math.random() * colors.length) | 0],
         shape: Math.random() < 0.5 ? 'rect' : 'tri'
       }
@@ -49,7 +50,8 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
     const particles = Array.from({ length: maxParticles }).map(spawnParticle)
     
     const recycleIfOut = (p) => {
-      const outOfBounds = p.y < -20 * dpr || p.y > canvas.height + 20 * dpr || p.x < -20 * dpr || p.x > canvas.width + 20 * dpr
+      const offset = boundaryOffset * dpr
+      const outOfBounds = p.y < -offset || p.y > canvas.height + offset || p.x < -offset || p.x > canvas.width + offset
       if (outOfBounds) {
         const np = spawnParticle()
         p.x = np.x
