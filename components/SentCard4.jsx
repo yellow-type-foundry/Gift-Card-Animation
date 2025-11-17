@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useRef, useMemo } from 'react'
+import React, { useRef, useMemo, useState } from 'react'
 import Image from 'next/image'
 import { TOKENS } from '@/constants/tokens'
 import useProgressAnimation from '@/hooks/useProgressAnimation'
@@ -35,6 +35,7 @@ const SentCard4 = ({
 }) => {
   // Hooks
   const cardRef = useRef(null)
+  const [isHovered, setIsHovered] = useState(false)
   
   // Progress animation
   const {
@@ -67,6 +68,8 @@ const SentCard4 = ({
   return (
     <div
       ref={cardRef}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       className="border border-[#dde2e9] border-solid relative rounded-[24px] w-full md:w-[300px] overflow-hidden"
       style={{
         borderRadius: TOKENS.sizes.borderRadius.card
@@ -227,7 +230,7 @@ const SentCard4 = ({
 
         <Footer
           isDone={isDone}
-          isHovered={false}
+          isHovered={isHovered}
           animatedProgress={animatedProgress}
           animatedCurrent={animatedCurrent}
           validatedTotal={validatedProgress.total}
