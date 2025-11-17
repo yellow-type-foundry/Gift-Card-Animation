@@ -435,10 +435,20 @@ export default function Home() {
               </div>
               
               {/* Mobile: Settings/Filter button - Visible only on mobile */}
-              <div className="md:hidden relative shrink-0">
+              <div className="md:hidden relative shrink-0" style={{ touchAction: 'manipulation' }}>
                 <button
-                  onClick={() => setShowSettingsMenu(!showSettingsMenu)}
-                  className="px-3 py-1.5 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 flex items-center gap-2"
+                  type="button"
+                  id="settings-button-mobile"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    setShowSettingsMenu(!showSettingsMenu)
+                  }}
+                  onTouchStart={(e) => {
+                    e.stopPropagation()
+                  }}
+                  className="px-3 py-1.5 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] hover:bg-gray-50 active:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 flex items-center gap-2 touch-manipulation"
+                  style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}
                 >
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M8 10C9.10457 10 10 9.10457 10 8C10 6.89543 9.10457 6 8 6C6.89543 6 6 6.89543 6 8C6 9.10457 6.89543 10 8 10Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -455,11 +465,26 @@ export default function Home() {
                   <>
                     {/* Backdrop */}
                     <div 
-                      className="fixed inset-0 z-40 bg-black/20"
-                      onClick={() => setShowSettingsMenu(false)}
+                      className="fixed inset-0 bg-black/20"
+                      style={{ zIndex: 40 }}
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        setShowSettingsMenu(false)
+                      }}
+                      onTouchStart={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        setShowSettingsMenu(false)
+                      }}
                     />
                     {/* Menu */}
-                    <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-[12px] border border-[#dde2e9] shadow-lg z-50 p-4">
+                    <div 
+                      className="fixed right-4 top-16 w-64 bg-white rounded-[12px] border border-[#dde2e9] shadow-lg p-4"
+                      style={{ zIndex: 50 }}
+                      onClick={(e) => e.stopPropagation()}
+                      onTouchStart={(e) => e.stopPropagation()}
+                    >
                       <div className="space-y-4">
                         {/* Theming toggle */}
                         <div className="flex items-center justify-between">
