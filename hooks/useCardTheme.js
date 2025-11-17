@@ -38,7 +38,7 @@ export default function useCardTheme(dominantColor, headerBgOverride = null) {
   )
   
   const gridCellBaseColor = useMemo(
-    () => capSaturation(adjustToLuminance(headerBgColor, 95), 90),
+    () => capSaturation(adjustToLuminance(headerBgColor, 95), 95),
     [headerBgColor]
   )
   

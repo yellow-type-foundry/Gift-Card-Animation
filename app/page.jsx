@@ -142,7 +142,7 @@ const shuffleArray = (array) => {
 }
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState('gift') // 'gift' | 'sent1' | 'sent4'
+  const [activeTab, setActiveTab] = useState('gift') // 'gift' | 'sent1' (Batch) | 'sent4' (Single)
   const [useColoredBackground, setUseColoredBackground] = useState(false) // Toggle for Sent Card 1 background
   const [useSentCard3Layout, setUseSentCard3Layout] = useState(false) // Toggle for SentCard3 design layout
   const [cardStates, setCardStates] = useState({
@@ -269,13 +269,13 @@ export default function Home() {
             onClick={() => setActiveTab('sent1')}
             className={`px-3 py-1.5 rounded-[12px] outline outline-1 outline-offset-[-1px] shrink-0 ${activeTab==='sent1' ? 'bg-white outline-zinc-300 text-black' : 'bg-[#f0f1f5] outline-zinc-200 text-[#525F7A]'}`}
           >
-            Sent Card (1)
+            Sent Card (Batch)
           </button>
           <button
             onClick={() => setActiveTab('sent4')}
             className={`px-3 py-1.5 rounded-[12px] outline outline-1 outline-offset-[-1px] shrink-0 ${activeTab==='sent4' ? 'bg-white outline-zinc-300 text-black' : 'bg-[#f0f1f5] outline-zinc-200 text-[#525F7A]'}`}
           >
-            Sent Card (4)
+            Sent Card (Single)
           </button>
         </div>
         {/* Content */}

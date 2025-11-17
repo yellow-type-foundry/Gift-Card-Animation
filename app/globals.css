@@ -165,7 +165,7 @@
 }
 
 /* Trigger animation only when hovering the Image Container block */
-[data-name="Envelope"] .grid-cell-base { opacity: 0.16; will-change: opacity; }
+[data-name="Envelope"] .grid-cell-base { opacity: 0.2; will-change: opacity; }
 [data-name="Envelope"] .grid-cell-overlay { opacity: 0.10; will-change: opacity; }
 /* Restore breathing on hover */
 [data-name="Envelope"]:hover .grid-cell-base,
