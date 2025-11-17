@@ -139,6 +139,8 @@ export default function Home() {
   const [useColoredBackground, setUseColoredBackground] = useState(false) // Toggle for theming
   const [layout, setLayout] = useState('default') // 'default' | 'altered1' | 'altered2'
   const [giftSentView, setGiftSentView] = useState('batch') // 'batch' | 'single'
+  const [mixCards, setMixCards] = useState(false) // Toggle to mix batch and single cards
+  const [mixSeed, setMixSeed] = useState(0) // Seed to regenerate mix when toggled
   const [cardStates, setCardStates] = useState({
     card1: 'unopened',
     card2: 'unopened',
@@ -204,6 +206,18 @@ export default function Home() {
     })
     setSentCards(randomized)
   }, [])
+  
+  // Generate stable card types for mixing
+  const mixedCardTypes = useMemo(() => {
+    if (!mixCards) return null
+    // Use a seeded random function for consistent results
+    let seed = mixSeed
+    const seededRandom = () => {
+      seed = (seed * 9301 + 49297) % 233280
+      return seed / 233280
+    }
+    return sentCards.map(() => seededRandom() < 0.5)
+  }, [mixCards, mixSeed, sentCards])
   
   const handleOpenGift = useCallback((cardId) => {
     setCardStates(prev => ({
@@ -290,7 +304,7 @@ export default function Home() {
             <div className="flex items-center justify-between mb-6" style={{ height: '40px' }}>
               {/* View toggle (Batch/Single) */}
               <div className="flex items-center gap-3">
-                <span className="text-sm text-[#525F7A]">View</span>
+                <span className="text-sm text-[#525F7A]">Batch</span>
                 <button
                   onClick={() => setGiftSentView(giftSentView === 'batch' ? 'single' : 'batch')}
                   className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
@@ -306,7 +320,7 @@ export default function Home() {
                     }`}
                   />
                 </button>
-                <span className="text-sm text-[#525F7A]">{giftSentView === 'batch' ? 'Batch' : 'Single'}</span>
+                <span className="text-sm text-[#525F7A]">Single</span>
               </div>
               {/* Theming and Layout controls */}
               <div className={`flex items-center gap-6 ${giftSentView === 'single' ? 'opacity-40' : ''}`}>
@@ -356,10 +370,92 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
+                {/* Mix cards button */}
+                <button
+                  onClick={() => {
+                    setMixCards(!mixCards)
+                    if (!mixCards) {
+                      setMixSeed(Date.now()) // Generate new seed when enabling mix
+                    }
+                  }}
+                  className={`px-3 py-1.5 rounded-[12px] border text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
+                    mixCards 
+                      ? 'border-[#5a3dff] bg-[#5a3dff] text-white hover:bg-[#4a2def]' 
+                      : 'border-[#dde2e9] bg-white text-[#525F7A] hover:bg-gray-50'
+                  }`}
+                >
+                  Mix Cards
+                </button>
               </div>
             </div>
             <div className="grid gift-card-grid gap-[24px]">
-              {giftSentView === 'batch' ? sentCards.map((card, index) => {
+              {mixCards && mixedCardTypes ? (
+                // Mix batch and single cards
+                sentCards.map((card, index) => {
+                  const isBatch = mixedCardTypes[index]
+                  
+                  if (isBatch) {
+                    // Determine which layout to use based on dropdown selection
+                    const useAlteredLayout1 = layout === 'altered1'
+                    const useAlteredLayout2 = layout === 'altered2'
+                    const useAlteredLayout = useAlteredLayout1 || useAlteredLayout2
+                    
+                    return (
+                      <SentCard1
+                        key={index}
+                        from={card.from}
+                        title={card.title}
+                        boxImage={card.boxImage}
+                        giftTitle={card.giftTitle}
+                        giftSubtitle={card.giftSubtitle}
+                        progress={card.progress}
+                        sentDate={card.sentDate}
+                        headerBgOverride={useColoredBackground ? null : "#E3E7ED"}
+                        hideUnion={useAlteredLayout}
+                        footerPadEqual={useAlteredLayout}
+                        footerTopPadding={useAlteredLayout ? 28 : undefined}
+                        footerBottomPadding={useAlteredLayout ? 24 : 16}
+                        envelopeScale={useAlteredLayout2 ? 0.8 : (useAlteredLayout1 ? 0.9 : 1)}
+                        envelopeOffsetY={useAlteredLayout ? 8 : 0}
+                        confettiWhiteOverlay={useAlteredLayout}
+                        envelopeHighZ={useAlteredLayout}
+                        overlayProgressOnEnvelope={useAlteredLayout}
+                        showFooterProgress={useAlteredLayout ? false : true}
+                        showFooterReminder={true}
+                        footerTransparent={useAlteredLayout}
+                        progressOutsideEnvelope={useAlteredLayout2}
+                        // Altered Layout 2 specific envelope controls
+                        envelopeScale2={useAlteredLayout2 ? 0.75 : undefined}
+                        envelopeOffsetY2={useAlteredLayout2 ? 24 : undefined}
+                        envelopeLeft2={useAlteredLayout2 ? 0 : undefined}
+                        envelopeRight2={useAlteredLayout2 ? 0 : undefined}
+                        envelopeTopBase2={useAlteredLayout2 ? 0 : undefined}
+                        headerHeight2={useAlteredLayout2 ? 240 : undefined}
+                        transformOrigin2={useAlteredLayout2 ? 'center top' : undefined}
+                        // Altered Layout 2 specific footer controls
+                        footerTopPadding2={useAlteredLayout2 ? 28 : undefined}
+                        footerBottomPadding2={useAlteredLayout2 ? 16 : undefined}
+                        footerPadEqual2={useAlteredLayout2 ? true : undefined}
+                        footerTransparent2={useAlteredLayout2 ? true : undefined}
+                        progressBottomPadding2={useAlteredLayout2 ? 20 : undefined}
+                      />
+                    )
+                  } else {
+                    return (
+                      <SentCard4
+                        key={index}
+                        from={card.from}
+                        title={card.title}
+                        boxImage={card.boxImage}
+                        giftTitle={card.giftTitle}
+                        giftSubtitle={card.giftSubtitle}
+                        progress={card.progress}
+                        sentDate={card.sentDate}
+                      />
+                    )
+                  }
+                })
+              ) : giftSentView === 'batch' ? sentCards.map((card, index) => {
                 // Determine which layout to use based on dropdown selection
                 const useAlteredLayout1 = layout === 'altered1'
                 const useAlteredLayout2 = layout === 'altered2'
