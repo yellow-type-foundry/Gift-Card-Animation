@@ -135,9 +135,10 @@ const ALL_SENT_DATES = [
 
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState('gift') // 'gift' | 'sent1' (Batch) | 'sent4' (Single)
+  const [activeTab, setActiveTab] = useState('gift') // 'gift' | 'sent'
   const [useColoredBackground, setUseColoredBackground] = useState(false) // Toggle for theming
   const [layout, setLayout] = useState('default') // 'default' | 'altered1' | 'altered2'
+  const [giftSentView, setGiftSentView] = useState('batch') // 'batch' | 'single'
   const [cardStates, setCardStates] = useState({
     card1: 'unopened',
     card2: 'unopened',
@@ -230,8 +231,7 @@ export default function Home() {
   
   // Memoize individual tab handlers
   const handleGiftTab = useCallback(() => handleTabChange('gift'), [handleTabChange])
-  const handleSent1Tab = useCallback(() => handleTabChange('sent1'), [handleTabChange])
-  const handleSent4Tab = useCallback(() => handleTabChange('sent4'), [handleTabChange])
+  const handleSentTab = useCallback(() => handleTabChange('sent'), [handleTabChange])
   
   return (
     <div className="min-h-screen bg-[#f0f1f5] flex items-start overflow-visible">
@@ -249,14 +249,9 @@ export default function Home() {
             onClick={handleGiftTab}
           />
           <TabButton
-            label="Gift Sent (Batch)"
-            isActive={activeTab === 'sent1'}
-            onClick={handleSent1Tab}
-          />
-          <TabButton
-            label="Gift Sent (Single)"
-            isActive={activeTab === 'sent4'}
-            onClick={handleSent4Tab}
+            label="Gift Sent"
+            isActive={activeTab === 'sent'}
+            onClick={handleSentTab}
           />
         </div>
         {/* Content */}
@@ -289,54 +284,82 @@ export default function Home() {
             {/* Card 8 */}
             <GiftCard state={cardStates.card8} from="Ryan Thompson" message={messages[7]} expiryText={cardStates.card8 === 'unopened' ? 'Expiring in 19 days' : undefined} giftTitle="Gourmet Chocolate Truffles" giftSubtitle="Vosges Haut-Chocolat" boxImage={boxPairs[7].box1} box2Image={boxPairs[7].box2} onOpenGift={cardHandlers.card8} />
           </div>
-        ) : activeTab === 'sent1' ? (
+        ) : activeTab === 'sent' ? (
           <div>
             {/* Toggles */}
-            <div className="flex items-center justify-center gap-6 mb-6">
-              {/* Background color toggle */}
+            <div className="flex items-center justify-between mb-6" style={{ height: '40px' }}>
+              {/* View toggle (Batch/Single) */}
               <div className="flex items-center gap-3">
-                <span className="text-sm text-[#525F7A]">Theming</span>
+                <span className="text-sm text-[#525F7A]">View</span>
                 <button
-                  onClick={() => setUseColoredBackground(!useColoredBackground)}
+                  onClick={() => setGiftSentView(giftSentView === 'batch' ? 'single' : 'batch')}
                   className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
-                    useColoredBackground ? 'bg-[#5a3dff]' : 'bg-gray-300'
+                    giftSentView === 'single' ? 'bg-[#5a3dff]' : 'bg-gray-300'
                   }`}
                   role="switch"
-                  aria-checked={useColoredBackground}
-                  aria-label="Toggle theming"
+                  aria-checked={giftSentView === 'single'}
+                  aria-label="Toggle between batch and single view"
                 >
                   <span
                     className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                      useColoredBackground ? 'translate-x-6' : 'translate-x-1'
+                      giftSentView === 'single' ? 'translate-x-6' : 'translate-x-1'
                     }`}
                   />
                 </button>
+                <span className="text-sm text-[#525F7A]">{giftSentView === 'batch' ? 'Batch' : 'Single'}</span>
               </div>
-              {/* Layout dropdown */}
-              <div className="flex items-center gap-3">
-                <label htmlFor="layout-select" className="text-sm text-[#525F7A]">Layout</label>
-                <div className="relative inline-block">
-                  <select
-                    id="layout-select"
-                    value={layout}
-                    onChange={(e) => setLayout(e.target.value)}
-                    className="py-2 pl-3 pr-8 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0 appearance-none cursor-pointer"
-                    style={{ width: 'auto', minWidth: '80px' }}
+              {/* Theming and Layout controls */}
+              <div className={`flex items-center gap-6 ${giftSentView === 'single' ? 'opacity-40' : ''}`}>
+                {/* Theming toggle */}
+                <div className="flex items-center gap-3">
+                  <span className="text-sm text-[#525F7A]">Theming</span>
+                  <button
+                    onClick={() => giftSentView === 'batch' && setUseColoredBackground(!useColoredBackground)}
+                    disabled={giftSentView === 'single'}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
+                      useColoredBackground ? 'bg-[#5a3dff]' : 'bg-gray-300'
+                    } ${giftSentView === 'single' ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                    role="switch"
+                    aria-checked={useColoredBackground}
+                    aria-disabled={giftSentView === 'single'}
+                    aria-label="Toggle theming"
                   >
-                    <option value="default">Layout 1</option>
-                    <option value="altered1">Layout 2</option>
-                    <option value="altered2">Layout 3</option>
-                  </select>
-                  <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
-                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M3 4.5L6 7.5L9 4.5" stroke="#525F7A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        useColoredBackground ? 'translate-x-6' : 'translate-x-1'
+                      }`}
+                    />
+                  </button>
+                </div>
+                {/* Layout dropdown */}
+                <div className="flex items-center gap-3">
+                  <label htmlFor="layout-select" className="text-sm text-[#525F7A]">Layout</label>
+                  <div className="relative inline-block">
+                    <select
+                      id="layout-select"
+                      value={layout}
+                      onChange={(e) => giftSentView === 'batch' && setLayout(e.target.value)}
+                      disabled={giftSentView === 'single'}
+                      className={`py-2 pl-3 pr-8 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0 appearance-none ${
+                        giftSentView === 'single' ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
+                      }`}
+                      style={{ width: 'auto', minWidth: '80px' }}
+                    >
+                      <option value="default">Layout 1</option>
+                      <option value="altered1">Layout 2</option>
+                      <option value="altered2">Layout 3</option>
+                    </select>
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 4.5L6 7.5L9 4.5" stroke="#525F7A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
             <div className="grid gift-card-grid gap-[24px]">
-              {sentCards.map((card, index) => {
+              {giftSentView === 'batch' ? sentCards.map((card, index) => {
                 // Determine which layout to use based on dropdown selection
                 const useAlteredLayout1 = layout === 'altered1'
                 const useAlteredLayout2 = layout === 'altered2'
@@ -382,25 +405,21 @@ export default function Home() {
                     progressBottomPadding2={useAlteredLayout2 ? 20 : undefined}
                   />
                 )
-              })}
+              }) : sentCards.map((card, index) => (
+                <SentCard4
+                  key={index}
+                  from={card.from}
+                  title={card.title}
+                  boxImage={card.boxImage}
+                  giftTitle={card.giftTitle}
+                  giftSubtitle={card.giftSubtitle}
+                  progress={card.progress}
+                  sentDate={card.sentDate}
+                />
+              ))}
             </div>
           </div>
-        ) : (
-          <div className="grid gift-card-grid gap-[24px]">
-            {sentCards.map((card, index) => (
-              <SentCard4
-                key={`sent4-${index}`}
-                from={card.from}
-                title={card.title}
-                boxImage={card.boxImage}
-                giftTitle={card.giftTitle}
-                giftSubtitle={card.giftSubtitle}
-                progress={card.progress}
-                sentDate={card.sentDate}
-              />
-            ))}
-          </div>
-        )}
+        ) : null}
       </div>
     </div>
   )
