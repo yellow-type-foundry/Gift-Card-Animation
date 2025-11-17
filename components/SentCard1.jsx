@@ -253,6 +253,41 @@ const SentCard1 = ({
             </p>
           </div>
 
+          {/* Dots background - behind envelope (for Batch 3) - positioned relative to header */}
+          {progressOutsideEnvelope && (
+            <div
+              className="absolute"
+              style={{
+                left: '50%',
+                top: '75%',
+                transform: 'translate(-50%, -50%)',
+                width: '300px',
+                height: '300px',
+                zIndex: 0,
+                pointerEvents: 'none',
+                opacity: 1,
+                position: 'absolute'
+              }}
+              aria-hidden="true"
+            >
+              <Image
+                src="/assets/GiftSent/Gift Container/Dots-3x.png"
+                alt=""
+                width={210}
+                height={150}
+                priority={false}
+                quality={100}
+                unoptimized={true}
+                style={{ 
+                  objectFit: 'contain', 
+                  width: '100%', 
+                  height: '100%',
+                  display: 'block'
+                }}
+              />
+            </div>
+          )}
+
           {/* Envelope Container - children positioned relative to header */}
           <div
             className={`absolute ${progressOutsideEnvelope && envelopeTopBase2 !== undefined ? '' : 'inset-0'}`}
@@ -280,8 +315,6 @@ const SentCard1 = ({
             data-name="Envelope"
             data-node-id="1467:49190"
           >
-            
-            
             {/* Base (envelope base) - moved inside Envelope so it moves together */}
             <div style={{ position: 'relative', width: '100%', height: '100%' }}>
               <EnvelopeBase ids={ids} baseTintColor={baseTintColor} />
