@@ -76,7 +76,7 @@ export default function Footer({
           </div>
         )}
         {/* Progress / Reminder slot (also hosts info when infoInSlot) */}
-        <div className="relative w-full flex items-center justify-center" style={{ height: infoInSlot ? '44px' : '36px' }}>
+        <div className="relative w-full flex items-center justify-center" style={{ minHeight: infoInSlot ? '44px' : '36px' }}>
           {infoInSlot && (infoTitle || infoSubtitle) && (
             <div
               className="absolute inset-0 flex items-center justify-center"
@@ -88,15 +88,18 @@ export default function Footer({
               }}
               data-name="InfoSlot"
             >
-              <div className="flex flex-col items-center justify-center gap-[8px] px-2" style={{ height: '44px' }}>
+              <div className="flex flex-col items-center justify-center gap-[4px] px-2" style={{ minHeight: '44px', width: '100%' }}>
                 {infoTitle && (
                   <p
-                    className="font-['Goody_Sans:Medium',sans-serif] text-[16px] leading-[1.4] truncate text-black"
+                    className="font-['Goody_Sans:Medium',sans-serif] text-[16px] leading-[1.4] text-black text-center"
                     style={{
                       fontFamily: 'var(--font-goody-sans)',
                       fontSize: '16px',
                       fontWeight: 500,
-                      lineHeight: 1.4
+                      lineHeight: 1.4,
+                      wordBreak: 'break-word',
+                      overflowWrap: 'break-word',
+                      maxWidth: '100%'
                     }}
                   >
                     {infoTitle}
@@ -104,11 +107,14 @@ export default function Footer({
                 )}
                 {infoSubtitle && (
                   <p
-                    className="font-['Goody_Sans:Regular',sans-serif] text-[16px] leading-[1.4] text-[#525F7A] truncate"
+                    className="font-['Goody_Sans:Regular',sans-serif] text-[16px] leading-[1.4] text-[#525F7A] text-center"
                     style={{
                       fontFamily: 'var(--font-goody-sans)',
                       fontSize: '16px',
-                      lineHeight: 1.4
+                      lineHeight: 1.4,
+                      wordBreak: 'break-word',
+                      overflowWrap: 'break-word',
+                      maxWidth: '100%'
                     }}
                   >
                     {infoSubtitle}

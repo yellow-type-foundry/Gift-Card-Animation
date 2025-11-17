@@ -1,16 +1,17 @@
 'use client'
 
-import React, { useState, useEffect, useRef, useMemo } from 'react'
+import React, { useState, useRef } from 'react'
 import Image from 'next/image'
 import { TOKENS } from '@/constants/tokens'
 import useDominantColor from '@/hooks/useDominantColor'
-import { darkenHex, lightenHex, computeLuminance, adjustToLuminance, capSaturation } from '@/utils/colors'
+import useCardTheme from '@/hooks/useCardTheme'
+import useProgressAnimation from '@/hooks/useProgressAnimation'
+import useConfetti from '@/hooks/useConfetti'
+import useComponentIds from '@/hooks/useComponentIds'
 import Footer from '@/components/sent-card/Footer'
-
-// Stable style constants
-const PROGRESS_PILL_RADIUS = '100px'
-const HEADER_OVERLAY_BG = 'linear-gradient(to bottom, rgba(255, 253, 253, 0.3) 00%, rgba(255, 255, 255, 0.95) 95%)'
-const PROGRESS_GLOW_BOX_SHADOW = '0px 2px 4px -8px rgba(46,10,255,0.1), 0px 2px 2px 0px rgba(90,61,255,0.08), 0px 4px 8px -4px rgba(16,0,112,0.15)'
+import EnvelopeBase from '@/components/sent-card/EnvelopeBase'
+import CardShape from '@/components/sent-card/CardShape'
+import { PROGRESS_PILL_RADIUS, HEADER_OVERLAY_BG, PROGRESS_GLOW_BOX_SHADOW, ENVELOPE_DIMENSIONS } from '@/constants/sentCardConstants'
 
 const SentCard1 = ({
   from = 'Alex Torres',
@@ -33,208 +34,41 @@ const SentCard1 = ({
   footerBottomPadding = 16,
   footerTopPadding
 }) => {
-  // Ensure current never exceeds total, and total never exceeds 40
-  const validatedProgress = {
-    current: Math.min(progress.current, progress.total),
-    total: Math.min(40, progress.total)
-  }
-  
-  // Calculate target progress percentage precisely (will never exceed 100% since current <= total)
-  const targetProgressPercentage = validatedProgress.total > 0 
-    ? (validatedProgress.current / validatedProgress.total) * 100 
-    : 0
-  
-  // Animated progress percentage (starts at 0, animates to target after content loads)
-  const [animatedProgress, setAnimatedProgress] = useState(0)
-  // Animated current value (starts at 0, counts up to target)
-  const [animatedCurrent, setAnimatedCurrent] = useState(0)
-  
-  // Refs to store timers for cleanup
-  const countIntervalRef = useRef(null)
-  const timerRef = useRef(null)
-  // Hover + confetti refs
+  // Hooks
   const cardRef = useRef(null)
   const confettiCanvasRef = useRef(null)
   const [isHovered, setIsHovered] = useState(false)
-  const isDone = validatedProgress.current === validatedProgress.total
   
-  // Generate stable IDs scoped to this component instance
-  const idRef = useRef(null)
-  if (idRef.current === null) {
-    const idSuffix = `${boxImage.replace(/[^a-zA-Z0-9]/g, '')}-${from.replace(/[^a-zA-Z0-9]/g, '')}`
-    idRef.current = {
-      baseFilterId: `filterBase-${idSuffix}`,
-      baseGradient1Id: `paintBase1-${idSuffix}`,
-      baseGradient2Id: `paintBase2-${idSuffix}`,
-      imageFilterId: `filterImg-${idSuffix}`,
-      imageClipId: `clipImg-${idSuffix}`,
-      imageGradientSoftLightId: `paintImgSoft-${idSuffix}`,
-      imageGradientShadowId: `paintImgShadow-${idSuffix}`,
-      gridCellGradId: `paintGridCell-${idSuffix}`,
-      cardFilterId: `filterCard-${idSuffix}`,
-      cardGradientId: `paintCard-${idSuffix}`,
-      unionFilterId: `filterUnion-${idSuffix}`,
-      unionGradientId: `paintUnion-${idSuffix}`
-    }
-  }
-  const ids = idRef.current
-
-  // Extract dominant color from the image
+  // Generate stable IDs for SVG elements
+  const ids = useComponentIds(boxImage, from)
+  
+  // Extract dominant color and calculate theme
   const { dominantColor } = useDominantColor(boxImage, '#f4c6fa')
-  // Derived theme colors (memoized)
-  const hiddenFlapColor = useMemo(
-    () => capSaturation(lightenHex(dominantColor, 4.0), 100),
-    [dominantColor]
-  )
-  const headerBgColor = useMemo(
-    () => capSaturation(adjustToLuminance(dominantColor, 99), 25),
-    [dominantColor]
-  )
-  const headerBgFinal = headerBgOverride || headerBgColor
-  const isMonochromeVariant = Boolean(headerBgOverride)
-  const headerTextClass = headerBgOverride ? 'text-black' : 'text-white'
-  const baseTintColor = useMemo(
-    () => capSaturation(adjustToLuminance(dominantColor, 85), 70),
-    [dominantColor]
-  )
-  const base2TintColor = useMemo(
-    () => capSaturation(lightenHex(dominantColor, 1.25), 65),
-    [dominantColor]
-  )
-  const overlayDarkColor = useMemo(
-    () => capSaturation(darkenHex(dominantColor, 0.7), 90),
-    [dominantColor]
-  )
-  const gridCellBaseColor = useMemo(
-    () => capSaturation(adjustToLuminance(headerBgColor, 95), 90),
-    [headerBgColor]
-  )
-  // Progress colors themed to image/card
-  const progressStartColor = useMemo(
-    () => capSaturation(adjustToLuminance(dominantColor, 60), 50),
-    [dominantColor]
-  )
-  const progressEndColor = useMemo(
-    () => capSaturation(lightenHex(dominantColor, 1.2), 50),
-    [dominantColor]
-  )
+  const theme = useCardTheme(dominantColor, headerBgOverride)
+  const {
+    headerBgFinal,
+    isMonochromeVariant,
+    headerTextClass,
+    baseTintColor,
+    base2TintColor,
+    overlayDarkColor,
+    gridCellBaseColor,
+    progressStartColor,
+    progressEndColor
+  } = theme
   
-  // Animate progress bar and count after content is loaded
-  useEffect(() => {
-    // Small delay before animation starts
-    timerRef.current = setTimeout(() => {
-      const targetCurrent = validatedProgress.current
-      const duration = 500 // 0.5s to match CSS transition
-      const steps = 30 // Number of animation steps
-      const stepDuration = duration / steps
-      const increment = targetCurrent / steps
-      let currentStep = 0
-      
-      // Animate progress bar width immediately
-      setAnimatedProgress(targetProgressPercentage)
-      
-      // Animate counting number
-      countIntervalRef.current = setInterval(() => {
-        currentStep++
-        const newValue = Math.min(
-          targetCurrent,
-          Math.floor(increment * currentStep)
-        )
-        setAnimatedCurrent(newValue)
-        
-        if (currentStep >= steps) {
-          // Ensure final value is exact
-          setAnimatedCurrent(targetCurrent)
-          if (countIntervalRef.current) {
-            clearInterval(countIntervalRef.current)
-            countIntervalRef.current = null
-          }
-        }
-      }, stepDuration)
-    }, 100)
-    
-    return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current)
-      }
-      if (countIntervalRef.current) {
-        clearInterval(countIntervalRef.current)
-      }
-    }
-  }, [targetProgressPercentage, validatedProgress.current])
-
-  const allAccepted = validatedProgress.current === validatedProgress.total
-
-  // Lightweight confetti behind the envelope on hover when all accepted
-  useEffect(() => {
-    if (!isHovered || !allAccepted) return
-    const canvas = confettiCanvasRef.current
-    const headerEl = cardRef.current?.querySelector('[data-name="Header"]')
-    if (!canvas || !headerEl) return
-    const ctx = canvas.getContext('2d')
-    let animId
-    const dpr = window.devicePixelRatio || 1
-    const rect = headerEl.getBoundingClientRect()
-    canvas.width = Math.max(1, Math.floor(rect.width * dpr))
-    canvas.height = Math.max(1, Math.floor(rect.height * dpr))
-    canvas.style.width = `${rect.width}px`
-    canvas.style.height = `${rect.height}px`
-    // Colorful confetti palette (multi-hue, soft pastels)
-    const colors = ['#7C66FF', '#5AD3FF', '#FF7AD9', '#FFD166', '#8CE99A']
-    const maxParticles = 120
-    const spawnParticle = () => {
-      const speed = 2 + Math.random() * 3
-      return {
-        // Start near bottom with slight horizontal randomness across width
-        x: Math.random() * (rect.width * dpr),
-        y: (rect.height * dpr) - 2 * dpr,
-        // Shoot upwards with slight horizontal drift
-        vx: (Math.random() * 2 - 1) * 1.5 * dpr,
-        vy: -speed * dpr,
-        // Gravity pulls down a bit so confetti slows as it rises
-        ay: 0.06 * dpr,
-        rot: Math.random() * Math.PI,
-        vr: (Math.random() * 0.3 - 0.15),
-        size: (4 + Math.random() * 4) * dpr,
-        color: colors[(Math.random() * colors.length) | 0],
-        shape: Math.random() < 0.5 ? 'rect' : 'tri'
-      }
-    }
-    const particles = Array.from({ length: maxParticles }).map(spawnParticle)
-    const recycleIfOut = (p) => {
-      const outOfBounds = p.y < -20 * dpr || p.y > canvas.height + 20 * dpr || p.x < -20 * dpr || p.x > canvas.width + 20 * dpr
-      if (outOfBounds) {
-        const np = spawnParticle()
-        p.x = np.x; p.y = np.y; p.vx = np.vx; p.vy = np.vy; p.ay = np.ay; p.rot = np.rot; p.vr = np.vr; p.size = np.size; p.color = np.color; p.shape = np.shape
-      }
-    }
-    const draw = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-      particles.forEach(p => {
-        p.vy += p.ay
-        p.x += p.vx
-        p.y += p.vy
-        p.rot += p.vr
-        recycleIfOut(p)
-        ctx.save()
-        ctx.translate(p.x, p.y)
-        ctx.rotate(p.rot)
-        ctx.fillStyle = p.color
-        // Draw circle only
-        ctx.beginPath()
-        ctx.arc(0, 0, p.size / 2, 0, Math.PI * 2)
-        ctx.closePath()
-        ctx.fill()
-        ctx.restore()
-      })
-      animId = requestAnimationFrame(draw)
-    }
-    animId = requestAnimationFrame(draw)
-    return () => {
-      if (animId) cancelAnimationFrame(animId)
-      ctx && ctx.clearRect(0, 0, canvas.width, canvas.height)
-    }
-  }, [isHovered, allAccepted])
+  // Progress animation
+  const {
+    animatedProgress,
+    animatedCurrent,
+    validatedProgress,
+    isDone
+  } = useProgressAnimation(progress)
+  
+  const allAccepted = isDone
+  
+  // Confetti animation
+  useConfetti(isHovered, allAccepted, confettiCanvasRef, cardRef)
 
   return (
     <div
@@ -361,273 +195,87 @@ const SentCard1 = ({
             
             
             {/* Base (envelope base) - moved inside Envelope so it moves together */}
-            <div
-              className="absolute"
-              style={{
-                left: '50px',
-                top: '83px',
-                width: '195.5px',
-                height: '220.575px',
-                zIndex: 1,
-                pointerEvents: 'none'
-              }}
-              data-name="Base"
-              data-node-id="1467:49192"
-            >
-                {/* Background blur layer (like Union) */}
+            <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+              <EnvelopeBase ids={ids} baseTintColor={baseTintColor} />
+              {overlayProgressOnEnvelope && (
                 <div
-                  className="absolute inset-0"
+                  className="absolute"
                   style={{
-                    backdropFilter: 'blur(0px)',
-                    WebkitBackdropFilter: 'blur(0px)',
-                    top: '-8px',
-                    left: '-8px',
-                    right: '-8px',
-                    bottom: '-8px',
-                    pointerEvents: 'none',
-                    zIndex: 0
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    // Position 10px gap from envelope base bottom
+                    // Envelope base is at top: 83px, height: 220.575px
+                    // So envelope base bottom is at 83 + 220.575 = 303.575px
+                    // Progress bar height is 36px, so its top should be at 303.575 - 10 - 36 = 257.575px
+                    top: `${parseFloat(ENVELOPE_DIMENSIONS.base.top) + parseFloat(ENVELOPE_DIMENSIONS.base.height.replace('px', '')) - 10 - 36}px`,
+                    height: '36px',
+                    zIndex: 3
                   }}
-                  aria-hidden="true"
-                />
-                <svg
-                  preserveAspectRatio="true"
-                  width="100%"
-                  height="100%"
-                  overflow="visible"
-                  style={{ display: 'block', position: 'relative', zIndex: 1 }}
-                  viewBox="0 0 196 219"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
+                  data-name="OverlayProgress"
                 >
-                  <g filter={`url(#${ids.baseFilterId})`}>
-                    {/* Themed base fill */}
-                    <path
-                      d="M0 84.4092C0 80.8407 1.58824 77.4572 4.33359 75.1774L92.6391 1.84547C95.6021 -0.615154 99.8979 -0.615156 102.861 1.84546L191.166 75.1774C193.912 77.4572 195.5 80.8406 195.5 84.4092V206.176C195.5 212.804 190.127 218.176 183.5 218.176H12C5.37259 218.176 0 212.804 0 206.176V84.4092Z"
-                      fill={baseTintColor}
-                    />
-                    {/* Highlight gradient overlay */}
-                    <path
-                      d="M0 84.4092C0 80.8407 1.58824 77.4572 4.33359 75.1774L92.6391 1.84547C95.6021 -0.615154 99.8979 -0.615156 102.861 1.84546L191.166 75.1774C193.912 77.4572 195.5 80.8406 195.5 84.4092V206.176C195.5 212.804 190.127 218.176 183.5 218.176H12C5.37259 218.176 0 212.804 0 206.176V84.4092Z"
-                      fill={`url(#${ids.baseGradient1Id})`}
-                      fillOpacity="0.5"
-                    />
-                    <path
-                      d="M92.7988 2.03769C95.6693 -0.345946 99.8307 -0.345947 102.701 2.03769L191.007 75.3697C193.695 77.602 195.25 80.9148 195.25 84.4088V206.176C195.25 212.666 189.989 217.926 183.5 217.926H12C5.51072 217.926 0.250108 212.666 0.25 206.176V84.4088C0.250125 80.9148 1.80517 77.602 4.49316 75.3697L92.7988 2.03769Z"
-                      stroke={`url(#${ids.baseGradient2Id})`}
-                      strokeOpacity="0.8"
-                      strokeWidth="0.5"
-                    />
-                  </g>
-                  <defs>
-                    <filter
-                      id={ids.baseFilterId}
-                      x="-8"
-                      y="-8"
-                      width="211.5"
-                      height="334.176"
-                      filterUnits="userSpaceOnUse"
-                      colorInterpolationFilters="sRGB"
-                    >
-                      <feFlood floodOpacity="0" result="BackgroundImageFix" />
-                      <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
-                      <feColorMatrix
-                        in="SourceAlpha"
-                        type="matrix"
-                        values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
-                        result="hardAlpha"
-                      />
-                      <feOffset dy="0" />
-                      <feGaussianBlur stdDeviation="5" />
-                      <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1" />
-                      <feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.95 0" />
-                      <feBlend mode="normal" in2="shape" result="effect1_innerShadow" />
-                    </filter>
-                    <linearGradient
-                      id={ids.baseGradient1Id}
-                      x1="90"
-                      y1="100"
-                      x2="90"
-                      y2="-200"
-                      gradientUnits="userSpaceOnUse"
-                    >
-                      <stop stopColor="white" />
-                      <stop offset="1" stopColor="grey" stopOpacity="0.2" />
-                    </linearGradient>
-                    <linearGradient
-                      id={ids.baseGradient2Id}
-                      x1="97"
-                      y1="10"
-                      x2="97"
-                      y2="131"
-                      gradientUnits="userSpaceOnUse"
-                    >
-                      <stop stopColor="white" stopOpacity="0" />
-                      <stop offset="0.6" stopColor="white" />
-                    </linearGradient>
-                  </defs>
-                </svg>
-                {overlayProgressOnEnvelope && (
                   <div
-                    className="absolute"
+                    className="bg-[#f0f1f5] border border-[rgba(221,226,233,0)] border-solid box-border content-stretch flex flex-col gap-[10px] items-start justify-center p-[2px] relative rounded-[100px] shrink-0"
                     style={{
-                      left: '50%',
-                      transform: 'translateX(-50%)',
-                      bottom: '10px',
-                      height: '36px',
-                      zIndex: 3
+                      borderRadius: PROGRESS_PILL_RADIUS,
+                      backgroundColor: '#f0f1f5',
+                      width: '120px'
                     }}
-                    data-name="OverlayProgress"
                   >
                     <div
-                      className="bg-[#f0f1f5] border border-[rgba(221,226,233,0)] border-solid box-border content-stretch flex flex-col gap-[10px] items-start justify-center p-[2px] relative rounded-[100px] shrink-0"
+                      className="bg-gradient-to-b box-border content-stretch flex flex-col from-[#5a3dff] gap-[10px] items-center justify-center px-[8px] py-[2px] relative rounded-[100px] shrink-0"
                       style={{
+                        background: `linear-gradient(to bottom, ${progressStartColor}, ${progressEndColor})`,
                         borderRadius: PROGRESS_PILL_RADIUS,
-                        backgroundColor: '#f0f1f5',
-                        width: '120px'
+                        width: isDone ? '100%' : `${animatedProgress}%`,
+                        maxWidth: '100%',
+                        minWidth: 'fit-content',
+                        transition: 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                        boxShadow: PROGRESS_GLOW_BOX_SHADOW
                       }}
                     >
-                      <div
-                        className="bg-gradient-to-b box-border content-stretch flex flex-col from-[#5a3dff] gap-[10px] items-center justify-center px-[8px] py-[2px] relative rounded-[100px] shrink-0"
+                      <p
+                        className="font-['Goody_Sans:Medium',sans-serif] leading-[1.4] not-italic relative shrink-0 text-[14px] text-white text-center w-full"
                         style={{
-                          background: `linear-gradient(to bottom, ${progressStartColor}, ${progressEndColor})`,
-                          borderRadius: PROGRESS_PILL_RADIUS,
-                          width: isDone ? '100%' : `${animatedProgress}%`,
-                          maxWidth: '100%',
-                          minWidth: 'fit-content',
-                          transition: 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                          boxShadow: PROGRESS_GLOW_BOX_SHADOW
+                          fontFamily: 'var(--font-goody-sans)',
+                          fontSize: '14px',
+                          fontWeight: 500,
+                          lineHeight: 1.4,
+                          color: '#ffffff',
+                          whiteSpace: 'nowrap'
                         }}
                       >
-                        <p
-                          className="font-['Goody_Sans:Medium',sans-serif] leading-[1.4] not-italic relative shrink-0 text-[14px] text-white text-center w-full"
-                          style={{
-                            fontFamily: 'var(--font-goody-sans)',
-                            fontSize: '14px',
-                            fontWeight: 500,
-                            lineHeight: 1.4,
-                            color: '#ffffff',
-                            whiteSpace: 'nowrap'
-                          }}
-                        >
-                          {isDone ? 'Done' : `${animatedCurrent}/${validatedProgress.total}`}
-                        </p>
-                        {/* highlight removed */}
-                        <div
-                          className="absolute inset-0 pointer-events-none"
-                          style={{
-                            boxShadow: '0px 3px 5px 2px inset rgba(255,255,255,0.5)',
-                            borderRadius: PROGRESS_PILL_RADIUS
-                          }}
-                        />
-                      </div>
+                        {isDone ? 'Done' : `${animatedCurrent}/${validatedProgress.total}`}
+                      </p>
+                      {/* highlight removed */}
                       <div
-                        className="absolute inset-[-1px] pointer-events-none"
+                        className="absolute inset-0 pointer-events-none"
                         style={{
-                          boxShadow: '0px 1px 2.25px 0px inset #c2c6d6, 0px -1px 2.25px 0px inset #ffffff',
+                          boxShadow: '0px 3px 5px 2px inset rgba(255,255,255,0.5)',
                           borderRadius: PROGRESS_PILL_RADIUS
                         }}
                       />
                     </div>
+                    <div
+                      className="absolute inset-[-1px] pointer-events-none"
+                      style={{
+                        boxShadow: '0px 1px 2.25px 0px inset #c2c6d6, 0px -1px 2.25px 0px inset #ffffff',
+                        borderRadius: PROGRESS_PILL_RADIUS
+                      }}
+                    />
                   </div>
-                )}
+                </div>
+              )}
             </div>
             {/* Rectangle 1790 (card shape container) - moved inside Envelope */}
-            <div
-              className="absolute"
-              style={{
-                left: '60px',
-                top: '91.117px',
-                width: '175.95px',
-                height: '146.2px',
-                zIndex: 2,
-                pointerEvents: 'none'
-              }}
-              data-node-id="1467:49194"
-            >
-                {/* Card shape overlay (hexagon shape) with inset wrapper */}
-                <div
-                  className="absolute"
-                  style={{
-                    left: '1.64%',
-                    top: '1.23%',
-                    right: '1.64%',
-                    bottom: '1.23%',
-                    position: 'absolute'
-                  }}
-                >
-                  <svg
-                    preserveAspectRatio="none"
-                    width="100%"
-                    height="100%"
-                    overflow="visible"
-                    style={{ display: 'block' }}
-                    viewBox="0 0 171 143"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <g filter={`url(#${ids.cardFilterId})`}>
-                      <path
-                        d="M81.2603 1.38519L1.84066 67.3763C-0.613553 69.4155 -0.613553 73.1822 1.84066 75.2214L81.2603 141.213C83.4831 143.059 86.7066 143.059 88.9294 141.213L168.349 75.2214C170.803 73.1822 170.803 69.4155 168.349 67.3763L88.9294 1.38519C86.7066 -0.461729 83.4831 -0.461731 81.2603 1.38519Z"
-                        fill={base2TintColor}
-                        fillOpacity="0.2"
-                      />
-                    </g>
-                    <defs>
-                      <filter
-                        id={ids.cardFilterId}
-                        x="-40"
-                        y="-40"
-                        width="260"
-                        height="220"
-                        filterUnits="userSpaceOnUse"
-                        colorInterpolationFilters="sRGB"
-                      >
-                        <feFlood floodOpacity="0" result="BackgroundImageFix" />
-                        <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
-                        <feColorMatrix
-                          in="SourceAlpha"
-                          type="matrix"
-                          values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
-                          result="hardAlpha"
-                        />
-                        <feOffset dy="0" />
-                        <feGaussianBlur stdDeviation="5" />
-                        <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1" />
-                        <feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.65 0" />
-                        <feBlend mode="normal" in2="shape" result="effect1_innerShadow" />
-                        {/* White outer drop shadows for 1790 */}
-                        <feDropShadow in="SourceGraphic" dx="0" dy="8" stdDeviation="3" floodColor="#FFFFFF" floodOpacity="1" result="cardOuterShadow1" />
-                        <feDropShadow in="SourceGraphic" dx="0" dy="8" stdDeviation="3" floodColor="#FFFFFF" floodOpacity="1" result="cardOuterShadow2" />
-                        <feMerge>
-                          <feMergeNode in="cardOuterShadow1" />
-                          <feMergeNode in="cardOuterShadow2" />
-                          <feMergeNode in="effect1_innerShadow" />
-                          <feMergeNode in="SourceGraphic" />
-                        </feMerge>
-                      </filter>
-                      <linearGradient
-                        id={ids.cardGradientId}
-                        x1="85"
-                        y1="-0.7"
-                        x2="85"
-                        y2="152"
-                        gradientUnits="userSpaceOnUse"
-                      >
-                        <stop stopColor="white" />
-                        <stop offset="1" stopColor="white" stopOpacity="0" />
-                      </linearGradient>
-                    </defs>
-                  </svg>
-                </div>
-              </div>
+            <CardShape ids={ids} base2TintColor={base2TintColor} />
             {/* Image Container (hosts image) */}
             <div
               className="absolute"
               style={{
-                left: '50px',
-                top: '83px',
-                width: '195.5px',
-                height: '220.575px',
+                left: ENVELOPE_DIMENSIONS.imageContainer.left,
+                top: ENVELOPE_DIMENSIONS.imageContainer.top,
+                width: ENVELOPE_DIMENSIONS.imageContainer.width,
+                height: ENVELOPE_DIMENSIONS.imageContainer.height,
                 zIndex: 2
               }}
               data-name="Image Container"
@@ -750,10 +398,10 @@ const SentCard1 = ({
             <div
               className="absolute"
               style={{
-                left: '51.25px',
-                top: '83px',
-                width: '195.5px',
-                height: '220.575px',
+                left: ENVELOPE_DIMENSIONS.imageFade.left,
+                top: ENVELOPE_DIMENSIONS.imageFade.top,
+                width: ENVELOPE_DIMENSIONS.imageFade.width,
+                height: ENVELOPE_DIMENSIONS.imageFade.height,
                 zIndex: 99,
                 pointerEvents: 'none'
               }}
@@ -805,10 +453,10 @@ const SentCard1 = ({
             <div
               className="absolute"
               style={{
-                left: '65px',
-                top: '115.5px',
-                width: '165px',
-                height: '45px',
+                left: ENVELOPE_DIMENSIONS.imageBadge.left,
+                top: ENVELOPE_DIMENSIONS.imageBadge.top,
+                width: ENVELOPE_DIMENSIONS.imageBadge.width,
+                height: ENVELOPE_DIMENSIONS.imageBadge.height,
                 borderRadius: '4px',
                 overflow: 'hidden',
                 zIndex: 100,
