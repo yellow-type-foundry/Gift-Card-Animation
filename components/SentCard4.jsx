@@ -115,7 +115,8 @@ const SentCard4 = ({
           style={{
             position: 'relative',
             paddingTop: '20px',
-            paddingBottom: '0'
+            paddingBottom: '0',
+            height: '240px'
           }}
           data-name="Header"
         >
@@ -179,8 +180,8 @@ const SentCard4 = ({
                 left: '50%',
                 top: '50%',
                 transform: 'translate(-50%, -50%)',
-                width: '280px',
-                height: '280px',
+                width: '300px',
+                height: '300pxx',
                 zIndex: 1,
                 pointerEvents: 'none',
                 opacity: 1,
@@ -210,7 +211,7 @@ const SentCard4 = ({
               className="relative"
               style={{
                 width: '250px',
-                height: '160px',
+                height: '250px',
                 zIndex: 1,
                 pointerEvents: 'none',
                 position: 'relative'

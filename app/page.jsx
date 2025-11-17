@@ -138,8 +138,7 @@ const ALL_SENT_DATES = [
 export default function Home() {
   const [activeTab, setActiveTab] = useState('gift') // 'gift' | 'sent'
   const [useColoredBackground, setUseColoredBackground] = useState(false) // Toggle for theming
-  const [layout, setLayout] = useState('default') // 'default' | 'altered1' | 'altered2'
-  const [giftSentView, setGiftSentView] = useState('batch') // 'batch' | 'single'
+  const [layout, setLayout] = useState('default') // 'default' | 'altered1' | 'altered2' | 'single'
   const [mixCards, setMixCards] = useState(false) // Toggle to mix batch and single cards
   const [mixSeed, setMixSeed] = useState(0) // Seed to regenerate mix when toggled
   const [showSettingsMenu, setShowSettingsMenu] = useState(false) // Mobile settings menu visibility
@@ -221,6 +220,9 @@ export default function Home() {
     return sentCards.map(() => seededRandom() < 0.5)
   }, [mixCards, mixSeed, sentCards])
   
+  // Determine if current layout is single
+  const isSingleLayout = layout === 'single'
+  
   const handleOpenGift = useCallback((cardId) => {
     setCardStates(prev => ({
       ...prev,
@@ -254,21 +256,195 @@ export default function Home() {
       <div 
         className="w-full px-0 md:px-[240px] py-10"
       >
-        {/* Tabs */}
+        {/* Tabs and Controls Row */}
         <div
-          className="w-full flex items-center justify-center gap-2 mb-6 overflow-x-auto md:overflow-visible whitespace-nowrap px-[20px] md:px-0"
-          style={{ WebkitOverflowScrolling: 'touch' }}
+          className="w-full flex items-center justify-between gap-4 mb-6 overflow-x-auto md:overflow-visible whitespace-nowrap"
+          style={{ 
+            WebkitOverflowScrolling: 'touch', 
+            height: '40px',
+            maxWidth: '1272px',
+            marginLeft: 'auto',
+            marginRight: 'auto'
+          }}
         >
-          <TabButton
-            label="Gift Received"
-            isActive={activeTab === 'gift'}
-            onClick={handleGiftTab}
-          />
-          <TabButton
-            label="Gift Sent"
-            isActive={activeTab === 'sent'}
-            onClick={handleSentTab}
-          />
+          {/* Tabs - Left side */}
+          <div className="flex items-center gap-2 shrink-0">
+            <TabButton
+              label="Gift Received"
+              isActive={activeTab === 'gift'}
+              onClick={handleGiftTab}
+            />
+            <TabButton
+              label="Gift Sent"
+              isActive={activeTab === 'sent'}
+              onClick={handleSentTab}
+            />
+          </div>
+          
+          {/* Controls - Right side (only show when on Gift Sent tab) */}
+          {activeTab === 'sent' && (
+            <>
+              {/* Desktop: Theming and Layout controls - Hidden on mobile */}
+              <div className="hidden md:flex items-center gap-6 shrink-0">
+                {/* Theming toggle */}
+                <div className="flex items-center gap-3">
+                  <span className="text-sm text-[#525F7A]">Theming</span>
+                  <button
+                    onClick={() => !isSingleLayout && setUseColoredBackground(!useColoredBackground)}
+                    disabled={isSingleLayout}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
+                      useColoredBackground ? 'bg-[#5a3dff]' : 'bg-gray-300'
+                    } ${isSingleLayout ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'}`}
+                    role="switch"
+                    aria-checked={useColoredBackground}
+                    aria-disabled={isSingleLayout}
+                    aria-label="Toggle theming"
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        useColoredBackground ? 'translate-x-6' : 'translate-x-1'
+                      }`}
+                    />
+                  </button>
+                </div>
+                {/* Layout dropdown */}
+                <div className="flex items-center gap-3">
+                  <label htmlFor="layout-select" className="text-sm text-[#525F7A]">Layout</label>
+                  <div className="relative inline-block">
+                    <select
+                      id="layout-select"
+                      value={layout}
+                      onChange={(e) => setLayout(e.target.value)}
+                      className="py-2 pl-3 pr-8 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0 appearance-none cursor-pointer"
+                      style={{ width: 'auto', minWidth: '100px' }}
+                    >
+                      <option value="default">Batch 1</option>
+                      <option value="altered1">Batch 2</option>
+                      <option value="altered2">Batch 3</option>
+                      <option value="single">Single</option>
+                    </select>
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 4.5L6 7.5L9 4.5" stroke="#525F7A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+                {/* Mix cards button */}
+                <button
+                  onClick={() => {
+                    setMixCards(!mixCards)
+                    if (!mixCards) {
+                      setMixSeed(Date.now()) // Generate new seed when enabling mix
+                    }
+                  }}
+                  className={`px-3 py-2 rounded-[12px] border text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
+                    mixCards 
+                      ? 'border-[#5a3dff] bg-[#5a3dff] text-white hover:bg-[#4a2def]' 
+                      : 'border-[#dde2e9] bg-white text-[#525F7A] hover:bg-gray-50'
+                  }`}
+                >
+                  Mix Cards
+                </button>
+              </div>
+              
+              {/* Mobile: Settings/Filter button - Visible only on mobile */}
+              <div className="md:hidden relative shrink-0">
+                <button
+                  onClick={() => setShowSettingsMenu(!showSettingsMenu)}
+                  className="px-3 py-1.5 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 flex items-center gap-2"
+                >
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8 10C9.10457 10 10 9.10457 10 8C10 6.89543 9.10457 6 8 6C6.89543 6 6 6.89543 6 8C6 9.10457 6.89543 10 8 10Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M13.5 8C13.5 7.5 13.5 7.5 13 7.5C12.5 7.5 12.5 7.5 12.5 8C12.5 8.5 12.5 8.5 13 8.5C13.5 8.5 13.5 8.5 13.5 8Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M3.5 8C3.5 7.5 3.5 7.5 3 7.5C2.5 7.5 2.5 7.5 2.5 8C2.5 8.5 2.5 8.5 3 8.5C3.5 8.5 3.5 8.5 3.5 8Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M8 3.5C8 3 8 3 7.5 3C7 3 7 3 7 3.5C7 4 7 4 7.5 4C8 4 8 4 8 3.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M8 12.5C8 12 8 12 7.5 12C7 12 7 12 7 12.5C7 13 7 13 7.5 13C8 13 8 13 8 12.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  Settings
+                </button>
+                
+                {/* Mobile Settings Menu Dropdown */}
+                {showSettingsMenu && (
+                  <>
+                    {/* Backdrop */}
+                    <div 
+                      className="fixed inset-0 z-40 bg-black/20"
+                      onClick={() => setShowSettingsMenu(false)}
+                    />
+                    {/* Menu */}
+                    <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-[12px] border border-[#dde2e9] shadow-lg z-50 p-4">
+                      <div className="space-y-4">
+                        {/* Theming toggle */}
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-[#525F7A]">Theming</span>
+                          <button
+                            onClick={() => !isSingleLayout && setUseColoredBackground(!useColoredBackground)}
+                            disabled={isSingleLayout}
+                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
+                              useColoredBackground ? 'bg-[#5a3dff]' : 'bg-gray-300'
+                            } ${isSingleLayout ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'}`}
+                            role="switch"
+                            aria-checked={useColoredBackground}
+                            aria-disabled={isSingleLayout}
+                            aria-label="Toggle theming"
+                          >
+                            <span
+                              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                                useColoredBackground ? 'translate-x-6' : 'translate-x-1'
+                              }`}
+                            />
+                          </button>
+                        </div>
+                        {/* Layout dropdown */}
+                        <div className="flex items-center justify-between">
+                          <label htmlFor="layout-select-mobile" className="text-sm text-[#525F7A]">Layout</label>
+                          <div className="relative inline-block">
+                            <select
+                              id="layout-select-mobile"
+                              value={layout}
+                              onChange={(e) => setLayout(e.target.value)}
+                              className="py-2 pl-3 pr-8 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0 appearance-none cursor-pointer"
+                              style={{ width: 'auto', minWidth: '100px' }}
+                            >
+                              <option value="default">Batch 1</option>
+                              <option value="altered1">Batch 2</option>
+                              <option value="altered2">Batch 3</option>
+                              <option value="single">Single</option>
+                            </select>
+                            <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M3 4.5L6 7.5L9 4.5" stroke="#525F7A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                            </div>
+                          </div>
+                        </div>
+                        {/* Mix cards button */}
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-[#525F7A]">Mix Cards</span>
+                          <button
+                            onClick={() => {
+                              setMixCards(!mixCards)
+                              if (!mixCards) {
+                                setMixSeed(Date.now()) // Generate new seed when enabling mix
+                              }
+                            }}
+                            className={`px-3 py-1.5 rounded-[12px] border text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
+                              mixCards 
+                                ? 'border-[#5a3dff] bg-[#5a3dff] text-white hover:bg-[#4a2def]' 
+                                : 'border-[#dde2e9] bg-white text-[#525F7A] hover:bg-gray-50'
+                            }`}
+                          >
+                            {mixCards ? 'On' : 'Off'}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            </>
+          )}
         </div>
         {/* Content */}
         {activeTab === 'gift' ? (
@@ -302,193 +478,6 @@ export default function Home() {
           </div>
         ) : activeTab === 'sent' ? (
           <div>
-            {/* Control Bar */}
-            <div className="flex items-center justify-between mb-6 px-5" style={{ height: '40px' }}>
-              {/* View toggle (Batch/Single) - Always visible */}
-              <div className="flex items-center gap-3">
-                <span className="text-sm text-[#525F7A]">Batch</span>
-                <button
-                  onClick={() => setGiftSentView(giftSentView === 'batch' ? 'single' : 'batch')}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
-                    giftSentView === 'single' ? 'bg-[#5a3dff]' : 'bg-gray-300'
-                  }`}
-                  role="switch"
-                  aria-checked={giftSentView === 'single'}
-                  aria-label="Toggle between batch and single view"
-                >
-                  <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                      giftSentView === 'single' ? 'translate-x-6' : 'translate-x-1'
-                    }`}
-                  />
-                </button>
-                <span className="text-sm text-[#525F7A]">Single</span>
-              </div>
-              
-              {/* Desktop: Theming and Layout controls - Hidden on mobile */}
-              <div className={`hidden md:flex items-center gap-6 ${giftSentView === 'single' ? 'opacity-40' : ''}`}>
-                {/* Theming toggle */}
-                <div className="flex items-center gap-3">
-                  <span className="text-sm text-[#525F7A]">Theming</span>
-                  <button
-                    onClick={() => giftSentView === 'batch' && setUseColoredBackground(!useColoredBackground)}
-                    disabled={giftSentView === 'single'}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
-                      useColoredBackground ? 'bg-[#5a3dff]' : 'bg-gray-300'
-                    } ${giftSentView === 'single' ? 'cursor-not-allowed' : 'cursor-pointer'}`}
-                    role="switch"
-                    aria-checked={useColoredBackground}
-                    aria-disabled={giftSentView === 'single'}
-                    aria-label="Toggle theming"
-                  >
-                    <span
-                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                        useColoredBackground ? 'translate-x-6' : 'translate-x-1'
-                      }`}
-                    />
-                  </button>
-                </div>
-                {/* Layout dropdown */}
-                <div className="flex items-center gap-3">
-                  <label htmlFor="layout-select" className="text-sm text-[#525F7A]">Layout</label>
-                  <div className="relative inline-block">
-                    <select
-                      id="layout-select"
-                      value={layout}
-                      onChange={(e) => giftSentView === 'batch' && setLayout(e.target.value)}
-                      disabled={giftSentView === 'single'}
-                      className={`py-2 pl-3 pr-8 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0 appearance-none ${
-                        giftSentView === 'single' ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
-                      }`}
-                      style={{ width: 'auto', minWidth: '80px' }}
-                    >
-                      <option value="default">Layout 1</option>
-                      <option value="altered1">Layout 2</option>
-                      <option value="altered2">Layout 3</option>
-                    </select>
-                    <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
-                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M3 4.5L6 7.5L9 4.5" stroke="#525F7A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-                {/* Mix cards button */}
-                <button
-                  onClick={() => {
-                    setMixCards(!mixCards)
-                    if (!mixCards) {
-                      setMixSeed(Date.now()) // Generate new seed when enabling mix
-                    }
-                  }}
-                  className={`px-3 py-1.5 rounded-[12px] border text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
-                    mixCards 
-                      ? 'border-[#5a3dff] bg-[#5a3dff] text-white hover:bg-[#4a2def]' 
-                      : 'border-[#dde2e9] bg-white text-[#525F7A] hover:bg-gray-50'
-                  }`}
-                >
-                  Mix Cards
-                </button>
-              </div>
-              
-              {/* Mobile: Settings/Filter button - Visible only on mobile */}
-              <div className="md:hidden relative">
-                <button
-                  onClick={() => setShowSettingsMenu(!showSettingsMenu)}
-                  className="px-3 py-1.5 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 flex items-center gap-2"
-                >
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M8 10C9.10457 10 10 9.10457 10 8C10 6.89543 9.10457 6 8 6C6.89543 6 6 6.89543 6 8C6 9.10457 6.89543 10 8 10Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M13.5 8C13.5 7.5 13.5 7.5 13 7.5C12.5 7.5 12.5 7.5 12.5 8C12.5 8.5 12.5 8.5 13 8.5C13.5 8.5 13.5 8.5 13.5 8Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M3.5 8C3.5 7.5 3.5 7.5 3 7.5C2.5 7.5 2.5 7.5 2.5 8C2.5 8.5 2.5 8.5 3 8.5C3.5 8.5 3.5 8.5 3.5 8Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M8 3.5C8 3 8 3 7.5 3C7 3 7 3 7 3.5C7 4 7 4 7.5 4C8 4 8 4 8 3.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M8 12.5C8 12 8 12 7.5 12C7 12 7 12 7 12.5C7 13 7 13 7.5 13C8 13 8 13 8 12.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                  Settings
-                </button>
-                
-                {/* Mobile Settings Menu Dropdown */}
-                {showSettingsMenu && (
-                  <>
-                    {/* Backdrop */}
-                    <div 
-                      className="fixed inset-0 z-40 bg-black/20"
-                      onClick={() => setShowSettingsMenu(false)}
-                    />
-                    {/* Menu */}
-                    <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-[12px] border border-[#dde2e9] shadow-lg z-50 p-4">
-                      <div className={`space-y-4 ${giftSentView === 'single' ? 'opacity-40' : ''}`}>
-                        {/* Theming toggle */}
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-[#525F7A]">Theming</span>
-                          <button
-                            onClick={() => giftSentView === 'batch' && setUseColoredBackground(!useColoredBackground)}
-                            disabled={giftSentView === 'single'}
-                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
-                              useColoredBackground ? 'bg-[#5a3dff]' : 'bg-gray-300'
-                            } ${giftSentView === 'single' ? 'cursor-not-allowed' : 'cursor-pointer'}`}
-                            role="switch"
-                            aria-checked={useColoredBackground}
-                            aria-disabled={giftSentView === 'single'}
-                            aria-label="Toggle theming"
-                          >
-                            <span
-                              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                                useColoredBackground ? 'translate-x-6' : 'translate-x-1'
-                              }`}
-                            />
-                          </button>
-                        </div>
-                        {/* Layout dropdown */}
-                        <div className="flex items-center justify-between">
-                          <label htmlFor="layout-select-mobile" className="text-sm text-[#525F7A]">Layout</label>
-                          <div className="relative inline-block">
-                            <select
-                              id="layout-select-mobile"
-                              value={layout}
-                              onChange={(e) => giftSentView === 'batch' && setLayout(e.target.value)}
-                              disabled={giftSentView === 'single'}
-                              className={`py-2 pl-3 pr-8 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0 appearance-none ${
-                                giftSentView === 'single' ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
-                              }`}
-                              style={{ width: 'auto', minWidth: '100px' }}
-                            >
-                              <option value="default">Layout 1</option>
-                              <option value="altered1">Layout 2</option>
-                              <option value="altered2">Layout 3</option>
-                            </select>
-                            <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
-                              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M3 4.5L6 7.5L9 4.5" stroke="#525F7A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                              </svg>
-                            </div>
-                          </div>
-                        </div>
-                        {/* Mix cards button */}
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-[#525F7A]">Mix Cards</span>
-                          <button
-                            onClick={() => {
-                              setMixCards(!mixCards)
-                              if (!mixCards) {
-                                setMixSeed(Date.now()) // Generate new seed when enabling mix
-                              }
-                            }}
-                            className={`px-3 py-1.5 rounded-[12px] border text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
-                              mixCards 
-                                ? 'border-[#5a3dff] bg-[#5a3dff] text-white hover:bg-[#4a2def]' 
-                                : 'border-[#dde2e9] bg-white text-[#525F7A] hover:bg-gray-50'
-                            }`}
-                          >
-                            {mixCards ? 'On' : 'Off'}
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
             <div className="grid gift-card-grid gap-[24px]">
               {mixCards && mixedCardTypes ? (
                 // Mix batch and single cards
@@ -556,7 +545,18 @@ export default function Home() {
                     )
                   }
                 })
-              ) : giftSentView === 'batch' ? sentCards.map((card, index) => {
+              ) : layout === 'single' ? sentCards.map((card, index) => (
+                <SentCard4
+                  key={index}
+                  from={card.from}
+                  title={card.title}
+                  boxImage={card.boxImage}
+                  giftTitle={card.giftTitle}
+                  giftSubtitle={card.giftSubtitle}
+                  progress={card.progress}
+                  sentDate={card.sentDate}
+                />
+              )) : sentCards.map((card, index) => {
                 // Determine which layout to use based on dropdown selection
                 const useAlteredLayout1 = layout === 'altered1'
                 const useAlteredLayout2 = layout === 'altered2'
@@ -602,18 +602,7 @@ export default function Home() {
                     progressBottomPadding2={useAlteredLayout2 ? FOOTER_CONFIG.altered2.progressOutside.bottomPadding : undefined}
                   />
                 )
-              }) : sentCards.map((card, index) => (
-                <SentCard4
-                  key={index}
-                  from={card.from}
-                  title={card.title}
-                  boxImage={card.boxImage}
-                  giftTitle={card.giftTitle}
-                  giftSubtitle={card.giftSubtitle}
-                  progress={card.progress}
-                  sentDate={card.sentDate}
-                />
-              ))}
+              })}
             </div>
           </div>
         ) : null}
