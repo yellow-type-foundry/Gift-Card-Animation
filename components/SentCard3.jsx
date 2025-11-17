@@ -1,11 +1,11 @@
 'use client'
 
 import React from 'react'
-import SentCard from './SentCard'
+import SentCard1 from './SentCard1'
 
-// Monochrome2 variant: same as Monochrome with fixed header BG and dark header text
-export default function SentCardMonochrome2(props) {
-  return <SentCard
+// SentCard (3): same as SentCard (2) with additional styling options
+export default function SentCard3(props) {
+  return <SentCard1
     {...props}
     headerBgOverride="#E3E7ED"
     hideUnion={true}
@@ -22,5 +22,4 @@ export default function SentCardMonochrome2(props) {
     showFooterReminder={true}
   />
 }
-
 

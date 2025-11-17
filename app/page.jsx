@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import GiftCard from '@/components/GiftCard'
-import SentCard from '@/components/SentCard'
-import SentCardMonochrome from '@/components/SentCardMonochrome'
-import SentCardMonochrome2 from '@/components/SentCardMonochrome2'
+import SentCard1 from '@/components/SentCard1'
+import SentCard2 from '@/components/SentCard2'
+import SentCard3 from '@/components/SentCard3'
 
 // Static data moved outside component to avoid recreation on every render
 const ALL_BOX_PAIRS = [
@@ -143,7 +143,7 @@ const shuffleArray = (array) => {
 }
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState('gift') // 'gift' | 'sent' | 'mono' | 'mono2'
+  const [activeTab, setActiveTab] = useState('gift') // 'gift' | 'sent1' | 'sent2' | 'sent3'
   const [cardStates, setCardStates] = useState({
     card1: 'unopened',
     card2: 'unopened',
@@ -265,22 +265,22 @@ export default function Home() {
             Gift Card
           </button>
           <button
-            onClick={() => setActiveTab('sent')}
-            className={`px-3 py-1.5 rounded-[12px] outline outline-1 outline-offset-[-1px] shrink-0 ${activeTab==='sent' ? 'bg-white outline-zinc-300 text-black' : 'bg-[#f0f1f5] outline-zinc-200 text-[#525F7A]'}`}
+            onClick={() => setActiveTab('sent1')}
+            className={`px-3 py-1.5 rounded-[12px] outline outline-1 outline-offset-[-1px] shrink-0 ${activeTab==='sent1' ? 'bg-white outline-zinc-300 text-black' : 'bg-[#f0f1f5] outline-zinc-200 text-[#525F7A]'}`}
           >
-            Sent Card
+            Sent Card (1)
           </button>
           <button
-            onClick={() => setActiveTab('mono')}
-            className={`px-3 py-1.5 rounded-[12px] outline outline-1 outline-offset-[-1px] shrink-0 ${activeTab==='mono' ? 'bg-white outline-zinc-300 text-black' : 'bg-[#f0f1f5] outline-zinc-200 text-[#525F7A]'}`}
+            onClick={() => setActiveTab('sent2')}
+            className={`px-3 py-1.5 rounded-[12px] outline outline-1 outline-offset-[-1px] shrink-0 ${activeTab==='sent2' ? 'bg-white outline-zinc-300 text-black' : 'bg-[#f0f1f5] outline-zinc-200 text-[#525F7A]'}`}
           >
-            Monochrome
+            Sent Card (2)
           </button>
           <button
-            onClick={() => setActiveTab('mono2')}
-            className={`px-3 py-1.5 rounded-[12px] outline outline-1 outline-offset-[-1px] shrink-0 ${activeTab==='mono2' ? 'bg-white outline-zinc-300 text-black' : 'bg-[#f0f1f5] outline-zinc-200 text-[#525F7A]'}`}
+            onClick={() => setActiveTab('sent3')}
+            className={`px-3 py-1.5 rounded-[12px] outline outline-1 outline-offset-[-1px] shrink-0 ${activeTab==='sent3' ? 'bg-white outline-zinc-300 text-black' : 'bg-[#f0f1f5] outline-zinc-200 text-[#525F7A]'}`}
           >
-            Monochrome2
+            Sent Card (3)
           </button>
         </div>
         {/* Content */}
@@ -313,10 +313,10 @@ export default function Home() {
             {/* Card 8 */}
             <GiftCard state={cardStates.card8} from="Ryan Thompson" message={messages[7]} expiryText={cardStates.card8 === 'unopened' ? 'Expiring in 19 days' : undefined} giftTitle="Gourmet Chocolate Truffles" giftSubtitle="Vosges Haut-Chocolat" boxImage={boxPairs[7].box1} box2Image={boxPairs[7].box2} onOpenGift={cardHandlers.card8} />
           </div>
-        ) : activeTab === 'sent' ? (
+        ) : activeTab === 'sent1' ? (
           <div className="grid gift-card-grid gap-[24px]">
             {sentCards.map((card, index) => (
-              <SentCard
+              <SentCard1
                 key={index}
                 from={card.from}
                 title={card.title}
@@ -328,11 +328,11 @@ export default function Home() {
               />
             ))}
           </div>
-        ) : activeTab === 'mono' ? (
+        ) : activeTab === 'sent2' ? (
           <div className="grid gift-card-grid gap-[24px]">
             {sentCards.map((card, index) => (
-              <SentCardMonochrome
-                key={`mono-${index}`}
+              <SentCard2
+                key={`sent2-${index}`}
                 from={card.from}
                 title={card.title}
                 boxImage={card.boxImage}
@@ -346,8 +346,8 @@ export default function Home() {
         ) : (
           <div className="grid gift-card-grid gap-[24px]">
             {sentCards.map((card, index) => (
-              <SentCardMonochrome2
-                key={`mono2-${index}`}
+              <SentCard3
+                key={`sent3-${index}`}
                 from={card.from}
                 title={card.title}
                 boxImage={card.boxImage}

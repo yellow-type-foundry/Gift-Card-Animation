@@ -88,7 +88,7 @@ export default function Footer({
               }}
               data-name="InfoSlot"
             >
-              <div className="flex flex-col items-center justify-center gap-[4px] px-2" style={{ height: '44px' }}>
+              <div className="flex flex-col items-center justify-center gap-[8px] px-2" style={{ height: '44px' }}>
                 {infoTitle && (
                   <p
                     className="font-['Goody_Sans:Medium',sans-serif] text-[16px] leading-[1.4] truncate text-black"
