@@ -256,7 +256,7 @@ export default function Home() {
       >
         {/* Tabs */}
         <div
-          className="w-full flex items-center md:justify-center justify-start gap-2 mb-6 overflow-x-auto md:overflow-visible whitespace-nowrap px-[20px] md:px-0"
+          className="w-full flex items-center justify-center gap-2 mb-6 overflow-x-auto md:overflow-visible whitespace-nowrap px-[20px] md:px-0"
           style={{ WebkitOverflowScrolling: 'touch' }}
         >
           <button
