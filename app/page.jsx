@@ -323,7 +323,6 @@ export default function Home() {
                   role="switch"
                   aria-checked={useColoredBackground}
                   aria-label="Toggle colored background"
-                  disabled={useSentCard3Layout}
                 >
                   <span
                     className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
@@ -363,7 +362,7 @@ export default function Home() {
                   giftSubtitle={card.giftSubtitle}
                   progress={card.progress}
                   sentDate={card.sentDate}
-                  headerBgOverride={useSentCard3Layout ? "#E3E7ED" : (useColoredBackground ? null : "#E3E7ED")}
+                  headerBgOverride={useColoredBackground ? null : "#E3E7ED"}
                   hideUnion={useSentCard3Layout}
                   footerPadEqual={useSentCard3Layout}
                   footerTopPadding={useSentCard3Layout ? 20 : undefined}
@@ -375,6 +374,7 @@ export default function Home() {
                   overlayProgressOnEnvelope={useSentCard3Layout}
                   showFooterProgress={useSentCard3Layout ? false : true}
                   showFooterReminder={true}
+                  footerTransparent={useSentCard3Layout}
                 />
               ))}
             </div>

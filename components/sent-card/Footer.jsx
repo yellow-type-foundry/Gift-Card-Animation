@@ -26,7 +26,7 @@ export default function Footer({
       className="box-border flex items-center justify-center pt-0 px-[16px] relative shrink-0 w-full"
       style={{ 
         position: 'relative', 
-        zIndex: 20, 
+        zIndex: transparent ? 1 : 20, 
         width: '100%', 
         paddingTop: topPadding !== undefined ? `${topPadding}px` : (equalPadding ? '16px' : undefined), 
         paddingBottom: `${bottomPadding}px`,
@@ -59,25 +59,26 @@ export default function Footer({
             data-name="Gift Message"
           >
             <p
-              className="[white-space-collapse:collapse] font-['Goody_Sans:Medium',sans-serif] h-[22px] overflow-ellipsis overflow-hidden relative shrink-0 text-[16px] text-black text-nowrap w-[268px]"
+              className="[white-space-collapse:collapse] font-['Goody_Sans:Medium',sans-serif] h-[22px] overflow-ellipsis overflow-hidden relative shrink-0 text-[16px] text-nowrap w-[268px]"
               style={{
                 fontFamily: 'var(--font-goody-sans)',
                 fontSize: '16px',
                 fontWeight: 500,
                 lineHeight: 1.4,
-                color: '#000000'
+                color: transparent ? '#000000' : '#000000'
               }}
             >
               {infoTitle}
             </p>
             {infoSubtitle && (
               <p
-                className="font-['Goody_Sans:Regular',sans-serif] h-[22px] relative shrink-0 text-[#525f7a] text-[16px] w-[268px]"
+                className="font-['Goody_Sans:Regular',sans-serif] h-[22px] relative shrink-0 text-[16px] w-[268px]"
                 style={{
                   fontFamily: 'var(--font-goody-sans)',
                   fontSize: '16px',
                   fontWeight: 400,
-                  lineHeight: 1.4
+                  lineHeight: 1.4,
+                  color: transparent ? '#525f7a' : '#525f7a'
                 }}
               >
                 {infoSubtitle}
@@ -101,7 +102,7 @@ export default function Footer({
               <div className="flex flex-col items-center justify-center gap-[4px] px-2" style={{ minHeight: '44px', width: '100%' }}>
                 {infoTitle && (
                   <p
-                    className="font-['Goody_Sans:Medium',sans-serif] text-[16px] leading-[1.4] text-black text-center"
+                    className="font-['Goody_Sans:Medium',sans-serif] text-[16px] leading-[1.4] text-center"
                     style={{
                       fontFamily: 'var(--font-goody-sans)',
                       fontSize: '16px',
@@ -109,7 +110,8 @@ export default function Footer({
                       lineHeight: 1.4,
                       wordBreak: 'break-word',
                       overflowWrap: 'break-word',
-                      maxWidth: '100%'
+                      maxWidth: '100%',
+                      color: transparent ? '#000000' : '#000000'
                     }}
                   >
                     {infoTitle}
@@ -117,14 +119,15 @@ export default function Footer({
                 )}
                 {infoSubtitle && (
                   <p
-                    className="font-['Goody_Sans:Regular',sans-serif] text-[16px] leading-[1.4] text-[#525F7A] text-center"
+                    className="font-['Goody_Sans:Regular',sans-serif] text-[16px] leading-[1.4] text-center"
                     style={{
                       fontFamily: 'var(--font-goody-sans)',
                       fontSize: '16px',
                       lineHeight: 1.4,
                       wordBreak: 'break-word',
                       overflowWrap: 'break-word',
-                      maxWidth: '100%'
+                      maxWidth: '100%',
+                      color: transparent ? '#525F7A' : '#525F7A'
                     }}
                   >
                     {infoSubtitle}

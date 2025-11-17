@@ -32,7 +32,8 @@ const SentCard1 = ({
   showFooterProgress = true,
   showFooterReminder = true,
   footerBottomPadding = 16,
-  footerTopPadding
+  footerTopPadding,
+  footerTransparent = false
 }) => {
   // Hooks
   const cardRef = useRef(null)
@@ -84,21 +85,14 @@ const SentCard1 = ({
       data-node-id="1467:49182"
     >
       <div className={`content-stretch flex flex-col items-start ${isMonochromeVariant ? 'overflow-visible' : 'overflow-hidden'} relative rounded-[inherit] size-full`}>
-        {/* Header Section - 280px tall */}
-        <div
-          className="box-border content-stretch flex flex-col h-[280px] items-center justify-between pb-0 pt-[20px] px-0 relative shrink-0 w-full overflow-visible"
-          style={{
-            position: 'relative'
-          }}
-          data-name="Header"
-          data-node-id="1467:49183"
-        >
-          {/* Background with gradient overlay */}
+        {/* Full card background when overlayProgressOnEnvelope is true */}
+        {overlayProgressOnEnvelope && (
           <div
             aria-hidden="true"
             className="absolute inset-0 pointer-events-none"
             style={{
-              borderRadius: `${TOKENS.sizes.borderRadius.card} ${TOKENS.sizes.borderRadius.card} 0 0`
+              borderRadius: TOKENS.sizes.borderRadius.card,
+              zIndex: 0
             }}
           >
             {/* Confetti canvas (behind envelope) */}
@@ -121,10 +115,10 @@ const SentCard1 = ({
             {/* Base color - dynamic from dominant color */}
             <div
               className="absolute inset-0"
-                data-name="HeaderBGBase"
+              data-name="HeaderBGBase"
               style={{
-                  backgroundColor: headerBgFinal,
-                  transition: 'background 200ms ease-out, filter 200ms ease-out'
+                backgroundColor: headerBgFinal,
+                transition: 'background 200ms ease-out, filter 200ms ease-out'
               }}
             />
             {/* Gradient overlay with blend mode */}
@@ -137,6 +131,63 @@ const SentCard1 = ({
               }}
             />
           </div>
+        )}
+        {/* Header Section - 280px tall */}
+        <div
+          className="box-border content-stretch flex flex-col h-[280px] items-center justify-between pb-0 pt-[20px] px-0 relative shrink-0 w-full overflow-visible"
+          style={{
+            position: 'relative',
+            zIndex: overlayProgressOnEnvelope ? 1 : 'auto'
+          }}
+          data-name="Header"
+          data-node-id="1467:49183"
+        >
+          {/* Background with gradient overlay - only when overlayProgressOnEnvelope is false */}
+          {!overlayProgressOnEnvelope && (
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                borderRadius: `${TOKENS.sizes.borderRadius.card} ${TOKENS.sizes.borderRadius.card} 0 0`
+              }}
+            >
+              {/* Confetti canvas (behind envelope) */}
+              <canvas
+                ref={confettiCanvasRef}
+                className="absolute inset-0"
+                style={{ zIndex: 1, pointerEvents: 'none', filter: 'blur(2.5px)' }}
+              />
+              {confettiWhiteOverlay && (
+                <div
+                  aria-hidden="true"
+                  className="absolute inset-0 pointer-events-none"
+                  style={{
+                    zIndex: 2,
+                    background:
+                      'linear-gradient(to top, rgba(255,255,255,0.8) 0%, rgba(255, 255, 255, 0.33) 30%, rgba(255,255,255,0.0) 100%)'
+                  }}
+                />
+              )}
+              {/* Base color - dynamic from dominant color */}
+              <div
+                className="absolute inset-0"
+                  data-name="HeaderBGBase"
+                style={{
+                  backgroundColor: headerBgFinal,
+                  transition: 'background 200ms ease-out, filter 200ms ease-out'
+                }}
+              />
+              {/* Gradient overlay with blend mode */}
+              <div
+                className="absolute inset-0"
+                style={{
+                  background: HEADER_OVERLAY_BG,
+                  mixBlendMode: 'overlay',
+                  zIndex: 0
+                }}
+              />
+            </div>
+          )}
 
           {/* Dots pattern removed */}
 
@@ -185,7 +236,7 @@ const SentCard1 = ({
               top: `${4 + envelopeOffsetY}px`,
               left: '-2px',
               right: '2px',
-              zIndex: envelopeHighZ ? 50 : 2,
+              zIndex: envelopeHighZ ? 50 : (overlayProgressOnEnvelope ? 2 : 2),
               transform: `scale(${envelopeScale})`,
               transformOrigin: 'center top'
             }}
@@ -612,6 +663,7 @@ const SentCard1 = ({
           infoInSlot={overlayProgressOnEnvelope}
           bottomPadding={footerBottomPadding}
           topPadding={footerTopPadding}
+          transparent={footerTransparent}
         />
       </div>
     </div>
