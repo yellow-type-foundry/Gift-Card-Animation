@@ -4,6 +4,12 @@
   background: none;
 }
 
+/* Exclude SentCard4 (sent-single) from hover dimming */
+[data-card-type="sent-single"]:hover [data-name="HeaderBGBase"] {
+  filter: none;
+  background: none;
+}
+
 /* Monochrome variant hover gradient */
 [data-variant="mono"][data-name="Gift Card"]:hover [data-name="HeaderBGBase"] {
   filter: none;

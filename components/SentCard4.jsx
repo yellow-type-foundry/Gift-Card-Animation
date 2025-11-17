@@ -79,6 +79,7 @@ const SentCard4 = ({
         borderRadius: TOKENS.sizes.borderRadius.card
       }}
       data-name="Gift Card"
+      data-card-type="sent-single"
     >
       <div className="content-stretch flex flex-col items-start overflow-hidden relative rounded-[inherit] size-full">
         {/* Background with gradient overlay - extends to full card */}
@@ -94,8 +95,7 @@ const SentCard4 = ({
             className="absolute inset-0"
             data-name="HeaderBGBase"
             style={{
-              backgroundColor: headerBgOverride || '#E3E7ED',
-              transition: 'background 200ms ease-out, filter 200ms ease-out'
+              backgroundColor: headerBgOverride || '#E3E7ED'
             }}
           />
           {/* Gradient overlay with blend mode */}
@@ -209,8 +209,8 @@ const SentCard4 = ({
             <div
               className="relative"
               style={{
-                width: '220px',
-                height: '150px',
+                width: '250px',
+                height: '160px',
                 zIndex: 1,
                 pointerEvents: 'none',
                 position: 'relative'
