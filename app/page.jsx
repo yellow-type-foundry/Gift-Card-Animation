@@ -138,8 +138,8 @@ const ALL_SENT_DATES = [
 export default function Home() {
   const [activeTab, setActiveTab] = useState('gift') // 'gift' | 'sent'
   const [useColoredBackground, setUseColoredBackground] = useState(false) // Toggle for theming
-  const [layout, setLayout] = useState('default') // 'default' | 'altered1' | 'altered2' | 'single'
-  const [mixCards, setMixCards] = useState(false) // Toggle to mix batch and single cards
+  const [layoutNumber, setLayoutNumber] = useState('1') // '1' | '2' | '3' - which layout pair to use
+  const [viewType, setViewType] = useState('mixed') // 'mixed' | 'batch' | 'single' - what to display
   const [mixSeed, setMixSeed] = useState(0) // Seed to regenerate mix when toggled
   const [showSettingsMenu, setShowSettingsMenu] = useState(false) // Mobile settings menu visibility
   const [cardStates, setCardStates] = useState({
@@ -208,9 +208,9 @@ export default function Home() {
     setSentCards(randomized)
   }, [])
   
-  // Generate stable card types for mixing
+  // Generate stable card types for mixed view
   const mixedCardTypes = useMemo(() => {
-    if (!mixCards) return null
+    if (viewType !== 'mixed') return null
     // Use a seeded random function for consistent results
     let seed = mixSeed
     const seededRandom = () => {
@@ -218,17 +218,37 @@ export default function Home() {
       return seed / 233280
     }
     return sentCards.map(() => seededRandom() < 0.5)
-  }, [mixCards, mixSeed, sentCards])
+  }, [viewType, mixSeed, sentCards])
   
-  // Determine if current layout is single
-  const isSingleLayout = layout === 'single'
+  // Map layout number to config keys
+  const getLayoutConfigKey = (layoutNum, viewType) => {
+    if (viewType === 'single') {
+      return `single${layoutNum}`
+    } else if (viewType === 'batch') {
+      if (layoutNum === '1') return 'default'
+      if (layoutNum === '2') return 'altered1'
+      if (layoutNum === '3') return 'altered2'
+    }
+    return null // mixed view
+  }
   
-  // Helper function to get SentCard1 props based on layout
-  const getSentCard1Props = useCallback((card, useAlteredLayout1, useAlteredLayout2, useAlteredLayout, useColoredBackground) => {
-    // Determine which layout config to use
-    const layoutKey = useAlteredLayout2 ? 'altered2' : (useAlteredLayout1 ? 'altered1' : 'default')
+  // Determine if current view is single
+  const isSingleView = viewType === 'single'
+  
+  // Helper function to get SentCard1 props based on layout number
+  const getSentCard1Props = useCallback((card, layoutNum, useColoredBackground) => {
+    // Map layout number to config key
+    let layoutKey
+    if (layoutNum === '1') layoutKey = 'default'
+    else if (layoutNum === '2') layoutKey = 'altered1'
+    else if (layoutNum === '3') layoutKey = 'altered2'
+    
     const layoutConfig = LAYOUT_CONFIG[layoutKey]
-    const footerConfig = useAlteredLayout1 ? FOOTER_CONFIG.altered1 : (useAlteredLayout2 ? FOOTER_CONFIG.altered2 : FOOTER_CONFIG.default)
+    const footerConfig = layoutNum === '1' ? FOOTER_CONFIG.default : (layoutNum === '2' ? FOOTER_CONFIG.altered1 : FOOTER_CONFIG.altered2)
+    
+    const useAlteredLayout1 = layoutNum === '2'
+    const useAlteredLayout2 = layoutNum === '3'
+    const useAlteredLayout = layoutNum !== '1'
     
     return {
       from: card.from,
@@ -346,14 +366,14 @@ export default function Home() {
                 <div className="flex items-center gap-3">
                   <span className="text-sm text-[#525F7A]">Theming</span>
                   <button
-                    onClick={() => !isSingleLayout && setUseColoredBackground(!useColoredBackground)}
-                    disabled={isSingleLayout}
+                    onClick={() => !isSingleView && setUseColoredBackground(!useColoredBackground)}
+                    disabled={isSingleView}
                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
                       useColoredBackground ? 'bg-[#5a3dff]' : 'bg-gray-300'
-                    } ${isSingleLayout ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'}`}
+                    } ${isSingleView ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'}`}
                     role="switch"
                     aria-checked={useColoredBackground}
-                    aria-disabled={isSingleLayout}
+                    aria-disabled={isSingleView}
                     aria-label="Toggle theming"
                   >
                     <span
@@ -369,14 +389,40 @@ export default function Home() {
                   <div className="relative inline-block">
                     <select
                       id="layout-select"
-                      value={layout}
-                      onChange={(e) => setLayout(e.target.value)}
+                      value={layoutNumber}
+                      onChange={(e) => setLayoutNumber(e.target.value)}
+                      className="py-2 pl-3 pr-8 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0 appearance-none cursor-pointer"
+                      style={{ width: 'auto', minWidth: '80px' }}
+                    >
+                      <option value="1">Layout 1</option>
+                      <option value="2">Layout 2</option>
+                      <option value="3">Layout 3</option>
+                    </select>
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 4.5L6 7.5L9 4.5" stroke="#525F7A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+                {/* View selector */}
+                <div className="flex items-center gap-3">
+                  <label htmlFor="view-select" className="text-sm text-[#525F7A]">View</label>
+                  <div className="relative inline-block">
+                    <select
+                      id="view-select"
+                      value={viewType}
+                      onChange={(e) => {
+                        setViewType(e.target.value)
+                        if (e.target.value === 'mixed') {
+                          setMixSeed(Date.now()) // Generate new seed when enabling mixed view
+                        }
+                      }}
                       className="py-2 pl-3 pr-8 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0 appearance-none cursor-pointer"
                       style={{ width: 'auto', minWidth: '100px' }}
                     >
-                      <option value="default">Batch 1</option>
-                      <option value="altered1">Batch 2</option>
-                      <option value="altered2">Batch 3</option>
+                      <option value="mixed">Mixed</option>
+                      <option value="batch">Batch</option>
                       <option value="single">Single</option>
                     </select>
                     <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
@@ -386,22 +432,6 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-                {/* Mix cards button */}
-                <button
-                  onClick={() => {
-                    setMixCards(!mixCards)
-                    if (!mixCards) {
-                      setMixSeed(Date.now()) // Generate new seed when enabling mix
-                    }
-                  }}
-                  className={`px-3 py-2 rounded-[12px] border text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
-                    mixCards 
-                      ? 'border-[#5a3dff] bg-[#5a3dff] text-white hover:bg-[#4a2def]' 
-                      : 'border-[#dde2e9] bg-white text-[#525F7A] hover:bg-gray-50'
-                  }`}
-                >
-                  Mix Cards
-                </button>
               </div>
               
               {/* Mobile: Settings/Filter button - Visible only on mobile */}
@@ -435,14 +465,14 @@ export default function Home() {
                         <div className="flex items-center justify-between">
                           <span className="text-sm text-[#525F7A]">Theming</span>
                           <button
-                            onClick={() => !isSingleLayout && setUseColoredBackground(!useColoredBackground)}
-                            disabled={isSingleLayout}
+                            onClick={() => !isSingleView && setUseColoredBackground(!useColoredBackground)}
+                            disabled={isSingleView}
                             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
                               useColoredBackground ? 'bg-[#5a3dff]' : 'bg-gray-300'
-                            } ${isSingleLayout ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'}`}
+                            } ${isSingleView ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'}`}
                             role="switch"
                             aria-checked={useColoredBackground}
-                            aria-disabled={isSingleLayout}
+                            aria-disabled={isSingleView}
                             aria-label="Toggle theming"
                           >
                             <span
@@ -458,15 +488,14 @@ export default function Home() {
                           <div className="relative inline-block">
                             <select
                               id="layout-select-mobile"
-                              value={layout}
-                              onChange={(e) => setLayout(e.target.value)}
+                              value={layoutNumber}
+                              onChange={(e) => setLayoutNumber(e.target.value)}
                               className="py-2 pl-3 pr-8 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0 appearance-none cursor-pointer"
-                              style={{ width: 'auto', minWidth: '100px' }}
+                              style={{ width: 'auto', minWidth: '80px' }}
                             >
-                              <option value="default">Batch 1</option>
-                              <option value="altered1">Batch 2</option>
-                              <option value="altered2">Batch 3</option>
-                              <option value="single">Single</option>
+                              <option value="1">Layout 1</option>
+                              <option value="2">Layout 2</option>
+                              <option value="3">Layout 3</option>
                             </select>
                             <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
                               <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -475,24 +504,32 @@ export default function Home() {
                             </div>
                           </div>
                         </div>
-                        {/* Mix cards button */}
+                        {/* View selector */}
                         <div className="flex items-center justify-between">
-                          <span className="text-sm text-[#525F7A]">Mix Cards</span>
-                          <button
-                            onClick={() => {
-                              setMixCards(!mixCards)
-                              if (!mixCards) {
-                                setMixSeed(Date.now()) // Generate new seed when enabling mix
-                              }
-                            }}
-                            className={`px-3 py-1.5 rounded-[12px] border text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
-                              mixCards 
-                                ? 'border-[#5a3dff] bg-[#5a3dff] text-white hover:bg-[#4a2def]' 
-                                : 'border-[#dde2e9] bg-white text-[#525F7A] hover:bg-gray-50'
-                            }`}
-                          >
-                            {mixCards ? 'On' : 'Off'}
-                          </button>
+                          <label htmlFor="view-select-mobile" className="text-sm text-[#525F7A]">View</label>
+                          <div className="relative inline-block">
+                            <select
+                              id="view-select-mobile"
+                              value={viewType}
+                              onChange={(e) => {
+                                setViewType(e.target.value)
+                                if (e.target.value === 'mixed') {
+                                  setMixSeed(Date.now()) // Generate new seed when enabling mixed view
+                                }
+                              }}
+                              className="py-2 pl-3 pr-8 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0 appearance-none cursor-pointer"
+                              style={{ width: 'auto', minWidth: '100px' }}
+                            >
+                              <option value="mixed">Mixed</option>
+                              <option value="batch">Batch</option>
+                              <option value="single">Single</option>
+                            </select>
+                            <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M3 4.5L6 7.5L9 4.5" stroke="#525F7A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -535,21 +572,16 @@ export default function Home() {
         ) : activeTab === 'sent' ? (
           <div>
             <div className="grid gift-card-grid gap-[24px]">
-              {mixCards && mixedCardTypes ? (
-                // Mix batch and single cards
+              {viewType === 'mixed' && mixedCardTypes ? (
+                // Mixed view: show both batch and single cards
                 sentCards.map((card, index) => {
                   const isBatch = mixedCardTypes[index]
                   
                   if (isBatch) {
-                    // Determine which layout to use based on dropdown selection
-                    const useAlteredLayout1 = layout === 'altered1'
-                    const useAlteredLayout2 = layout === 'altered2'
-                    const useAlteredLayout = useAlteredLayout1 || useAlteredLayout2
-                    
                     return (
                       <SentCard1
                         key={index}
-                        {...getSentCard1Props(card, useAlteredLayout1, useAlteredLayout2, useAlteredLayout, useColoredBackground)}
+                        {...getSentCard1Props(card, layoutNumber, useColoredBackground)}
                       />
                     )
                   } else {
@@ -567,30 +599,29 @@ export default function Home() {
                     )
                   }
                 })
-              ) : layout === 'single' ? sentCards.map((card, index) => (
-                <SentCard4
-                  key={index}
-                  from={card.from}
-                  title={card.title}
-                  boxImage={card.boxImage}
-                  giftTitle={card.giftTitle}
-                  giftSubtitle={card.giftSubtitle}
-                  progress={card.progress}
-                  sentDate={card.sentDate}
-                />
-              )) : sentCards.map((card, index) => {
-                // Determine which layout to use based on dropdown selection
-                const useAlteredLayout1 = layout === 'altered1'
-                const useAlteredLayout2 = layout === 'altered2'
-                const useAlteredLayout = useAlteredLayout1 || useAlteredLayout2
-                
-                return (
+              ) : viewType === 'single' ? (
+                // Single view: show only single cards
+                sentCards.map((card, index) => (
+                  <SentCard4
+                    key={index}
+                    from={card.from}
+                    title={card.title}
+                    boxImage={card.boxImage}
+                    giftTitle={card.giftTitle}
+                    giftSubtitle={card.giftSubtitle}
+                    progress={card.progress}
+                    sentDate={card.sentDate}
+                  />
+                ))
+              ) : (
+                // Batch view: show only batch cards
+                sentCards.map((card, index) => (
                   <SentCard1
                     key={index}
-                    {...getSentCard1Props(card, useAlteredLayout1, useAlteredLayout2, useAlteredLayout, useColoredBackground)}
+                    {...getSentCard1Props(card, layoutNumber, useColoredBackground)}
                   />
-                )
-              })}
+                ))
+              )}
             </div>
           </div>
         ) : null}
