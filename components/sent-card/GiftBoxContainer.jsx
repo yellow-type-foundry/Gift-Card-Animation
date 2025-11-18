@@ -212,6 +212,8 @@ const GiftBoxContainer = ({
                       lineHeight: 1.4,
                       color: '#ffffff',
                       zIndex: 1,
+                      mixBlendMode: 'overlay',
+                      opacity: 0.8,
                       position: 'relative'
                     }}
                   >

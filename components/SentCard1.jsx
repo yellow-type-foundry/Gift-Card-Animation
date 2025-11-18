@@ -15,6 +15,7 @@ import CardShape from '@/components/sent-card/CardShape'
 import GiftBoxContainer from '@/components/sent-card/GiftBoxContainer'
 import { PROGRESS_PILL_RADIUS, HEADER_OVERLAY_BG, PROGRESS_GLOW_BOX_SHADOW, ENVELOPE_DIMENSIONS, FOOTER_CONFIG } from '@/constants/sentCardConstants'
 import { useMemo } from 'react'
+import { adjustToLuminance, capSaturation } from '@/utils/colors'
 
 // Gift container images (brand names)
 const GIFT_CONTAINER_IMAGES = [
@@ -128,6 +129,14 @@ const SentCard1 = ({
     progressStartColor,
     progressEndColor
   } = theme
+  
+  // Calculate themed box color for GiftBoxContainer
+  // Use a light, saturated version of the dominant color
+  const themedBoxColor = useMemo(() => {
+    if (headerBgOverride) return '#94d8f9' // Default when theming is disabled
+    // Create a light, vibrant box color from dominant color
+    return capSaturation(adjustToLuminance(dominantColor, 85), 70)
+  }, [dominantColor, headerBgOverride])
   
   const allAccepted = isDone
   
@@ -407,7 +416,7 @@ const SentCard1 = ({
               // Gift Box Container (for Single 2)
               <GiftBoxContainer
                 progress={validatedProgress}
-                boxColor="#94d8f9"
+                boxColor={themedBoxColor}
                 isHovered={isHovered}
               />
             ) : useGiftContainer ? (
