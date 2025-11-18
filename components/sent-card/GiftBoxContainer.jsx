@@ -70,10 +70,19 @@ const GiftBoxContainer = ({
             className="box-border content-stretch flex flex-col gap-[10px] items-center justify-center pb-[16px] pt-0 px-[16px] relative shrink-0 w-full"
             data-name="Progress Bar"
           >
-            <div 
-              className="border-[0.5px] border-[rgba(255,255,255,0)] border-solid box-border content-stretch flex flex-col gap-[11.351px] items-start justify-center p-[3.405px] relative rounded-[100px] size-full overflow-hidden"
-              data-name="Progress Bar"
+            {/* Stroke wrapper with gradient (0.5px outside) */}
+            <div
+              className="relative rounded-[100px]"
+              style={{
+                padding: '0.5px',
+                background: 'linear-gradient(to top, rgb(255, 255, 255, 0.5) 0%, rgb(255, 255, 255, 0.7) 100%)',
+                boxShadow: '0px -1px 3px 0px rgba(255,255,255,0.55), 0px 3px 4px 0px rgba(255,255,255,0.4)'
+              }}
             >
+              <div 
+                className="border-[0.5px] border-[rgba(255,255,255,0)] border-solid box-border content-stretch flex flex-col gap-[11.351px] items-start justify-center p-[3.405px] relative rounded-[100px] size-full overflow-hidden"
+                data-name="Progress Bar"
+              >
               {/* Progress bar background layers */}
               <div aria-hidden="true" className="absolute inset-0 pointer-events-none rounded-[100px]">
                 {/* 1. Color fill, normal mode, 100% (base layer) */}
@@ -136,6 +145,7 @@ const GiftBoxContainer = ({
                   boxShadow: '0px 1.135px 2.554px 0px inset rgba(0,0,0,0.1), 0px -1.135px 3.405px 0px inset rgba(255,255,255,0.5)'
                 }}
               />
+              </div>
             </div>
           </div>
 
