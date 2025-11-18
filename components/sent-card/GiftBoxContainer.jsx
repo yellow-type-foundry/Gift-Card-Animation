@@ -11,10 +11,10 @@ const GiftBoxContainer = ({
     : 0
 
   // Calculate progress bar width dynamically
-  // Container width: 168px, padding: 16px each side = 32px, progress bar padding: 3.405px each side = 6.81px
-  // Available width: 168 - 32 - 6.81 = 129.19px
+  // Container width: 176px, padding: 16px each side = 32px, progress bar padding: 3.405px each side = 6.81px
+  // Available width: 176 - 32 - 6.81 = 137.19px
   // Minimum width: 59.027px
-  const progressBarMaxWidth = 168 - 32 - 6.81
+  const progressBarMaxWidth = 176 - 32 - 6.81
   const progressBarWidth = Math.max(59.027, (progressPercentage / 100) * progressBarMaxWidth)
 
   return (
@@ -24,7 +24,7 @@ const GiftBoxContainer = ({
     >
       <div 
         className="border-[0.5px] border-[rgba(255,255,255,0)] border-solid relative rounded-[32px] shrink-0 overflow-hidden"
-        style={{ width: '168px', height: '168px' }}
+        style={{ width: '176px', height: '176px' }}
         data-name="Box"
       >
         {/* Base background and gradient overlay */}
@@ -43,7 +43,7 @@ const GiftBoxContainer = ({
         </div>
 
         {/* Inner content container */}
-        <div className="content-stretch flex flex-col items-start overflow-hidden relative rounded-[inherit] w-full h-full" style={{ width: '168px', height: '168px' }}>
+        <div className="content-stretch flex flex-col items-start overflow-hidden relative rounded-[inherit] w-full h-full" style={{ width: '176px', height: '176px' }}>
           {/* Logo Container (top, flex-grow) */}
           <div 
             className="basis-0 box-border content-stretch flex flex-col grow items-center min-h-px min-w-px px-[16px] py-[20px] relative shrink-0 w-full"
@@ -66,7 +66,7 @@ const GiftBoxContainer = ({
 
           {/* Progress Bar (bottom, fixed) */}
           <div 
-            className="box-border content-stretch flex flex-col gap-[10px] items-center justify-center py-[14px] px-[16px] relative shrink-0 w-full"
+            className="box-border content-stretch flex flex-col gap-[10px] items-center justify-center pb-[16px] pt-0 px-[16px] relative shrink-0 w-full"
             data-name="Progress Bar"
           >
             <div 
@@ -135,6 +135,61 @@ const GiftBoxContainer = ({
               />
             </div>
           </div>
+
+          {/* Highlight layer */}
+          <div 
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+            style={{
+              width: '162px',
+              height: '162px',
+              borderRadius: '36px',
+              overflow: 'visible',
+              zIndex: 99,
+              mixBlendMode: 'overlay'
+            }}
+          >
+            <div
+              className="absolute inset-0"
+              style={{
+                width: '168px',
+                height: '168px',
+                borderRadius: '36px',
+                border: '16px solid transparent',
+                background: 'linear-gradient(45deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 100%)',
+                filter: 'blur(12px)',
+                opacity: 1
+              }}
+              data-name="Highlight"
+            />
+          </div>
+        </div>
+
+        {/* Shadow layer - outside inner container to allow blend mode */}
+        <div 
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+          style={{
+            width: '168px',
+            height: '168px',
+            borderRadius: '36px',
+            overflow: 'visible',
+            zIndex: 99,
+            mixBlendMode: 'overlay'
+          }}
+        >
+          <div 
+            className="absolute inset-0"
+            style={{
+              width: '162px',
+              height: '162px',
+              borderRadius: '36px',
+              border: '16px solid transparent',
+              background: 'linear-gradient(-45deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0) 100%)',
+              filter: 'blur(14px)',
+              opacity: 1,
+              willChange: 'filter'
+            }}
+            data-name="Shadow"
+          />
         </div>
 
         {/* Box inset shadow */}
