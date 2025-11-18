@@ -6,6 +6,7 @@ import { GIFT_BOX_TOKENS } from '@/constants/giftBoxTokens'
 const ProgressBar = ({
   progress = { current: 4, total: 5 },
   boxColor = '#94d8f9',
+  indicatorColor,
   progressBarWidth,
   animatedCurrent,
   validatedProgress,
@@ -17,6 +18,8 @@ const ProgressBar = ({
     top: 0
   }
 }) => {
+  // Use indicatorColor if provided, otherwise fall back to boxColor
+  const indicatorBgColor = indicatorColor || boxColor
   return (
     <div 
       className="box-border content-stretch flex flex-col gap-[10px] items-center justify-center relative shrink-0 w-full"
@@ -90,7 +93,7 @@ const ProgressBar = ({
                 paddingLeft: GIFT_BOX_TOKENS.progressBar.indicator.horizontalPadding,
                 paddingRight: GIFT_BOX_TOKENS.progressBar.indicator.horizontalPadding,
                 borderRadius: GIFT_BOX_TOKENS.progressBar.indicator.borderRadius,
-                backgroundColor: boxColor,
+                backgroundColor: indicatorBgColor,
                 transition: `background-color ${GIFT_BOX_TOKENS.animations.duration.fast} ${GIFT_BOX_TOKENS.animations.easing.easeOut}`
               }}
             >
@@ -98,7 +101,7 @@ const ProgressBar = ({
                 className="font-['Goody_Sans:Medium',sans-serif] leading-[1.4] not-italic relative shrink-0 text-white w-full"
                 style={{
                   fontFamily: 'var(--font-goody-sans)',
-                  fontSize: '15.892px',
+                  fontSize: '16px',
                   fontWeight: 500,
                   lineHeight: 1.4,
                   color: GIFT_BOX_TOKENS.colors.progressText,
@@ -113,7 +116,7 @@ const ProgressBar = ({
               <div 
                 className="absolute inset-0 pointer-events-none"
                 style={{
-                  boxShadow: `0px -2.3px 4.5px 0px inset rgba(255,255,255,0.5), 0px 0px 4.5px 0px inset rgba(255,255,255,0.5), 0px -4.5px 13px 4.5px inset ${themedShadowColor}`
+                  boxShadow: `0px -2.3px 5px 0.25px inset rgba(255,255,255,0.5), 0px 0px 4.5px 0px inset rgba(255,255,255,0.5), 0px -4.5px 13px 4.5px inset ${themedShadowColor}`
                 }}
               />
             </div>

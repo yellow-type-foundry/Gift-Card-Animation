@@ -30,7 +30,7 @@ const EnvelopeBoxContainer = ({
   const themedShadowColor = useMemo(() => {
     // Calculate shadow color from box color (darker version)
     const [h, s, l] = hexToHsl(boxColor)
-    const darkerL = Math.max(0, l - 20)
+    const darkerL = Math.max(0, l - 5) // Reduced from 20 to 10 for lighter shadow
     return hslToHex(h, s, darkerL)
   }, [boxColor])
 
@@ -64,7 +64,7 @@ const EnvelopeBoxContainer = ({
   // Inner container padding: 3.405px each side = 6.81px
   // Available width: 168 - 32 - 0.9 - 6.81 = 128.29px
   const progressBarMaxWidth = useMemo(() => {
-    const containerWidth = 168
+    const containerWidth = 165.5
     const outerPadding = 16
     const strokePadding = 0.45
     const innerPadding = 3.405
@@ -81,6 +81,14 @@ const EnvelopeBoxContainer = ({
     // Create a lighter version of the box color for grid cells
     const [h, s, l] = hexToHsl(boxColor)
     const lighterL = Math.min(100, l + 35) // Lighten by 35 units
+    return hslToHex(h, s, lighterL)
+  }, [boxColor])
+
+  // Progress bar indicator color - slightly lighter than envelope
+  const indicatorColor = useMemo(() => {
+    // Create a slightly lighter version of the box color for progress bar indicator
+    const [h, s, l] = hexToHsl(boxColor)
+    const lighterL = Math.min(100, s + 60, l + 20,) // Lighten by 5 units
     return hslToHex(h, s, lighterL)
   }, [boxColor])
 
@@ -253,16 +261,12 @@ const EnvelopeBoxContainer = ({
             <ProgressBar
               progress={progress}
               boxColor={boxColor}
+              indicatorColor={indicatorColor}
               progressBarWidth={progressBarWidth}
               animatedCurrent={animatedCurrent}
               validatedProgress={validatedProgress}
               isDone={isDone}
               themedShadowColor={themedShadowColor}
-              containerPadding={{
-                bottom: '16px',
-                horizontal: '16px',
-                top: 0
-              }}
             />
 
             {/* Specular Highlight */}
