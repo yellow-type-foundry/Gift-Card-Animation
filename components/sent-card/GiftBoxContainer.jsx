@@ -136,6 +136,42 @@ const GiftBoxContainer = ({
             </div>
           </div>
 
+          {/* Specular Highlight */}
+          <div 
+            className="absolute left-[3.98%] right-[3.98%] top-0 pointer-events-none"
+            style={{
+              height: '28px',
+              mixBlendMode: 'soft-light'
+            }}
+            data-name="Specular Highlight"
+          >
+            <div className="absolute inset-[-82.38%_-12.71%]">
+              <img 
+                alt="" 
+                className="block max-w-none size-full" 
+                src="/assets/5e8144bc8235e529f9163592afb375946eec80a3.svg"
+              />
+            </div>
+          </div>
+
+          {/* Shadow Highlight */}
+          <div 
+            className="absolute left-[3.98%] right-[3.98%] bottom-0 pointer-events-none"
+            style={{
+              height: '28px',
+              mixBlendMode: 'multiply'
+            }}
+            data-name="Shadow Highlight"
+          >
+            <div className="absolute inset-[-118.52%_-19.75%]">
+              <img 
+                alt="" 
+                className="block max-w-none size-full" 
+                src="/assets/b368b833f1a35441c58064df65b762b08214287c.svg"
+              />
+            </div>
+          </div>
+
           {/* Highlight layer */}
           <div 
             className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
@@ -196,7 +232,7 @@ const GiftBoxContainer = ({
         <div 
           className="absolute inset-0 pointer-events-none"
           style={{
-            boxShadow: '0px 1.5px 16px 0px inset #ffffff, 0px 2px 4px 0px inset rgba(255,255,255,0.65)'
+            boxShadow: '0px 2px 20px 0px inset #ffffff, 0px 0px 8px 0px inset rgba(255,255,255,0.85)'
           }}
         />
       </div>
