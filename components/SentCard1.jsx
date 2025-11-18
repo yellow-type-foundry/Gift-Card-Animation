@@ -142,6 +142,172 @@ const SentCard1 = ({
   // Confetti animation
   useConfetti(isHovered, allAccepted, confettiCanvasRef, cardRef)
 
+  // Memoized style objects
+  const cardContainerStyle = useMemo(() => ({
+    borderRadius: TOKENS.sizes.borderRadius.card,
+    height: 'auto',
+    ...(headerUseFlex && headerHeight !== undefined && !overlayProgressOnEnvelope && !progressOutsideEnvelope
+      ? { minHeight: '400px' }
+      : overlayProgressOnEnvelope && headerUseFlex1 && headerHeight1 !== undefined && !progressOutsideEnvelope
+      ? { minHeight: '400px' }
+      : {})
+  }), [headerUseFlex, headerHeight, overlayProgressOnEnvelope, progressOutsideEnvelope, headerUseFlex1, headerHeight1])
+
+  const contentWrapperStyle = useMemo(() => ({
+    paddingBottom: progressOutsideEnvelope ? '0px' : undefined,
+    ...(progressOutsideEnvelope && headerHeight2 !== undefined 
+      ? { minHeight: '400px' } 
+      : headerUseFlex && headerHeight !== undefined && !overlayProgressOnEnvelope && !progressOutsideEnvelope
+      ? { minHeight: '400px' }
+      : overlayProgressOnEnvelope && headerUseFlex1 && headerHeight1 !== undefined && !progressOutsideEnvelope
+      ? { minHeight: '400px' }
+      : {})
+  }), [progressOutsideEnvelope, headerHeight2, headerUseFlex, headerHeight, overlayProgressOnEnvelope, headerUseFlex1, headerHeight1])
+
+  const fullCardBackgroundStyle = useMemo(() => ({
+    borderRadius: TOKENS.sizes.borderRadius.card,
+    zIndex: 0
+  }), [])
+
+  const confettiCanvasStyle = useMemo(() => ({
+    zIndex: 1,
+    pointerEvents: 'none',
+    filter: 'blur(2.5px)'
+  }), [])
+
+  const confettiWhiteOverlayStyle = useMemo(() => ({
+    zIndex: 2,
+    background: 'linear-gradient(to top, rgba(255,255,255,0.8) 0%, rgba(255, 255, 255, 0.33) 30%, rgba(255,255,255,0.0) 100%)'
+  }), [])
+
+  const headerBgBaseStyle = useMemo(() => ({
+    backgroundColor: headerBgFinal,
+    transition: 'background 200ms ease-out, filter 200ms ease-out'
+  }), [headerBgFinal])
+
+  const gradientOverlayStyle = useMemo(() => ({
+    background: HEADER_OVERLAY_BG,
+    mixBlendMode: 'overlay',
+    zIndex: 0
+  }), [])
+
+  const headerSectionStyle = useMemo(() => ({
+    position: 'relative',
+    zIndex: overlayProgressOnEnvelope ? 1 : 'auto',
+    ...(hideEnvelope
+      ? { flex: 1, minHeight: '280px' }
+      : progressOutsideEnvelope && headerHeight2 !== undefined && headerUseFlex2
+      ? { flex: 1, minHeight: `${headerHeight2}px` }
+      : overlayProgressOnEnvelope && headerHeight1 !== undefined && headerUseFlex1
+      ? { flex: 1, minHeight: `${headerHeight1}px` }
+      : overlayProgressOnEnvelope && headerUseFlex1
+      ? { flex: 1, minHeight: '280px' }
+      : headerUseFlex && headerHeight !== undefined
+      ? { flex: 1, minHeight: `${headerHeight}px` }
+      : { height: headerHeight !== undefined ? `${headerHeight}px` : '280px' })
+  }), [hideEnvelope, progressOutsideEnvelope, headerHeight2, headerUseFlex2, overlayProgressOnEnvelope, headerHeight1, headerUseFlex1, headerUseFlex, headerHeight])
+
+  const backgroundBorderRadiusStyle = useMemo(() => ({
+    borderRadius: `${TOKENS.sizes.borderRadius.card} ${TOKENS.sizes.borderRadius.card} 0 0`
+  }), [])
+
+  const sentDateTextStyle = useMemo(() => ({
+    fontFamily: 'var(--font-goody-sans)',
+    fontSize: '16px',
+    fontWeight: 400,
+    lineHeight: 1.4,
+    opacity: 0.8,
+    color: headerBgOverride ? TOKENS.colors.text.tertiary : '#ffffff'
+  }), [headerBgOverride])
+
+  const titleTextStyle = useMemo(() => ({
+    fontFamily: 'var(--font-hw-cigars)',
+    fontSize: '24px',
+    fontWeight: 400,
+    lineHeight: 1.2,
+    letterSpacing: '-0.36px'
+  }), [])
+
+  const dotsBackgroundStyle = useMemo(() => ({
+    left: '50%',
+    top: '75%',
+    transform: 'translate(-50%, -50%)',
+    width: '300px',
+    height: '300px',
+    zIndex: 0,
+    pointerEvents: 'none',
+    opacity: 1,
+    position: 'absolute'
+  }), [])
+
+  const dotsImageStyle = useMemo(() => ({
+    objectFit: 'contain',
+    width: '100%',
+    height: '100%',
+    display: 'block'
+  }), [])
+
+  const envelopeContainerStyle = useMemo(() => ({
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...(hideEnvelope
+      ? {
+          position: 'relative',
+          width: '100%',
+          height: '100%',
+          flex: 1,
+          minHeight: 0
+        }
+      : useGiftContainer && giftContainerTop !== undefined
+      ? {
+          top: `${giftContainerTop + (giftContainerOffsetY !== undefined ? giftContainerOffsetY : 0)}px`,
+          left: giftContainerLeft !== undefined ? `${giftContainerLeft}px` : undefined,
+          right: giftContainerRight !== undefined ? `${giftContainerRight}px` : undefined,
+          bottom: giftContainerBottom !== undefined ? `${giftContainerBottom}px` : 'auto'
+        }
+      : useGiftContainer
+      ? {
+          top: `${4 + (giftContainerOffsetY !== undefined ? giftContainerOffsetY : 0)}px`,
+          left: '-2px',
+          right: '2px',
+          bottom: '0px'
+        }
+      : progressOutsideEnvelope && envelopeTopBase2 !== undefined 
+      ? {
+          top: `${envelopeTopBase2 + (envelopeOffsetY2 !== undefined ? envelopeOffsetY2 : envelopeOffsetY)}px`,
+          left: envelopeLeft2 !== undefined ? `${envelopeLeft2}px` : '0px',
+          right: envelopeRight2 !== undefined ? `${envelopeRight2}px` : '0px',
+          bottom: 'auto'
+        }
+      : {
+          top: `${4 + envelopeOffsetY}px`,
+          left: '0px',
+          right: '0px',
+          bottom: '0px'
+        }),
+    zIndex: envelopeHighZ ? 50 : (overlayProgressOnEnvelope ? 2 : 2),
+    transform: hideEnvelope ? 'none' : `scale(${useGiftContainer && giftContainerScale !== undefined ? giftContainerScale : (progressOutsideEnvelope && envelopeScale2 !== undefined ? envelopeScale2 : envelopeScale)})`,
+    transformOrigin: hideEnvelope ? 'center center' : (useGiftContainer && giftContainerTransformOrigin !== undefined ? giftContainerTransformOrigin : (progressOutsideEnvelope && transformOrigin2 !== undefined ? transformOrigin2 : 'center top'))
+  }), [hideEnvelope, useGiftContainer, giftContainerTop, giftContainerOffsetY, giftContainerLeft, giftContainerRight, giftContainerBottom, progressOutsideEnvelope, envelopeTopBase2, envelopeOffsetY2, envelopeOffsetY, envelopeLeft2, envelopeRight2, envelopeHighZ, overlayProgressOnEnvelope, giftContainerScale, envelopeScale2, envelopeScale, giftContainerTransformOrigin, transformOrigin2])
+
+  const giftContainerWrapperStyle = useMemo(() => ({
+    position: 'relative',
+    width: giftContainerWidth !== undefined ? `${giftContainerWidth}px` : '250px',
+    height: giftContainerHeight !== undefined ? `${giftContainerHeight}px` : '200px',
+    pointerEvents: 'none'
+  }), [giftContainerWidth, giftContainerHeight])
+
+  const giftContainerImageStyle = useMemo(() => ({
+    objectFit: 'contain'
+  }), [])
+
+  const envelopeBaseWrapperStyle = useMemo(() => ({
+    position: 'relative',
+    width: '100%',
+    height: '100%'
+  }), [])
+
   return (
     <div
       data-variant={headerBgOverride ? 'mono' : 'themed'}
@@ -149,40 +315,20 @@ const SentCard1 = ({
       onMouseEnter={handleHoverEnter}
       onMouseLeave={handleHoverLeave}
       className="border border-[#dde2e9] border-solid relative rounded-[24px] w-full md:w-[300px] overflow-hidden"
-      style={{
-        borderRadius: TOKENS.sizes.borderRadius.card,
-        height: 'auto',
-        ...(headerUseFlex && headerHeight !== undefined && !overlayProgressOnEnvelope && !progressOutsideEnvelope
-          ? { minHeight: '400px' }
-          : overlayProgressOnEnvelope && headerUseFlex1 && headerHeight1 !== undefined && !progressOutsideEnvelope
-          ? { minHeight: '400px' }
-          : {})
-      }}
+      style={cardContainerStyle}
       data-name="Gift Card"
       data-node-id="1467:49182"
     >
       <div 
         className={`content-stretch flex flex-col items-start ${isMonochromeVariant ? 'overflow-visible' : 'overflow-hidden'} relative rounded-[inherit] w-full ${(progressOutsideEnvelope && headerHeight2 !== undefined) || (headerUseFlex && headerHeight !== undefined && !overlayProgressOnEnvelope && !progressOutsideEnvelope) || (overlayProgressOnEnvelope && headerUseFlex1 && headerHeight1 !== undefined && !progressOutsideEnvelope) ? 'h-full' : ''}`} 
-        style={{ 
-          paddingBottom: progressOutsideEnvelope ? '0px' : undefined,
-          ...(progressOutsideEnvelope && headerHeight2 !== undefined 
-            ? { minHeight: '400px' } 
-            : headerUseFlex && headerHeight !== undefined && !overlayProgressOnEnvelope && !progressOutsideEnvelope
-            ? { minHeight: '400px' }
-            : overlayProgressOnEnvelope && headerUseFlex1 && headerHeight1 !== undefined && !progressOutsideEnvelope
-            ? { minHeight: '400px' }
-            : {})
-        }}
+        style={contentWrapperStyle}
       >
         {/* Full card background when overlayProgressOnEnvelope is true */}
         {overlayProgressOnEnvelope && (
           <div
             aria-hidden="true"
             className="absolute inset-0 pointer-events-none"
-            style={{
-              borderRadius: TOKENS.sizes.borderRadius.card,
-              zIndex: 0
-            }}
+            style={fullCardBackgroundStyle}
           >
             {/* Confetti canvas (behind envelope) */}
             <canvas
@@ -224,21 +370,7 @@ const SentCard1 = ({
         {/* Header Section - 280px tall */}
         <div
           className={`box-border content-stretch flex flex-col items-center ${hideEnvelope ? 'justify-center' : 'justify-between'} ${hideEnvelope ? 'pt-[20px] pb-0' : 'pb-0 pt-[20px]'} px-0 relative w-full overflow-visible ${(progressOutsideEnvelope && headerUseFlex2) || (overlayProgressOnEnvelope && headerUseFlex1) || headerUseFlex ? '' : 'shrink-0'}`}
-          style={{
-            position: 'relative',
-            zIndex: overlayProgressOnEnvelope ? 1 : 'auto',
-            ...(hideEnvelope
-              ? { flex: 1, minHeight: '280px' }
-              : progressOutsideEnvelope && headerHeight2 !== undefined && headerUseFlex2
-              ? { flex: 1, minHeight: `${headerHeight2}px` }
-              : overlayProgressOnEnvelope && headerHeight1 !== undefined && headerUseFlex1
-              ? { flex: 1, minHeight: `${headerHeight1}px` }
-              : overlayProgressOnEnvelope && headerUseFlex1
-              ? { flex: 1, minHeight: '280px' }
-              : headerUseFlex && headerHeight !== undefined
-              ? { flex: 1, minHeight: `${headerHeight}px` }
-              : { height: headerHeight !== undefined ? `${headerHeight}px` : '280px' })
-          }}
+          style={headerSectionStyle}
           data-name="Header"
           data-node-id="1467:49183"
         >
@@ -247,44 +379,31 @@ const SentCard1 = ({
             <div
               aria-hidden="true"
               className="absolute inset-0 pointer-events-none"
-              style={{
-                borderRadius: `${TOKENS.sizes.borderRadius.card} ${TOKENS.sizes.borderRadius.card} 0 0`
-              }}
+              style={backgroundBorderRadiusStyle}
             >
               {/* Confetti canvas (behind envelope) */}
               <canvas
                 ref={confettiCanvasRef}
                 className="absolute inset-0"
-                style={{ zIndex: 1, pointerEvents: 'none', filter: 'blur(2.5px)' }}
+                style={confettiCanvasStyle}
               />
               {confettiWhiteOverlay && (
                 <div
                   aria-hidden="true"
                   className="absolute inset-0 pointer-events-none"
-                  style={{
-                    zIndex: 2,
-                    background:
-                      'linear-gradient(to top, rgba(255,255,255,0.8) 0%, rgba(255, 255, 255, 0.33) 30%, rgba(255,255,255,0.0) 100%)'
-                  }}
+                  style={confettiWhiteOverlayStyle}
                 />
               )}
               {/* Base color - dynamic from dominant color */}
               <div
                 className="absolute inset-0"
-                  data-name="HeaderBGBase"
-                style={{
-                  backgroundColor: headerBgFinal,
-                  transition: 'background 200ms ease-out, filter 200ms ease-out'
-                }}
+                data-name="HeaderBGBase"
+                style={headerBgBaseStyle}
               />
               {/* Gradient overlay with blend mode */}
               <div
                 className="absolute inset-0"
-                style={{
-                  background: HEADER_OVERLAY_BG,
-                  mixBlendMode: 'overlay',
-                  zIndex: 0
-                }}
+                style={gradientOverlayStyle}
               />
             </div>
           )}
@@ -299,27 +418,14 @@ const SentCard1 = ({
           >
             <p
               className="font-['Goody_Sans:Regular',sans-serif] leading-[1.4] opacity-80 relative shrink-0 text-[16px] whitespace-pre"
-              style={{
-                fontFamily: 'var(--font-goody-sans)',
-                fontSize: '16px',
-                fontWeight: 400,
-                lineHeight: 1.4,
-                opacity: 0.8,
-                color: headerBgOverride ? TOKENS.colors.text.tertiary : '#ffffff'
-              }}
+              style={sentDateTextStyle}
               data-node-id="1467:49185"
             >
               {sentDate} • {from}
             </p>
             <p
               className="[white-space-collapse:collapse] font-['HW_Cigars:Regular',sans-serif] leading-[1.2] min-w-full overflow-ellipsis overflow-hidden relative shrink-0 text-[24px] tracking-[-0.36px] w-[min-content]"
-              style={{
-                fontFamily: 'var(--font-hw-cigars)',
-                fontSize: '24px',
-                fontWeight: 400,
-                lineHeight: 1.2,
-                letterSpacing: '-0.36px'
-              }}
+              style={titleTextStyle}
               data-node-id="1467:49186"
             >
               {title}
@@ -330,17 +436,7 @@ const SentCard1 = ({
           {progressOutsideEnvelope && (
             <div
               className="absolute"
-              style={{
-                left: '50%',
-                top: '75%',
-                transform: 'translate(-50%, -50%)',
-                width: '300px',
-                height: '300px',
-                zIndex: 0,
-                pointerEvents: 'none',
-                opacity: 1,
-                position: 'absolute'
-              }}
+              style={dotsBackgroundStyle}
               aria-hidden="true"
             >
               <Image
@@ -351,12 +447,7 @@ const SentCard1 = ({
                 priority={false}
                 quality={100}
                 unoptimized={true}
-                style={{ 
-                  objectFit: 'contain', 
-                  width: '100%', 
-                  height: '100%',
-                  display: 'block'
-                }}
+                style={dotsImageStyle}
               />
             </div>
           )}
@@ -364,50 +455,7 @@ const SentCard1 = ({
           {/* Envelope Container - children positioned relative to header */}
           <div
             className={`${hideEnvelope ? 'relative flex-1' : 'absolute'} ${hideEnvelope ? '' : (useGiftContainer && giftContainerTop !== undefined ? '' : (progressOutsideEnvelope && envelopeTopBase2 !== undefined ? '' : 'inset-0'))}`}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              ...(hideEnvelope
-                ? {
-                    // Center the gift box container - use relative positioning
-                    position: 'relative',
-                    width: '100%',
-                    height: '100%',
-                    flex: 1,
-                    minHeight: 0
-                  }
-                : useGiftContainer && giftContainerTop !== undefined
-                ? {
-                    top: `${giftContainerTop + (giftContainerOffsetY !== undefined ? giftContainerOffsetY : 0)}px`,
-                    left: giftContainerLeft !== undefined ? `${giftContainerLeft}px` : undefined,
-                    right: giftContainerRight !== undefined ? `${giftContainerRight}px` : undefined,
-                    bottom: giftContainerBottom !== undefined ? `${giftContainerBottom}px` : 'auto'
-                  }
-                : useGiftContainer
-                ? {
-                    top: `${4 + (giftContainerOffsetY !== undefined ? giftContainerOffsetY : 0)}px`,
-                    left: '-2px',
-                    right: '2px',
-                    bottom: '0px'
-                  }
-                : progressOutsideEnvelope && envelopeTopBase2 !== undefined 
-                ? {
-                    top: `${envelopeTopBase2 + (envelopeOffsetY2 !== undefined ? envelopeOffsetY2 : envelopeOffsetY)}px`,
-                    left: envelopeLeft2 !== undefined ? `${envelopeLeft2}px` : '0px',
-                    right: envelopeRight2 !== undefined ? `${envelopeRight2}px` : '0px',
-                    bottom: 'auto'
-                  }
-                : {
-                    top: `${4 + envelopeOffsetY}px`,
-                    left: '0px',
-                    right: '0px',
-                    bottom: '0px'
-                  }),
-              zIndex: envelopeHighZ ? 50 : (overlayProgressOnEnvelope ? 2 : 2),
-              transform: hideEnvelope ? 'none' : `scale(${useGiftContainer && giftContainerScale !== undefined ? giftContainerScale : (progressOutsideEnvelope && envelopeScale2 !== undefined ? envelopeScale2 : envelopeScale)})`,
-              transformOrigin: hideEnvelope ? 'center center' : (useGiftContainer && giftContainerTransformOrigin !== undefined ? giftContainerTransformOrigin : (progressOutsideEnvelope && transformOrigin2 !== undefined ? transformOrigin2 : 'center top'))
-            }}
+            style={envelopeContainerStyle}
             data-name={useGiftContainer ? "Gift Container" : "Envelope"}
             data-node-id="1467:49190"
           >
@@ -420,14 +468,7 @@ const SentCard1 = ({
               />
             ) : useGiftContainer ? (
               // Gift Container Image (replaces envelope)
-              <div
-                style={{
-                  position: 'relative',
-                  width: giftContainerWidth !== undefined ? `${giftContainerWidth}px` : '250px',
-                  height: giftContainerHeight !== undefined ? `${giftContainerHeight}px` : '200px',
-                  pointerEvents: 'none'
-                }}
-              >
+              <div style={giftContainerWrapperStyle}>
                 <Image
                   src={giftContainerImage}
                   alt="Gift Container"
@@ -436,13 +477,13 @@ const SentCard1 = ({
                   priority={true}
                   quality={100}
                   unoptimized={true}
-                  style={{ objectFit: 'contain' }}
+                  style={giftContainerImageStyle}
                 />
               </div>
             ) : (
               <>
                 {/* Base (envelope base) - moved inside Envelope so it moves together */}
-                <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                <div style={envelopeBaseWrapperStyle}>
                   <EnvelopeBase ids={ids} baseTintColor={baseTintColor} />
               {overlayProgressOnEnvelope && !progressOutsideEnvelope && (
                 <div

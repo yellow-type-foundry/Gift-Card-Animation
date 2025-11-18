@@ -1,10 +1,8 @@
 'use client'
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import GiftCard from '@/components/GiftCard'
-import SentCard1 from '@/components/SentCard1'
-import SentCard4 from '@/components/SentCard4'
-import TabButton from '@/components/TabButton'
+import ControlBar from '@/components/ControlBar'
+import CardGrid from '@/components/CardGrid'
 import { shuffleArray, generateRandomSentCardData } from '@/utils/cardData'
 import { FOOTER_CONFIG, LAYOUT_CONFIG } from '@/constants/sentCardConstants'
 
@@ -401,10 +399,6 @@ export default function Home() {
     setActiveTab(tab)
   }, [])
   
-  // Memoize individual tab handlers
-  const handleGiftTab = useCallback(() => handleTabChange('gift'), [handleTabChange])
-  const handleSentTab = useCallback(() => handleTabChange('sent'), [handleTabChange])
-  
   // Shuffle cards function
   const handleShuffle = useCallback(() => {
     // Shuffle Gift Received cards
@@ -441,394 +435,42 @@ export default function Home() {
         className="w-full px-0 md:px-[240px] py-10"
       >
         {/* Tabs and Controls Row */}
-        <div
-          className="w-full flex items-center justify-between gap-4 mb-6 overflow-x-auto md:overflow-visible whitespace-nowrap px-5 md:px-0"
-          style={{ 
-            WebkitOverflowScrolling: 'touch', 
-            height: '40px',
-            maxWidth: '1272px',
-            marginLeft: 'auto',
-            marginRight: 'auto'
+        <ControlBar
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
+          onShuffle={handleShuffle}
+          isSentTab={activeTab === 'sent'}
+          useColoredBackground={useColoredBackground}
+          onThemingChange={setUseColoredBackground}
+          layoutNumber={layoutNumber}
+          onLayoutChange={(e) => setLayoutNumber(e.target.value)}
+          viewType={viewType}
+          onViewChange={(value) => {
+            setViewType(value)
+            if (value === 'mixed') {
+              setMixSeed(Date.now())
+            }
           }}
-        >
-          {/* Tabs - Left side */}
-          <div className="flex items-center gap-2 shrink-0">
-            <TabButton
-              label="Gift Received"
-              isActive={activeTab === 'gift'}
-              onClick={handleGiftTab}
-            />
-            <TabButton
-              label="Gift Sent"
-              isActive={activeTab === 'sent'}
-              onClick={handleSentTab}
-            />
-          </div>
-          
-          {/* Controls - Right side */}
-          <div className="flex items-center gap-4 shrink-0">
-            {/* Shuffle button - Always visible */}
-            <button
-              onClick={handleShuffle}
-              className="flex items-center gap-2 px-4 py-2 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0"
-              aria-label="Shuffle cards"
-            >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2L14 4L12 6M2 4H14M4 10L2 12L4 14M14 12H2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              <span className="hidden md:inline">Shuffle</span>
-            </button>
-            
-            {/* Gift Sent specific controls */}
-            {activeTab === 'sent' && (
-            <>
-              {/* Desktop: Theming and Layout controls - Hidden on mobile */}
-              <div className="hidden md:flex items-center gap-6 shrink-0">
-                {/* Theming toggle */}
-                <div className="flex items-center gap-3">
-                  <span className="text-sm text-[#525F7A]">Theming</span>
-                  <button
-                    onClick={() => !isSingleView && setUseColoredBackground(!useColoredBackground)}
-                    disabled={isSingleView}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
-                      useColoredBackground ? 'bg-[#5a3dff]' : 'bg-gray-300'
-                    } ${isSingleView ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'}`}
-                    role="switch"
-                    aria-checked={useColoredBackground}
-                    aria-disabled={isSingleView}
-                    aria-label="Toggle theming"
-                  >
-                    <span
-                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                        useColoredBackground ? 'translate-x-6' : 'translate-x-1'
-                      }`}
-                    />
-                  </button>
-                </div>
-                {/* Layout dropdown */}
-                <div className="flex items-center gap-3">
-                  <label htmlFor="layout-select" className="text-sm text-[#525F7A]">Layout</label>
-                  <div className="relative inline-block">
-                    <select
-                      id="layout-select"
-                      value={layoutNumber}
-                      onChange={(e) => setLayoutNumber(e.target.value)}
-                      className="py-2 pl-3 pr-8 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0 appearance-none cursor-pointer"
-                      style={{ width: 'auto', minWidth: '80px' }}
-                    >
-                      <option value="1">Layout 1</option>
-                      <option value="2">Layout 2</option>
-                      <option value="3">Layout 3</option>
-                    </select>
-                    <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
-                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M3 4.5L6 7.5L9 4.5" stroke="#525F7A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-                {/* View selector */}
-                <div className="flex items-center gap-3">
-                  <label htmlFor="view-select" className="text-sm text-[#525F7A]">View</label>
-                  <div className="relative inline-block">
-                    <select
-                      id="view-select"
-                      value={viewType}
-                      onChange={(e) => {
-                        setViewType(e.target.value)
-                        if (e.target.value === 'mixed') {
-                          setMixSeed(Date.now()) // Generate new seed when enabling mixed view
-                        }
-                      }}
-                      className="py-2 pl-3 pr-8 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0 appearance-none cursor-pointer"
-                      style={{ width: 'auto', minWidth: '100px' }}
-                    >
-                      <option value="mixed">Mixed</option>
-                      <option value="batch">Batch</option>
-                      <option value="single">Single</option>
-                    </select>
-                    <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
-                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M3 4.5L6 7.5L9 4.5" stroke="#525F7A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Mobile: Settings/Filter button - Visible only on mobile */}
-              <div className="md:hidden relative shrink-0" style={{ touchAction: 'manipulation' }}>
-                <button
-                  type="button"
-                  id="settings-button-mobile"
-                  onClick={(e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    setShowSettingsMenu(!showSettingsMenu)
-                  }}
-                  onTouchStart={(e) => {
-                    e.stopPropagation()
-                  }}
-                  className="px-3 py-1.5 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] hover:bg-gray-50 active:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 flex items-center gap-2 touch-manipulation"
-                  style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}
-                >
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M8 10C9.10457 10 10 9.10457 10 8C10 6.89543 9.10457 6 8 6C6.89543 6 6 6.89543 6 8C6 9.10457 6.89543 10 8 10Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M13.5 8C13.5 7.5 13.5 7.5 13 7.5C12.5 7.5 12.5 7.5 12.5 8C12.5 8.5 12.5 8.5 13 8.5C13.5 8.5 13.5 8.5 13.5 8Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M3.5 8C3.5 7.5 3.5 7.5 3 7.5C2.5 7.5 2.5 7.5 2.5 8C2.5 8.5 2.5 8.5 3 8.5C3.5 8.5 3.5 8.5 3.5 8Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M8 3.5C8 3 8 3 7.5 3C7 3 7 3 7 3.5C7 4 7 4 7.5 4C8 4 8 4 8 3.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M8 12.5C8 12 8 12 7.5 12C7 12 7 12 7 12.5C7 13 7 13 7.5 13C8 13 8 13 8 12.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                  Settings
-                </button>
-                
-                {/* Mobile Settings Menu Dropdown */}
-                {showSettingsMenu && (
-                  <>
-                    {/* Backdrop */}
-                    <div 
-                      className="fixed inset-0 bg-black/20"
-                      style={{ zIndex: 40 }}
-                      onClick={(e) => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                        setShowSettingsMenu(false)
-                      }}
-                      onTouchStart={(e) => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                        setShowSettingsMenu(false)
-                      }}
-                    />
-                    {/* Menu */}
-                    <div 
-                      className="fixed right-4 top-16 w-64 bg-white rounded-[12px] border border-[#dde2e9] shadow-lg p-4"
-                      style={{ zIndex: 50 }}
-                      onClick={(e) => e.stopPropagation()}
-                      onTouchStart={(e) => e.stopPropagation()}
-                    >
-                      <div className="space-y-4">
-                        {/* Theming toggle */}
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-[#525F7A]">Theming</span>
-                          <button
-                            onClick={() => !isSingleView && setUseColoredBackground(!useColoredBackground)}
-                            disabled={isSingleView}
-                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
-                              useColoredBackground ? 'bg-[#5a3dff]' : 'bg-gray-300'
-                            } ${isSingleView ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'}`}
-                            role="switch"
-                            aria-checked={useColoredBackground}
-                            aria-disabled={isSingleView}
-                            aria-label="Toggle theming"
-                          >
-                            <span
-                              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                                useColoredBackground ? 'translate-x-6' : 'translate-x-1'
-                              }`}
-                            />
-                          </button>
-                        </div>
-                        {/* Layout dropdown */}
-                        <div className="flex items-center justify-between">
-                          <label htmlFor="layout-select-mobile" className="text-sm text-[#525F7A]">Layout</label>
-                          <div className="relative inline-block">
-                            <select
-                              id="layout-select-mobile"
-                              value={layoutNumber}
-                              onChange={(e) => setLayoutNumber(e.target.value)}
-                              className="py-2 pl-3 pr-8 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0 appearance-none cursor-pointer"
-                              style={{ width: 'auto', minWidth: '80px' }}
-                            >
-                              <option value="1">Layout 1</option>
-                              <option value="2">Layout 2</option>
-                              <option value="3">Layout 3</option>
-                            </select>
-                            <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
-                              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M3 4.5L6 7.5L9 4.5" stroke="#525F7A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                              </svg>
-                            </div>
-                          </div>
-                        </div>
-                        {/* View selector */}
-                        <div className="flex items-center justify-between">
-                          <label htmlFor="view-select-mobile" className="text-sm text-[#525F7A]">View</label>
-                          <div className="relative inline-block">
-                            <select
-                              id="view-select-mobile"
-                              value={viewType}
-                              onChange={(e) => {
-                                setViewType(e.target.value)
-                                if (e.target.value === 'mixed') {
-                                  setMixSeed(Date.now()) // Generate new seed when enabling mixed view
-                                }
-                              }}
-                              className="py-2 pl-3 pr-8 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0 appearance-none cursor-pointer"
-                              style={{ width: 'auto', minWidth: '100px' }}
-                            >
-                              <option value="mixed">Mixed</option>
-                              <option value="batch">Batch</option>
-                              <option value="single">Single</option>
-                            </select>
-                            <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
-                              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M3 4.5L6 7.5L9 4.5" stroke="#525F7A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                              </svg>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-            </>
-            )}
-          </div>
-        </div>
+          isSingleView={isSingleView}
+          showSettingsMenu={showSettingsMenu}
+          onSettingsMenuToggle={setShowSettingsMenu}
+        />
         {/* Content */}
-        {activeTab === 'gift' ? (
-          <div className="grid gift-card-grid gap-[24px]">
-            {/* Card 1 - Original */}
-            <GiftCard
-              state={cardStates.card1}
-              from="Lisa Tran"
-              message={messages[0]}
-              expiryText={cardStates.card1 === 'unopened' ? 'Expiring in 21 days' : undefined}
-              giftTitle="24 Pack of Cookies"
-              giftSubtitle="Levain Cookies"
-              boxImage={boxPairs[0].box1}
-              box2Image={boxPairs[0].box2}
-              onOpenGift={cardHandlers.card1}
-            />
-            {/* Card 2 */}
-            <GiftCard state={cardStates.card2} from="Michael Chen" message={messages[1]} expiryText={cardStates.card2 === 'unopened' ? 'Expiring in 18 days' : undefined} giftTitle="Coffee Gift Set" giftSubtitle="Blue Bottle Coffee" boxImage={boxPairs[1].box1} box2Image={boxPairs[1].box2} onOpenGift={cardHandlers.card2} />
-            {/* Card 3 */}
-            <GiftCard state={cardStates.card3} from="Sarah Johnson" message={messages[2]} expiryText={cardStates.card3 === 'unopened' ? 'Expiring in 15 days' : undefined} giftTitle="Chocolate Box Collection" giftSubtitle="Godiva Chocolates" boxImage={boxPairs[2].box1} box2Image={boxPairs[2].box2} onOpenGift={cardHandlers.card3} />
-            {/* Card 4 */}
-            <GiftCard state={cardStates.card4} from="David Kim" message={messages[3]} expiryText={cardStates.card4 === 'unopened' ? 'Expiring in 30 days' : undefined} giftTitle="Gourmet Tea Selection" giftSubtitle="TWG Tea" boxImage={boxPairs[3].box1} box2Image={boxPairs[3].box2} onOpenGift={cardHandlers.card4} />
-            {/* Card 5 */}
-            <GiftCard state={cardStates.card5} from="Emily Rodriguez" message={messages[4]} expiryText={cardStates.card5 === 'unopened' ? 'Expiring in 12 days' : undefined} giftTitle="Artisan Cheese Board" giftSubtitle="Murray's Cheese" boxImage={boxPairs[4].box1} box2Image={boxPairs[4].box2} onOpenGift={cardHandlers.card5} />
-            {/* Card 6 */}
-            <GiftCard state={cardStates.card6} from="James Wilson" message={messages[5]} expiryText={cardStates.card6 === 'unopened' ? 'Expiring in 25 days' : undefined} giftTitle="Wine Collection" giftSubtitle="Napa Valley Wines" boxImage={boxPairs[5].box1} box2Image={boxPairs[5].box2} onOpenGift={cardHandlers.card6} />
-            {/* Card 7 */}
-            <GiftCard state={cardStates.card7} from="Olivia Martinez" message={messages[6]} expiryText={cardStates.card7 === 'unopened' ? 'Expiring in 7 days' : undefined} giftTitle="Spa Gift Certificate" giftSubtitle="Bliss Spa" boxImage={boxPairs[6].box1} box2Image={boxPairs[6].box2} onOpenGift={cardHandlers.card7} />
-            {/* Card 8 */}
-            <GiftCard state={cardStates.card8} from="Ryan Thompson" message={messages[7]} expiryText={cardStates.card8 === 'unopened' ? 'Expiring in 19 days' : undefined} giftTitle="Gourmet Chocolate Truffles" giftSubtitle="Vosges Haut-Chocolat" boxImage={boxPairs[7].box1} box2Image={boxPairs[7].box2} onOpenGift={cardHandlers.card8} />
-          </div>
-        ) : activeTab === 'sent' ? (
-          <div>
-            <div className="grid gift-card-grid gap-[24px]">
-              {viewType === 'mixed' && mixedCardTypes ? (
-                // Mixed view: show both batch and single cards
-                (() => {
-                  // Map layout number to single config key
-                  // Layout 2 uses single2, others use single{layoutNumber}
-                  const singleConfigKey = `single${layoutNumber}`
-                  if (!LAYOUT_CONFIG[singleConfigKey]) {
-                    return (
-                      <div className="col-span-full text-center text-[#525F7A] py-8">
-                        No cards available for this layout
-                      </div>
-                    )
-                  }
-                  return sentCards.map((card, index) => {
-                    const isBatch = mixedCardTypes[index]
-                    
-                    if (isBatch) {
-                      return (
-                        <SentCard1
-                          key={index}
-                          {...getSentCard1Props(card, layoutNumber, useColoredBackground)}
-                        />
-                      )
-                    } else {
-                      // Single 1 uses SentCard1 (with gift container replacing envelope)
-                      if (layoutNumber === '1') {
-                        return (
-                          <SentCard1
-                            key={index}
-                            {...getSingle1Props(card, useColoredBackground)}
-                          />
-                        )
-                      }
-                      // Single 2 (Layout 2) uses SentCard1 with Batch 2 props (empty container)
-                      if (layoutNumber === '2') {
-                        return (
-                          <SentCard1
-                            key={index}
-                            {...getSentCard1Props(card, layoutNumber, useColoredBackground)}
-                            hideEnvelope={true}
-                          />
-                        )
-                      }
-                      // Other single cards use SentCard4 (with gift container)
-                      const props = getSentCard4Props(card, layoutNumber, useColoredBackground)
-                      if (!props) return null
-                      return (
-                        <SentCard4
-                          key={index}
-                          {...props}
-                        />
-                      )
-                    }
-                  })
-                })()
-              ) : viewType === 'single' ? (
-                // Single view: show only single cards
-                (() => {
-                  // Single 2 (Layout 2) uses SentCard1 with Batch 2 props (empty container)
-                  if (layoutNumber === '2') {
-                    return sentCards.map((card, index) => (
-                      <SentCard1
-                        key={index}
-                        {...getSentCard1Props(card, layoutNumber, useColoredBackground)}
-                        hideEnvelope={true}
-                      />
-                    ))
-                  }
-                  // Check if config exists for this layout
-                  const singleConfigKey = `single${layoutNumber}`
-                  if (!LAYOUT_CONFIG[singleConfigKey]) {
-                    return (
-                      <div className="col-span-full text-center text-[#525F7A] py-8">
-                        No cards available for this layout
-                      </div>
-                    )
-                  }
-                  // Single 1 uses SentCard1 (with gift container replacing envelope), others use SentCard4 (with gift container)
-                  if (layoutNumber === '1') {
-                    return sentCards.map((card, index) => (
-                      <SentCard1
-                        key={index}
-                        {...getSingle1Props(card, useColoredBackground)}
-                      />
-                    ))
-                  }
-                  return sentCards.map((card, index) => {
-                    const props = getSentCard4Props(card, layoutNumber, useColoredBackground)
-                    if (!props) return null
-                    return (
-                      <SentCard4
-                        key={index}
-                        {...props}
-                      />
-                    )
-                  })
-                })()
-              ) : (
-                // Batch view: show only batch cards
-                sentCards.map((card, index) => (
-                  <SentCard1
-                    key={index}
-                    {...getSentCard1Props(card, layoutNumber, useColoredBackground)}
-                  />
-                ))
-              )}
-            </div>
-          </div>
-        ) : null}
+        <CardGrid
+          activeTab={activeTab}
+          cardStates={cardStates}
+          messages={messages}
+          boxPairs={boxPairs}
+          cardHandlers={cardHandlers}
+          viewType={viewType}
+          layoutNumber={layoutNumber}
+          useColoredBackground={useColoredBackground}
+          sentCards={sentCards}
+          mixedCardTypes={mixedCardTypes}
+          getSentCard1Props={getSentCard1Props}
+          getSingle1Props={getSingle1Props}
+          getSentCard4Props={getSentCard4Props}
+        />
       </div>
     </div>
   )
