@@ -81,9 +81,9 @@ const GiftBoxContainer = ({
             <div
               className="relative rounded-[100px] w-full"
               style={{
-                padding: '.5px',
-                background: 'linear-gradient(to top, rgb(255, 255, 255, 0.5) 0%, rgb(255, 255, 255, 0.7) 100%)',
-                boxShadow: '0px -1px 3px 0px rgba(255,255,255,0.55), 0px 3px 4px 0px rgba(255,255,255,0.4)'
+                padding: '.45px',
+                background: 'linear-gradient(to top, rgba(255, 255, 255, 0.7) 0%, rgba(0, 0, 0, 0.02) 100%)',
+                boxShadow: '0px -1px 3px 0px rgba(255, 255, 255, 0.55), 0px 3px 4px 0px rgba(255,255,255,0.4)'
               }}
             >
               <div 
@@ -258,6 +258,63 @@ const GiftBoxContainer = ({
             boxShadow: '0px 2px 20px 0px inset #ffffff, 0px 0px 8px 0px inset rgba(255,255,255,0.85)'
           }}
         />
+
+        {/* Noise texture overlay */}
+        <div 
+          className="absolute inset-0 pointer-events-none rounded-[32px]"
+          style={{
+            zIndex: 999,
+            opacity: .75,
+            mixBlendMode: 'overlay',
+            backgroundImage: 'url(/assets/GiftSent/Noise2.png)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat'
+          }}
+        />
+      </div>
+
+      {/* Box Shadow */}
+      <div 
+        className="absolute flex items-center justify-center pointer-events-none"
+        style={{
+          left: 'calc(50% + 0.5px)',
+          top: '160px',
+          transform: 'translateX(-50%)',
+          height: '60px',
+          width: '130px',
+          opacity: .75,
+          zIndex: -1
+        }}
+        data-name="Box Shadow"
+      >
+        <div 
+          className="flex-none"
+          style={{
+            transform: 'scaleY(-1)'
+          }}
+        >
+          <div 
+            className="relative"
+            style={{
+              height: '59px',
+              width: '131px'
+            }}
+          >
+            <div 
+              className="absolute"
+              style={{
+                inset: '-40.68% -18.32%'
+              }}
+            >
+              <img 
+                alt="" 
+                className="block max-w-none size-full" 
+                src="/assets/6f359e913554354f597a2d17f6b84af6c1b85d2e.svg"
+              />
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )
