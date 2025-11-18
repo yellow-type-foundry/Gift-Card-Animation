@@ -49,9 +49,10 @@ const GiftBoxContainer = ({
             className="basis-0 box-border content-stretch flex flex-col grow items-center min-h-px min-w-px px-[16px] py-[20px] relative shrink-0 w-full"
             data-name="Logo Container"
           >
+            {/* Logo with text emboss style */}
             <div 
               className="h-[22px] mix-blend-overlay relative shrink-0 w-[121px]"
-              style={{ mixBlendMode: 'overlay' }}
+              style={{ mixBlendMode: 'overlay' }} // text emboss style
               data-name="Logo"
             >
               <div className="absolute inset-[-12.66%_-1.84%_-9.28%_-1.84%]">
@@ -70,15 +71,17 @@ const GiftBoxContainer = ({
             data-name="Progress Bar"
           >
             <div 
-              className="border-[0.5px] border-[rgba(255,255,255,0)] border-solid box-border content-stretch flex flex-col gap-[11.351px] items-start justify-center p-[3.405px] relative rounded-[100px] shrink-0 w-full overflow-hidden"
+              className="border-[0.5px] border-[rgba(255,255,255,0)] border-solid box-border content-stretch flex flex-col gap-[11.351px] items-start justify-center p-[3.405px] relative rounded-[100px] size-full overflow-hidden"
               data-name="Progress Bar"
             >
               {/* Progress bar background layers */}
               <div aria-hidden="true" className="absolute inset-0 pointer-events-none rounded-[100px]">
+                {/* 1. Color fill, normal mode, 100% (base layer) */}
                 <div 
                   className="absolute inset-0 rounded-[100px]"
                   style={{ backgroundColor: boxColor }}
                 />
+                {/* 2. White fill, 40%, overlay mode (blends with color below) */}
                 <div 
                   className="absolute inset-0 mix-blend-overlay rounded-[100px]"
                   style={{ 
@@ -93,9 +96,9 @@ const GiftBoxContainer = ({
                 className="relative rounded-[40.865px] shrink-0 overflow-hidden"
                 style={{ 
                   width: `${progressBarWidth}px`,
-                  minWidth: '59.027px',
-                  padding: '0.5px',
-                  background: 'linear-gradient(to bottom, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%)'
+                  minWidth: '59px',
+                  padding: '0px',
+                  background: 'linear-gradient(to bottom, rgba(255,255,255,1) 0%, rgba(255, 255, 255, 0) 100%)'
                 }}
                 data-name="Progress"
               >
