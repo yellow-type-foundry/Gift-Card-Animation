@@ -1,46 +1,10 @@
 'use client'
 
-import React, { useMemo } from 'react'
+import React from 'react'
 import useProgressAnimation from '@/hooks/useProgressAnimation'
 import useHover from '@/hooks/useHover'
-
-// Helper function to convert hex to HSL
-const hexToHsl = (hex) => {
-  const r = parseInt(hex.slice(1, 3), 16) / 255
-  const g = parseInt(hex.slice(3, 5), 16) / 255
-  const b = parseInt(hex.slice(5, 7), 16) / 255
-
-  const max = Math.max(r, g, b)
-  const min = Math.min(r, g, b)
-  let h, s, l = (max + min) / 2
-
-  if (max === min) {
-    h = s = 0
-  } else {
-    const d = max - min
-    s = l > 0.5 ? d / (2 - max - min) : d / (max + min)
-    switch (max) {
-      case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break
-      case g: h = ((b - r) / d + 2) / 6; break
-      case b: h = ((r - g) / d + 4) / 6; break
-      default: h = 0
-    }
-  }
-
-  return [Math.round(h * 360), Math.round(s * 100), Math.round(l * 100)]
-}
-
-// Helper function to convert HSL to hex
-const hslToHex = (h, s, l) => {
-  l /= 100
-  const a = s * Math.min(l, 1 - l) / 100
-  const f = n => {
-    const k = (n + h / 30) % 12
-    const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1)
-    return Math.round(255 * color).toString(16).padStart(2, '0')
-  }
-  return `#${f(0)}${f(8)}${f(4)}`
-}
+import useHoverColor from '@/hooks/useHoverColor'
+import { GIFT_BOX_TOKENS, calculateProgressBarMaxWidth, calculateProgressBarWidth } from '@/constants/giftBoxTokens'
 
 const GiftBoxContainer = ({
   progress = { current: 4, total: 5 },
@@ -51,24 +15,8 @@ const GiftBoxContainer = ({
   // Use external hover state if provided, otherwise use internal
   const isHovered = externalIsHovered !== undefined ? externalIsHovered : internalIsHovered
 
-  // Calculate hover color with increased saturation and lightness
-  const hoverBoxColor = useMemo(() => {
-    if (!isHovered) return boxColor
-    const [h, s, l] = hexToHsl(boxColor)
-    const newS = Math.min(100, s + 3)
-    const newL = Math.min(100, l + 2)
-    return hslToHex(h, newS, newL)
-  }, [boxColor, isHovered])
-
-  // Calculate themed shadow color based on boxColor
-  // Default shadow #56c5f6 is darker than default boxColor #94d8f9
-  // We'll derive it by reducing lightness
-  const themedShadowColor = useMemo(() => {
-    const [h, s, l] = hexToHsl(boxColor)
-    // Reduce lightness by ~20-25% to create shadow effect
-    const shadowL = Math.max(0, l - 20)
-    return hslToHex(h, s, shadowL)
-  }, [boxColor])
+  // Calculate hover and shadow colors using reusable hook
+  const { hoverColor: hoverBoxColor, shadowColor: themedShadowColor } = useHoverColor(boxColor, isHovered)
   // Progress animation with delay and loading
   const {
     animatedProgress,
@@ -76,15 +24,9 @@ const GiftBoxContainer = ({
     validatedProgress
   } = useProgressAnimation(progress)
 
-  // Calculate progress bar width dynamically
-  // Container width: 176px
-  // Outer padding: 16px each side = 32px
-  // Stroke wrapper padding: 0.5px each side = 1px
-  // Inner container padding: 3.405px each side = 6.81px
-  // Available width: 176 - 32 - 1 - 6.81 = 136.19px
-  // Minimum width: 60px
-  const progressBarMaxWidth = 176 - 32 - 1 - 7.5
-  const progressBarWidth = Math.min(progressBarMaxWidth, Math.max(60, (animatedProgress / 100) * progressBarMaxWidth))
+  // Calculate progress bar width dynamically using tokens
+  const progressBarMaxWidth = calculateProgressBarMaxWidth()
+  const progressBarWidth = calculateProgressBarWidth(animatedProgress, progressBarMaxWidth)
 
   return (
     <div 
@@ -95,44 +37,57 @@ const GiftBoxContainer = ({
       style={{ position: 'relative' }}
     >
       <div 
-        className="border-[0.5px] border-[rgba(255,255,255,0)] border-solid relative rounded-[32px] shrink-0 overflow-hidden"
+        className="border-[0.5px] border-[rgba(255,255,255,0)] border-solid relative shrink-0 overflow-hidden"
         style={{ 
-          width: '176px', 
-          height: '176px',
-          transform: isHovered ? 'translateY(-4px)' : 'translateY(0)',
-          transition: 'transform 300ms ease-out'
+          width: GIFT_BOX_TOKENS.box.width, 
+          height: GIFT_BOX_TOKENS.box.height,
+          borderRadius: GIFT_BOX_TOKENS.box.borderRadius,
+          transform: isHovered ? `translateY(${GIFT_BOX_TOKENS.hoverEffects.transform.translateY})` : 'translateY(0)',
+          transition: `transform ${GIFT_BOX_TOKENS.animations.duration.fast} ${GIFT_BOX_TOKENS.animations.easing.easeOut}`
         }}
         data-name="Box"
       >
         {/* Base background and gradient overlay */}
-        <div aria-hidden="true" className="absolute inset-0 pointer-events-none rounded-[32px]">
+        <div aria-hidden="true" className="absolute inset-0 pointer-events-none" style={{ borderRadius: GIFT_BOX_TOKENS.box.borderRadius }}>
           <div 
-            className="absolute inset-0 rounded-[32px]"
+            className="absolute inset-0"
             style={{ 
+              borderRadius: GIFT_BOX_TOKENS.box.borderRadius,
               backgroundColor: hoverBoxColor,
-              transition: 'background-color 300ms ease-out'
+              transition: `background-color ${GIFT_BOX_TOKENS.animations.duration.fast} ${GIFT_BOX_TOKENS.animations.easing.easeOut}`
             }}
           />
           <div 
-            className="absolute inset-0 mix-blend-overlay rounded-[32px]"
+            className="absolute inset-0"
             style={{ 
-              mixBlendMode: 'overlay',
-              background: 'linear-gradient(to bottom, rgba(0,0,0,0) 34.459%, rgba(0,0,0,0.5) 100%)'
+              borderRadius: GIFT_BOX_TOKENS.box.borderRadius,
+              mixBlendMode: GIFT_BOX_TOKENS.blendModes.overlay,
+              background: GIFT_BOX_TOKENS.gradients.boxBase
             }}
           />
         </div>
 
         {/* Inner content container */}
-        <div className="content-stretch flex flex-col items-start overflow-hidden relative rounded-[inherit] w-full h-full" style={{ width: '176px', height: '176px' }}>
+        <div className="content-stretch flex flex-col items-start overflow-hidden relative rounded-[inherit] w-full h-full" style={{ width: GIFT_BOX_TOKENS.box.width, height: GIFT_BOX_TOKENS.box.height }}>
           {/* Logo Container (top, flex-grow) */}
           <div 
-            className="basis-0 box-border content-stretch flex flex-col grow items-center min-h-px min-w-px px-[16px] py-[20px] relative shrink-0 w-full"
+            className="basis-0 box-border content-stretch flex flex-col grow items-center min-h-px min-w-px relative shrink-0 w-full"
+            style={{
+              paddingLeft: GIFT_BOX_TOKENS.logo.containerPadding.horizontal,
+              paddingRight: GIFT_BOX_TOKENS.logo.containerPadding.horizontal,
+              paddingTop: GIFT_BOX_TOKENS.logo.containerPadding.vertical,
+              paddingBottom: GIFT_BOX_TOKENS.logo.containerPadding.vertical,
+            }}
             data-name="Logo Container"
           >
             {/* Logo with text emboss style */}
             <div 
-              className="h-[22px] mix-blend-overlay relative shrink-0 w-[121px]"
-              style={{ mixBlendMode: 'overlay' }} // text emboss style
+              className="relative shrink-0 mix-blend-overlay"
+              style={{ 
+                width: GIFT_BOX_TOKENS.logo.width,
+                height: GIFT_BOX_TOKENS.logo.height,
+                mixBlendMode: GIFT_BOX_TOKENS.blendModes.overlay
+              }}
               data-name="Logo"
             >
               <div className="absolute inset-[-12.66%_-1.84%_-9.28%_-1.84%]">
@@ -147,38 +102,51 @@ const GiftBoxContainer = ({
 
           {/* Progress Bar (bottom, fixed) */}
           <div 
-            className="box-border content-stretch flex flex-col gap-[10px] items-center justify-center pb-[16px] pt-0 px-[16px] relative shrink-0 w-full"
+            className="box-border content-stretch flex flex-col gap-[10px] items-center justify-center relative shrink-0 w-full"
+            style={{
+              paddingBottom: GIFT_BOX_TOKENS.progressBar.container.bottomPadding,
+              paddingLeft: GIFT_BOX_TOKENS.progressBar.container.horizontalPadding,
+              paddingRight: GIFT_BOX_TOKENS.progressBar.container.horizontalPadding,
+            }}
             data-name="Progress Bar"
           >
             {/* Stroke wrapper with gradient (0.5px outside) */}
             <div
-              className="relative rounded-[100px] w-full"
+              className="relative w-full"
               style={{
-                padding: '.45px',
-                background: 'linear-gradient(to top, rgba(255, 255, 255, 0.7) 0%, rgba(0, 0, 0, 0.02) 100%)',
-                boxShadow: '0px -1px 3px 0px rgba(255, 255, 255, 0.55), 0px 3px 4px 0px rgba(255,255,255,0.4)'
+                padding: GIFT_BOX_TOKENS.progressBar.strokeWrapper.padding,
+                borderRadius: GIFT_BOX_TOKENS.progressBar.strokeWrapper.borderRadius,
+                background: GIFT_BOX_TOKENS.gradients.progressBarStroke,
+                boxShadow: GIFT_BOX_TOKENS.shadows.progressBarStroke
               }}
             >
               <div 
-                className="border-[0.5px] border-[rgba(255,255,255,0)] border-solid box-border content-stretch flex flex-col gap-[11.351px] items-start justify-center p-[3.405px] relative rounded-[100px] size-full overflow-hidden"
+                className="border-[0.5px] border-[rgba(255,255,255,0)] border-solid box-border content-stretch flex flex-col items-start justify-center relative size-full overflow-hidden"
+                style={{
+                  gap: GIFT_BOX_TOKENS.progressBar.innerContainer.gap,
+                  padding: GIFT_BOX_TOKENS.progressBar.innerContainer.padding,
+                  borderRadius: GIFT_BOX_TOKENS.progressBar.innerContainer.borderRadius,
+                }}
                 data-name="Progress Bar"
               >
               {/* Progress bar background layers */}
-              <div aria-hidden="true" className="absolute inset-0 pointer-events-none rounded-[100px]">
+              <div aria-hidden="true" className="absolute inset-0 pointer-events-none" style={{ borderRadius: GIFT_BOX_TOKENS.progressBar.innerContainer.borderRadius }}>
                 {/* 1. Color fill, normal mode, 100% (base layer) */}
                 <div 
-                  className="absolute inset-0 rounded-[100px]"
+                  className="absolute inset-0"
                   style={{ 
+                    borderRadius: GIFT_BOX_TOKENS.progressBar.innerContainer.borderRadius,
                     backgroundColor: hoverBoxColor,
-                    transition: 'background-color 300ms ease-out'
+                    transition: `background-color ${GIFT_BOX_TOKENS.animations.duration.fast} ${GIFT_BOX_TOKENS.animations.easing.easeOut}`
                   }}
                 />
                 {/* 2. White fill, 40%, overlay mode (blends with color below) */}
                 <div 
-                  className="absolute inset-0 mix-blend-overlay rounded-[100px]"
+                  className="absolute inset-0"
                   style={{ 
-                    mixBlendMode: 'overlay',
-                    backgroundColor: 'rgba(255,255,255,0.4)'
+                    borderRadius: GIFT_BOX_TOKENS.progressBar.innerContainer.borderRadius,
+                    mixBlendMode: GIFT_BOX_TOKENS.blendModes.overlay,
+                    backgroundColor: GIFT_BOX_TOKENS.colors.whiteOverlay
                   }}
                 />
               </div>
@@ -186,21 +154,26 @@ const GiftBoxContainer = ({
               {/* Progress indicator */}
               {/* Stroke wrapper with gradient (0.5px inside) */}
               <div
-                className="relative rounded-[40.865px] shrink-0"
+                className="relative shrink-0"
                 style={{
                   width: `${progressBarWidth}px`,
-                  minWidth: '60px',
-                  padding: '0.5px',
-                  background: 'linear-gradient(to bottom, rgba(255,255,255,.65) 0%, rgba(255,255,255,0) 100%)',
-                  transition: 'width 500ms cubic-bezier(0.25, 0.10, 0.25, 1.0)'
+                  minWidth: GIFT_BOX_TOKENS.progressBar.indicator.minWidth,
+                  padding: GIFT_BOX_TOKENS.progressBar.indicator.strokePadding,
+                  borderRadius: GIFT_BOX_TOKENS.progressBar.indicator.borderRadius,
+                  background: GIFT_BOX_TOKENS.gradients.progressIndicatorStroke,
+                  transition: `width ${GIFT_BOX_TOKENS.animations.duration.medium} ${GIFT_BOX_TOKENS.animations.easing.progressBar}`
                 }}
                 data-name="Progress"
               >
                 <div 
-                  className="box-border content-stretch flex flex-col h-[27.243px] items-start justify-center px-[9.081px] py-0 relative rounded-[40.865px] w-full overflow-hidden"
+                  className="box-border content-stretch flex flex-col items-start justify-center py-0 relative w-full overflow-hidden"
                   style={{ 
+                    height: GIFT_BOX_TOKENS.progressBar.indicator.height,
+                    paddingLeft: GIFT_BOX_TOKENS.progressBar.indicator.horizontalPadding,
+                    paddingRight: GIFT_BOX_TOKENS.progressBar.indicator.horizontalPadding,
+                    borderRadius: GIFT_BOX_TOKENS.progressBar.indicator.borderRadius,
                     backgroundColor: hoverBoxColor,
-                    transition: 'background-color 300ms ease-out'
+                    transition: `background-color ${GIFT_BOX_TOKENS.animations.duration.fast} ${GIFT_BOX_TOKENS.animations.easing.easeOut}`
                   }}
                 >
                   <p 
@@ -210,10 +183,10 @@ const GiftBoxContainer = ({
                       fontSize: '15.892px',
                       fontWeight: 500,
                       lineHeight: 1.4,
-                      color: '#ffffff',
-                      zIndex: 1,
-                      mixBlendMode: 'overlay',
-                      opacity: 0.8,
+                      color: GIFT_BOX_TOKENS.colors.progressText,
+                      zIndex: GIFT_BOX_TOKENS.zIndex.progressText,
+                      mixBlendMode: GIFT_BOX_TOKENS.blendModes.overlay,
+                      opacity: GIFT_BOX_TOKENS.colors.progressTextOpacity,
                       position: 'relative'
                     }}
                   >
@@ -232,7 +205,7 @@ const GiftBoxContainer = ({
               <div 
                 className="absolute inset-[-0.5px] pointer-events-none"
                 style={{
-                  boxShadow: '0px 1.135px 2.554px 0px inset rgba(0,0,0,0.1), 0px -1.135px 3.405px 0px inset rgba(255,255,255,0.5)'
+                  boxShadow: GIFT_BOX_TOKENS.shadows.progressBarContainerInset
                 }}
               />
               </div>
@@ -241,10 +214,12 @@ const GiftBoxContainer = ({
 
           {/* Specular Highlight */}
           <div 
-            className="absolute left-[3.98%] right-[3.98%] top-0 pointer-events-none"
+            className="absolute top-0 pointer-events-none"
             style={{
-              height: '28px',
-              mixBlendMode: 'soft-light'
+              left: GIFT_BOX_TOKENS.effects.specularHighlight.horizontalOffset,
+              right: GIFT_BOX_TOKENS.effects.specularHighlight.horizontalOffset,
+              height: GIFT_BOX_TOKENS.effects.specularHighlight.height,
+              mixBlendMode: GIFT_BOX_TOKENS.blendModes.softLight
             }}
             data-name="Specular Highlight"
           >
@@ -252,17 +227,19 @@ const GiftBoxContainer = ({
               <img 
                 alt="" 
                 className="block max-w-none size-full" 
-                src="/assets/5e8144bc8235e529f9163592afb375946eec80a3.svg"
+                src={GIFT_BOX_TOKENS.assets.specularHighlight}
               />
             </div>
           </div>
 
           {/* Shadow Highlight */}
           <div 
-            className="absolute left-[3.98%] right-[3.98%] bottom-0 pointer-events-none"
+            className="absolute bottom-0 pointer-events-none"
             style={{
-              height: '28px',
-              mixBlendMode: 'multiply'
+              left: GIFT_BOX_TOKENS.effects.shadowHighlight.horizontalOffset,
+              right: GIFT_BOX_TOKENS.effects.shadowHighlight.horizontalOffset,
+              height: GIFT_BOX_TOKENS.effects.shadowHighlight.height,
+              mixBlendMode: GIFT_BOX_TOKENS.blendModes.multiply
             }}
             data-name="Shadow Highlight"
           >
@@ -270,7 +247,7 @@ const GiftBoxContainer = ({
               <img 
                 alt="" 
                 className="block max-w-none size-full" 
-                src="/assets/b368b833f1a35441c58064df65b762b08214287c.svg"
+                src={GIFT_BOX_TOKENS.assets.shadowHighlight}
               />
             </div>
           </div>
@@ -279,23 +256,23 @@ const GiftBoxContainer = ({
           <div 
             className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
             style={{
-              width: '162px',
-              height: '162px',
-              borderRadius: '36px',
+              width: GIFT_BOX_TOKENS.effects.highlight.width,
+              height: GIFT_BOX_TOKENS.effects.highlight.height,
+              borderRadius: GIFT_BOX_TOKENS.effects.highlight.borderRadius,
               overflow: 'visible',
-              zIndex: 99,
-              mixBlendMode: 'overlay'
+              zIndex: GIFT_BOX_TOKENS.zIndex.highlight,
+              mixBlendMode: GIFT_BOX_TOKENS.blendModes.overlay
             }}
           >
             <div
               className="absolute inset-0"
               style={{
-                width: '168px',
-                height: '168px',
-                borderRadius: '36px',
-                border: '16px solid transparent',
-                background: 'linear-gradient(45deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 100%)',
-                filter: 'blur(12px)',
+                width: GIFT_BOX_TOKENS.effects.highlightWrapper.width,
+                height: GIFT_BOX_TOKENS.effects.highlightWrapper.height,
+                borderRadius: GIFT_BOX_TOKENS.effects.highlightWrapper.borderRadius,
+                border: GIFT_BOX_TOKENS.effects.highlightWrapper.border,
+                background: GIFT_BOX_TOKENS.gradients.highlight,
+                filter: `blur(${GIFT_BOX_TOKENS.effects.highlight.blur})`,
                 opacity: 1
               }}
               data-name="Highlight"
@@ -307,23 +284,23 @@ const GiftBoxContainer = ({
         <div 
           className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
           style={{
-            width: '168px',
-            height: '168px',
-            borderRadius: '36px',
+            width: GIFT_BOX_TOKENS.effects.shadowWrapper.width,
+            height: GIFT_BOX_TOKENS.effects.shadowWrapper.height,
+            borderRadius: GIFT_BOX_TOKENS.effects.shadowWrapper.borderRadius,
             overflow: 'visible',
-            zIndex: 99,
-            mixBlendMode: 'overlay'
+            zIndex: GIFT_BOX_TOKENS.zIndex.highlight,
+            mixBlendMode: GIFT_BOX_TOKENS.blendModes.overlay
           }}
         >
           <div 
             className="absolute inset-0"
             style={{
-              width: '162px',
-              height: '162px',
-              borderRadius: '36px',
-              border: '16px solid transparent',
-              background: 'linear-gradient(-45deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0) 100%)',
-              filter: 'blur(14px)',
+              width: GIFT_BOX_TOKENS.effects.shadow.width,
+              height: GIFT_BOX_TOKENS.effects.shadow.height,
+              borderRadius: GIFT_BOX_TOKENS.effects.shadow.borderRadius,
+              border: GIFT_BOX_TOKENS.effects.shadowWrapper.border,
+              background: GIFT_BOX_TOKENS.gradients.shadow,
+              filter: `blur(${GIFT_BOX_TOKENS.effects.shadow.blur})`,
               opacity: 1,
               willChange: 'filter'
             }}
@@ -335,22 +312,23 @@ const GiftBoxContainer = ({
         <div 
           className="absolute inset-0 pointer-events-none"
           style={{
-            boxShadow: '0px 2px 20px 0px inset #ffffff, 0px 0px 8px 0px inset rgba(255,255,255,0.85)'
+            boxShadow: GIFT_BOX_TOKENS.shadows.boxInset
           }}
         />
 
         {/* Noise texture overlay */}
         <div 
-          className="absolute inset-0 pointer-events-none rounded-[32px]"
+          className="absolute inset-0 pointer-events-none"
           style={{
-            zIndex: 999,
-            opacity: isHovered ? 0.75 : 0.95,
-            mixBlendMode: 'overlay',
-            backgroundImage: 'url(/assets/GiftSent/Noise2.png)',
+            borderRadius: GIFT_BOX_TOKENS.box.borderRadius,
+            zIndex: GIFT_BOX_TOKENS.zIndex.noise,
+            opacity: isHovered ? GIFT_BOX_TOKENS.hoverEffects.noiseOpacity.hover : GIFT_BOX_TOKENS.hoverEffects.noiseOpacity.default,
+            mixBlendMode: GIFT_BOX_TOKENS.blendModes.overlay,
+            backgroundImage: `url(${GIFT_BOX_TOKENS.assets.noise})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
-            transition: 'opacity 300ms ease-out'
+            transition: `opacity ${GIFT_BOX_TOKENS.animations.duration.fast} ${GIFT_BOX_TOKENS.animations.easing.easeOut}`
           }}
         />
       </div>
@@ -359,14 +337,14 @@ const GiftBoxContainer = ({
       <div 
         className="absolute flex items-center justify-center pointer-events-none"
         style={{
-          left: 'calc(50% + 0.5px)',
-          top: '160px',
+          left: `calc(50% + ${GIFT_BOX_TOKENS.boxShadow.leftOffset})`,
+          top: GIFT_BOX_TOKENS.boxShadow.top,
           transform: 'translateX(-50%)',
-          height: '60px',
-          width: '130px',
-          opacity: isHovered ? 0.75 : 0,
-          zIndex: -1,
-          transition: 'opacity 300ms ease-out'
+          height: GIFT_BOX_TOKENS.boxShadow.height,
+          width: GIFT_BOX_TOKENS.boxShadow.width,
+          opacity: isHovered ? GIFT_BOX_TOKENS.hoverEffects.boxShadowOpacity.hover : GIFT_BOX_TOKENS.hoverEffects.boxShadowOpacity.default,
+          zIndex: GIFT_BOX_TOKENS.zIndex.boxShadow,
+          transition: `opacity ${GIFT_BOX_TOKENS.animations.duration.fast} ${GIFT_BOX_TOKENS.animations.easing.easeOut}`
         }}
         data-name="Box Shadow"
       >
@@ -379,20 +357,20 @@ const GiftBoxContainer = ({
           <div 
             className="relative"
             style={{
-              height: '59px',
-              width: '131px'
+              height: GIFT_BOX_TOKENS.boxShadow.imageSize.height,
+              width: GIFT_BOX_TOKENS.boxShadow.imageSize.width
             }}
           >
             <div 
               className="absolute"
               style={{
-                inset: '-40.68% -18.32%'
+                inset: GIFT_BOX_TOKENS.boxShadow.imageInset
               }}
             >
               <img 
                 alt="" 
                 className="block max-w-none size-full" 
-                src="/assets/6f359e913554354f597a2d17f6b84af6c1b85d2e.svg"
+                src={GIFT_BOX_TOKENS.assets.boxShadow}
               />
             </div>
           </div>
@@ -402,5 +380,5 @@ const GiftBoxContainer = ({
   )
 }
 
-export default GiftBoxContainer
+export default React.memo(GiftBoxContainer)
 
