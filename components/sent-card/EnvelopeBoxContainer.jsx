@@ -226,10 +226,11 @@ const EnvelopeBoxContainer = ({
 
         {/* Box (main container) - rounded only at bottom, sharp at top */}
         <div 
-          className="border-[0.5px] border-[rgba(255,255,255,0)] border-solid h-[105px] min-w-[168px] relative shrink-0 w-full overflow-hidden"
+          className="border-[0px] border-[rgba(255,255,255,0)] border-solid h-[105px] min-w-[168px] relative shrink-0 w-full overflow-hidden"
           data-name="Box"
           style={{
-            borderRadius: '0 0 32px 32px' // Only round bottom corners
+            borderRadius: '0 0 32px 32px', // Only round bottom corners
+            transform: 'translateY(-0.5px)' // Move up by 0.5px
             // No hover lift effect
           }}
         >
@@ -321,7 +322,7 @@ const EnvelopeBoxContainer = ({
 
           {/* Box inset shadow - rounded only at bottom */}
           <div 
-            className="absolute inset-0 pointer-events-none shadow-[0px_1.5px_16px_0px_inset_#ffffff,0px_2px_4px_0px_inset_rgba(255,255,255,0.65)]"
+            className="absolute inset-0 pointer-events-none shadow-[0px_2px_16px_0px_inset_rgba(255,255,255,0.55),0px_2px_4px_0px_inset_rgba(255,255,255,0.35)]"
             style={{ borderRadius: '0 0 32px 32px' }}
           />
         </div>
