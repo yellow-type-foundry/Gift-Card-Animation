@@ -12,6 +12,7 @@ import useHover from '@/hooks/useHover'
 import Footer from '@/components/sent-card/Footer'
 import EnvelopeBase from '@/components/sent-card/EnvelopeBase'
 import CardShape from '@/components/sent-card/CardShape'
+import GiftBoxContainer from '@/components/sent-card/GiftBoxContainer'
 import { PROGRESS_PILL_RADIUS, HEADER_OVERLAY_BG, PROGRESS_GLOW_BOX_SHADOW, ENVELOPE_DIMENSIONS, FOOTER_CONFIG } from '@/constants/sentCardConstants'
 import { useMemo } from 'react'
 
@@ -391,7 +392,13 @@ const SentCard1 = ({
             data-name={useGiftContainer ? "Gift Container" : "Envelope"}
             data-node-id="1467:49190"
           >
-            {hideEnvelope ? null : useGiftContainer ? (
+            {hideEnvelope ? (
+              // Gift Box Container (for Single 2)
+              <GiftBoxContainer
+                progress={validatedProgress}
+                boxColor="#94d8f9"
+              />
+            ) : useGiftContainer ? (
               // Gift Container Image (replaces envelope)
               <div
                 style={{
