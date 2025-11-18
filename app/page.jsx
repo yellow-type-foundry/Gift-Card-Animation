@@ -235,6 +235,84 @@ export default function Home() {
   // Determine if current view is single
   const isSingleView = viewType === 'single'
   
+  // Helper function to get SentCard4 props based on layout number
+  const getSentCard4Props = useCallback((card, layoutNum, useColoredBackground) => {
+    // Map layout number to single config key
+    const singleConfigKey = `single${layoutNum}`
+    const layoutConfig = LAYOUT_CONFIG[singleConfigKey]
+    
+    // If config doesn't exist, return null to indicate no cards should be shown
+    if (!layoutConfig) {
+      return null
+    }
+    
+    const footerConfig = FOOTER_CONFIG.single // Single cards use the same footer config
+    
+    return {
+      from: card.from,
+      title: card.title,
+      boxImage: card.boxImage,
+      giftTitle: card.giftTitle,
+      giftSubtitle: card.giftSubtitle,
+      progress: card.progress,
+      sentDate: card.sentDate,
+      headerBgOverride: useColoredBackground ? null : "#E3E7ED",
+      overlayProgressOnEnvelope: layoutConfig.overlayProgressOnEnvelope,
+      footerPadEqual: footerConfig.equalPadding,
+      footerTopPadding: footerConfig.topPadding,
+      footerBottomPadding: footerConfig.bottomPadding,
+      showFooterReminder: footerConfig.showReminder,
+      // Header settings from layout config
+      headerHeight: layoutConfig.header.height,
+      headerUseFlex: layoutConfig.header.useFlex,
+      // Union setting from layout config
+      hideUnion: layoutConfig.hideUnion,
+    }
+  }, [])
+  
+  // Helper function to get Single 1 specific props (with gift container controls)
+  const getSingle1Props = useCallback((card, useColoredBackground) => {
+    const layoutConfig = LAYOUT_CONFIG.single1
+    const footerConfig = FOOTER_CONFIG.default // Single 1 uses default footer config (same as Batch 1)
+    
+    return {
+      from: card.from,
+      title: card.title,
+      boxImage: card.boxImage,
+      giftTitle: card.giftTitle,
+      giftSubtitle: card.giftSubtitle,
+      progress: card.progress,
+      sentDate: card.sentDate,
+      headerBgOverride: useColoredBackground ? null : "#E3E7ED",
+      // Layout config values
+      hideUnion: layoutConfig.hideUnion,
+      confettiWhiteOverlay: layoutConfig.confettiWhiteOverlay,
+      envelopeHighZ: layoutConfig.envelopeHighZ,
+      overlayProgressOnEnvelope: layoutConfig.overlayProgressOnEnvelope,
+      progressOutsideEnvelope: layoutConfig.progressOutsideEnvelope,
+      // Header settings
+      headerHeight: layoutConfig.header.height,
+      headerUseFlex: layoutConfig.header.useFlex,
+      // Footer settings
+      footerPadEqual: footerConfig.equalPadding,
+      footerTopPadding: footerConfig.topPadding,
+      footerBottomPadding: footerConfig.bottomPadding,
+      showFooterProgress: footerConfig.showProgress,
+      showFooterReminder: footerConfig.showReminder,
+      // Gift container exclusive controls (Single 1 only)
+      useGiftContainer: true,
+      giftContainerOffsetY: layoutConfig.giftContainer.offsetY,
+      giftContainerScale: layoutConfig.giftContainer.scale,
+      giftContainerWidth: layoutConfig.giftContainer.width,
+      giftContainerHeight: layoutConfig.giftContainer.height,
+      giftContainerTop: layoutConfig.giftContainer.top,
+      giftContainerLeft: layoutConfig.giftContainer.left,
+      giftContainerRight: layoutConfig.giftContainer.right,
+      giftContainerBottom: layoutConfig.giftContainer.bottom,
+      giftContainerTransformOrigin: layoutConfig.giftContainer.transformOrigin,
+    }
+  }, [])
+  
   // Helper function to get SentCard1 props based on layout number
   const getSentCard1Props = useCallback((card, layoutNum, useColoredBackground) => {
     // Map layout number to config key
@@ -610,34 +688,57 @@ export default function Home() {
                       />
                     )
                   } else {
+                    // Single 1 uses SentCard1 (with gift container replacing envelope), others use SentCard4 (with gift container)
+                    if (layoutNumber === '1') {
+                      return (
+                        <SentCard1
+                          key={index}
+                          {...getSingle1Props(card, useColoredBackground)}
+                        />
+                      )
+                    }
+                    const props = getSentCard4Props(card, layoutNumber, useColoredBackground)
+                    if (!props) return null
                     return (
                       <SentCard4
                         key={index}
-                        from={card.from}
-                        title={card.title}
-                        boxImage={card.boxImage}
-                        giftTitle={card.giftTitle}
-                        giftSubtitle={card.giftSubtitle}
-                        progress={card.progress}
-                        sentDate={card.sentDate}
+                        {...props}
                       />
                     )
                   }
                 })
               ) : viewType === 'single' ? (
                 // Single view: show only single cards
-                sentCards.map((card, index) => (
-                  <SentCard4
-                    key={index}
-                    from={card.from}
-                    title={card.title}
-                    boxImage={card.boxImage}
-                    giftTitle={card.giftTitle}
-                    giftSubtitle={card.giftSubtitle}
-                    progress={card.progress}
-                    sentDate={card.sentDate}
-                  />
-                ))
+                (() => {
+                  // Check if config exists for this layout
+                  const singleConfigKey = `single${layoutNumber}`
+                  if (!LAYOUT_CONFIG[singleConfigKey]) {
+                    return (
+                      <div className="col-span-full text-center text-[#525F7A] py-8">
+                        No cards available for this layout
+                      </div>
+                    )
+                  }
+                  // Single 1 uses SentCard1 (with gift container replacing envelope), others use SentCard4 (with gift container)
+                  if (layoutNumber === '1') {
+                    return sentCards.map((card, index) => (
+                      <SentCard1
+                        key={index}
+                        {...getSingle1Props(card, useColoredBackground)}
+                      />
+                    ))
+                  }
+                  return sentCards.map((card, index) => {
+                    const props = getSentCard4Props(card, layoutNumber, useColoredBackground)
+                    if (!props) return null
+                    return (
+                      <SentCard4
+                        key={index}
+                        {...props}
+                      />
+                    )
+                  })
+                })()
               ) : (
                 // Batch view: show only batch cards
                 sentCards.map((card, index) => (

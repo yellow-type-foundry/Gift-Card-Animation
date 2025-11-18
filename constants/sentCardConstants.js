@@ -186,27 +186,39 @@ export const LAYOUT_CONFIG = {
     progressOutsideEnvelope: true,
   },
   
-  // Single card layout 1 (SentCard4)
+  // Single card layout 1 (SentCard4) - Exact duplicate of Batch 1 (default)
   single1: {
     // Header settings
     header: {
-      height: 240, // minHeight when useFlex is true
-      useFlex: true, // Fill available height
+      height: 280, // minHeight when useFlex is true
+      useFlex: true, // Whether to use flex: 1 for fill height
     },
-    // Gift container settings (similar to envelope)
+    // Envelope settings (not used when useGiftContainer is true)
     envelope: {
-      scale: 1, // Not used for single, but kept for consistency
+      scale: 1,
       offsetY: 0,
-      left: undefined,
+      left: undefined, // Uses default positioning
       right: undefined,
       top: undefined,
       transformOrigin: undefined,
     },
+    // Gift container settings (exclusive to Single 1)
+    giftContainer: {
+      scale: 1,
+      offsetY: 0,
+      width: 360,
+      height: 300,
+      top: 80, // Uses default positioning (inset-0)
+      left: undefined,
+      right: undefined,
+      bottom: undefined,
+      transformOrigin: 'center top',
+    },
     // Layout flags
-    hideUnion: false, // Not applicable
+    hideUnion: false,
     confettiWhiteOverlay: false,
     envelopeHighZ: false,
-    overlayProgressOnEnvelope: true,
+    overlayProgressOnEnvelope: false,
     progressOutsideEnvelope: false,
   },
   

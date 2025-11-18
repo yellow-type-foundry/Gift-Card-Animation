@@ -13,6 +13,18 @@ import Footer from '@/components/sent-card/Footer'
 import EnvelopeBase from '@/components/sent-card/EnvelopeBase'
 import CardShape from '@/components/sent-card/CardShape'
 import { PROGRESS_PILL_RADIUS, HEADER_OVERLAY_BG, PROGRESS_GLOW_BOX_SHADOW, ENVELOPE_DIMENSIONS, FOOTER_CONFIG } from '@/constants/sentCardConstants'
+import { useMemo } from 'react'
+
+// Gift container images (brand names)
+const GIFT_CONTAINER_IMAGES = [
+  '/assets/GiftSent/Gift Container/Apple.png',
+  '/assets/GiftSent/Gift Container/Chipotle.png',
+  '/assets/GiftSent/Gift Container/Columbia.png',
+  '/assets/GiftSent/Gift Container/Goody.png',
+  '/assets/GiftSent/Gift Container/Nike.png',
+  '/assets/GiftSent/Gift Container/Supergoop.png',
+  '/assets/GiftSent/Gift Container/Tiffany & Co.png'
+]
 
 const SentCard1 = ({
   from = 'Alex Torres',
@@ -57,7 +69,19 @@ const SentCard1 = ({
   footerPadEqual2,
   footerTransparent2,
   // Altered Layout 2 specific progress bar controls
-  progressBottomPadding2
+  progressBottomPadding2,
+  // Gift container mode (replaces envelope with gift container images)
+  useGiftContainer = false,
+  // Gift container exclusive controls (for Single 1)
+  giftContainerOffsetY,
+  giftContainerScale,
+  giftContainerWidth,
+  giftContainerHeight,
+  giftContainerTop,
+  giftContainerLeft,
+  giftContainerRight,
+  giftContainerBottom,
+  giftContainerTransformOrigin
 }) => {
   // Hooks
   const cardRef = useRef(null)
@@ -67,8 +91,28 @@ const SentCard1 = ({
   // Generate stable IDs for SVG elements
   const ids = useComponentIds(boxImage, from)
   
-  // Extract dominant color and calculate theme
-  const { dominantColor } = useDominantColor(boxImage, '#f4c6fa')
+  // Progress animation
+  const {
+    animatedProgress,
+    animatedCurrent,
+    validatedProgress,
+    isDone
+  } = useProgressAnimation(progress)
+  
+  // Select gift container image based on progress (cycle through brands) - only when useGiftContainer is true
+  const giftContainerImage = useMemo(() => {
+    if (!useGiftContainer) return null
+    // Map progress to image index (0-6 for brands)
+    const progressRatio = validatedProgress.total > 0 
+      ? validatedProgress.current / validatedProgress.total 
+      : 0
+    const index = Math.min(6, Math.floor(progressRatio * 7))
+    return GIFT_CONTAINER_IMAGES[index]
+  }, [useGiftContainer, validatedProgress.current, validatedProgress.total])
+  
+  // Extract dominant color from gift container image (for Single 1) or boxImage (for other layouts)
+  const imageForColorExtraction = useGiftContainer && giftContainerImage ? giftContainerImage : boxImage
+  const { dominantColor } = useDominantColor(imageForColorExtraction, '#f4c6fa')
   const theme = useCardTheme(dominantColor, headerBgOverride)
   const {
     headerBgFinal,
@@ -81,14 +125,6 @@ const SentCard1 = ({
     progressStartColor,
     progressEndColor
   } = theme
-  
-  // Progress animation
-  const {
-    animatedProgress,
-    animatedCurrent,
-    validatedProgress,
-    isDone
-  } = useProgressAnimation(progress)
   
   const allAccepted = isDone
   
@@ -314,12 +350,26 @@ const SentCard1 = ({
 
           {/* Envelope Container - children positioned relative to header */}
           <div
-            className={`absolute ${progressOutsideEnvelope && envelopeTopBase2 !== undefined ? '' : 'inset-0'}`}
+            className={`absolute ${useGiftContainer && giftContainerTop !== undefined ? '' : (progressOutsideEnvelope && envelopeTopBase2 !== undefined ? '' : 'inset-0')}`}
             style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              ...(progressOutsideEnvelope && envelopeTopBase2 !== undefined 
+              ...(useGiftContainer && giftContainerTop !== undefined
+                ? {
+                    top: `${giftContainerTop + (giftContainerOffsetY !== undefined ? giftContainerOffsetY : 0)}px`,
+                    left: giftContainerLeft !== undefined ? `${giftContainerLeft}px` : undefined,
+                    right: giftContainerRight !== undefined ? `${giftContainerRight}px` : undefined,
+                    bottom: giftContainerBottom !== undefined ? `${giftContainerBottom}px` : 'auto'
+                  }
+                : useGiftContainer
+                ? {
+                    top: `${4 + (giftContainerOffsetY !== undefined ? giftContainerOffsetY : 0)}px`,
+                    left: '-2px',
+                    right: '2px',
+                    bottom: '0px'
+                  }
+                : progressOutsideEnvelope && envelopeTopBase2 !== undefined 
                 ? {
                     top: `${envelopeTopBase2 + (envelopeOffsetY2 !== undefined ? envelopeOffsetY2 : envelopeOffsetY)}px`,
                     left: envelopeLeft2 !== undefined ? `${envelopeLeft2}px` : '0px',
@@ -333,15 +383,38 @@ const SentCard1 = ({
                     bottom: '0px'
                   }),
               zIndex: envelopeHighZ ? 50 : (overlayProgressOnEnvelope ? 2 : 2),
-              transform: `scale(${progressOutsideEnvelope && envelopeScale2 !== undefined ? envelopeScale2 : envelopeScale})`,
-              transformOrigin: progressOutsideEnvelope && transformOrigin2 !== undefined ? transformOrigin2 : 'center top'
+              transform: `scale(${useGiftContainer && giftContainerScale !== undefined ? giftContainerScale : (progressOutsideEnvelope && envelopeScale2 !== undefined ? envelopeScale2 : envelopeScale)})`,
+              transformOrigin: useGiftContainer && giftContainerTransformOrigin !== undefined ? giftContainerTransformOrigin : (progressOutsideEnvelope && transformOrigin2 !== undefined ? transformOrigin2 : 'center top')
             }}
-            data-name="Envelope"
+            data-name={useGiftContainer ? "Gift Container" : "Envelope"}
             data-node-id="1467:49190"
           >
-            {/* Base (envelope base) - moved inside Envelope so it moves together */}
-            <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-              <EnvelopeBase ids={ids} baseTintColor={baseTintColor} />
+            {useGiftContainer ? (
+              // Gift Container Image (replaces envelope)
+              <div
+                style={{
+                  position: 'relative',
+                  width: giftContainerWidth !== undefined ? `${giftContainerWidth}px` : '250px',
+                  height: giftContainerHeight !== undefined ? `${giftContainerHeight}px` : '200px',
+                  pointerEvents: 'none'
+                }}
+              >
+                <Image
+                  src={giftContainerImage}
+                  alt="Gift Container"
+                  fill
+                  sizes="200px"
+                  priority={true}
+                  quality={100}
+                  unoptimized={true}
+                  style={{ objectFit: 'contain' }}
+                />
+              </div>
+            ) : (
+              <>
+                {/* Base (envelope base) - moved inside Envelope so it moves together */}
+                <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                  <EnvelopeBase ids={ids} baseTintColor={baseTintColor} />
               {overlayProgressOnEnvelope && !progressOutsideEnvelope && (
                 <div
                   className="absolute"
@@ -626,6 +699,8 @@ const SentCard1 = ({
                 }}
               />
             </div>
+              </>
+            )}
           </div>
 
           
