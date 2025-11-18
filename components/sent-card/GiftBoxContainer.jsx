@@ -108,14 +108,15 @@ const GiftBoxContainer = ({
               </div>
 
               {/* Progress indicator */}
-              <div 
-                className="relative rounded-[40.865px] shrink-0 overflow-hidden"
-                style={{ 
+              {/* Stroke wrapper with gradient (0.5px inside) */}
+              <div
+                className="relative rounded-[40.865px] shrink-0"
+                style={{
                   width: `${progressBarWidth}px`,
                   minWidth: '60px',
-                  padding: '0px',
-                  background: 'linear-gradient(to bottom, rgba(255,255,255,1) 0%, rgba(255, 255, 255, 0) 100%)',
-                  transition: 'width 500ms ease-out'
+                  padding: '0.5px',
+                  background: 'linear-gradient(to bottom, rgba(255,255,255,.65) 0%, rgba(255,255,255,0) 100%)',
+                  transition: 'width 500ms cubic-bezier(0.25, 0.10, 0.25, 1.0)'
                 }}
                 data-name="Progress"
               >
