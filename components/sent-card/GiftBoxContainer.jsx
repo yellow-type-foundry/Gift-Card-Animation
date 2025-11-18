@@ -1,8 +1,46 @@
 'use client'
 
-import React from 'react'
+import React, { useMemo } from 'react'
 import useProgressAnimation from '@/hooks/useProgressAnimation'
 import useHover from '@/hooks/useHover'
+
+// Helper function to convert hex to HSL
+const hexToHsl = (hex) => {
+  const r = parseInt(hex.slice(1, 3), 16) / 255
+  const g = parseInt(hex.slice(3, 5), 16) / 255
+  const b = parseInt(hex.slice(5, 7), 16) / 255
+
+  const max = Math.max(r, g, b)
+  const min = Math.min(r, g, b)
+  let h, s, l = (max + min) / 2
+
+  if (max === min) {
+    h = s = 0
+  } else {
+    const d = max - min
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min)
+    switch (max) {
+      case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break
+      case g: h = ((b - r) / d + 2) / 6; break
+      case b: h = ((r - g) / d + 4) / 6; break
+      default: h = 0
+    }
+  }
+
+  return [Math.round(h * 360), Math.round(s * 100), Math.round(l * 100)]
+}
+
+// Helper function to convert HSL to hex
+const hslToHex = (h, s, l) => {
+  l /= 100
+  const a = s * Math.min(l, 1 - l) / 100
+  const f = n => {
+    const k = (n + h / 30) % 12
+    const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1)
+    return Math.round(255 * color).toString(16).padStart(2, '0')
+  }
+  return `#${f(0)}${f(8)}${f(4)}`
+}
 
 const GiftBoxContainer = ({
   progress = { current: 4, total: 5 },
@@ -12,6 +50,25 @@ const GiftBoxContainer = ({
   const { isHovered: internalIsHovered, handleHoverEnter, handleHoverLeave } = useHover()
   // Use external hover state if provided, otherwise use internal
   const isHovered = externalIsHovered !== undefined ? externalIsHovered : internalIsHovered
+
+  // Calculate hover color with increased saturation and lightness
+  const hoverBoxColor = useMemo(() => {
+    if (!isHovered) return boxColor
+    const [h, s, l] = hexToHsl(boxColor)
+    const newS = Math.min(100, s + 3)
+    const newL = Math.min(100, l + 2)
+    return hslToHex(h, newS, newL)
+  }, [boxColor, isHovered])
+
+  // Calculate themed shadow color based on boxColor
+  // Default shadow #56c5f6 is darker than default boxColor #94d8f9
+  // We'll derive it by reducing lightness
+  const themedShadowColor = useMemo(() => {
+    const [h, s, l] = hexToHsl(boxColor)
+    // Reduce lightness by ~20-25% to create shadow effect
+    const shadowL = Math.max(0, l - 20)
+    return hslToHex(h, s, shadowL)
+  }, [boxColor])
   // Progress animation with delay and loading
   const {
     animatedProgress,
@@ -51,7 +108,10 @@ const GiftBoxContainer = ({
         <div aria-hidden="true" className="absolute inset-0 pointer-events-none rounded-[32px]">
           <div 
             className="absolute inset-0 rounded-[32px]"
-            style={{ backgroundColor: boxColor }}
+            style={{ 
+              backgroundColor: hoverBoxColor,
+              transition: 'background-color 300ms ease-out'
+            }}
           />
           <div 
             className="absolute inset-0 mix-blend-overlay rounded-[32px]"
@@ -108,7 +168,10 @@ const GiftBoxContainer = ({
                 {/* 1. Color fill, normal mode, 100% (base layer) */}
                 <div 
                   className="absolute inset-0 rounded-[100px]"
-                  style={{ backgroundColor: boxColor }}
+                  style={{ 
+                    backgroundColor: hoverBoxColor,
+                    transition: 'background-color 300ms ease-out'
+                  }}
                 />
                 {/* 2. White fill, 40%, overlay mode (blends with color below) */}
                 <div 
@@ -136,7 +199,8 @@ const GiftBoxContainer = ({
                 <div 
                   className="box-border content-stretch flex flex-col h-[27.243px] items-start justify-center px-[9.081px] py-0 relative rounded-[40.865px] w-full overflow-hidden"
                   style={{ 
-                    backgroundColor: boxColor
+                    backgroundColor: hoverBoxColor,
+                    transition: 'background-color 300ms ease-out'
                   }}
                 >
                   <p 
@@ -156,7 +220,7 @@ const GiftBoxContainer = ({
                   <div 
                     className="absolute inset-0 pointer-events-none"
                     style={{
-                      boxShadow: '0px -2.27px 4.541px 0px inset rgba(255,255,255,0.5), 0px 0px 4.541px 0px inset rgba(255,255,255,0.5), 0px -4.541px 13.622px 4.541px inset #56c5f6'
+                      boxShadow: `0px -2.3px 4.5px 0px inset rgba(255,255,255,0.5), 0px 0px 4.5px 0px inset rgba(255,255,255,0.5), 0px -4.5px 13px 4.5px inset ${themedShadowColor}`
                     }}
                   />
                 </div>
@@ -278,7 +342,7 @@ const GiftBoxContainer = ({
           className="absolute inset-0 pointer-events-none rounded-[32px]"
           style={{
             zIndex: 999,
-            opacity: isHovered ? 0.6 : 0.75,
+            opacity: isHovered ? 0.75 : 0.95,
             mixBlendMode: 'overlay',
             backgroundImage: 'url(/assets/GiftSent/Noise2.png)',
             backgroundSize: 'cover',
