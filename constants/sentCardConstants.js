@@ -74,7 +74,7 @@ export const FOOTER_CONFIG = {
   altered2: {
     equalPadding: true,
     topPadding: 28,
-    bottomPadding: 20,
+    bottomPadding: 16,
     transparent: true,
     showProgress: false, // Progress is shown outside footer
     showReminder: true, // Reminder is shown outside footer (prop must be true for outside button to render)
@@ -82,7 +82,7 @@ export const FOOTER_CONFIG = {
     hideInfoOnHover: false, // Info stays visible on hover
     // Progress bar outside footer
     progressOutside: {
-      bottomPadding: 16,
+      bottomPadding: 18,
     },
   },
   
@@ -171,7 +171,7 @@ export const LAYOUT_CONFIG = {
     },
     // Envelope settings
     envelope: {
-      scale: 0.75,
+      scale: 0.77, // Adjusted to achieve 170px max height (220.575px × 0.77 ≈ 170px)
       offsetY: 24,
       left: 0,
       right: 0,

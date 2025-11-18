@@ -226,7 +226,7 @@ const SentCard4 = ({
               className="relative"
               style={{
                 width: '250px',
-                height: '200px',
+                height: '170px',
                 zIndex: 1,
                 pointerEvents: 'none',
                 position: 'relative'

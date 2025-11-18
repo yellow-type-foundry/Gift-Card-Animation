@@ -405,6 +405,36 @@ export default function Home() {
   const handleGiftTab = useCallback(() => handleTabChange('gift'), [handleTabChange])
   const handleSentTab = useCallback(() => handleTabChange('sent'), [handleTabChange])
   
+  // Shuffle cards function
+  const handleShuffle = useCallback(() => {
+    // Shuffle Gift Received cards
+    const shuffledBoxPairs = shuffleArray(ALL_BOX_PAIRS)
+    const selected = []
+    for (let i = 0; i < 8; i++) {
+      selected.push(shuffledBoxPairs[i % shuffledBoxPairs.length])
+    }
+    setBoxPairs(shuffleArray(selected))
+    setMessages(shuffleArray(ALL_MESSAGES).slice(0, 8))
+    
+    // Shuffle Gift Sent cards
+    const randomized = generateRandomSentCardData({
+      covers: ALL_COVERS,
+      senders: ALL_SENDERS,
+      titles: ALL_TITLES,
+      giftTitles: ALL_GIFT_TITLES,
+      giftSubtitles: ALL_GIFT_SUBTITLES,
+      dates: ALL_SENT_DATES,
+      count: 8,
+      minDoneCards: 2
+    })
+    setSentCards(randomized)
+    
+    // Update mix seed to reshuffle mixed view
+    if (viewType === 'mixed') {
+      setMixSeed(Date.now())
+    }
+  }, [viewType])
+  
   return (
     <div className="min-h-screen bg-[#f0f1f5] flex items-start overflow-visible">
       <div 
@@ -435,8 +465,22 @@ export default function Home() {
             />
           </div>
           
-          {/* Controls - Right side (only show when on Gift Sent tab) */}
-          {activeTab === 'sent' && (
+          {/* Controls - Right side */}
+          <div className="flex items-center gap-4 shrink-0">
+            {/* Shuffle button - Always visible */}
+            <button
+              onClick={handleShuffle}
+              className="flex items-center gap-2 px-4 py-2 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0"
+              aria-label="Shuffle cards"
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L14 4L12 6M2 4H14M4 10L2 12L4 14M14 12H2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              <span className="hidden md:inline">Shuffle</span>
+            </button>
+            
+            {/* Gift Sent specific controls */}
+            {activeTab === 'sent' && (
             <>
               {/* Desktop: Theming and Layout controls - Hidden on mobile */}
               <div className="hidden md:flex items-center gap-6 shrink-0">
@@ -640,7 +684,8 @@ export default function Home() {
                 )}
               </div>
             </>
-          )}
+            )}
+          </div>
         </div>
         {/* Content */}
         {activeTab === 'gift' ? (
