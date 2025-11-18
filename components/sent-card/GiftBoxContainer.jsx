@@ -1,21 +1,25 @@
 'use client'
 
 import React from 'react'
+import useProgressAnimation from '@/hooks/useProgressAnimation'
 
 const GiftBoxContainer = ({
   progress = { current: 4, total: 5 },
   boxColor = '#94d8f9'
 }) => {
-  const progressPercentage = progress.total > 0 
-    ? (progress.current / progress.total) * 100 
-    : 0
+  // Progress animation with delay and loading
+  const {
+    animatedProgress,
+    animatedCurrent,
+    validatedProgress
+  } = useProgressAnimation(progress)
 
   // Calculate progress bar width dynamically
   // Container width: 176px, padding: 16px each side = 32px, progress bar padding: 3.405px each side = 6.81px
   // Available width: 176 - 32 - 6.81 = 137.19px
   // Minimum width: 59.027px
   const progressBarMaxWidth = 176 - 32 - 6.81
-  const progressBarWidth = Math.max(59.027, (progressPercentage / 100) * progressBarMaxWidth)
+  const progressBarWidth = Math.max(59.027, (animatedProgress / 100) * progressBarMaxWidth)
 
   return (
     <div 
@@ -72,9 +76,9 @@ const GiftBoxContainer = ({
           >
             {/* Stroke wrapper with gradient (0.5px outside) */}
             <div
-              className="relative rounded-[100px]"
+              className="relative rounded-[100px] w-full"
               style={{
-                padding: '0.5px',
+                padding: '.5px',
                 background: 'linear-gradient(to top, rgb(255, 255, 255, 0.5) 0%, rgb(255, 255, 255, 0.7) 100%)',
                 boxShadow: '0px -1px 3px 0px rgba(255,255,255,0.55), 0px 3px 4px 0px rgba(255,255,255,0.4)'
               }}
@@ -105,9 +109,10 @@ const GiftBoxContainer = ({
                 className="relative rounded-[40.865px] shrink-0 overflow-hidden"
                 style={{ 
                   width: `${progressBarWidth}px`,
-                  minWidth: '59px',
+                  minWidth: '60px',
                   padding: '0px',
-                  background: 'linear-gradient(to bottom, rgba(255,255,255,1) 0%, rgba(255, 255, 255, 0) 100%)'
+                  background: 'linear-gradient(to bottom, rgba(255,255,255,1) 0%, rgba(255, 255, 255, 0) 100%)',
+                  transition: 'width 500ms ease-out'
                 }}
                 data-name="Progress"
               >
@@ -124,10 +129,12 @@ const GiftBoxContainer = ({
                       fontSize: '15.892px',
                       fontWeight: 500,
                       lineHeight: 1.4,
-                      color: '#ffffff'
+                      color: '#ffffff',
+                      zIndex: 1,
+                      position: 'relative'
                     }}
                   >
-                    {progress.current}/{progress.total}
+                    {animatedCurrent}/{validatedProgress.total}
                   </p>
                   <div 
                     className="absolute inset-0 pointer-events-none"
