@@ -215,11 +215,13 @@ const SentCard1 = ({
         )}
         {/* Header Section - 280px tall */}
         <div
-          className={`box-border content-stretch flex flex-col items-center ${hideEnvelope ? 'justify-center' : 'justify-between'} ${hideEnvelope ? 'py-[20px]' : 'pb-0 pt-[20px]'} px-0 relative w-full overflow-visible ${(progressOutsideEnvelope && headerUseFlex2) || (overlayProgressOnEnvelope && headerUseFlex1) || headerUseFlex ? '' : 'shrink-0'}`}
+          className={`box-border content-stretch flex flex-col items-center ${hideEnvelope ? 'justify-center' : 'justify-between'} ${hideEnvelope ? 'pt-[20px] pb-0' : 'pb-0 pt-[20px]'} px-0 relative w-full overflow-visible ${(progressOutsideEnvelope && headerUseFlex2) || (overlayProgressOnEnvelope && headerUseFlex1) || headerUseFlex ? '' : 'shrink-0'}`}
           style={{
             position: 'relative',
             zIndex: overlayProgressOnEnvelope ? 1 : 'auto',
-            ...(progressOutsideEnvelope && headerHeight2 !== undefined && headerUseFlex2
+            ...(hideEnvelope
+              ? { flex: 1, minHeight: '280px' }
+              : progressOutsideEnvelope && headerHeight2 !== undefined && headerUseFlex2
               ? { flex: 1, minHeight: `${headerHeight2}px` }
               : overlayProgressOnEnvelope && headerHeight1 !== undefined && headerUseFlex1
               ? { flex: 1, minHeight: `${headerHeight1}px` }
@@ -364,7 +366,8 @@ const SentCard1 = ({
                     position: 'relative',
                     width: '100%',
                     height: '100%',
-                    flex: 1
+                    flex: 1,
+                    minHeight: 0
                   }
                 : useGiftContainer && giftContainerTop !== undefined
                 ? {
@@ -865,7 +868,9 @@ const SentCard1 = ({
               : FOOTER_CONFIG.default.bottomPadding
           }
           topPadding={
-            progressOutsideEnvelope && footerTopPadding2 !== undefined
+            hideEnvelope
+              ? 0
+              : progressOutsideEnvelope && footerTopPadding2 !== undefined
               ? footerTopPadding2
               : overlayProgressOnEnvelope
               ? FOOTER_CONFIG.altered1.topPadding
