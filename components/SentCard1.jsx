@@ -408,6 +408,7 @@ const SentCard1 = ({
               <GiftBoxContainer
                 progress={validatedProgress}
                 boxColor="#94d8f9"
+                isHovered={isHovered}
               />
             ) : useGiftContainer ? (
               // Gift Container Image (replaces envelope)

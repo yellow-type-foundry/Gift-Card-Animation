@@ -2,11 +2,16 @@
 
 import React from 'react'
 import useProgressAnimation from '@/hooks/useProgressAnimation'
+import useHover from '@/hooks/useHover'
 
 const GiftBoxContainer = ({
   progress = { current: 4, total: 5 },
-  boxColor = '#94d8f9'
+  boxColor = '#94d8f9',
+  isHovered: externalIsHovered
 }) => {
+  const { isHovered: internalIsHovered, handleHoverEnter, handleHoverLeave } = useHover()
+  // Use external hover state if provided, otherwise use internal
+  const isHovered = externalIsHovered !== undefined ? externalIsHovered : internalIsHovered
   // Progress animation with delay and loading
   const {
     animatedProgress,
@@ -28,10 +33,18 @@ const GiftBoxContainer = ({
     <div 
       className="box-border content-stretch flex gap-[10px] items-center justify-center relative size-full"
       data-name="Gift Container/Goody"
+      onMouseEnter={handleHoverEnter}
+      onMouseLeave={handleHoverLeave}
+      style={{ position: 'relative' }}
     >
       <div 
         className="border-[0.5px] border-[rgba(255,255,255,0)] border-solid relative rounded-[32px] shrink-0 overflow-hidden"
-        style={{ width: '176px', height: '176px' }}
+        style={{ 
+          width: '176px', 
+          height: '176px',
+          transform: isHovered ? 'translateY(-4px)' : 'translateY(0)',
+          transition: 'transform 300ms ease-out'
+        }}
         data-name="Box"
       >
         {/* Base background and gradient overlay */}
@@ -265,17 +278,18 @@ const GiftBoxContainer = ({
           className="absolute inset-0 pointer-events-none rounded-[32px]"
           style={{
             zIndex: 999,
-            opacity: .75,
+            opacity: isHovered ? 0.6 : 0.75,
             mixBlendMode: 'overlay',
             backgroundImage: 'url(/assets/GiftSent/Noise2.png)',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat'
+            backgroundRepeat: 'no-repeat',
+            transition: 'opacity 300ms ease-out'
           }}
         />
       </div>
 
-      {/* Box Shadow */}
+      {/* Box Shadow - only visible on hover */}
       <div 
         className="absolute flex items-center justify-center pointer-events-none"
         style={{
@@ -284,8 +298,9 @@ const GiftBoxContainer = ({
           transform: 'translateX(-50%)',
           height: '60px',
           width: '130px',
-          opacity: .75,
-          zIndex: -1
+          opacity: isHovered ? 0.75 : 0,
+          zIndex: -1,
+          transition: 'opacity 300ms ease-out'
         }}
         data-name="Box Shadow"
       >
