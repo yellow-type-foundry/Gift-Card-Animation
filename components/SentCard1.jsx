@@ -72,6 +72,8 @@ const SentCard1 = ({
   progressBottomPadding2,
   // Gift container mode (replaces envelope with gift container images)
   useGiftContainer = false,
+  // Hide envelope (makes container empty)
+  hideEnvelope = false,
   // Gift container exclusive controls (for Single 1)
   giftContainerOffsetY,
   giftContainerScale,
@@ -389,7 +391,7 @@ const SentCard1 = ({
             data-name={useGiftContainer ? "Gift Container" : "Envelope"}
             data-node-id="1467:49190"
           >
-            {useGiftContainer ? (
+            {hideEnvelope ? null : useGiftContainer ? (
               // Gift Container Image (replaces envelope)
               <div
                 style={{

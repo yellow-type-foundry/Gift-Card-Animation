@@ -753,12 +753,13 @@ export default function Home() {
                           />
                         )
                       }
-                      // Single 2 (Layout 2) uses SentCard1 with Batch 2 props (envelope)
+                      // Single 2 (Layout 2) uses SentCard1 with Batch 2 props (empty container)
                       if (layoutNumber === '2') {
                         return (
                           <SentCard1
                             key={index}
                             {...getSentCard1Props(card, layoutNumber, useColoredBackground)}
+                            hideEnvelope={true}
                           />
                         )
                       }
@@ -777,12 +778,13 @@ export default function Home() {
               ) : viewType === 'single' ? (
                 // Single view: show only single cards
                 (() => {
-                  // Single 2 (Layout 2) uses SentCard1 with Batch 2 props (envelope)
+                  // Single 2 (Layout 2) uses SentCard1 with Batch 2 props (empty container)
                   if (layoutNumber === '2') {
                     return sentCards.map((card, index) => (
                       <SentCard1
                         key={index}
                         {...getSentCard1Props(card, layoutNumber, useColoredBackground)}
+                        hideEnvelope={true}
                       />
                     ))
                   }
