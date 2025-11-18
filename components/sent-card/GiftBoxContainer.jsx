@@ -19,7 +19,7 @@ const GiftBoxContainer = ({
 
   return (
     <div 
-      className="box-border content-stretch flex gap-[10px] items-center justify-center px-[76px] py-[21px] relative size-full"
+      className="box-border content-stretch flex gap-[10px] items-center justify-center relative size-full"
       data-name="Gift Container/Goody"
     >
       <div 
@@ -66,7 +66,7 @@ const GiftBoxContainer = ({
 
           {/* Progress Bar (bottom, fixed) */}
           <div 
-            className="box-border content-stretch flex flex-col gap-[10px] items-center justify-center pb-[12px] pt-0 px-[16px] relative shrink-0 w-full"
+            className="box-border content-stretch flex flex-col gap-[10px] items-center justify-center py-[14px] px-[16px] relative shrink-0 w-full"
             data-name="Progress Bar"
           >
             <div 

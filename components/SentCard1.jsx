@@ -215,7 +215,7 @@ const SentCard1 = ({
         )}
         {/* Header Section - 280px tall */}
         <div
-          className={`box-border content-stretch flex flex-col items-center justify-between pb-0 pt-[20px] px-0 relative w-full overflow-visible ${(progressOutsideEnvelope && headerUseFlex2) || (overlayProgressOnEnvelope && headerUseFlex1) || headerUseFlex ? '' : 'shrink-0'}`}
+          className={`box-border content-stretch flex flex-col items-center ${hideEnvelope ? 'justify-center' : 'justify-between'} ${hideEnvelope ? 'py-[20px]' : 'pb-0 pt-[20px]'} px-0 relative w-full overflow-visible ${(progressOutsideEnvelope && headerUseFlex2) || (overlayProgressOnEnvelope && headerUseFlex1) || headerUseFlex ? '' : 'shrink-0'}`}
           style={{
             position: 'relative',
             zIndex: overlayProgressOnEnvelope ? 1 : 'auto',
@@ -353,12 +353,20 @@ const SentCard1 = ({
 
           {/* Envelope Container - children positioned relative to header */}
           <div
-            className={`absolute ${useGiftContainer && giftContainerTop !== undefined ? '' : (progressOutsideEnvelope && envelopeTopBase2 !== undefined ? '' : 'inset-0')}`}
+            className={`${hideEnvelope ? 'relative flex-1' : 'absolute'} ${hideEnvelope ? '' : (useGiftContainer && giftContainerTop !== undefined ? '' : (progressOutsideEnvelope && envelopeTopBase2 !== undefined ? '' : 'inset-0'))}`}
             style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              ...(useGiftContainer && giftContainerTop !== undefined
+              ...(hideEnvelope
+                ? {
+                    // Center the gift box container - use relative positioning
+                    position: 'relative',
+                    width: '100%',
+                    height: '100%',
+                    flex: 1
+                  }
+                : useGiftContainer && giftContainerTop !== undefined
                 ? {
                     top: `${giftContainerTop + (giftContainerOffsetY !== undefined ? giftContainerOffsetY : 0)}px`,
                     left: giftContainerLeft !== undefined ? `${giftContainerLeft}px` : undefined,
@@ -381,13 +389,13 @@ const SentCard1 = ({
                   }
                 : {
                     top: `${4 + envelopeOffsetY}px`,
-                    left: '-2px',
-                    right: '2px',
+                    left: '0px',
+                    right: '0px',
                     bottom: '0px'
                   }),
               zIndex: envelopeHighZ ? 50 : (overlayProgressOnEnvelope ? 2 : 2),
-              transform: `scale(${useGiftContainer && giftContainerScale !== undefined ? giftContainerScale : (progressOutsideEnvelope && envelopeScale2 !== undefined ? envelopeScale2 : envelopeScale)})`,
-              transformOrigin: useGiftContainer && giftContainerTransformOrigin !== undefined ? giftContainerTransformOrigin : (progressOutsideEnvelope && transformOrigin2 !== undefined ? transformOrigin2 : 'center top')
+              transform: hideEnvelope ? 'none' : `scale(${useGiftContainer && giftContainerScale !== undefined ? giftContainerScale : (progressOutsideEnvelope && envelopeScale2 !== undefined ? envelopeScale2 : envelopeScale)})`,
+              transformOrigin: hideEnvelope ? 'center center' : (useGiftContainer && giftContainerTransformOrigin !== undefined ? giftContainerTransformOrigin : (progressOutsideEnvelope && transformOrigin2 !== undefined ? transformOrigin2 : 'center top'))
             }}
             data-name={useGiftContainer ? "Gift Container" : "Envelope"}
             data-node-id="1467:49190"
