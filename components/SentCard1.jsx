@@ -13,6 +13,7 @@ import Footer from '@/components/sent-card/Footer'
 import EnvelopeBase from '@/components/sent-card/EnvelopeBase'
 import CardShape from '@/components/sent-card/CardShape'
 import GiftBoxContainer from '@/components/sent-card/GiftBoxContainer'
+import EnvelopeBoxContainer from '@/components/sent-card/EnvelopeBoxContainer'
 import { PROGRESS_PILL_RADIUS, HEADER_OVERLAY_BG, PROGRESS_GLOW_BOX_SHADOW, ENVELOPE_DIMENSIONS, FOOTER_CONFIG } from '@/constants/sentCardConstants'
 import { adjustToLuminance, capSaturation } from '@/utils/colors'
 
@@ -75,6 +76,8 @@ const SentCard1 = ({
   useGiftContainer = false,
   // Hide envelope (makes container empty)
   hideEnvelope = false,
+  // Show gift box when envelope is hidden (for Single 2)
+  showGiftBoxWhenHidden = false,
   // Gift container exclusive controls (for Single 1)
   giftContainerOffsetY,
   giftContainerScale,
@@ -136,6 +139,14 @@ const SentCard1 = ({
     // Create a light, vibrant box color from dominant color
     return capSaturation(adjustToLuminance(dominantColor, 85), 70)
   }, [dominantColor, headerBgOverride])
+
+  // For Batch 2 envelope: always use themed color (not conditional on toggle)
+  // The envelope should always be themed based on dominant color
+  // Use more subtle values than baseTintColor (luminance 95, saturation 30) for a softer look
+  const envelopeBoxColor = useMemo(() => {
+    // Create a subtle, light box color from dominant color
+    return capSaturation(adjustToLuminance(dominantColor, 95), 30)
+  }, [dominantColor])
   
   const allAccepted = isDone
   
@@ -459,11 +470,20 @@ const SentCard1 = ({
             data-name={useGiftContainer ? "Gift Container" : "Envelope"}
             data-node-id="1467:49190"
           >
-            {hideEnvelope ? (
+            {hideEnvelope && showGiftBoxWhenHidden ? (
               // Gift Box Container (for Single 2)
               <GiftBoxContainer
                 progress={validatedProgress}
                 boxColor={themedBoxColor}
+                isHovered={isHovered}
+              />
+            ) : hideEnvelope ? (
+              // Envelope Box Container (for Batch 2)
+              // Always use themed color for envelope (not conditional on toggle)
+              <EnvelopeBoxContainer
+                progress={validatedProgress}
+                boxImage={boxImage}
+                boxColor={envelopeBoxColor}
                 isHovered={isHovered}
               />
             ) : useGiftContainer ? (

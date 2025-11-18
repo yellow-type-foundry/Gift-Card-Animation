@@ -4,8 +4,9 @@ import React, { useMemo } from 'react'
 import Image from 'next/image'
 import useProgressAnimation from '@/hooks/useProgressAnimation'
 import useHover from '@/hooks/useHover'
-import useHoverColor from '@/hooks/useHoverColor'
 import { GIFT_BOX_TOKENS } from '@/constants/giftBoxTokens'
+import { hexToHsl, hslToHex } from '@/utils/colors'
+import ProgressBar from '@/components/sent-card/ProgressBar'
 
 // Asset paths from Figma
 const imgBoxShadow = '/assets/3ce71b28afba3770de07efe28f1558dfed6b4cd7.svg'
@@ -25,8 +26,29 @@ const EnvelopeBoxContainer = ({
   // Use external hover state if provided, otherwise use internal
   const isHovered = externalIsHovered !== undefined ? externalIsHovered : internalIsHovered
 
-  // Calculate hover and shadow colors using reusable hook
-  const { hoverColor: hoverBoxColor, shadowColor: themedShadowColor } = useHoverColor(boxColor, isHovered)
+  // Use themed box color for envelope theming
+  const themedShadowColor = useMemo(() => {
+    // Calculate shadow color from box color (darker version)
+    const [h, s, l] = hexToHsl(boxColor)
+    const darkerL = Math.max(0, l - 20)
+    return hslToHex(h, s, darkerL)
+  }, [boxColor])
+
+  // Calculate CSS filter to transform blue flap to themed color
+  const flapFilter = useMemo(() => {
+    const defaultBlue = '#94d8f9'
+    const [defaultH, defaultS, defaultL] = hexToHsl(defaultBlue)
+    const [themedH, themedS, themedL] = hexToHsl(boxColor)
+    
+    // Calculate hue rotation (difference in hue)
+    const hueRotate = themedH - defaultH
+    // Calculate saturation adjustment (ratio)
+    const saturateRatio = themedS / Math.max(defaultS, 1) // Avoid division by zero
+    // Calculate brightness adjustment (ratio)
+    const brightnessRatio = themedL / Math.max(defaultL, 1)
+    
+    return `hue-rotate(${hueRotate}deg) saturate(${saturateRatio}) brightness(${brightnessRatio})`
+  }, [boxColor])
 
   // Progress animation with delay and loading
   const {
@@ -54,8 +76,13 @@ const EnvelopeBoxContainer = ({
     return Math.min(progressBarMaxWidth, Math.max(minWidth, (animatedProgress / 100) * progressBarMaxWidth))
   }, [animatedProgress, progressBarMaxWidth])
 
-  // Grid cell color (light blue from Figma)
-  const gridCellColor = '#c6e7fa'
+  // Grid cell color - use a lighter version of the themed box color
+  const gridCellColor = useMemo(() => {
+    // Create a lighter version of the box color for grid cells
+    const [h, s, l] = hexToHsl(boxColor)
+    const lighterL = Math.min(100, l + 35) // Lighten by 35 units
+    return hslToHex(h, s, lighterL)
+  }, [boxColor])
 
   return (
     <div 
@@ -177,9 +204,14 @@ const EnvelopeBoxContainer = ({
         data-name="Envelope"
         style={{ zIndex: 2 }}
       >
-        {/* Flap (top) */}
-        <div className="h-[97px] relative shrink-0 w-[168px]" data-name="Flap">
-          <div className="absolute bottom-0 left-0 right-0 top-[2.39%]">
+        {/* Flap (top) - themed using CSS filter to transform blue to themed color */}
+        <div className="h-[97px] relative shrink-0 w-[168px] overflow-visible" data-name="Flap">
+          <div 
+            className="absolute bottom-0 left-0 right-0 top-[2.39%]"
+            style={{
+              filter: flapFilter
+            }}
+          >
             <img alt="" className="block max-w-none size-full" src={imgFlap} />
           </div>
         </div>
@@ -189,9 +221,8 @@ const EnvelopeBoxContainer = ({
           className="border-[0.5px] border-[rgba(255,255,255,0)] border-solid h-[105px] min-w-[168px] relative shrink-0 w-full overflow-hidden"
           data-name="Box"
           style={{
-            borderRadius: '0 0 32px 32px', // Only round bottom corners
-            transform: isHovered ? `translateY(${GIFT_BOX_TOKENS.hoverEffects.transform.translateY})` : 'translateY(0)',
-            transition: `transform ${GIFT_BOX_TOKENS.animations.duration.fast} ${GIFT_BOX_TOKENS.animations.easing.easeOut}`
+            borderRadius: '0 0 32px 32px' // Only round bottom corners
+            // No hover lift effect
           }}
         >
           {/* Base background and gradient overlay - rounded only at bottom */}
@@ -200,8 +231,7 @@ const EnvelopeBoxContainer = ({
               className="absolute inset-0"
               style={{ 
                 borderRadius: '0 0 32px 32px',
-                backgroundColor: hoverBoxColor,
-                transition: `background-color ${GIFT_BOX_TOKENS.animations.duration.fast} ${GIFT_BOX_TOKENS.animations.easing.easeOut}`
+                backgroundColor: boxColor // Themed box color
               }}
             />
             <div 
@@ -220,108 +250,20 @@ const EnvelopeBoxContainer = ({
             <div className="basis-0 grow min-h-px min-w-px shrink-0 w-full" data-name="Logo Container" />
 
             {/* Progress Bar (bottom, fixed) */}
-            <div 
-              className="box-border content-stretch flex flex-col gap-[10px] items-center justify-center pb-[12px] pt-0 px-[16px] relative shrink-0 w-full"
-              data-name="Progress Bar"
-            >
-              {/* Stroke wrapper with gradient (0.5px outside) */}
-              <div
-                className="relative w-full"
-                style={{
-                  padding: '0.45px',
-                  borderRadius: '100px',
-                  background: GIFT_BOX_TOKENS.gradients.progressBarStroke,
-                  boxShadow: GIFT_BOX_TOKENS.shadows.progressBarStroke
-                }}
-              >
-                <div 
-                  className="border-[0.5px] border-[rgba(255,255,255,0)] border-solid box-border content-stretch flex flex-col items-start justify-center relative size-full overflow-hidden"
-                  style={{
-                    gap: '11.351px',
-                    padding: '3.405px',
-                    borderRadius: '100px',
-                  }}
-                  data-name="Progress Bar"
-                >
-                  {/* Progress bar background layers */}
-                  <div aria-hidden="true" className="absolute inset-0 pointer-events-none" style={{ borderRadius: '100px' }}>
-                    {/* 1. Color fill, normal mode, 100% (base layer) */}
-                    <div 
-                      className="absolute inset-0"
-                      style={{ 
-                        borderRadius: '100px',
-                        backgroundColor: hoverBoxColor,
-                        transition: `background-color ${GIFT_BOX_TOKENS.animations.duration.fast} ${GIFT_BOX_TOKENS.animations.easing.easeOut}`
-                      }}
-                    />
-                    {/* 2. White fill, 40%, overlay mode */}
-                    <div 
-                      className="absolute inset-0"
-                      style={{ 
-                        borderRadius: '100px',
-                        mixBlendMode: GIFT_BOX_TOKENS.blendModes.overlay,
-                        backgroundColor: GIFT_BOX_TOKENS.colors.whiteOverlay
-                      }}
-                    />
-                  </div>
-
-                  {/* Progress indicator */}
-                  <div
-                    className="relative shrink-0"
-                    style={{
-                      width: `${progressBarWidth}px`,
-                      minWidth: '60px',
-                      padding: '0.5px',
-                      borderRadius: '40px',
-                      background: GIFT_BOX_TOKENS.gradients.progressIndicatorStroke,
-                      transition: `width ${GIFT_BOX_TOKENS.animations.duration.medium} ${GIFT_BOX_TOKENS.animations.easing.progressBar}`
-                    }}
-                    data-name="Progress"
-                  >
-                    <div 
-                      className="box-border content-stretch flex flex-col items-start justify-center py-0 relative w-full overflow-hidden border-[0.5px] border-solid border-white"
-                      style={{ 
-                        height: '28px',
-                        paddingLeft: '10px',
-                        paddingRight: '10px',
-                        borderRadius: '40px',
-                        backgroundColor: hoverBoxColor,
-                        transition: `background-color ${GIFT_BOX_TOKENS.animations.duration.fast} ${GIFT_BOX_TOKENS.animations.easing.easeOut}`
-                      }}
-                    >
-                      <p 
-                        className="font-['Goody_Sans:Medium',sans-serif] leading-[1.4] not-italic relative shrink-0 text-white w-full"
-                        style={{
-                          fontFamily: 'var(--font-goody-sans)',
-                          fontSize: '15.892px',
-                          fontWeight: 500,
-                          lineHeight: 1.4,
-                          color: '#ffffff',
-                          zIndex: GIFT_BOX_TOKENS.zIndex.progressText,
-                          position: 'relative'
-                        }}
-                      >
-                        {isDone ? 'Done' : `${animatedCurrent}/${validatedProgress.total}`}
-                      </p>
-                      <div 
-                        className="absolute inset-0 pointer-events-none"
-                        style={{
-                          boxShadow: `0px -2.5px 4.5px 0px inset rgba(255,255,255,0.5), 0px 0px 4.541px 0px inset rgba(255,255,255,0.5), 0px -4.541px 13.622px 4.541px inset ${themedShadowColor}`
-                        }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Progress bar inset shadow */}
-                  <div 
-                    className="absolute inset-[-0.5px] pointer-events-none"
-                    style={{
-                      boxShadow: GIFT_BOX_TOKENS.shadows.progressBarContainerInset
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
+            <ProgressBar
+              progress={progress}
+              boxColor={boxColor}
+              progressBarWidth={progressBarWidth}
+              animatedCurrent={animatedCurrent}
+              validatedProgress={validatedProgress}
+              isDone={isDone}
+              themedShadowColor={themedShadowColor}
+              containerPadding={{
+                bottom: '16px',
+                horizontal: '16px',
+                top: 0
+              }}
+            />
 
             {/* Specular Highlight */}
             <div 
@@ -380,9 +322,14 @@ const EnvelopeBoxContainer = ({
           />
         </div>
 
-        {/* Flap 3 (overlay on top) */}
-        <div className="absolute h-[87px] left-1/2 top-[10px] translate-x-[-50%] w-[154px]" data-name="Flap 3">
-          <div className="absolute bottom-0 left-0 right-0 top-[1.99%]">
+        {/* Flap 3 (overlay on top) - themed using CSS filter to transform blue to themed color */}
+        <div className="absolute h-[87px] left-1/2 top-[10px] translate-x-[-50%] w-[154px] overflow-visible" data-name="Flap 3">
+          <div 
+            className="absolute bottom-0 left-0 right-0 top-[1.99%]"
+            style={{
+              filter: flapFilter
+            }}
+          >
             <img alt="" className="block max-w-none size-full" src={imgFlap3} />
           </div>
         </div>

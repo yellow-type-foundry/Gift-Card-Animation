@@ -341,6 +341,7 @@ export default function Home() {
       envelopeHighZ: layoutConfig.envelopeHighZ,
       overlayProgressOnEnvelope: layoutConfig.overlayProgressOnEnvelope,
       progressOutsideEnvelope: layoutConfig.progressOutsideEnvelope,
+      hideEnvelope: layoutConfig.hideEnvelope || false,
       // Envelope settings
       envelopeScale: layoutConfig.envelope.scale,
       envelopeOffsetY: layoutConfig.envelope.offsetY,

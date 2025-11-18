@@ -160,6 +160,7 @@ export const LAYOUT_CONFIG = {
     envelopeHighZ: true,
     overlayProgressOnEnvelope: true,
     progressOutsideEnvelope: false,
+    hideEnvelope: true, // Empty the envelope container
   },
   
   // Altered Layout 2 (Batch - Layout 3)
