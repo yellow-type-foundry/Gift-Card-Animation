@@ -5,6 +5,8 @@ import Image from 'next/image'
 import { TOKENS } from '@/constants/tokens'
 import useProgressAnimation from '@/hooks/useProgressAnimation'
 import useHover from '@/hooks/useHover'
+import useDominantColor from '@/hooks/useDominantColor'
+import useCardTheme from '@/hooks/useCardTheme'
 import Footer from '@/components/sent-card/Footer'
 import { HEADER_OVERLAY_BG, FOOTER_CONFIG } from '@/constants/sentCardConstants'
 
@@ -68,6 +70,17 @@ const SentCard4 = ({
     return fileName.replace('.png', '')
   }, [giftContainerImage])
   
+  // Extract dominant color from gift container image for theming
+  const { dominantColor } = useDominantColor(giftContainerImage, '#f4c6fa')
+  const theme = useCardTheme(dominantColor, headerBgOverride)
+  const {
+    headerBgFinal,
+    isMonochromeVariant,
+    headerTextClass,
+    progressStartColor,
+    progressEndColor
+  } = theme
+  
 
   return (
     <div
@@ -96,7 +109,7 @@ const SentCard4 = ({
             className="absolute inset-0"
             data-name="HeaderBGBase"
             style={{
-              backgroundColor: headerBgOverride || '#E3E7ED'
+              backgroundColor: headerBgFinal || '#E3E7ED'
             }}
           />
           {/* Gradient overlay with blend mode */}
@@ -132,20 +145,20 @@ const SentCard4 = ({
             data-name="Header Content"
           >
             <p
-              className="font-['Goody_Sans:Regular',sans-serif] leading-[1.4] opacity-80 relative shrink-0 text-[16px] whitespace-pre"
+              className={`font-['Goody_Sans:Regular',sans-serif] leading-[1.4] opacity-80 relative shrink-0 text-[16px] whitespace-pre ${headerBgOverride === null ? headerTextClass : ''}`}
               style={{
                 fontFamily: 'var(--font-goody-sans)',
                 fontSize: '16px',
                 fontWeight: 400,
                 lineHeight: 1.4,
                 opacity: 0.8,
-                color: TOKENS.colors.text.tertiary
+                color: headerBgOverride === null ? undefined : TOKENS.colors.text.tertiary
               }}
             >
               {sentDate} • {from}
             </p>
             <p
-              className="[white-space-collapse:collapse] font-['HW_Cigars:Regular',sans-serif] leading-[1.2] min-w-full overflow-ellipsis overflow-hidden relative shrink-0 text-[24px] tracking-[-0.36px] w-[min-content] text-black"
+              className={`[white-space-collapse:collapse] font-['HW_Cigars:Regular',sans-serif] leading-[1.2] min-w-full overflow-ellipsis overflow-hidden relative shrink-0 text-[24px] tracking-[-0.36px] w-[min-content] ${headerBgOverride === null ? headerTextClass : 'text-black'}`}
               style={{
                 fontFamily: 'var(--font-hw-cigars)',
                 fontSize: '24px',
@@ -251,6 +264,8 @@ const SentCard4 = ({
           topPadding={FOOTER_CONFIG.single.topPadding}
           transparent={FOOTER_CONFIG.single.transparent}
           hideInfoOnHover={FOOTER_CONFIG.single.hideInfoOnHover}
+          progressStartColor={headerBgOverride === null ? progressStartColor : undefined}
+          progressEndColor={headerBgOverride === null ? progressEndColor : undefined}
         />
       </div>
     </div>
