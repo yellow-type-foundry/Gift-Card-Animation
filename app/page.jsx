@@ -722,39 +722,70 @@ export default function Home() {
             <div className="grid gift-card-grid gap-[24px]">
               {viewType === 'mixed' && mixedCardTypes ? (
                 // Mixed view: show both batch and single cards
-                sentCards.map((card, index) => {
-                  const isBatch = mixedCardTypes[index]
-                  
-                  if (isBatch) {
+                (() => {
+                  // Map layout number to single config key
+                  // Layout 2 uses single2, others use single{layoutNumber}
+                  const singleConfigKey = `single${layoutNumber}`
+                  if (!LAYOUT_CONFIG[singleConfigKey]) {
                     return (
+                      <div className="col-span-full text-center text-[#525F7A] py-8">
+                        No cards available for this layout
+                      </div>
+                    )
+                  }
+                  return sentCards.map((card, index) => {
+                    const isBatch = mixedCardTypes[index]
+                    
+                    if (isBatch) {
+                      return (
+                        <SentCard1
+                          key={index}
+                          {...getSentCard1Props(card, layoutNumber, useColoredBackground)}
+                        />
+                      )
+                    } else {
+                      // Single 1 uses SentCard1 (with gift container replacing envelope)
+                      if (layoutNumber === '1') {
+                        return (
+                          <SentCard1
+                            key={index}
+                            {...getSingle1Props(card, useColoredBackground)}
+                          />
+                        )
+                      }
+                      // Single 2 (Layout 2) uses SentCard1 with Batch 2 props (envelope)
+                      if (layoutNumber === '2') {
+                        return (
+                          <SentCard1
+                            key={index}
+                            {...getSentCard1Props(card, layoutNumber, useColoredBackground)}
+                          />
+                        )
+                      }
+                      // Other single cards use SentCard4 (with gift container)
+                      const props = getSentCard4Props(card, layoutNumber, useColoredBackground)
+                      if (!props) return null
+                      return (
+                        <SentCard4
+                          key={index}
+                          {...props}
+                        />
+                      )
+                    }
+                  })
+                })()
+              ) : viewType === 'single' ? (
+                // Single view: show only single cards
+                (() => {
+                  // Single 2 (Layout 2) uses SentCard1 with Batch 2 props (envelope)
+                  if (layoutNumber === '2') {
+                    return sentCards.map((card, index) => (
                       <SentCard1
                         key={index}
                         {...getSentCard1Props(card, layoutNumber, useColoredBackground)}
                       />
-                    )
-                  } else {
-                    // Single 1 uses SentCard1 (with gift container replacing envelope), others use SentCard4 (with gift container)
-                    if (layoutNumber === '1') {
-                      return (
-                        <SentCard1
-                          key={index}
-                          {...getSingle1Props(card, useColoredBackground)}
-                        />
-                      )
-                    }
-                    const props = getSentCard4Props(card, layoutNumber, useColoredBackground)
-                    if (!props) return null
-                    return (
-                      <SentCard4
-                        key={index}
-                        {...props}
-                      />
-                    )
+                    ))
                   }
-                })
-              ) : viewType === 'single' ? (
-                // Single view: show only single cards
-                (() => {
                   // Check if config exists for this layout
                   const singleConfigKey = `single${layoutNumber}`
                   if (!LAYOUT_CONFIG[singleConfigKey]) {
