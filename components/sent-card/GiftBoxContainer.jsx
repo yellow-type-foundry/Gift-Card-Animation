@@ -15,11 +15,14 @@ const GiftBoxContainer = ({
   } = useProgressAnimation(progress)
 
   // Calculate progress bar width dynamically
-  // Container width: 176px, padding: 16px each side = 32px, progress bar padding: 3.405px each side = 6.81px
-  // Available width: 176 - 32 - 6.81 = 137.19px
-  // Minimum width: 59.027px
-  const progressBarMaxWidth = 176 - 32 - 6.81
-  const progressBarWidth = Math.max(59.027, (animatedProgress / 100) * progressBarMaxWidth)
+  // Container width: 176px
+  // Outer padding: 16px each side = 32px
+  // Stroke wrapper padding: 0.5px each side = 1px
+  // Inner container padding: 3.405px each side = 6.81px
+  // Available width: 176 - 32 - 1 - 6.81 = 136.19px
+  // Minimum width: 60px
+  const progressBarMaxWidth = 176 - 32 - 1 - 7.5
+  const progressBarWidth = Math.min(progressBarMaxWidth, Math.max(60, (animatedProgress / 100) * progressBarMaxWidth))
 
   return (
     <div 
