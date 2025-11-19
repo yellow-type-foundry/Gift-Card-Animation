@@ -41,11 +41,11 @@ const ControlBar = ({
   }), [])
 
   const backdropStyle = useMemo(() => ({
-    zIndex: 999
+    zIndex: 9998
   }), [])
 
   const menuStyle = useMemo(() => ({
-    zIndex: 1000
+    zIndex: 9999
   }), [])
 
   const selectStyle = useMemo(() => ({
@@ -170,7 +170,7 @@ const ControlBar = ({
               e.stopPropagation()
             }}
             className="md:hidden fixed bottom-6 right-6 w-12 h-12 rounded-full border border-[#dde2e9] bg-white text-[#525F7A] hover:bg-gray-50 active:bg-gray-100 transition-colors focus:outline-none flex items-center justify-center touch-manipulation shadow-lg settings-button-enter"
-            style={{ ...mobileSettingsButtonStyle, zIndex: 998 }}
+            style={{ ...mobileSettingsButtonStyle, zIndex: 9997 }}
             aria-label="Settings"
           >
             <svg width="20" height="20" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
