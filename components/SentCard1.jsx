@@ -142,12 +142,14 @@ const SentCard1 = ({
 
   // Batch 2 Envelope and Flap Color Controls
   // These values control the saturation and luminance for Batch 2 card theming
-  const BATCH2_ENVELOPE_LUMINANCE = 95  // Luminance for envelope box (0-100)
-  const BATCH2_ENVELOPE_SATURATION = 50 // Saturation for envelope box (0-100)
+  const BATCH2_ENVELOPE_LUMINANCE = 100  // Luminance for envelope box (0-100)
+  const BATCH2_ENVELOPE_SATURATION = 28 // Saturation for envelope box (0-100)
   const BATCH2_ENVELOPE_OPACITY = 1.0   // Opacity for envelope box (0-1)
-  const BATCH2_FLAP_LUMINANCE = 95      // Luminance for flap (0-100)
-  const BATCH2_FLAP_SATURATION = 50     // Saturation for flap (0-100)
+  const BATCH2_FLAP_LUMINANCE = 100      // Luminance for flap (0-100)
+  const BATCH2_FLAP_SATURATION = 100     // Saturation for flap (0-100)
   const BATCH2_FLAP_OPACITY = 1.0        // Opacity for flap (0-1)
+  const BATCH2_PROGRESS_SHADOW_LUMINANCE = 95  // Luminance for progress indicator shadow (0-100, darker = lower value)
+  const BATCH2_PROGRESS_SHADOW_SATURATION = 95 // Saturation for progress indicator shadow (0-100)
 
   // For Batch 2 envelope: always use themed color (not conditional on toggle)
   // The envelope should always be themed based on dominant color
@@ -165,6 +167,16 @@ const SentCard1 = ({
     return capSaturation(
       adjustToLuminance(dominantColor, BATCH2_FLAP_LUMINANCE),
       BATCH2_FLAP_SATURATION
+    )
+  }, [dominantColor])
+
+  // Progress indicator shadow color - themed separately
+  const progressIndicatorShadowColor = useMemo(() => {
+    // Create shadow color with controlled luminance and saturation
+    // Lower luminance = darker shadow
+    return capSaturation(
+      adjustToLuminance(dominantColor, BATCH2_PROGRESS_SHADOW_LUMINANCE),
+      BATCH2_PROGRESS_SHADOW_SATURATION
     )
   }, [dominantColor])
   
@@ -507,6 +519,7 @@ const SentCard1 = ({
                 flapColor={envelopeFlapColor}
                 boxOpacity={BATCH2_ENVELOPE_OPACITY}
                 flapOpacity={BATCH2_FLAP_OPACITY}
+                progressIndicatorShadowColor={progressIndicatorShadowColor}
                 isHovered={isHovered}
               />
             ) : useGiftContainer ? (

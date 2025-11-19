@@ -23,6 +23,7 @@ const EnvelopeBoxContainer = ({
   flapColor, // Optional separate color for flap theming. If not provided, uses boxColor
   boxOpacity = 1.0, // Opacity for envelope box (0-1)
   flapOpacity = 1.0, // Opacity for flap (0-1)
+  progressIndicatorShadowColor, // Optional separate shadow color for progress indicator. If not provided, calculated from boxColor
   isHovered: externalIsHovered
 }) => {
   const { isHovered: internalIsHovered, handleHoverEnter, handleHoverLeave } = useHover()
@@ -33,12 +34,16 @@ const EnvelopeBoxContainer = ({
   const effectiveFlapColor = flapColor !== undefined ? flapColor : boxColor
 
   // Use themed box color for envelope theming
+  // If progressIndicatorShadowColor is provided, use it; otherwise calculate from boxColor
   const themedShadowColor = useMemo(() => {
+    if (progressIndicatorShadowColor !== undefined) {
+      return progressIndicatorShadowColor
+    }
     // Calculate shadow color from box color (darker version)
     const [h, s, l] = hexToHsl(boxColor)
     const darkerL = Math.max(0, l - 5) // Reduced from 20 to 10 for lighter shadow
     return hslToHex(h, s, darkerL)
-  }, [boxColor])
+  }, [boxColor, progressIndicatorShadowColor])
 
   // Calculate CSS filter to transform blue flap to themed color
   // Uses flapColor if provided, otherwise uses boxColor
@@ -60,6 +65,19 @@ const EnvelopeBoxContainer = ({
     
     return `hue-rotate(${hueRotate}deg) saturate(${saturateRatio}) brightness(${brightnessRatio})`
   }, [effectiveFlapColor])
+
+  // Calculate CSS filter to theme the shadow color image (blue to themed color)
+  const shadowColorFilter = useMemo(() => {
+    const defaultBlue = '#94d8f9'
+    const [defaultH, defaultS, defaultL] = hexToHsl(defaultBlue)
+    const [themedH, themedS, themedL] = hexToHsl(boxColor)
+    
+    const hueRotate = themedH - defaultH
+    const saturateRatio = themedS / Math.max(defaultS, 1)
+    const brightnessRatio = themedL / Math.max(defaultL, 1)
+    
+    return `hue-rotate(${hueRotate}deg) saturate(${saturateRatio}) brightness(${brightnessRatio})`
+  }, [boxColor])
 
   // Progress animation with delay and loading
   const {
@@ -257,7 +275,7 @@ const EnvelopeBoxContainer = ({
             className="absolute bottom-0 left-0 right-0 top-[2.39%] pointer-events-none"
             data-name="Noise"
             style={{
-              opacity: isHovered ? 0.6 : 0.75,
+              opacity: isHovered ? 0.7 : 0.75,
               transition: `opacity ${GIFT_BOX_TOKENS.animations.duration.fast} ${GIFT_BOX_TOKENS.animations.easing.easeOut}`,
               backgroundImage: `url(${GIFT_BOX_TOKENS.assets.noise})`,
               backgroundSize: 'cover',
@@ -337,7 +355,12 @@ const EnvelopeBoxContainer = ({
               className="absolute bottom-0 h-[27px] left-[9.52%] mix-blend-multiply right-[9.52%] pointer-events-none"
               data-name="Shadow color"
             >
-              <div className="absolute inset-[-118.52%_-23.53%]">
+              <div 
+                className="absolute inset-[-118.52%_-23.53%]"
+                style={{
+                  filter: shadowColorFilter
+                }}
+              >
                 <img alt="" className="block max-w-none size-full" src={imgShadowColor} />
               </div>
             </div>

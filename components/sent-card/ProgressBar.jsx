@@ -1,7 +1,8 @@
 'use client'
 
-import React from 'react'
+import React, { useMemo } from 'react'
 import { GIFT_BOX_TOKENS } from '@/constants/giftBoxTokens'
+import { hexToHsl, hslToHex } from '@/utils/colors'
 
 const ProgressBar = ({
   progress = { current: 4, total: 5 },
@@ -20,6 +21,19 @@ const ProgressBar = ({
 }) => {
   // Use indicatorColor if provided, otherwise fall back to boxColor
   const indicatorBgColor = indicatorColor || boxColor
+  
+  // Use themed shadow color - should always be provided from parent component
+  // Fallback to calculating from boxColor only if themedShadowColor is not provided
+  const effectiveShadowColor = useMemo(() => {
+    if (themedShadowColor !== undefined && themedShadowColor !== null) {
+      return themedShadowColor
+    }
+    // Fallback: calculate shadow color from boxColor if themedShadowColor is not provided
+    const [h, s, l] = hexToHsl(boxColor)
+    const darkerL = Math.max(0, l - 5)
+    return hslToHex(h, s, darkerL)
+  }, [themedShadowColor, boxColor])
+  
   return (
     <div 
       className="box-border content-stretch flex flex-col gap-[10px] items-center justify-center relative shrink-0 w-full"
@@ -116,7 +130,7 @@ const ProgressBar = ({
               <div 
                 className="absolute inset-0 pointer-events-none"
                 style={{
-                  boxShadow: `0px -2.3px 5px 0.25px inset rgba(255,255,255,0.5), 0px 0px 4.5px 0px inset rgba(255,255,255,0.5), 0px -4.5px 13px 4.5px inset ${themedShadowColor}`
+                  boxShadow: `0px -2.3px 5px 0.25px inset rgba(255,255,255,0.5), 0px 0px 5px 0px inset rgba(255,255,255,0.5), 0px -4.5px 13px 4.5px inset ${effectiveShadowColor}`
                 }}
               />
             </div>
