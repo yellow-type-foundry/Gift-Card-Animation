@@ -184,9 +184,9 @@ const EnvelopeBoxContainer = ({
           background: 'linear-gradient(to top, rgba(255,255,255,0) 0%, rgba(221,226,233,1) 100%)' // Gradient border from top to bottom
         }}
       >
-        <div className="bg-white h-[60px] overflow-clip relative rounded-[inherit] w-[144px]">
+        <div className="bg-white overflow-clip relative rounded-[inherit] w-[144px] flex flex-col items-center" style={{ padding: '8px', height: '60px' }}>
           {/* Cover image */}
-          <div className="absolute h-[33.6px] left-[6.2px] rounded-[3.2px] top-[6px] w-[128px]" data-name="Cover image">
+          <div className="relative w-full rounded-[3.2px] flex-shrink-0" style={{ height: '33.6px', flexGrow: 0 }} data-name="Cover image">
             <div aria-hidden="true" className="absolute inset-0 pointer-events-none rounded-[3.2px]">
               <Image
                 src={boxImage}
@@ -201,15 +201,14 @@ const EnvelopeBoxContainer = ({
           </div>
 
           {/* Grid cells (4 cells) - with breathing animation on hover */}
-          {[0, 1, 2, 3].map((index) => {
-            const left = 6.4 + (index * 32.8) // 6.4px + (index * 32.8px spacing)
-            return (
-              <div 
-                key={index}
-                className="absolute rounded-[3.2px] size-[28.8px] top-[45.2px]"
-                style={{ left: `${left}px` }}
-                data-name="Container"
-              >
+          <div className="flex gap-[3.2px] w-full" style={{ marginTop: '5px' }}>
+            {[0, 1, 2, 3].map((index) => {
+              return (
+                <div 
+                  key={index}
+                  className="relative rounded-[3.2px] flex-1 aspect-square"
+                  data-name="Container"
+                >
                 <div aria-hidden="true" className="absolute inset-0 pointer-events-none rounded-[3.2px]">
                   {/* Base color - with breathing animation (opacity controlled by CSS to match Batch 1) */}
                   <div 
@@ -232,6 +231,7 @@ const EnvelopeBoxContainer = ({
               </div>
             )
           })}
+          </div>
 
           {/* Shadow Overlay */}
           <div 
