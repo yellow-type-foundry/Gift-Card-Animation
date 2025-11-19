@@ -433,7 +433,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-[#f0f1f5] flex items-start overflow-visible">
       <div 
-        className="w-full px-0 md:px-[240px] py-10"
+        className="w-full px-0 md:px-[240px] pt-5 pb-10"
       >
         {/* Tabs and Controls Row */}
         <ControlBar
