@@ -153,7 +153,7 @@ const SentCard1 = ({
   
   // Batch 2 Envelope Container Spacing Controls
   const BATCH2_ENVELOPE_PADDING = { top: 21, right: 76, bottom: 21, left: 76 } // Padding for envelope container (px) - separate top, right, bottom, left
-  const BATCH2_ENVELOPE_MARGIN = { top: 0, right: 0, bottom: 0, left: 0 } // Margin for envelope container (px) - separate top, right, bottom, left
+  const BATCH2_ENVELOPE_MARGIN = { top: 0, right: 0, bottom: 30, left: 0 } // Margin for envelope container (px) - separate top, right, bottom, left
 
   // For Batch 2 envelope: always use themed color (not conditional on toggle)
   // The envelope should always be themed based on dominant color
@@ -294,28 +294,34 @@ const SentCard1 = ({
     display: 'block'
   }), [])
 
-  const envelopeContainerStyle = useMemo(() => ({
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...(hideEnvelope
-      ? {
-          position: 'relative',
-          width: '100%',
-          height: '100%',
-          flex: 1,
-          minHeight: 0,
-          overflow: 'visible',
-          paddingTop: `${BATCH2_ENVELOPE_PADDING.top}px`,
-          paddingRight: `${BATCH2_ENVELOPE_PADDING.right}px`,
-          paddingBottom: `${BATCH2_ENVELOPE_PADDING.bottom}px`,
-          paddingLeft: `${BATCH2_ENVELOPE_PADDING.left}px`,
-          marginTop: `${BATCH2_ENVELOPE_MARGIN.top}px`,
-          marginRight: `${BATCH2_ENVELOPE_MARGIN.right}px`,
-          marginBottom: `${BATCH2_ENVELOPE_MARGIN.bottom}px`,
-          marginLeft: `${BATCH2_ENVELOPE_MARGIN.left}px`,
-          boxSizing: 'border-box'
-        }
+  const envelopeContainerStyle = useMemo(() => {
+    // Only apply Batch 2 padding/margin when it's Batch 2 (EnvelopeBoxContainer), not Single 2 (GiftBoxContainer)
+    const isBatch2 = hideEnvelope && !showGiftBoxWhenHidden
+    
+    return {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      ...(hideEnvelope
+        ? {
+            position: 'relative',
+            width: '100%',
+            height: '100%',
+            flex: 1,
+            minHeight: 0,
+            overflow: 'visible',
+            ...(isBatch2 ? {
+              paddingTop: `${BATCH2_ENVELOPE_PADDING.top}px`,
+              paddingRight: `${BATCH2_ENVELOPE_PADDING.right}px`,
+              paddingBottom: `${BATCH2_ENVELOPE_PADDING.bottom}px`,
+              paddingLeft: `${BATCH2_ENVELOPE_PADDING.left}px`,
+              marginTop: `${BATCH2_ENVELOPE_MARGIN.top}px`,
+              marginRight: `${BATCH2_ENVELOPE_MARGIN.right}px`,
+              marginBottom: `${BATCH2_ENVELOPE_MARGIN.bottom}px`,
+              marginLeft: `${BATCH2_ENVELOPE_MARGIN.left}px`,
+              boxSizing: 'border-box'
+            } : {})
+          }
       : useGiftContainer && giftContainerTop !== undefined
       ? {
           top: `${giftContainerTop + (giftContainerOffsetY !== undefined ? giftContainerOffsetY : 0)}px`,
@@ -346,7 +352,7 @@ const SentCard1 = ({
     zIndex: envelopeHighZ ? 50 : (overlayProgressOnEnvelope ? 2 : 2),
     transform: hideEnvelope ? 'none' : `scale(${useGiftContainer && giftContainerScale !== undefined ? giftContainerScale : (progressOutsideEnvelope && envelopeScale2 !== undefined ? envelopeScale2 : envelopeScale)})`,
     transformOrigin: hideEnvelope ? 'center center' : (useGiftContainer && giftContainerTransformOrigin !== undefined ? giftContainerTransformOrigin : (progressOutsideEnvelope && transformOrigin2 !== undefined ? transformOrigin2 : 'center top'))
-  }), [hideEnvelope, useGiftContainer, giftContainerTop, giftContainerOffsetY, giftContainerLeft, giftContainerRight, giftContainerBottom, progressOutsideEnvelope, envelopeTopBase2, envelopeOffsetY2, envelopeOffsetY, envelopeLeft2, envelopeRight2, envelopeHighZ, overlayProgressOnEnvelope, giftContainerScale, envelopeScale2, envelopeScale, giftContainerTransformOrigin, transformOrigin2, BATCH2_ENVELOPE_PADDING, BATCH2_ENVELOPE_MARGIN])
+  }}, [hideEnvelope, showGiftBoxWhenHidden, useGiftContainer, giftContainerTop, giftContainerOffsetY, giftContainerLeft, giftContainerRight, giftContainerBottom, progressOutsideEnvelope, envelopeTopBase2, envelopeOffsetY2, envelopeOffsetY, envelopeLeft2, envelopeRight2, envelopeHighZ, overlayProgressOnEnvelope, giftContainerScale, envelopeScale2, envelopeScale, giftContainerTransformOrigin, transformOrigin2, BATCH2_ENVELOPE_PADDING, BATCH2_ENVELOPE_MARGIN])
 
   const giftContainerWrapperStyle = useMemo(() => ({
     position: 'relative',
@@ -534,6 +540,8 @@ const SentCard1 = ({
                 boxOpacity={BATCH2_ENVELOPE_OPACITY}
                 flapOpacity={BATCH2_FLAP_OPACITY}
                 progressIndicatorShadowColor={progressIndicatorShadowColor}
+                containerPadding={BATCH2_ENVELOPE_PADDING}
+                containerMargin={BATCH2_ENVELOPE_MARGIN}
                 isHovered={isHovered}
               />
             ) : useGiftContainer ? (

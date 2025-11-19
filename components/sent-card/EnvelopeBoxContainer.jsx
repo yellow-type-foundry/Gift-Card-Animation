@@ -22,6 +22,8 @@ const EnvelopeBoxContainer = ({
   boxOpacity = 1.0, // Opacity for envelope box (0-1)
   flapOpacity = 1.0, // Opacity for flap (0-1)
   progressIndicatorShadowColor, // Optional separate shadow color for progress indicator. If not provided, calculated from boxColor
+  containerPadding = { top: 0, right: 0, bottom: 0, left: 0 }, // Padding from wrapper (px) - used to adjust paper position
+  containerMargin = { top: 0, right: 0, bottom: 0, left: 0 }, // Margin from wrapper (px) - used to adjust paper position
   isHovered: externalIsHovered
 }) => {
   const { isHovered: internalIsHovered, handleHoverEnter, handleHoverLeave } = useHover()
@@ -176,7 +178,7 @@ const EnvelopeBoxContainer = ({
         data-name="Paper"
         style={{ 
           zIndex: 3, // Highest z-index
-          top: '40.5px', // Positioned just above the envelope (flap starts at top, paper above it)
+          top: `${15 + containerPadding.top + containerMargin.top}px`, // Positioned just above the envelope, adjusted for wrapper padding/margin
           padding: '0.5px', // Border width
           borderRadius: '8px 8px 0 0', // Rounded top corners
           background: 'linear-gradient(to top, rgba(255,255,255,0) 0%, rgba(221,226,233,1) 100%)' // Gradient border from top to bottom
@@ -405,7 +407,7 @@ const EnvelopeBoxContainer = ({
         {/* Flap 3 (overlay on top) - themed using CSS filter to transform blue to themed color */}
         <div className="absolute h-[87px] left-1/2 top-[10px] translate-x-[-50%] w-[154px] overflow-visible" data-name="Flap 3">
           <div 
-            className="absolute bottom-0 left-0 right-0 top-[1.99%]"
+            className="absolute bottom-0 left-0 right-0 top-[2%]"
             style={{
               filter: flapFilter,
               opacity: flapOpacity
