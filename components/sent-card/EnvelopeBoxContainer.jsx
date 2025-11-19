@@ -245,7 +245,11 @@ const EnvelopeBoxContainer = ({
       <div 
         className="content-stretch flex flex-col items-start relative shrink-0 w-[168px]" 
         data-name="Envelope"
-        style={{ zIndex: 2 }}
+        style={{ 
+          zIndex: 2,
+          transform: 'scale(1.025)',
+          transformOrigin: 'center center'
+        }}
       >
         {/* Flap (top) - themed using CSS filter to transform blue to themed color */}
         <div className="h-[97px] relative shrink-0 w-[168px] overflow-visible" data-name="Flap">
