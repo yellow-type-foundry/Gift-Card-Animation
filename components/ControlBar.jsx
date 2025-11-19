@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useMemo } from 'react'
+import React, { useMemo, useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import TabButton from '@/components/TabButton'
 
 const ControlBar = ({
@@ -26,6 +27,12 @@ const ControlBar = ({
     const value = e.target.value
     onViewChange(value)
   }
+
+  const [isMounted, setIsMounted] = useState(false)
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   const controlBarStyle = useMemo(() => ({
     WebkitOverflowScrolling: 'touch',
@@ -156,7 +163,7 @@ const ControlBar = ({
       </div>
       
       {/* Mobile: Floating Settings Button - Bottom Right */}
-      {isSentTab && (
+      {isSentTab && isMounted && createPortal(
         <>
           <button
             type="button"
@@ -293,7 +300,8 @@ const ControlBar = ({
               </div>
             </>
           )}
-        </>
+        </>,
+        document.body
       )}
     </div>
   )
