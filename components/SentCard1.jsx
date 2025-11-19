@@ -150,6 +150,10 @@ const SentCard1 = ({
   const BATCH2_FLAP_OPACITY = 1.0        // Opacity for flap (0-1)
   const BATCH2_PROGRESS_SHADOW_LUMINANCE = 95  // Luminance for progress indicator shadow (0-100, darker = lower value)
   const BATCH2_PROGRESS_SHADOW_SATURATION = 95 // Saturation for progress indicator shadow (0-100)
+  
+  // Batch 2 Envelope Container Spacing Controls
+  const BATCH2_ENVELOPE_PADDING = { top: 21, right: 76, bottom: 21, left: 76 } // Padding for envelope container (px) - separate top, right, bottom, left
+  const BATCH2_ENVELOPE_MARGIN = { top: 0, right: 0, bottom: 0, left: 0 } // Margin for envelope container (px) - separate top, right, bottom, left
 
   // For Batch 2 envelope: always use themed color (not conditional on toggle)
   // The envelope should always be themed based on dominant color
@@ -300,7 +304,17 @@ const SentCard1 = ({
           width: '100%',
           height: '100%',
           flex: 1,
-          minHeight: 0
+          minHeight: 0,
+          overflow: 'visible',
+          paddingTop: `${BATCH2_ENVELOPE_PADDING.top}px`,
+          paddingRight: `${BATCH2_ENVELOPE_PADDING.right}px`,
+          paddingBottom: `${BATCH2_ENVELOPE_PADDING.bottom}px`,
+          paddingLeft: `${BATCH2_ENVELOPE_PADDING.left}px`,
+          marginTop: `${BATCH2_ENVELOPE_MARGIN.top}px`,
+          marginRight: `${BATCH2_ENVELOPE_MARGIN.right}px`,
+          marginBottom: `${BATCH2_ENVELOPE_MARGIN.bottom}px`,
+          marginLeft: `${BATCH2_ENVELOPE_MARGIN.left}px`,
+          boxSizing: 'border-box'
         }
       : useGiftContainer && giftContainerTop !== undefined
       ? {
@@ -332,7 +346,7 @@ const SentCard1 = ({
     zIndex: envelopeHighZ ? 50 : (overlayProgressOnEnvelope ? 2 : 2),
     transform: hideEnvelope ? 'none' : `scale(${useGiftContainer && giftContainerScale !== undefined ? giftContainerScale : (progressOutsideEnvelope && envelopeScale2 !== undefined ? envelopeScale2 : envelopeScale)})`,
     transformOrigin: hideEnvelope ? 'center center' : (useGiftContainer && giftContainerTransformOrigin !== undefined ? giftContainerTransformOrigin : (progressOutsideEnvelope && transformOrigin2 !== undefined ? transformOrigin2 : 'center top'))
-  }), [hideEnvelope, useGiftContainer, giftContainerTop, giftContainerOffsetY, giftContainerLeft, giftContainerRight, giftContainerBottom, progressOutsideEnvelope, envelopeTopBase2, envelopeOffsetY2, envelopeOffsetY, envelopeLeft2, envelopeRight2, envelopeHighZ, overlayProgressOnEnvelope, giftContainerScale, envelopeScale2, envelopeScale, giftContainerTransformOrigin, transformOrigin2])
+  }), [hideEnvelope, useGiftContainer, giftContainerTop, giftContainerOffsetY, giftContainerLeft, giftContainerRight, giftContainerBottom, progressOutsideEnvelope, envelopeTopBase2, envelopeOffsetY2, envelopeOffsetY, envelopeLeft2, envelopeRight2, envelopeHighZ, overlayProgressOnEnvelope, giftContainerScale, envelopeScale2, envelopeScale, giftContainerTransformOrigin, transformOrigin2, BATCH2_ENVELOPE_PADDING, BATCH2_ENVELOPE_MARGIN])
 
   const giftContainerWrapperStyle = useMemo(() => ({
     position: 'relative',

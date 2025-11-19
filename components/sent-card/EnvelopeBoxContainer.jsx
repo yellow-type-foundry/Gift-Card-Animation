@@ -9,8 +9,6 @@ import { hexToHsl, hslToHex } from '@/utils/colors'
 import ProgressBar from '@/components/sent-card/ProgressBar'
 
 // Asset paths from Figma
-const imgBoxShadow = '/assets/3ce71b28afba3770de07efe28f1558dfed6b4cd7.svg'
-const imgBoxShadowColor = '/assets/89f2ea89a03f9a1a7fd227903c03bf6b556ab2f8.svg'
 const imgFlap = '/assets/e4fbcc3f1c94bf36a4cddc7dd9cef4a43efa8592.svg'
 const imgSpecularHighlight = '/assets/a97f045e889f6250003707fa595a0ca65cc55325.svg'
 const imgShadowColor = '/assets/a03cbeacdf722aee39283024dde0fe6b4e0bcf5a.svg'
@@ -123,48 +121,50 @@ const EnvelopeBoxContainer = ({
 
   return (
     <div 
-      className="box-border content-stretch flex flex-col gap-0 items-center justify-center px-[76px] py-[21px] relative size-full"
+      className="content-stretch flex flex-col gap-0 items-center justify-center relative size-full"
       data-name="Box Container/Batch 2"
       onMouseEnter={handleHoverEnter}
       onMouseLeave={handleHoverLeave}
     >
-      {/* Box Shadow (beneath) - lowest z-index */}
+      {/* Box Shadow - same as Single2 (GiftBoxContainer) - only visible on hover */}
       <div 
-        className="absolute flex h-[59px] items-center justify-center left-[calc(50%+0.5px)] top-[143px] translate-x-[-50%] w-[131px]"
-        style={{ zIndex: 0 }}
+        className="absolute flex items-center justify-center pointer-events-none"
+        style={{
+          left: `calc(50% + ${GIFT_BOX_TOKENS.boxShadow.leftOffset})`,
+          top: GIFT_BOX_TOKENS.boxShadow.top,
+          transform: 'translateX(-50%)',
+          height: GIFT_BOX_TOKENS.boxShadow.height,
+          width: GIFT_BOX_TOKENS.boxShadow.width,
+          opacity: isHovered ? GIFT_BOX_TOKENS.hoverEffects.boxShadowOpacity.hover : GIFT_BOX_TOKENS.hoverEffects.boxShadowOpacity.default,
+          zIndex: GIFT_BOX_TOKENS.zIndex.boxShadow,
+          transition: `opacity ${GIFT_BOX_TOKENS.animations.duration.fast} ${GIFT_BOX_TOKENS.animations.easing.easeOut}`
+        }}
+        data-name="Box Shadow"
       >
-        <div className="flex-none scale-y-[-100%]">
+        <div 
+          className="flex-none"
+          style={{
+            transform: 'scaleY(-1)'
+          }}
+        >
           <div 
-            className="h-[59px] relative w-[131px]" 
-            data-name="Box Shadow"
+            className="relative"
             style={{
-              opacity: isHovered ? 0.75 : 0,
-              transition: `opacity ${GIFT_BOX_TOKENS.animations.duration.fast} ${GIFT_BOX_TOKENS.animations.easing.easeOut}`
+              height: GIFT_BOX_TOKENS.boxShadow.imageSize.height,
+              width: GIFT_BOX_TOKENS.boxShadow.imageSize.width
             }}
           >
-            <div className="absolute inset-[-40.68%_-18.32%]">
-              <img alt="" className="block max-w-none size-full" src={imgBoxShadow} />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Box Shadow Color (beneath, with color blend) - lowest z-index */}
-      <div 
-        className="absolute flex h-[70px] items-center justify-center left-[82px] mix-blend-color top-[132px] w-[136px]"
-        style={{ zIndex: 0 }}
-      >
-        <div className="flex-none scale-y-[-100%]">
-          <div 
-            className="h-[70px] relative w-[136px]" 
-            data-name="Box Shadow color"
-            style={{
-              opacity: isHovered ? 0.75 : 0,
-              transition: `opacity ${GIFT_BOX_TOKENS.animations.duration.fast} ${GIFT_BOX_TOKENS.animations.easing.easeOut}`
-            }}
-          >
-            <div className="absolute inset-[-34.29%_-17.65%]">
-              <img alt="" className="block max-w-none size-full" src={imgBoxShadowColor} />
+            <div 
+              className="absolute"
+              style={{
+                inset: GIFT_BOX_TOKENS.boxShadow.imageInset
+              }}
+            >
+              <img 
+                alt="" 
+                className="block max-w-none size-full" 
+                src={GIFT_BOX_TOKENS.assets.boxShadow}
+              />
             </div>
           </div>
         </div>
@@ -176,7 +176,7 @@ const EnvelopeBoxContainer = ({
         data-name="Paper"
         style={{ 
           zIndex: 3, // Highest z-index
-          top: '61.5px', // Positioned just above the envelope (flap starts at top, paper above it)
+          top: '40.5px', // Positioned just above the envelope (flap starts at top, paper above it)
           padding: '0.5px', // Border width
           borderRadius: '8px 8px 0 0', // Rounded top corners
           background: 'linear-gradient(to top, rgba(255,255,255,0) 0%, rgba(221,226,233,1) 100%)' // Gradient border from top to bottom
