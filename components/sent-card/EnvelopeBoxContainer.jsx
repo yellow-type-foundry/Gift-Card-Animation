@@ -20,11 +20,17 @@ const EnvelopeBoxContainer = ({
   progress = { current: 4, total: 5 },
   boxImage = '/assets/covers/Onboarding 03.png',
   boxColor = '#94d8f9',
+  flapColor, // Optional separate color for flap theming. If not provided, uses boxColor
+  boxOpacity = 1.0, // Opacity for envelope box (0-1)
+  flapOpacity = 1.0, // Opacity for flap (0-1)
   isHovered: externalIsHovered
 }) => {
   const { isHovered: internalIsHovered, handleHoverEnter, handleHoverLeave } = useHover()
   // Use external hover state if provided, otherwise use internal
   const isHovered = externalIsHovered !== undefined ? externalIsHovered : internalIsHovered
+
+  // Use flapColor if provided, otherwise fall back to boxColor
+  const effectiveFlapColor = flapColor !== undefined ? flapColor : boxColor
 
   // Use themed box color for envelope theming
   const themedShadowColor = useMemo(() => {
@@ -35,20 +41,25 @@ const EnvelopeBoxContainer = ({
   }, [boxColor])
 
   // Calculate CSS filter to transform blue flap to themed color
+  // Uses flapColor if provided, otherwise uses boxColor
+  // NOTE: CSS filters work multiplicatively, so the result is an approximation of the target color
+  // The envelope box uses backgroundColor directly and will match exactly, but the flap uses filters
   const flapFilter = useMemo(() => {
     const defaultBlue = '#94d8f9'
     const [defaultH, defaultS, defaultL] = hexToHsl(defaultBlue)
-    const [themedH, themedS, themedL] = hexToHsl(boxColor)
+    const [themedH, themedS, themedL] = hexToHsl(effectiveFlapColor)
     
     // Calculate hue rotation (difference in hue)
     const hueRotate = themedH - defaultH
     // Calculate saturation adjustment (ratio)
-    const saturateRatio = themedS / Math.max(defaultS, 1) // Avoid division by zero
+    // CSS saturate() multiplies saturation, so ratio = target / source
+    const saturateRatio = themedS / Math.max(defaultS, 1) // defaultS is ~89
     // Calculate brightness adjustment (ratio)
-    const brightnessRatio = themedL / Math.max(defaultL, 1)
+    // CSS brightness() multiplies lightness, so ratio = target / source  
+    const brightnessRatio = themedL / Math.max(defaultL, 1) // defaultL is ~78
     
     return `hue-rotate(${hueRotate}deg) saturate(${saturateRatio}) brightness(${brightnessRatio})`
-  }, [boxColor])
+  }, [effectiveFlapColor])
 
   // Progress animation with delay and loading
   const {
@@ -217,11 +228,51 @@ const EnvelopeBoxContainer = ({
           <div 
             className="absolute bottom-0 left-0 right-0 top-[2.39%]"
             style={{
-              filter: flapFilter
+              filter: flapFilter,
+              opacity: flapOpacity
             }}
           >
             <img alt="" className="block max-w-none size-full" src={imgFlap} />
           </div>
+          
+          {/* Gradient overlay - clipped to flap shape */}
+          <div 
+            className="absolute bottom-0 left-0 right-0 top-[2.39%] pointer-events-none"
+            style={{
+              mixBlendMode: GIFT_BOX_TOKENS.blendModes.overlay,
+              background: GIFT_BOX_TOKENS.gradients.boxBase,
+              WebkitMaskImage: `url(${imgFlap})`,
+              WebkitMaskSize: '100% 100%',
+              WebkitMaskRepeat: 'no-repeat',
+              WebkitMaskPosition: '0% 0%',
+              maskImage: `url(${imgFlap})`,
+              maskSize: '100% 100%',
+              maskRepeat: 'no-repeat',
+              maskPosition: '0% 0%'
+            }}
+          />
+          
+          {/* Noise overlay - clipped to flap shape, positioned exactly like the flap image */}
+          <div 
+            className="absolute bottom-0 left-0 right-0 top-[2.39%] pointer-events-none"
+            data-name="Noise"
+            style={{
+              opacity: isHovered ? 0.6 : 0.75,
+              transition: `opacity ${GIFT_BOX_TOKENS.animations.duration.fast} ${GIFT_BOX_TOKENS.animations.easing.easeOut}`,
+              backgroundImage: `url(${GIFT_BOX_TOKENS.assets.noise})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              mixBlendMode: 'overlay',
+              WebkitMaskImage: `url(${imgFlap})`,
+              WebkitMaskSize: '100% 100%',
+              WebkitMaskRepeat: 'no-repeat',
+              WebkitMaskPosition: '0% 0%',
+              maskImage: `url(${imgFlap})`,
+              maskSize: '100% 100%',
+              maskRepeat: 'no-repeat',
+              maskPosition: '0% 0%'
+            }}
+          />
         </div>
 
         {/* Box (main container) - rounded only at bottom, sharp at top */}
@@ -240,7 +291,8 @@ const EnvelopeBoxContainer = ({
               className="absolute inset-0"
               style={{ 
                 borderRadius: '0 0 32px 32px',
-                backgroundColor: boxColor // Themed box color
+                backgroundColor: boxColor, // Themed box color
+                opacity: boxOpacity
               }}
             />
             <div 
@@ -332,7 +384,8 @@ const EnvelopeBoxContainer = ({
           <div 
             className="absolute bottom-0 left-0 right-0 top-[1.99%]"
             style={{
-              filter: flapFilter
+              filter: flapFilter,
+              opacity: flapOpacity
             }}
           >
             <img alt="" className="block max-w-none size-full" src={imgFlap3} />

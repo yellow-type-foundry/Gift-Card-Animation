@@ -140,12 +140,32 @@ const SentCard1 = ({
     return capSaturation(adjustToLuminance(dominantColor, 85), 70)
   }, [dominantColor, headerBgOverride])
 
+  // Batch 2 Envelope and Flap Color Controls
+  // These values control the saturation and luminance for Batch 2 card theming
+  const BATCH2_ENVELOPE_LUMINANCE = 95  // Luminance for envelope box (0-100)
+  const BATCH2_ENVELOPE_SATURATION = 50 // Saturation for envelope box (0-100)
+  const BATCH2_ENVELOPE_OPACITY = 1.0   // Opacity for envelope box (0-1)
+  const BATCH2_FLAP_LUMINANCE = 95      // Luminance for flap (0-100)
+  const BATCH2_FLAP_SATURATION = 50     // Saturation for flap (0-100)
+  const BATCH2_FLAP_OPACITY = 1.0        // Opacity for flap (0-1)
+
   // For Batch 2 envelope: always use themed color (not conditional on toggle)
   // The envelope should always be themed based on dominant color
-  // Use more subtle values than baseTintColor (luminance 95, saturation 30) for a softer look
   const envelopeBoxColor = useMemo(() => {
-    // Create a subtle, light box color from dominant color
-    return capSaturation(adjustToLuminance(dominantColor, 95), 30)
+    // Create envelope box color with controlled luminance and saturation
+    return capSaturation(
+      adjustToLuminance(dominantColor, BATCH2_ENVELOPE_LUMINANCE),
+      BATCH2_ENVELOPE_SATURATION
+    )
+  }, [dominantColor])
+
+  // Separate color for flap theming with independent saturation and luminance controls
+  const envelopeFlapColor = useMemo(() => {
+    // Create flap color with its own luminance and saturation values
+    return capSaturation(
+      adjustToLuminance(dominantColor, BATCH2_FLAP_LUMINANCE),
+      BATCH2_FLAP_SATURATION
+    )
   }, [dominantColor])
   
   const allAccepted = isDone
@@ -484,6 +504,9 @@ const SentCard1 = ({
                 progress={validatedProgress}
                 boxImage={boxImage}
                 boxColor={envelopeBoxColor}
+                flapColor={envelopeFlapColor}
+                boxOpacity={BATCH2_ENVELOPE_OPACITY}
+                flapOpacity={BATCH2_FLAP_OPACITY}
                 isHovered={isHovered}
               />
             ) : useGiftContainer ? (
