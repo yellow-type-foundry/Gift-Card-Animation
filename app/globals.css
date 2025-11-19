@@ -210,3 +210,37 @@
 .gc-6 { animation-duration: 2950ms; animation-direction: alternate-reverse; animation-timing-function: ease-out; }
 .gc-7 { animation-duration: 1950ms; animation-direction: alternate; animation-timing-function: ease-in-out; }
 .gc-8 { animation-duration: 2550ms; animation-direction: alternate-reverse; animation-timing-function: ease; }
+
+/* Batch 2 Grid Cell Opacity - increased by 0.3 from Batch 1 */
+@keyframes grid-breathe-base-batch2 {
+  0% { opacity: 0.66; }
+  50% { opacity: 0.88; }
+  100% { opacity: 0.66; }
+}
+@keyframes grid-breathe-overlay-batch2 {
+  0% { opacity: 0.60; }
+  50% { opacity: 0.50; }
+  100% { opacity: 0.60; }
+}
+
+/* Batch 2 default opacity (increased by 0.3) */
+[data-name="Box Container/Batch 2"] .grid-cell-base { opacity: 0.5; will-change: opacity; }
+[data-name="Box Container/Batch 2"] .grid-cell-overlay { opacity: 0.4; will-change: opacity; }
+
+/* Batch 2 hover breathing animation (increased by 0.3) */
+[data-name="Box Container/Batch 2"]:hover .grid-cell-base,
+[data-name="Gift Card"]:has([data-name="Box Container/Batch 2"]):hover .grid-cell-base {
+  animation-name: grid-breathe-base-batch2;
+  animation-duration: 500ms;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-direction: normal;
+}
+[data-name="Box Container/Batch 2"]:hover .grid-cell-overlay,
+[data-name="Gift Card"]:has([data-name="Box Container/Batch 2"]):hover .grid-cell-overlay {
+  animation-name: grid-breathe-overlay-batch2;
+  animation-duration: 1000ms;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-direction: normal;
+}

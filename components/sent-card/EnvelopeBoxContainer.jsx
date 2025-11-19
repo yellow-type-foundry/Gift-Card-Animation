@@ -200,28 +200,32 @@ const EnvelopeBoxContainer = ({
             </div>
           </div>
 
-          {/* Grid cells (4 cells) */}
+          {/* Grid cells (4 cells) - with breathing animation on hover */}
           {[0, 1, 2, 3].map((index) => {
             const left = 6.4 + (index * 32.8) // 6.4px + (index * 32.8px spacing)
             return (
               <div 
                 key={index}
-                className="absolute opacity-50 rounded-[3.2px] size-[28.8px] top-[45.2px]"
+                className="absolute rounded-[3.2px] size-[28.8px] top-[45.2px]"
                 style={{ left: `${left}px` }}
                 data-name="Container"
               >
                 <div aria-hidden="true" className="absolute inset-0 pointer-events-none rounded-[3.2px]">
-                  {/* Base color */}
+                  {/* Base color - with breathing animation (opacity controlled by CSS to match Batch 1) */}
                   <div 
-                    className="absolute inset-0 rounded-[3.2px]"
-                    style={{ backgroundColor: gridCellColor }}
+                    className={`grid-cell-base gc-${index + 1} absolute inset-0 rounded-[3.2px]`}
+                    style={{ 
+                      backgroundColor: gridCellColor
+                      // Opacity controlled by CSS: default 0.2, hover animates 0.16 → 0.38 → 0.16
+                    }}
                   />
-                  {/* Gradient overlay */}
+                  {/* Gradient overlay - with breathing animation (opacity controlled by CSS to match Batch 1) */}
                   <div 
-                    className="absolute inset-0 rounded-[3.2px]"
+                    className={`grid-cell-overlay gc-${index + 1} absolute inset-0 rounded-[3.2px]`}
                     style={{
                       mixBlendMode: GIFT_BOX_TOKENS.blendModes.overlay,
                       background: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%)'
+                      // Opacity controlled by CSS: default 0.10, hover animates 0.10 → 0.00 → 0.10
                     }}
                   />
                 </div>
