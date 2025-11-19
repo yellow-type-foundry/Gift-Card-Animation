@@ -121,6 +121,21 @@ const EnvelopeBoxContainer = ({
     return hslToHex(h, s, lighterL)
   }, [boxColor])
 
+  // Paper gradient overlay colors - themed with boxColor
+  const paperGradientTopColor = useMemo(() => {
+    // Light, transparent version at top
+    const [h, s, l] = hexToHsl(boxColor)
+    const lighterL = Math.min(100, l + 50) // Much lighter for top
+    return hslToHex(h, s, lighterL)
+  }, [boxColor])
+
+  const paperGradientBottomColor = useMemo(() => {
+    // Dark shade at bottom
+    const [h, s, l] = hexToHsl(boxColor)
+    const darkerL = Math.max(0, l - 30) // Darker for bottom
+    return hslToHex(h, s, darkerL)
+  }, [boxColor])
+
   return (
     <div 
       className="content-stretch flex flex-col gap-0 items-center justify-center relative size-full"
@@ -188,7 +203,7 @@ const EnvelopeBoxContainer = ({
         <div 
           className="bg-white overflow-clip relative rounded-[inherit] w-[144px] flex flex-col items-center" 
           style={{ 
-            padding: '8px', 
+            padding: '6px', 
             height: isHovered ? '60px' : '52px',
             transition: 'height 250ms ease-in-out'
           }}
@@ -240,6 +255,16 @@ const EnvelopeBoxContainer = ({
             )
           })}
           </div>
+
+          {/* Gradient Overlay - themed color gradient from top to bottom */}
+          <div 
+            className="absolute inset-0 pointer-events-none rounded-[inherit]"
+            style={{
+              background: `linear-gradient(to bottom, ${paperGradientTopColor}00 0%, ${paperGradientBottomColor}66 100%)`,
+              mixBlendMode: 'multiply'
+            }}
+            data-name="Paper Gradient Overlay"
+          />
 
           {/* Shadow Overlay */}
           <div 
