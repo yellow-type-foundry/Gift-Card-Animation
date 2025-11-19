@@ -178,13 +178,21 @@ const EnvelopeBoxContainer = ({
         data-name="Paper"
         style={{ 
           zIndex: 3, // Highest z-index
-          top: `${15 + containerPadding.top + containerMargin.top}px`, // Positioned just above the envelope, adjusted for wrapper padding/margin
+          top: `${23 + containerPadding.top + containerMargin.top - (isHovered ? 8 : 0)}px`, // Positioned just above the envelope, adjusted for wrapper padding/margin and hover expansion (moves up 8px on hover to expand from bottom)
           padding: '0.5px', // Border width
           borderRadius: '8px 8px 0 0', // Rounded top corners
-          background: 'linear-gradient(to top, rgba(255,255,255,0) 0%, rgba(221,226,233,1) 100%)' // Gradient border from top to bottom
+          background: 'linear-gradient(to top, rgba(255,255,255,0) 0%, rgba(221,226,233,1) 100%)', // Gradient border from top to bottom
+          transition: 'top 250ms ease-in-out'
         }}
       >
-        <div className="bg-white overflow-clip relative rounded-[inherit] w-[144px] flex flex-col items-center" style={{ padding: '8px', height: '60px' }}>
+        <div 
+          className="bg-white overflow-clip relative rounded-[inherit] w-[144px] flex flex-col items-center" 
+          style={{ 
+            padding: '8px', 
+            height: isHovered ? '60px' : '52px',
+            transition: 'height 250ms ease-in-out'
+          }}
+        >
           {/* Cover image */}
           <div className="relative w-full rounded-[3.2px] flex-shrink-0" style={{ height: '33.6px', flexGrow: 0 }} data-name="Cover image">
             <div aria-hidden="true" className="absolute inset-0 pointer-events-none rounded-[3.2px]">
