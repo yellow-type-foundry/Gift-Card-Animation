@@ -30,6 +30,17 @@ const ControlBar = ({
     onViewChange(value)
   }
 
+  const handleAnimationChange = (e) => {
+    const value = e.target.value
+    // "highlight" maps to true, "none" maps to false
+    onHighlightAnimationChange(value === 'highlight')
+  }
+
+  const animationSelectStyle = useMemo(() => ({
+    width: 'auto',
+    minWidth: '140px'
+  }), [])
+
   const [isMounted, setIsMounted] = useState(false)
   const [showStylingMenu, setShowStylingMenu] = useState(false)
   const stylingButtonRef = useRef(null)
@@ -203,24 +214,26 @@ const ControlBar = ({
                           />
                         </button>
                       </div>
-                      {/* Highlight animation toggle */}
+                      {/* Animation selector */}
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-[#525F7A]">Highlight animation</span>
-                        <button
-                          onClick={() => onHighlightAnimationChange(!enableHighlightAnimation)}
-                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
-                            enableHighlightAnimation ? 'bg-[#5a3dff]' : 'bg-gray-300'
-                          } cursor-pointer`}
-                          role="switch"
-                          aria-checked={enableHighlightAnimation}
-                          aria-label="Toggle highlight animation"
-                        >
-                          <span
-                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                              enableHighlightAnimation ? 'translate-x-6' : 'translate-x-1'
-                            }`}
-                          />
-                        </button>
+                        <label htmlFor="animation-select-styling" className="text-sm text-[#525F7A]">Animation</label>
+                        <div className="relative inline-block">
+                          <select
+                            id="animation-select-styling"
+                            value={enableHighlightAnimation ? 'highlight' : 'none'}
+                            onChange={handleAnimationChange}
+                            className="py-2 pl-3 pr-8 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0 appearance-none cursor-pointer"
+                            style={animationSelectStyle}
+                          >
+                            <option value="highlight">Highlight</option>
+                            <option value="none">None</option>
+                          </select>
+                          <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M3 4.5L6 7.5L9 4.5" stroke="#525F7A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          </div>
+                        </div>
                       </div>
                       {/* View selector */}
                       <div className="flex items-center justify-between">
@@ -368,24 +381,26 @@ const ControlBar = ({
                           />
                         </button>
                       </div>
-                      {/* Highlight animation toggle */}
+                      {/* Animation selector */}
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-[#525F7A]">Highlight animation</span>
-                        <button
-                          onClick={() => onHighlightAnimationChange(!enableHighlightAnimation)}
-                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
-                            enableHighlightAnimation ? 'bg-[#5a3dff]' : 'bg-gray-300'
-                          } cursor-pointer`}
-                          role="switch"
-                          aria-checked={enableHighlightAnimation}
-                          aria-label="Toggle highlight animation"
-                        >
-                          <span
-                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                              enableHighlightAnimation ? 'translate-x-6' : 'translate-x-1'
-                            }`}
-                          />
-                        </button>
+                        <label htmlFor="animation-select-mobile" className="text-sm text-[#525F7A]">Animation</label>
+                        <div className="relative inline-block">
+                          <select
+                            id="animation-select-mobile"
+                            value={enableHighlightAnimation ? 'highlight' : 'none'}
+                            onChange={handleAnimationChange}
+                            className="py-2 pl-3 pr-8 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0 appearance-none cursor-pointer"
+                            style={animationSelectStyle}
+                          >
+                            <option value="highlight">Highlight</option>
+                            <option value="none">None</option>
+                          </select>
+                          <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M3 4.5L6 7.5L9 4.5" stroke="#525F7A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          </div>
+                        </div>
                       </div>
                       {/* View selector */}
                       <div className="flex items-center justify-between">
@@ -448,24 +463,26 @@ const ControlBar = ({
                       />
                     </button>
                   </div>
-                      {/* Highlight animation toggle */}
+                      {/* Animation selector */}
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-[#525F7A]">Highlight animation</span>
-                        <button
-                          onClick={() => onHighlightAnimationChange(!enableHighlightAnimation)}
-                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
-                            enableHighlightAnimation ? 'bg-[#5a3dff]' : 'bg-gray-300'
-                          } cursor-pointer`}
-                          role="switch"
-                          aria-checked={enableHighlightAnimation}
-                          aria-label="Toggle highlight animation"
-                        >
-                          <span
-                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                              enableHighlightAnimation ? 'translate-x-6' : 'translate-x-1'
-                            }`}
-                          />
-                        </button>
+                        <label htmlFor="animation-select-mobile-2" className="text-sm text-[#525F7A]">Animation</label>
+                        <div className="relative inline-block">
+                          <select
+                            id="animation-select-mobile-2"
+                            value={enableHighlightAnimation ? 'highlight' : 'none'}
+                            onChange={handleAnimationChange}
+                            className="py-2 pl-3 pr-8 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0 appearance-none cursor-pointer"
+                            style={animationSelectStyle}
+                          >
+                            <option value="highlight">Highlight</option>
+                            <option value="none">None</option>
+                          </select>
+                          <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M3 4.5L6 7.5L9 4.5" stroke="#525F7A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          </div>
+                        </div>
                       </div>
                   {/* Layout pagination */}
                   <div className="flex items-center justify-between">
