@@ -1,11 +1,12 @@
 'use client'
 
-import React from 'react'
+import React, { useMemo } from 'react'
 import useProgressAnimation from '@/hooks/useProgressAnimation'
 import useHover from '@/hooks/useHover'
 import useHoverColor from '@/hooks/useHoverColor'
 import { GIFT_BOX_TOKENS, calculateProgressBarMaxWidth, calculateProgressBarWidth } from '@/constants/giftBoxTokens'
 import ProgressBar from '@/components/sent-card/ProgressBar'
+import { hexToHsl } from '@/utils/colors'
 
 const GiftBoxContainer = ({
   progress = { current: 4, total: 5 },
@@ -18,6 +19,20 @@ const GiftBoxContainer = ({
 
   // Calculate hover and shadow colors using reusable hook
   const { hoverColor: hoverBoxColor, shadowColor: themedShadowColor } = useHoverColor(boxColor, isHovered)
+  
+  // Calculate CSS filter to theme the shadow color image (blue to themed color)
+  const shadowColorFilter = useMemo(() => {
+    const defaultBlue = '#94d8f9'
+    const [defaultH, defaultS, defaultL] = hexToHsl(defaultBlue)
+    const [themedH, themedS, themedL] = hexToHsl(boxColor)
+    
+    const hueRotate = themedH - defaultH
+    const saturateRatio = themedS / Math.max(defaultS, 1)
+    const brightnessRatio = themedL / Math.max(defaultL, 1)
+    
+    return `hue-rotate(${hueRotate}deg) saturate(${saturateRatio}) brightness(${brightnessRatio})`
+  }, [boxColor])
+  
   // Progress animation with delay and loading
   const {
     animatedProgress,
@@ -144,7 +159,12 @@ const GiftBoxContainer = ({
             }}
             data-name="Shadow Highlight"
           >
-            <div className="absolute inset-[-118.52%_-19.75%]">
+            <div 
+              className="absolute inset-[-118.52%_-19.75%]"
+              style={{
+                filter: shadowColorFilter
+              }}
+            >
               <img 
                 alt="" 
                 className="block max-w-none size-full" 
