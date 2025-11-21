@@ -222,16 +222,16 @@ const EnvelopeBoxContainer = ({
       onMouseEnter={handleHoverEnter}
       onMouseLeave={handleHoverLeave}
     >
-      {/* Box Shadow - same as Single2 (GiftBoxContainer) - only visible on hover */}
+      {/* Box Shadow - Batch 2 - only visible on hover */}
       {/* Dynamic shadow that responds to tilt angle in 3D mode */}
       <div 
         className="absolute flex items-center justify-center pointer-events-none"
         style={{
-          left: `calc(50% + ${GIFT_BOX_TOKENS.boxShadow.leftOffset} + ${shadowOffsetX}px)`,
-          top: `calc(${GIFT_BOX_TOKENS.boxShadow.top} + ${shadowOffsetY}px)`,
+          left: `calc(50% + ${GIFT_BOX_TOKENS.boxShadowBatch2.leftOffset} + ${shadowOffsetX}px)`,
+          top: `calc(${GIFT_BOX_TOKENS.boxShadowBatch2.top} + ${shadowOffsetY}px)`,
           transform: 'translateX(-50%)',
-          height: GIFT_BOX_TOKENS.boxShadow.height,
-          width: GIFT_BOX_TOKENS.boxShadow.width,
+          height: GIFT_BOX_TOKENS.boxShadowBatch2.height,
+          width: GIFT_BOX_TOKENS.boxShadowBatch2.width,
           opacity: shadowOpacity,
           zIndex: GIFT_BOX_TOKENS.zIndex.boxShadow,
           transition: isHovered && animationType === '3d'
@@ -252,14 +252,14 @@ const EnvelopeBoxContainer = ({
           <div 
             className="relative"
             style={{
-              height: GIFT_BOX_TOKENS.boxShadow.imageSize.height,
-              width: GIFT_BOX_TOKENS.boxShadow.imageSize.width
+              height: GIFT_BOX_TOKENS.boxShadowBatch2.imageSize.height,
+              width: GIFT_BOX_TOKENS.boxShadowBatch2.imageSize.width
             }}
           >
             <div 
               className="absolute"
               style={{
-                inset: GIFT_BOX_TOKENS.boxShadow.imageInset
+                inset: GIFT_BOX_TOKENS.boxShadowBatch2.imageInset
               }}
             >
               <img 

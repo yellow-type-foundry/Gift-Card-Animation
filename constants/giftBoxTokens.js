@@ -94,8 +94,20 @@ export const GIFT_BOX_TOKENS = {
     },
   },
 
-  // Box shadow (hover effect)
+  // Box shadow (hover effect) - Single 2
   boxShadow: {
+    top: '180px',
+    height: '60px',
+    width: '130px',
+    leftOffset: '0.5px',
+    imageInset: '-40.68% -18.32%',
+    imageSize: {
+      height: '59px',
+      width: '131px',
+    },
+  },
+  // Box shadow (hover effect) - Batch 2
+  boxShadowBatch2: {
     top: '160px',
     height: '60px',
     width: '130px',
