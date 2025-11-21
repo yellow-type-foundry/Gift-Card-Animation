@@ -241,8 +241,9 @@ const GiftBoxContainer = ({
               top: '50%',
               transform: 'translate(-50%, -50%)',
               zIndex: 0,
-              filter: 'blur(20px) hue-rotate(35deg)',
-              opacity: 0,
+              filter: 'blur(30px) hue-rotate(35deg)',
+              opacity: isHovered ? 0.8 : 0,
+              transition: 'opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
               pointerEvents: 'none'
             }}
           >
@@ -277,7 +278,8 @@ const GiftBoxContainer = ({
               transform: 'translate(-50%, -50%)',
               zIndex: 0,
               filter: 'blur(20px) hue-rotate(-35deg)',
-              opacity: 0,
+              opacity: isHovered ? 0.5 : 0,
+              transition: 'opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
               pointerEvents: 'none'
             }}
           >

@@ -353,36 +353,31 @@
 /* Breathing animation for Single 2 box */
 @keyframes breathing-1 {
   0%, 100% {
-    opacity: 0.15;
     transform: translate(-50%, -50%) rotate(0deg) scale(1);
   }
   50% {
-    opacity: 0.5;
     transform: translate(-50%, -50%) rotate(5deg) scale(1.05);
   }
 }
 
 @keyframes breathing-2 {
   0%, 100% {
-    opacity: 0.2;
     transform: translate(-50%, -50%) rotate(0deg) scale(1);
   }
   50% {
-    opacity: 0.4;
     transform: translate(-50%, -50%) rotate(-5deg) scale(1.05);
   }
 }
 
 .breathing-box-duplicate {
   will-change: opacity, transform;
+  animation-fill-mode: none;
 }
 
-[data-name="Gift Container/Goody"]:hover .breathing-box-1 {
-  opacity: 1;
+[data-name="Gift Card"]:hover .breathing-box-1 {
   animation: breathing-1 2s ease-in-out infinite;
 }
 
-[data-name="Gift Container/Goody"]:hover .breathing-box-2 {
-  opacity: 1;
+[data-name="Gift Card"]:hover .breathing-box-2 {
   animation: breathing-2 1.75s ease-in-out infinite;
 }
