@@ -356,19 +356,19 @@
 /* Breathing animation for Single 2 box */
 @keyframes breathing-1 {
   0%, 100% {
-    transform: translate(-50%, -50%) rotate(0deg) scale(1);
+    transform: translate(-50%, -50%) rotate(0deg) scale(.9);
   }
   50% {
-    transform: translate(-50%, -50%) rotate(5deg) scale(1.05);
+    transform: translate(-50%, -50%) rotate(15deg) scale(1.15);
   }
 }
 
 @keyframes breathing-2 {
   0%, 100% {
-    transform: translate(-50%, -50%) rotate(0deg) scale(1);
+    transform: translate(-50%, -50%) rotate(0deg) scale(.8);
   }
   50% {
-    transform: translate(-50%, -50%) rotate(-5deg) scale(1.05);
+    transform: translate(-50%, -50%) rotate(-15deg) scale(1.05);
   }
 }
 
