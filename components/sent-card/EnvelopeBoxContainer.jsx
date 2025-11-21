@@ -28,7 +28,10 @@ const EnvelopeBoxContainer = ({
   parallaxX = 0, // Parallax offset X for tilt effect
   parallaxY = 0, // Parallax offset Y for tilt effect
   skewX = 0, // Skew X angle for 3D effect
-  skewY = 0 // Skew Y angle for 3D effect
+  skewY = 0, // Skew Y angle for 3D effect
+  tiltX = 0, // Tilt X angle for 3D effect
+  tiltY = 0, // Tilt Y angle for 3D effect
+  animationType = 'none' // Animation type to determine if 3D effects should be applied
 }) => {
   const { isHovered: internalIsHovered, handleHoverEnter, handleHoverLeave } = useHover()
   // Use external hover state if provided, otherwise use internal
@@ -192,8 +195,9 @@ const EnvelopeBoxContainer = ({
       </div>
 
       {/* Paper/Card Container - highest z-index, absolutely positioned above envelope */}
+      {/* Paper is an essential part of the envelope and moves with it */}
       <div 
-        className="absolute left-1/2 translate-x-[-50%]"
+        className="absolute left-1/2"
         data-name="Paper"
         style={{ 
           zIndex: 3, // Highest z-index
@@ -201,11 +205,18 @@ const EnvelopeBoxContainer = ({
           padding: '0.5px', // Border width
           borderRadius: '8px 8px 0 0', // Rounded top corners
           background: 'linear-gradient(to top, rgba(255,255,255,0) 0%, rgba(221,226,233,1) 100%)', // Gradient border from top to bottom
-          transform: isHovered 
-            ? `translateX(-50%) translate(${parallaxX * 0.5}px, ${parallaxY * 0.5}px) scale(1.02)`
-            : 'translateX(-50%) translate(0px, 0px) scale(1)',
+          ...(isHovered && animationType === '3d' ? {
+            transform: `translateX(-50%) perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translate(${parallaxX}px, ${parallaxY}px) skewX(${skewX}deg) skewY(${skewY}deg) scale(1.02)`,
+            transformStyle: 'preserve-3d'
+          } : {
+            transform: isHovered
+              ? `translateX(-50%) translate(${parallaxX}px, ${parallaxY}px) scale(1.02)`
+              : 'translateX(-50%) translate(0px, 0px) scale(1)'
+          }),
           transformOrigin: 'center center',
-          transition: 'top 250ms ease-in-out, transform 300ms ease-out'
+          transition: isHovered 
+            ? 'top 250ms ease-in-out, transform 0.15s ease-out' // Match envelope transition timing
+            : 'top 250ms ease-in-out, transform 0.3s ease-out' // Match envelope transition timing
         }}
       >
         <div 
@@ -288,15 +299,18 @@ const EnvelopeBoxContainer = ({
         data-name="Envelope"
         style={{ 
           zIndex: 2,
-          transform: isHovered 
-            ? `translate(${parallaxX}px, ${parallaxY}px) skewX(${skewX}deg) skewY(${skewY}deg) scale(1.02)`
-            : 'translate(0px, 0px) skewX(0deg) skewY(0deg) scale(1)',
+          ...(isHovered && animationType === '3d' ? {
+            transform: `perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translate(${parallaxX}px, ${parallaxY}px) skewX(${skewX}deg) skewY(${skewY}deg) scale(1.02)`,
+            transformStyle: 'preserve-3d'
+          } : {
+            transform: isHovered
+              ? `translate(${parallaxX}px, ${parallaxY}px) scale(1.02)`
+              : 'translate(0px, 0px) scale(1)'
+          }),
+          transformOrigin: 'center center',
           transition: isHovered 
             ? 'transform 0.15s ease-out' // Smooth transition when entering hover
-            : 'transform 0.3s ease-out', // Slower transition when leaving hover
-          transform: isHovered ? 'scale(1.02)' : 'scale(1)',
-          transformOrigin: 'center center',
-          transition: `transform ${GIFT_BOX_TOKENS.animations.duration.fast} ${GIFT_BOX_TOKENS.animations.easing.easeOut}`
+            : 'transform 0.3s ease-out' // Slower transition when leaving hover
         }}
       >
         {/* Flap (top) - themed using CSS filter to transform blue to themed color */}

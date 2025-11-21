@@ -362,6 +362,8 @@ const SentCard1 = ({
   useConfetti(shouldShowConfetti && isHovered, shouldShowConfetti && allAccepted, confettiCanvasRef, cardRef)
 
   // Memoized style objects
+  // Note: When 3D is active, we don't apply tilt to the card container itself
+  // Only the inner objects (envelope/box) will tilt and skew
   const cardContainerStyle = useMemo(() => ({
     borderRadius: TOKENS.sizes.borderRadius.card,
     height: 'auto',
@@ -369,18 +371,8 @@ const SentCard1 = ({
       ? { minHeight: '400px' }
       : overlayProgressOnEnvelope && headerUseFlex1 && headerHeight1 !== undefined && !progressOutsideEnvelope
       ? { minHeight: '400px' }
-      : {}),
-    ...(shouldApplyTilt
-      ? {
-          transform: isHovered
-            ? `perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`
-            : 'perspective(1000px) rotateX(0deg) rotateY(0deg)',
-          transition: isHovered
-            ? 'transform 0.15s ease-out' // Smooth transition when entering hover
-            : 'transform 0.3s ease-out' // Slower transition when leaving hover
-        }
       : {})
-  }), [headerUseFlex, headerHeight, overlayProgressOnEnvelope, progressOutsideEnvelope, headerUseFlex1, headerHeight1, shouldApplyTilt, isHovered, tiltX, tiltY])
+  }), [headerUseFlex, headerHeight, overlayProgressOnEnvelope, progressOutsideEnvelope, headerUseFlex1, headerHeight1])
 
   const contentWrapperStyle = useMemo(() => ({
     paddingBottom: progressOutsideEnvelope ? '0px' : undefined,
@@ -563,6 +555,7 @@ const SentCard1 = ({
       className="border border-[#dde2e9] border-solid relative rounded-[24px] w-full md:w-[300px] overflow-hidden"
       style={cardContainerStyle}
       data-name="Gift Card"
+      data-animation-type={animationType}
       data-node-id="1467:49182"
     >
       <div 
@@ -790,6 +783,9 @@ const SentCard1 = ({
                 parallaxY={parallaxY}
                 skewX={skewX}
                 skewY={skewY}
+                tiltX={tiltX}
+                tiltY={tiltY}
+                animationType={animationType}
               />
             ) : useGiftContainer ? (
               // Gift Container Image (replaces envelope)

@@ -31,6 +31,12 @@
   box-shadow: 0 12px 40px -8px rgba(0, 0, 0, 0.15), 0 4px 12px -4px rgba(0, 0, 0, 0.10);
 }
 
+/* Disable hover lift and shadow when 3D animation is active */
+[data-name="Gift Card"][data-animation-type="3d"]:hover {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
 /* (progress styles are in component; no reminder button global styles) */
 /* Font Face Declarations */
 @font-face {
