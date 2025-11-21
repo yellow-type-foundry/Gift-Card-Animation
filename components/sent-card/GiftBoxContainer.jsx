@@ -14,7 +14,7 @@ const GiftBoxContainer = ({
   isHovered: externalIsHovered,
   logoPath = '/assets/GiftSent/Gift Container/9bc812442d8f2243c9c74124dd128a8df145f983.svg',
   logoBrandColor = null,
-  enableHighlightAnimation = true
+  animationType = 'highlight' // 'highlight', 'breathing', or 'none'
 }) => {
   const { isHovered: internalIsHovered, handleHoverEnter, handleHoverLeave } = useHover()
   // Use external hover state if provided, otherwise use internal
@@ -149,6 +149,81 @@ const GiftBoxContainer = ({
       onMouseLeave={handleHoverLeave}
       style={{ position: 'relative' }}
     >
+      {/* Breathing animation: Two duplicate boxes behind original (only when animationType is 'breathing') */}
+      {animationType === 'breathing' && (
+        <>
+          {/* First duplicate box - hue +15 */}
+          <div 
+            className="border-[0.5px] border-[rgba(255,255,255,0)] border-solid absolute shrink-0 overflow-hidden breathing-box-duplicate breathing-box-1"
+            style={{ 
+              width: GIFT_BOX_TOKENS.box.width, 
+              height: GIFT_BOX_TOKENS.box.height,
+              borderRadius: GIFT_BOX_TOKENS.box.borderRadius,
+              left: '50%',
+              top: '50%',
+              transform: 'translate(-50%, -50%)',
+              zIndex: 0,
+              filter: 'blur(20px) hue-rotate(15deg)',
+              opacity: 0,
+              pointerEvents: 'none'
+            }}
+          >
+            {/* Duplicate box content */}
+            <div aria-hidden="true" className="absolute inset-0 pointer-events-none" style={{ borderRadius: GIFT_BOX_TOKENS.box.borderRadius }}>
+              <div 
+                className="absolute inset-0"
+                style={{ 
+                  borderRadius: GIFT_BOX_TOKENS.box.borderRadius,
+                  backgroundColor: hoverBoxColor,
+                }}
+              />
+              <div 
+                className="absolute inset-0"
+                style={{ 
+                  borderRadius: GIFT_BOX_TOKENS.box.borderRadius,
+                  mixBlendMode: GIFT_BOX_TOKENS.blendModes.overlay,
+                  background: GIFT_BOX_TOKENS.gradients.boxBase
+                }}
+              />
+            </div>
+          </div>
+          {/* Second duplicate box - hue -15 */}
+          <div 
+            className="border-[0.5px] border-[rgba(255,255,255,0)] border-solid absolute shrink-0 overflow-hidden breathing-box-duplicate breathing-box-2"
+            style={{ 
+              width: GIFT_BOX_TOKENS.box.width, 
+              height: GIFT_BOX_TOKENS.box.height,
+              borderRadius: GIFT_BOX_TOKENS.box.borderRadius,
+              left: '50%',
+              top: '50%',
+              transform: 'translate(-50%, -50%)',
+              zIndex: 0,
+              filter: 'blur(20px) hue-rotate(-15deg)',
+              opacity: 0,
+              pointerEvents: 'none'
+            }}
+          >
+            {/* Duplicate box content */}
+            <div aria-hidden="true" className="absolute inset-0 pointer-events-none" style={{ borderRadius: GIFT_BOX_TOKENS.box.borderRadius }}>
+              <div 
+                className="absolute inset-0"
+                style={{ 
+                  borderRadius: GIFT_BOX_TOKENS.box.borderRadius,
+                  backgroundColor: hoverBoxColor,
+                }}
+              />
+              <div 
+                className="absolute inset-0"
+                style={{ 
+                  borderRadius: GIFT_BOX_TOKENS.box.borderRadius,
+                  mixBlendMode: GIFT_BOX_TOKENS.blendModes.overlay,
+                  background: GIFT_BOX_TOKENS.gradients.boxBase
+                }}
+              />
+            </div>
+          </div>
+        </>
+      )}
       <div 
         className="border-[0.5px] border-[rgba(255,255,255,0)] border-solid relative shrink-0 overflow-hidden"
         style={{ 
@@ -156,10 +231,11 @@ const GiftBoxContainer = ({
           height: GIFT_BOX_TOKENS.box.height,
           borderRadius: GIFT_BOX_TOKENS.box.borderRadius,
           transform: isHovered ? `translateY(${GIFT_BOX_TOKENS.hoverEffects.transform.translateY})` : 'translateY(0)',
-          transition: `transform ${GIFT_BOX_TOKENS.animations.duration.fast} ${GIFT_BOX_TOKENS.animations.easing.easeOut}`
+          transition: `transform ${GIFT_BOX_TOKENS.animations.duration.fast} ${GIFT_BOX_TOKENS.animations.easing.easeOut}`,
+          zIndex: 1
         }}
         data-name="Box"
-        data-highlight-enabled={enableHighlightAnimation}
+        data-animation-type={animationType}
       >
         {/* Base background and gradient overlay */}
         <div aria-hidden="true" className="absolute inset-0 pointer-events-none" style={{ borderRadius: GIFT_BOX_TOKENS.box.borderRadius }}>

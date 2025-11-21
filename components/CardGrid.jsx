@@ -17,7 +17,7 @@ const CardGrid = ({
   viewType,
   layoutNumber,
   useColoredBackground,
-  enableHighlightAnimation,
+  animationType,
   sentCards,
   mixedCardTypes,
   getSentCard1Props,
@@ -142,7 +142,7 @@ const CardGrid = ({
                   return (
                     <SentCard1
                       key={index}
-                      {...getSentCard1Props(card, layoutNumber, useColoredBackground, enableHighlightAnimation)}
+                      {...getSentCard1Props(card, layoutNumber, useColoredBackground, animationType)}
                     />
                   )
                 } else {
@@ -160,7 +160,7 @@ const CardGrid = ({
                     return (
                       <SentCard1
                         key={index}
-                        {...getSentCard1Props(card, layoutNumber, useColoredBackground, enableHighlightAnimation)}
+                        {...getSentCard1Props(card, layoutNumber, useColoredBackground, animationType)}
                         hideEnvelope={true}
                         showGiftBoxWhenHidden={true}
                       />

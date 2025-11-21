@@ -100,8 +100,8 @@ const SentCard1 = ({
   hideEnvelope = false,
   // Show gift box when envelope is hidden (for Single 2)
   showGiftBoxWhenHidden = false,
-  // Enable highlight animation for Single 2 cards
-  enableHighlightAnimation = true,
+  // Animation type for Single 2 cards: 'highlight', 'breathing', or 'none'
+  animationType = 'highlight',
   // Gift container exclusive controls (for Single 1)
   giftContainerOffsetY,
   giftContainerScale,
@@ -297,8 +297,9 @@ const SentCard1 = ({
   
   const allAccepted = isDone
   
-  // Confetti animation
-  useConfetti(isHovered, allAccepted, confettiCanvasRef, cardRef)
+  // Confetti animation - disabled for Batch 2 and Single 2
+  const shouldShowConfetti = !hideEnvelope
+  useConfetti(shouldShowConfetti && isHovered, shouldShowConfetti && allAccepted, confettiCanvasRef, cardRef)
 
   // Memoized style objects
   const cardContainerStyle = useMemo(() => ({
@@ -674,7 +675,7 @@ const SentCard1 = ({
                 isHovered={isHovered}
                 logoPath={svgLogoPath}
                 logoBrandColor={logoBrandColor}
-                enableHighlightAnimation={enableHighlightAnimation}
+                animationType={animationType}
               />
             ) : hideEnvelope ? (
               // Envelope Box Container (for Batch 2)

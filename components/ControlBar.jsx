@@ -12,8 +12,8 @@ const ControlBar = ({
   isSentTab,
   useColoredBackground,
   onThemingChange,
-  enableHighlightAnimation,
-  onHighlightAnimationChange,
+  animationType,
+  onAnimationTypeChange,
   layoutNumber,
   onLayoutChange,
   viewType,
@@ -32,8 +32,7 @@ const ControlBar = ({
 
   const handleAnimationChange = (e) => {
     const value = e.target.value
-    // "highlight" maps to true, "none" maps to false
-    onHighlightAnimationChange(value === 'highlight')
+    onAnimationTypeChange(value)
   }
 
   const animationSelectStyle = useMemo(() => ({
@@ -220,12 +219,13 @@ const ControlBar = ({
                         <div className="relative inline-block">
                           <select
                             id="animation-select-styling"
-                            value={enableHighlightAnimation ? 'highlight' : 'none'}
+                            value={animationType}
                             onChange={handleAnimationChange}
                             className="py-2 pl-3 pr-8 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0 appearance-none cursor-pointer"
                             style={animationSelectStyle}
                           >
                             <option value="highlight">Highlight</option>
+                            <option value="breathing">Breathing</option>
                             <option value="none">None</option>
                           </select>
                           <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
@@ -387,12 +387,13 @@ const ControlBar = ({
                         <div className="relative inline-block">
                           <select
                             id="animation-select-mobile"
-                            value={enableHighlightAnimation ? 'highlight' : 'none'}
+                            value={animationType}
                             onChange={handleAnimationChange}
                             className="py-2 pl-3 pr-8 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0 appearance-none cursor-pointer"
                             style={animationSelectStyle}
                           >
                             <option value="highlight">Highlight</option>
+                            <option value="breathing">Breathing</option>
                             <option value="none">None</option>
                           </select>
                           <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
@@ -469,12 +470,13 @@ const ControlBar = ({
                         <div className="relative inline-block">
                           <select
                             id="animation-select-mobile-2"
-                            value={enableHighlightAnimation ? 'highlight' : 'none'}
+                            value={animationType}
                             onChange={handleAnimationChange}
                             className="py-2 pl-3 pr-8 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0 appearance-none cursor-pointer"
                             style={animationSelectStyle}
                           >
                             <option value="highlight">Highlight</option>
+                            <option value="breathing">Breathing</option>
                             <option value="none">None</option>
                           </select>
                           <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
