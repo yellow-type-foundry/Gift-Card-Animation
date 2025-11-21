@@ -52,6 +52,78 @@ const EnvelopeBoxContainer = ({
     return hslToHex(h, s, darkerL)
   }, [boxColor, progressIndicatorShadowColor])
 
+  // Dynamic shadow calculations based on tilt angle (for 3D effect)
+  // Shadow moves opposite to tilt direction, becomes more elongated, and opacity changes
+  const shadowOffsetX = useMemo(() => {
+    if (!isHovered || animationType !== '3d') return 0
+    // Shadow moves opposite to tiltY (when tilted right, shadow moves left)
+    return -tiltY * 2 // 2px per degree
+  }, [isHovered, animationType, tiltY])
+
+  const shadowOffsetY = useMemo(() => {
+    if (!isHovered || animationType !== '3d') return 0
+    // Shadow moves opposite to tiltX (when tilted down, shadow moves up)
+    return -tiltX * 2 // 2px per degree
+  }, [isHovered, animationType, tiltX])
+
+  const shadowScaleX = useMemo(() => {
+    if (!isHovered || animationType !== '3d') return 1
+    // Shadow becomes more elongated when tilted
+    // Calculate based on tilt angle magnitude
+    const tiltMagnitude = Math.sqrt(tiltX * tiltX + tiltY * tiltY)
+    return 1 + (tiltMagnitude / 6) * 0.3 // Up to 30% elongation
+  }, [isHovered, animationType, tiltX, tiltY])
+
+  const shadowScaleY = useMemo(() => {
+    if (!isHovered || animationType !== '3d') return 1
+    // Shadow becomes slightly compressed when tilted
+    const tiltMagnitude = Math.sqrt(tiltX * tiltX + tiltY * tiltY)
+    return 1 - (tiltMagnitude / 6) * 0.1 // Up to 10% compression
+  }, [isHovered, animationType, tiltX, tiltY])
+
+  const shadowOpacity = useMemo(() => {
+    if (!isHovered) return GIFT_BOX_TOKENS.hoverEffects.boxShadowOpacity.default
+    if (animationType !== '3d') return GIFT_BOX_TOKENS.hoverEffects.boxShadowOpacity.hover
+    // Shadow opacity increases when tilted (more dramatic)
+    const tiltMagnitude = Math.sqrt(tiltX * tiltX + tiltY * tiltY)
+    const baseOpacity = GIFT_BOX_TOKENS.hoverEffects.boxShadowOpacity.hover
+    return Math.min(1, baseOpacity + (tiltMagnitude / 6) * 0.2) // Up to 20% more opacity
+  }, [isHovered, animationType, tiltX, tiltY])
+
+  // 2. Depth-based scale: scale down when tilted away, scale up when tilted toward viewer
+  const depthScale = useMemo(() => {
+    if (!isHovered || animationType !== '3d') return 1
+    // Calculate perceived distance based on tilt (negative tiltX = tilted away)
+    // When tilted away (positive tiltX), scale down; when tilted toward (negative tiltX), scale up
+    const distanceFactor = -tiltX / 6 // Normalize to -1 to 1 range
+    return 1 + distanceFactor * 0.05 // Up to 5% scale change
+  }, [isHovered, animationType, tiltX])
+
+  // 3. Lighting/brightness shifts: brighter when tilted toward light, darker when away
+  const brightnessShift = useMemo(() => {
+    if (!isHovered || animationType !== '3d') return 1
+    // Light source is from top-left, so negative tiltX (tilted up) and negative tiltY (tilted left) = brighter
+    const lightFactor = (-tiltX - tiltY) / 12 // Normalize to -1 to 1 range
+    return 1 + lightFactor * 0.15 // Up to 15% brightness change
+  }, [isHovered, animationType, tiltX, tiltY])
+
+  // 4. Edge highlighting: brighter edges when facing light
+  const edgeHighlightIntensity = useMemo(() => {
+    if (!isHovered || animationType !== '3d') return 0
+    // Top and left edges are brighter when facing light
+    const topEdgeFactor = Math.max(0, -tiltX / 6) // Top edge (negative tiltX = facing up)
+    const leftEdgeFactor = Math.max(0, -tiltY / 6) // Left edge (negative tiltY = facing left)
+    return Math.max(topEdgeFactor, leftEdgeFactor) * 0.6 // Up to 60% intensity
+  }, [isHovered, animationType, tiltX, tiltY])
+
+  // 5. Perspective blur (depth of field): blur when tilted away from viewer
+  const depthBlur = useMemo(() => {
+    if (!isHovered || animationType !== '3d') return 0
+    // Blur increases when tilted away (positive tiltX)
+    const blurFactor = Math.max(0, tiltX / 6) // 0 to 1 range
+    return blurFactor * 2 // Up to 2px blur
+  }, [isHovered, animationType, tiltX])
+
   // Calculate CSS filter to transform blue flap to themed color
   // Uses flapColor if provided, otherwise uses boxColor
   // NOTE: CSS filters work multiplicatively, so the result is an approximation of the target color
@@ -151,24 +223,30 @@ const EnvelopeBoxContainer = ({
       onMouseLeave={handleHoverLeave}
     >
       {/* Box Shadow - same as Single2 (GiftBoxContainer) - only visible on hover */}
+      {/* Dynamic shadow that responds to tilt angle in 3D mode */}
       <div 
         className="absolute flex items-center justify-center pointer-events-none"
         style={{
-          left: `calc(50% + ${GIFT_BOX_TOKENS.boxShadow.leftOffset})`,
-          top: GIFT_BOX_TOKENS.boxShadow.top,
+          left: `calc(50% + ${GIFT_BOX_TOKENS.boxShadow.leftOffset} + ${shadowOffsetX}px)`,
+          top: `calc(${GIFT_BOX_TOKENS.boxShadow.top} + ${shadowOffsetY}px)`,
           transform: 'translateX(-50%)',
           height: GIFT_BOX_TOKENS.boxShadow.height,
           width: GIFT_BOX_TOKENS.boxShadow.width,
-          opacity: isHovered ? GIFT_BOX_TOKENS.hoverEffects.boxShadowOpacity.hover : GIFT_BOX_TOKENS.hoverEffects.boxShadowOpacity.default,
+          opacity: shadowOpacity,
           zIndex: GIFT_BOX_TOKENS.zIndex.boxShadow,
-          transition: `opacity ${GIFT_BOX_TOKENS.animations.duration.fast} ${GIFT_BOX_TOKENS.animations.easing.easeOut}`
+          transition: isHovered && animationType === '3d'
+            ? `opacity 0.15s ease-out, left 0.15s ease-out, top 0.15s ease-out`
+            : `opacity ${GIFT_BOX_TOKENS.animations.duration.fast} ${GIFT_BOX_TOKENS.animations.easing.easeOut}`
         }}
         data-name="Box Shadow"
       >
         <div 
           className="flex-none"
           style={{
-            transform: 'scaleY(-1)'
+            transform: `scaleY(-1) scaleX(${shadowScaleX}) scaleY(${shadowScaleY})`,
+            transition: isHovered && animationType === '3d'
+              ? 'transform 0.15s ease-out'
+              : 'none'
           }}
         >
           <div 
@@ -206,17 +284,20 @@ const EnvelopeBoxContainer = ({
           borderRadius: '8px 8px 0 0', // Rounded top corners
           background: 'linear-gradient(to top, rgba(255,255,255,0) 0%, rgba(221,226,233,1) 100%)', // Gradient border from top to bottom
           ...(isHovered && animationType === '3d' ? {
-            transform: `translateX(-50%) perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translate(${parallaxX}px, ${parallaxY}px) skewX(${skewX}deg) skewY(${skewY}deg) scale(1.02)`,
-            transformStyle: 'preserve-3d'
+            transform: `translateX(-50%) perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translate(${parallaxX}px, ${parallaxY}px) skewX(${skewX}deg) skewY(${skewY}deg) scale(${1.02 * depthScale})`,
+            transformStyle: 'preserve-3d',
+            filter: `brightness(${brightnessShift}) blur(${depthBlur}px)`,
+            transition: 'top 250ms ease-in-out, transform 0.15s ease-out, filter 0.15s ease-out'
           } : {
             transform: isHovered
               ? `translateX(-50%) translate(${parallaxX}px, ${parallaxY}px) scale(1.02)`
-              : 'translateX(-50%) translate(0px, 0px) scale(1)'
+              : 'translateX(-50%) translate(0px, 0px) scale(1)',
+            filter: 'none',
+            transition: isHovered 
+              ? 'top 250ms ease-in-out, transform 0.15s ease-out'
+              : 'top 250ms ease-in-out, transform 0.3s ease-out'
           }),
-          transformOrigin: 'center center',
-          transition: isHovered 
-            ? 'top 250ms ease-in-out, transform 0.15s ease-out' // Match envelope transition timing
-            : 'top 250ms ease-in-out, transform 0.3s ease-out' // Match envelope transition timing
+          transformOrigin: 'center center'
         }}
       >
         <div 
@@ -300,19 +381,47 @@ const EnvelopeBoxContainer = ({
         style={{ 
           zIndex: 2,
           ...(isHovered && animationType === '3d' ? {
-            transform: `perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translate(${parallaxX}px, ${parallaxY}px) skewX(${skewX}deg) skewY(${skewY}deg) scale(1.02)`,
-            transformStyle: 'preserve-3d'
+            transform: `perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translate(${parallaxX}px, ${parallaxY}px) skewX(${skewX}deg) skewY(${skewY}deg) scale(${1.02 * depthScale})`,
+            transformStyle: 'preserve-3d',
+            filter: `brightness(${brightnessShift}) blur(${depthBlur}px)`,
+            transition: 'transform 0.15s ease-out, filter 0.15s ease-out'
           } : {
             transform: isHovered
               ? `translate(${parallaxX}px, ${parallaxY}px) scale(1.02)`
-              : 'translate(0px, 0px) scale(1)'
+              : 'translate(0px, 0px) scale(1)',
+            filter: 'none',
+            transition: 'transform 0.3s ease-out'
           }),
-          transformOrigin: 'center center',
-          transition: isHovered 
-            ? 'transform 0.15s ease-out' // Smooth transition when entering hover
-            : 'transform 0.3s ease-out' // Slower transition when leaving hover
+          transformOrigin: 'center center'
         }}
       >
+        {/* 4. Edge highlighting: brighter edges when facing light (only in 3D mode) */}
+        {isHovered && animationType === '3d' && edgeHighlightIntensity > 0 && (
+          <>
+            {/* Top edge highlight */}
+            <div 
+              className="absolute top-0 left-0 right-0 pointer-events-none"
+              style={{
+                height: '2px',
+                background: `linear-gradient(to right, transparent 0%, rgba(255, 255, 255, ${edgeHighlightIntensity}) 50%, transparent 100%)`,
+                mixBlendMode: 'overlay',
+                zIndex: 10,
+                transition: 'opacity 0.15s ease-out'
+              }}
+            />
+            {/* Left edge highlight */}
+            <div 
+              className="absolute top-0 bottom-0 left-0 pointer-events-none"
+              style={{
+                width: '2px',
+                background: `linear-gradient(to bottom, transparent 0%, rgba(255, 255, 255, ${edgeHighlightIntensity}) 50%, transparent 100%)`,
+                mixBlendMode: 'overlay',
+                zIndex: 10,
+                transition: 'opacity 0.15s ease-out'
+              }}
+            />
+          </>
+        )}
         {/* Flap (top) - themed using CSS filter to transform blue to themed color */}
         <div className="h-[97px] relative shrink-0 w-[168px] overflow-visible" data-name="Flap">
           <div 

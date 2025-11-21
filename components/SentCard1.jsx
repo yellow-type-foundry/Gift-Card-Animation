@@ -172,13 +172,13 @@ const SentCard1 = ({
   const skewX = useMemo(() => {
     if (!isHovered || !shouldApplyTilt) return 0
     // Skew in opposite direction of Y position (when cursor moves down, skew up)
-    return (0.5 - mousePosition.y) * 2 // Max 1 degree skew
+    return (0.5 - mousePosition.y) * 1.4 // Max 1 degree skew
   }, [isHovered, shouldApplyTilt, mousePosition.y])
   
   const skewY = useMemo(() => {
     if (!isHovered || !shouldApplyTilt) return 0
     // Skew in opposite direction of X position (when cursor moves right, skew left)
-    return (0.5 - mousePosition.x) * 2 // Max 1 degree skew, fully inverted
+    return (0.5 - mousePosition.x) * 1.4 // Max 1 degree skew, fully inverted
   }, [isHovered, shouldApplyTilt, mousePosition.x])
   
   // Progress animation
@@ -563,6 +563,7 @@ const SentCard1 = ({
         style={contentWrapperStyle}
       >
         {/* Specular highlight that follows cursor (only when 3D animation is selected) */}
+        {/* 6. Enhanced Specular Highlight - follows cursor and responds to tilt */}
         {shouldApplyTilt && isHovered && (
           <div
             className="absolute pointer-events-none"
@@ -573,11 +574,11 @@ const SentCard1 = ({
               height: '180px',
               transform: 'translate(-50%, -50%)',
               borderRadius: '50%',
-              background: 'radial-gradient(circle, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.2) 30%, transparent 70%)',
+              background: 'radial-gradient(circle, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.3) 30%, transparent 70%)',
               mixBlendMode: 'overlay',
-              opacity: 0.4,
+              opacity: 0.4 + Math.max(0, (-tiltX - tiltY) / 12) * 0.3, // More intense when facing light
               zIndex: 100,
-              transition: 'opacity 0.2s ease-out',
+              transition: 'opacity 0.15s ease-out',
               filter: 'blur(8px)'
             }}
           />
@@ -764,6 +765,8 @@ const SentCard1 = ({
                 parallaxY={parallaxY}
                 skewX={skewX}
                 skewY={skewY}
+                tiltX={tiltX}
+                tiltY={tiltY}
               />
             ) : hideEnvelope ? (
               // Envelope Box Container (for Batch 2)
