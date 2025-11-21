@@ -100,6 +100,8 @@ const SentCard1 = ({
   hideEnvelope = false,
   // Show gift box when envelope is hidden (for Single 2)
   showGiftBoxWhenHidden = false,
+  // Enable highlight animation for Single 2 cards
+  enableHighlightAnimation = true,
   // Gift container exclusive controls (for Single 1)
   giftContainerOffsetY,
   giftContainerScale,
@@ -157,6 +159,35 @@ const SentCard1 = ({
     // Default fallback
     return '/assets/GiftSent/SVG Logo/Logo.svg'
   }, [hideEnvelope, showGiftBoxWhenHidden, giftContainerImage, validatedProgress.current, validatedProgress.total])
+
+  // Extract brand name from logo path
+  const brandName = useMemo(() => {
+    // Get the logo path (prefer SVG, fallback to PNG)
+    let logoPath = svgLogoPath
+    if (!logoPath && giftContainerImage) {
+      logoPath = giftContainerImage
+    }
+    if (!logoPath) {
+      // Fallback: try to get from progress-based selection
+      if (hideEnvelope && showGiftBoxWhenHidden) {
+        const progressRatio = validatedProgress.total > 0 
+          ? validatedProgress.current / validatedProgress.total 
+          : 0
+        const index = Math.min(6, Math.floor(progressRatio * 7))
+        logoPath = GIFT_CONTAINER_IMAGES[index]
+      }
+    }
+    
+    if (!logoPath) return null
+    
+    // Extract filename from path
+    const filename = logoPath.split('/').pop() || ''
+    // Remove extension (.png, .svg)
+    const nameWithoutExt = filename.replace(/\.(png|svg)$/i, '')
+    // Handle special cases
+    if (nameWithoutExt === 'Logo') return 'Columbia'
+    return nameWithoutExt
+  }, [svgLogoPath, giftContainerImage, hideEnvelope, showGiftBoxWhenHidden, validatedProgress.current, validatedProgress.total])
 
   // Single 2 Brand Color Controls
   // These values control the saturation and luminance for Single 2 brand colors (box and logo)
@@ -610,6 +641,7 @@ const SentCard1 = ({
                 isHovered={isHovered}
                 logoPath={svgLogoPath}
                 logoBrandColor={logoBrandColor}
+                enableHighlightAnimation={enableHighlightAnimation}
               />
             ) : hideEnvelope ? (
               // Envelope Box Container (for Batch 2)
@@ -1055,7 +1087,7 @@ const SentCard1 = ({
           animatedCurrent={animatedCurrent}
           validatedTotal={validatedProgress.total}
           infoTitle={giftTitle}
-          infoSubtitle={giftSubtitle}
+          infoSubtitle={brandName || giftSubtitle}
           equalPadding={
             progressOutsideEnvelope && footerPadEqual2 !== undefined
               ? footerPadEqual2

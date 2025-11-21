@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useMemo, useEffect, useState } from 'react'
+import React, { useMemo, useEffect, useState, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import TabButton from '@/components/TabButton'
 
@@ -12,6 +12,8 @@ const ControlBar = ({
   isSentTab,
   useColoredBackground,
   onThemingChange,
+  enableHighlightAnimation,
+  onHighlightAnimationChange,
   layoutNumber,
   onLayoutChange,
   viewType,
@@ -29,10 +31,38 @@ const ControlBar = ({
   }
 
   const [isMounted, setIsMounted] = useState(false)
+  const [showStylingMenu, setShowStylingMenu] = useState(false)
+  const stylingButtonRef = useRef(null)
+  const [stylingMenuPosition, setStylingMenuPosition] = useState({ top: 0, right: 0 })
 
   useEffect(() => {
     setIsMounted(true)
   }, [])
+
+  // Calculate dropdown position when opening
+  useEffect(() => {
+    if (showStylingMenu && stylingButtonRef.current) {
+      const rect = stylingButtonRef.current.getBoundingClientRect()
+      setStylingMenuPosition({
+        top: rect.bottom + 8, // 8px = mt-2
+        right: window.innerWidth - rect.right
+      })
+    }
+  }, [showStylingMenu])
+
+  // Close styling menu when clicking outside
+  useEffect(() => {
+    if (!showStylingMenu) return
+    
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.styling-menu-container')) {
+        setShowStylingMenu(false)
+      }
+    }
+    
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [showStylingMenu])
 
   const controlBarStyle = useMemo(() => ({
     WebkitOverflowScrolling: 'touch',
@@ -89,71 +119,136 @@ const ControlBar = ({
         {/* Gift Sent specific controls */}
         {isSentTab && (
         <>
-          {/* Desktop: Theming and Layout controls - Hidden on mobile */}
-          <div className="hidden md:flex items-center gap-6 shrink-0 controls-fade-in">
-            {/* Theming toggle */}
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-[#525F7A]">Theming</span>
+          {/* Desktop: Controls - Hidden on mobile */}
+          <div className="hidden md:flex items-center gap-4 shrink-0 controls-fade-in">
+            {/* Styling dropdown button */}
+            <div className="relative styling-menu-container">
               <button
-                onClick={() => !isSingleView && onThemingChange(!useColoredBackground)}
-                disabled={isSingleView}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
-                  useColoredBackground ? 'bg-[#5a3dff]' : 'bg-gray-300'
-                } ${isSingleView ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'}`}
-                role="switch"
-                aria-checked={useColoredBackground}
-                aria-disabled={isSingleView}
-                aria-label="Toggle theming"
+                ref={stylingButtonRef}
+                onClick={() => setShowStylingMenu(!showStylingMenu)}
+                className="flex items-center gap-2 px-4 py-2 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0"
+                aria-label="Styling options"
+                aria-expanded={showStylingMenu}
               >
-                <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                    useColoredBackground ? 'translate-x-6' : 'translate-x-1'
-                  }`}
-                />
+                <span>Styling</span>
+                <svg 
+                  width="12" 
+                  height="12" 
+                  viewBox="0 0 12 12" 
+                  fill="none" 
+                  xmlns="http://www.w3.org/2000/svg"
+                  className={`transition-transform ${showStylingMenu ? 'rotate-180' : ''}`}
+                >
+                  <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
               </button>
             </div>
-            {/* Layout pagination */}
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-[#525F7A]">Layout</span>
-              <div className="flex items-center gap-1">
-                {[1, 2, 3].map((num) => (
-                  <button
-                    key={num}
-                    onClick={() => onLayoutChange({ target: { value: String(num) } })}
-                    className={`px-3 py-1.5 rounded-[8px] text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0 ${
-                      layoutNumber === String(num)
-                        ? 'bg-[#5a3dff] text-white'
-                        : 'bg-white border border-[#dde2e9] text-[#525F7A] hover:bg-gray-50'
-                    }`}
-                    aria-label={`Layout ${num}`}
-                  >
-                    {num}
-                  </button>
-                ))}
-              </div>
-            </div>
-            {/* View selector */}
-            <div className="flex items-center gap-3">
-              <label htmlFor="view-select" className="text-sm text-[#525F7A]">View</label>
-              <div className="relative inline-block">
-                <select
-                  id="view-select"
-                  value={viewType}
-                  onChange={handleViewChange}
-                  className="py-2 pl-3 pr-8 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0 appearance-none cursor-pointer"
-                  style={viewSelectStyle}
+            
+            {/* Styling dropdown menu - Portal to body */}
+            {showStylingMenu && isMounted && createPortal(
+              <>
+                <div 
+                  className="fixed inset-0"
+                  style={{ zIndex: 9998 }}
+                  onClick={() => setShowStylingMenu(false)}
+                />
+                <div 
+                  className="fixed w-64 bg-white rounded-[12px] border border-[#dde2e9] shadow-lg p-4 styling-menu-container"
+                  style={{ 
+                    zIndex: 9999,
+                    top: `${stylingMenuPosition.top}px`,
+                    right: `${stylingMenuPosition.right}px`
+                  }}
+                  onClick={(e) => e.stopPropagation()}
                 >
-                  <option value="mixed">Mixed</option>
-                  <option value="batch">Batch</option>
-                  <option value="single">Single</option>
-                </select>
-                <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
-                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M3 4.5L6 7.5L9 4.5" stroke="#525F7A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </div>
-              </div>
-            </div>
+                    <div className="space-y-4">
+                      {/* Layout pagination */}
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-[#525F7A]">Layout</span>
+                        <div className="flex items-center gap-1">
+                          {[1, 2, 3].map((num) => (
+                            <button
+                              key={num}
+                              onClick={() => onLayoutChange({ target: { value: String(num) } })}
+                              className={`px-3 py-1.5 rounded-[8px] text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0 ${
+                                layoutNumber === String(num)
+                                  ? 'bg-[#5a3dff] text-white'
+                                  : 'bg-white border border-[#dde2e9] text-[#525F7A] hover:bg-gray-50'
+                              }`}
+                              aria-label={`Layout ${num}`}
+                            >
+                              {num}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      {/* Theming toggle */}
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-[#525F7A]">Theming</span>
+                        <button
+                          onClick={() => !isSingleView && onThemingChange(!useColoredBackground)}
+                          disabled={isSingleView}
+                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
+                            useColoredBackground ? 'bg-[#5a3dff]' : 'bg-gray-300'
+                          } ${isSingleView ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'}`}
+                          role="switch"
+                          aria-checked={useColoredBackground}
+                          aria-disabled={isSingleView}
+                          aria-label="Toggle theming"
+                        >
+                          <span
+                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                              useColoredBackground ? 'translate-x-6' : 'translate-x-1'
+                            }`}
+                          />
+                        </button>
+                      </div>
+                      {/* Highlight animation toggle */}
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-[#525F7A]">Highlight animation</span>
+                        <button
+                          onClick={() => onHighlightAnimationChange(!enableHighlightAnimation)}
+                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
+                            enableHighlightAnimation ? 'bg-[#5a3dff]' : 'bg-gray-300'
+                          } cursor-pointer`}
+                          role="switch"
+                          aria-checked={enableHighlightAnimation}
+                          aria-label="Toggle highlight animation"
+                        >
+                          <span
+                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                              enableHighlightAnimation ? 'translate-x-6' : 'translate-x-1'
+                            }`}
+                          />
+                        </button>
+                      </div>
+                      {/* View selector */}
+                      <div className="flex items-center justify-between">
+                        <label htmlFor="view-select-styling" className="text-sm text-[#525F7A]">View</label>
+                        <div className="relative inline-block">
+                          <select
+                            id="view-select-styling"
+                            value={viewType}
+                            onChange={handleViewChange}
+                            className="py-2 pl-3 pr-8 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0 appearance-none cursor-pointer"
+                            style={viewSelectStyle}
+                          >
+                            <option value="mixed">Mixed</option>
+                            <option value="batch">Batch</option>
+                            <option value="single">Single</option>
+                          </select>
+                          <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M3 4.5L6 7.5L9 4.5" stroke="#525F7A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </>,
+                document.body
+              )}
           </div>
           
         </>
@@ -225,8 +320,99 @@ const ControlBar = ({
                 onTouchStart={(e) => e.stopPropagation()}
               >
                 <div className="space-y-4">
-                  {/* Shuffle button */}
+                  {/* Layout pagination */}
                   <div className="flex items-center justify-between">
+                    <span className="text-sm text-[#525F7A]">Layout</span>
+                    <div className="flex items-center gap-1">
+                      {[1, 2, 3].map((num) => (
+                        <button
+                          key={num}
+                          onClick={() => {
+                            onLayoutChange({ target: { value: String(num) } })
+                            onSettingsMenuToggle(false)
+                          }}
+                          className={`px-3 py-1.5 rounded-[8px] text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0 ${
+                            layoutNumber === String(num)
+                              ? 'bg-[#5a3dff] text-white'
+                              : 'bg-white border border-[#dde2e9] text-[#525F7A] hover:bg-gray-50'
+                          }`}
+                          aria-label={`Layout ${num}`}
+                        >
+                          {num}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  {/* Styling section header */}
+                  <div className="pt-2 border-t border-[#dde2e9]">
+                    <div className="text-xs font-medium text-[#525F7A] mb-3">Styling</div>
+                    <div className="space-y-4">
+                      {/* Theming toggle */}
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-[#525F7A]">Theming</span>
+                        <button
+                          onClick={() => !isSingleView && onThemingChange(!useColoredBackground)}
+                          disabled={isSingleView}
+                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
+                            useColoredBackground ? 'bg-[#5a3dff]' : 'bg-gray-300'
+                          } ${isSingleView ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'}`}
+                          role="switch"
+                          aria-checked={useColoredBackground}
+                          aria-disabled={isSingleView}
+                          aria-label="Toggle theming"
+                        >
+                          <span
+                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                              useColoredBackground ? 'translate-x-6' : 'translate-x-1'
+                            }`}
+                          />
+                        </button>
+                      </div>
+                      {/* Highlight animation toggle */}
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-[#525F7A]">Highlight animation</span>
+                        <button
+                          onClick={() => onHighlightAnimationChange(!enableHighlightAnimation)}
+                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
+                            enableHighlightAnimation ? 'bg-[#5a3dff]' : 'bg-gray-300'
+                          } cursor-pointer`}
+                          role="switch"
+                          aria-checked={enableHighlightAnimation}
+                          aria-label="Toggle highlight animation"
+                        >
+                          <span
+                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                              enableHighlightAnimation ? 'translate-x-6' : 'translate-x-1'
+                            }`}
+                          />
+                        </button>
+                      </div>
+                      {/* View selector */}
+                      <div className="flex items-center justify-between">
+                        <label htmlFor="view-select-mobile" className="text-sm text-[#525F7A]">View</label>
+                        <div className="relative inline-block">
+                          <select
+                            id="view-select-mobile"
+                            value={viewType}
+                            onChange={handleViewChange}
+                            className="py-2 pl-3 pr-8 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0 appearance-none cursor-pointer"
+                            style={viewSelectStyle}
+                          >
+                            <option value="mixed">Mixed</option>
+                            <option value="batch">Batch</option>
+                            <option value="single">Single</option>
+                          </select>
+                          <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M3 4.5L6 7.5L9 4.5" stroke="#525F7A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  {/* Shuffle button */}
+                  <div className="flex items-center justify-between pt-2 border-t border-[#dde2e9]">
                     <span className="text-sm text-[#525F7A]">Shuffle</span>
                     <button
                       onClick={() => {
@@ -262,6 +448,25 @@ const ControlBar = ({
                       />
                     </button>
                   </div>
+                      {/* Highlight animation toggle */}
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-[#525F7A]">Highlight animation</span>
+                        <button
+                          onClick={() => onHighlightAnimationChange(!enableHighlightAnimation)}
+                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
+                            enableHighlightAnimation ? 'bg-[#5a3dff]' : 'bg-gray-300'
+                          } cursor-pointer`}
+                          role="switch"
+                          aria-checked={enableHighlightAnimation}
+                          aria-label="Toggle highlight animation"
+                        >
+                          <span
+                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                              enableHighlightAnimation ? 'translate-x-6' : 'translate-x-1'
+                            }`}
+                          />
+                        </button>
+                      </div>
                   {/* Layout pagination */}
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-[#525F7A]">Layout</span>

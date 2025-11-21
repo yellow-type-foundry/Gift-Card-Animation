@@ -13,7 +13,8 @@ const GiftBoxContainer = ({
   boxColor = '#1987C7', // Columbia blue as default (replaces old placeholder blue)
   isHovered: externalIsHovered,
   logoPath = '/assets/GiftSent/Gift Container/9bc812442d8f2243c9c74124dd128a8df145f983.svg',
-  logoBrandColor = null
+  logoBrandColor = null,
+  enableHighlightAnimation = true
 }) => {
   const { isHovered: internalIsHovered, handleHoverEnter, handleHoverLeave } = useHover()
   // Use external hover state if provided, otherwise use internal
@@ -158,6 +159,7 @@ const GiftBoxContainer = ({
           transition: `transform ${GIFT_BOX_TOKENS.animations.duration.fast} ${GIFT_BOX_TOKENS.animations.easing.easeOut}`
         }}
         data-name="Box"
+        data-highlight-enabled={enableHighlightAnimation}
       >
         {/* Base background and gradient overlay */}
         <div aria-hidden="true" className="absolute inset-0 pointer-events-none" style={{ borderRadius: GIFT_BOX_TOKENS.box.borderRadius }}>
