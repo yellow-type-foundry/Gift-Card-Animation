@@ -14,7 +14,11 @@ const GiftBoxContainer = ({
   isHovered: externalIsHovered,
   logoPath = '/assets/GiftSent/Gift Container/9bc812442d8f2243c9c74124dd128a8df145f983.svg',
   logoBrandColor = null,
-  animationType = 'highlight' // 'highlight', 'breathing', or 'none'
+  animationType = 'highlight', // 'highlight', 'breathing', '3d', or 'none'
+  parallaxX = 0, // Parallax offset X for tilt effect
+  parallaxY = 0, // Parallax offset Y for tilt effect
+  skewX = 0, // Skew X angle for 3D effect
+  skewY = 0 // Skew Y angle for 3D effect
 }) => {
   const { isHovered: internalIsHovered, handleHoverEnter, handleHoverLeave } = useHover()
   // Use external hover state if provided, otherwise use internal
@@ -149,8 +153,8 @@ const GiftBoxContainer = ({
       onMouseLeave={handleHoverLeave}
       style={{ position: 'relative' }}
     >
-      {/* Breathing animation: Two duplicate boxes behind original (only when animationType is 'breathing') */}
-      {animationType === 'breathing' && (
+      {/* Breathing animation: Two duplicate boxes behind original (only when animationType is 'breathing' or '3d') */}
+      {(animationType === 'breathing' || animationType === '3d') && (
         <>
           {/* First duplicate box - hue +15 */}
           <div 
@@ -230,8 +234,14 @@ const GiftBoxContainer = ({
           width: GIFT_BOX_TOKENS.box.width, 
           height: GIFT_BOX_TOKENS.box.height,
           borderRadius: GIFT_BOX_TOKENS.box.borderRadius,
-          transform: isHovered ? `translateY(${GIFT_BOX_TOKENS.hoverEffects.transform.translateY}) scale(1.0125)` : 'translateY(0) scale(1)',
-          transition: `transform ${GIFT_BOX_TOKENS.animations.duration.fast} ${GIFT_BOX_TOKENS.animations.easing.easeOut}`,
+          transform: (isHovered && animationType === '3d')
+            ? `translate(${parallaxX}px, ${parallaxY}px) translateY(${GIFT_BOX_TOKENS.hoverEffects.transform.translateY}) skewX(${skewX}deg) skewY(${skewY}deg) scale(1.0125)` 
+            : isHovered
+            ? `translateY(${GIFT_BOX_TOKENS.hoverEffects.transform.translateY}) scale(1.0125)`
+            : `translateY(0) scale(1)`,
+          transition: isHovered
+            ? `transform 0.15s ease-out` // Smooth transition when entering hover
+            : `transform 0.3s ease-out`, // Slower transition when leaving hover
           zIndex: 1,
           transformOrigin: 'center center'
         }}
@@ -302,17 +312,24 @@ const GiftBoxContainer = ({
               paddingRight: GIFT_BOX_TOKENS.logo.containerPadding.horizontal,
               paddingTop: GIFT_BOX_TOKENS.logo.containerPadding.vertical,
               paddingBottom: GIFT_BOX_TOKENS.logo.containerPadding.vertical,
+              ...(animationType === '3d' && isHovered
+                ? {
+                    transform: `translate(${-parallaxX * 0.5}px, ${-parallaxY * 0.5}px)`,
+                    transition: 'transform 0.15s ease-out'
+                  }
+                : {})
             }}
             data-name="Logo Container"
           >
             {/* Logo with text emboss style */}
             <div 
-              className="relative shrink-0 mix-blend-overlay"
+              className={`relative shrink-0 ${animationType === '3d' ? '' : 'mix-blend-overlay'}`}
               style={{ 
                 width: GIFT_BOX_TOKENS.logo.width,
                 height: GIFT_BOX_TOKENS.logo.height,
-                mixBlendMode: GIFT_BOX_TOKENS.blendModes.overlay,
-                paddingTop: '18px'
+                mixBlendMode: animationType === '3d' ? 'normal' : GIFT_BOX_TOKENS.blendModes.overlay,
+                paddingTop: '18px',
+                transition: 'mix-blend-mode 0.2s ease-out' // Smooth transition between blend modes
               }}
               data-name="Logo"  
             >

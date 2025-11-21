@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useRef, useMemo } from 'react'
+import React, { useRef, useMemo, useState, useCallback } from 'react'
 import Image from 'next/image'
 import { TOKENS } from '@/constants/tokens'
 import useDominantColor from '@/hooks/useDominantColor'
@@ -120,6 +120,66 @@ const SentCard1 = ({
   
   // Generate stable IDs for SVG elements
   const ids = useComponentIds(boxImage, from)
+  
+  // Mouse tracking for tilt effect (only for Single 2 and Batch 2 when animationType is '3d')
+  const [mousePosition, setMousePosition] = useState({ x: 0.5, y: 0.5 })
+  const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 }) // Pixel position for specular highlight
+  const isSingle2OrBatch2 = (hideEnvelope && showGiftBoxWhenHidden) || (hideEnvelope && !showGiftBoxWhenHidden) // Single 2 or Batch 2
+  const shouldApplyTilt = isSingle2OrBatch2 && animationType === '3d' // Only apply tilt when 3D animation is selected
+  
+  // Handle mouse move for tilt effect
+  const handleMouseMove = useCallback((e) => {
+    if (!shouldApplyTilt || !cardRef.current) return
+    
+    const rect = cardRef.current.getBoundingClientRect()
+    const x = (e.clientX - rect.left) / rect.width
+    const y = (e.clientY - rect.top) / rect.height
+    setMousePosition({ x, y })
+    setCursorPosition({ x: e.clientX - rect.left, y: e.clientY - rect.top })
+  }, [shouldApplyTilt])
+  
+  // Reset position on mouse leave
+  const handleMouseLeaveWithReset = useCallback(() => {
+    handleHoverLeave()
+    setMousePosition({ x: 0.5, y: 0.5 })
+  }, [handleHoverLeave])
+  
+  // Calculate tilt angles based on mouse position
+  const tiltX = useMemo(() => {
+    if (!isHovered || !shouldApplyTilt) return 0
+    // Map y position (0-1) to tilt angle (-3 to 3 degrees)
+    return (mousePosition.y - 0.5) * 6
+  }, [isHovered, shouldApplyTilt, mousePosition.y])
+  
+  const tiltY = useMemo(() => {
+    if (!isHovered || !shouldApplyTilt) return 0
+    // Map x position (0-1) to tilt angle (-3 to 3 degrees), inverted for natural feel
+    return (0.5 - mousePosition.x) * 6
+  }, [isHovered, shouldApplyTilt, mousePosition.x])
+  
+  // Parallax offsets for envelope/box (opposite direction, smaller magnitude)
+  const parallaxX = useMemo(() => {
+    if (!isHovered || !shouldApplyTilt) return 0
+    return (mousePosition.x - 0.5) * 10 // 10px max offset
+  }, [isHovered, shouldApplyTilt, mousePosition.x])
+  
+  const parallaxY = useMemo(() => {
+    if (!isHovered || !shouldApplyTilt) return 0
+    return (mousePosition.y - 0.5) * 10 // 10px max offset
+  }, [isHovered, shouldApplyTilt, mousePosition.y])
+  
+  // Skew angles for 3D effect (opposite direction of cursor)
+  const skewX = useMemo(() => {
+    if (!isHovered || !shouldApplyTilt) return 0
+    // Skew in opposite direction of Y position (when cursor moves down, skew up)
+    return (0.5 - mousePosition.y) * 2 // Max 1 degree skew
+  }, [isHovered, shouldApplyTilt, mousePosition.y])
+  
+  const skewY = useMemo(() => {
+    if (!isHovered || !shouldApplyTilt) return 0
+    // Skew in opposite direction of X position (when cursor moves right, skew left)
+    return (0.5 - mousePosition.x) * 2 // Max 1 degree skew, fully inverted
+  }, [isHovered, shouldApplyTilt, mousePosition.x])
   
   // Progress animation
   const {
@@ -309,8 +369,18 @@ const SentCard1 = ({
       ? { minHeight: '400px' }
       : overlayProgressOnEnvelope && headerUseFlex1 && headerHeight1 !== undefined && !progressOutsideEnvelope
       ? { minHeight: '400px' }
+      : {}),
+    ...(shouldApplyTilt
+      ? {
+          transform: isHovered
+            ? `perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`
+            : 'perspective(1000px) rotateX(0deg) rotateY(0deg)',
+          transition: isHovered
+            ? 'transform 0.15s ease-out' // Smooth transition when entering hover
+            : 'transform 0.3s ease-out' // Slower transition when leaving hover
+        }
       : {})
-  }), [headerUseFlex, headerHeight, overlayProgressOnEnvelope, progressOutsideEnvelope, headerUseFlex1, headerHeight1])
+  }), [headerUseFlex, headerHeight, overlayProgressOnEnvelope, progressOutsideEnvelope, headerUseFlex1, headerHeight1, shouldApplyTilt, isHovered, tiltX, tiltY])
 
   const contentWrapperStyle = useMemo(() => ({
     paddingBottom: progressOutsideEnvelope ? '0px' : undefined,
@@ -488,7 +558,8 @@ const SentCard1 = ({
       data-variant={headerBgOverride ? 'mono' : 'themed'}
       ref={cardRef}
       onMouseEnter={handleHoverEnter}
-      onMouseLeave={handleHoverLeave}
+      onMouseMove={shouldApplyTilt ? handleMouseMove : undefined}
+      onMouseLeave={shouldApplyTilt ? handleMouseLeaveWithReset : handleHoverLeave}
       className="border border-[#dde2e9] border-solid relative rounded-[24px] w-full md:w-[300px] overflow-hidden"
       style={cardContainerStyle}
       data-name="Gift Card"
@@ -498,6 +569,26 @@ const SentCard1 = ({
         className={`content-stretch flex flex-col items-start ${isMonochromeVariant ? 'overflow-visible' : 'overflow-hidden'} relative rounded-[inherit] w-full ${(progressOutsideEnvelope && headerHeight2 !== undefined) || (headerUseFlex && headerHeight !== undefined && !overlayProgressOnEnvelope && !progressOutsideEnvelope) || (overlayProgressOnEnvelope && headerUseFlex1 && headerHeight1 !== undefined && !progressOutsideEnvelope) ? 'h-full' : ''}`} 
         style={contentWrapperStyle}
       >
+        {/* Specular highlight that follows cursor (only when 3D animation is selected) */}
+        {shouldApplyTilt && isHovered && (
+          <div
+            className="absolute pointer-events-none"
+            style={{
+              left: `${cursorPosition.x}px`,
+              top: `${cursorPosition.y}px`,
+              width: '180px',
+              height: '180px',
+              transform: 'translate(-50%, -50%)',
+              borderRadius: '50%',
+              background: 'radial-gradient(circle, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.2) 30%, transparent 70%)',
+              mixBlendMode: 'overlay',
+              opacity: 0.4,
+              zIndex: 100,
+              transition: 'opacity 0.2s ease-out',
+              filter: 'blur(8px)'
+            }}
+          />
+        )}
         {/* Full card background when overlayProgressOnEnvelope is true */}
         {overlayProgressOnEnvelope && (
           <div
@@ -676,6 +767,10 @@ const SentCard1 = ({
                 logoPath={svgLogoPath}
                 logoBrandColor={logoBrandColor}
                 animationType={animationType}
+                parallaxX={parallaxX}
+                parallaxY={parallaxY}
+                skewX={skewX}
+                skewY={skewY}
               />
             ) : hideEnvelope ? (
               // Envelope Box Container (for Batch 2)
@@ -691,6 +786,10 @@ const SentCard1 = ({
                 containerPadding={BATCH2_ENVELOPE_PADDING}
                 containerMargin={BATCH2_ENVELOPE_MARGIN}
                 isHovered={isHovered}
+                parallaxX={parallaxX}
+                parallaxY={parallaxY}
+                skewX={skewX}
+                skewY={skewY}
               />
             ) : useGiftContainer ? (
               // Gift Container Image (replaces envelope)

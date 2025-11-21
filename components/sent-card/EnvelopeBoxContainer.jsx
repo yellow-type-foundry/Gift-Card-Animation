@@ -24,7 +24,11 @@ const EnvelopeBoxContainer = ({
   progressIndicatorShadowColor, // Optional separate shadow color for progress indicator. If not provided, calculated from boxColor
   containerPadding = { top: 0, right: 0, bottom: 0, left: 0 }, // Padding from wrapper (px) - used to adjust paper position
   containerMargin = { top: 0, right: 0, bottom: 0, left: 0 }, // Margin from wrapper (px) - used to adjust paper position
-  isHovered: externalIsHovered
+  isHovered: externalIsHovered,
+  parallaxX = 0, // Parallax offset X for tilt effect
+  parallaxY = 0, // Parallax offset Y for tilt effect
+  skewX = 0, // Skew X angle for 3D effect
+  skewY = 0 // Skew Y angle for 3D effect
 }) => {
   const { isHovered: internalIsHovered, handleHoverEnter, handleHoverLeave } = useHover()
   // Use external hover state if provided, otherwise use internal
@@ -197,7 +201,9 @@ const EnvelopeBoxContainer = ({
           padding: '0.5px', // Border width
           borderRadius: '8px 8px 0 0', // Rounded top corners
           background: 'linear-gradient(to top, rgba(255,255,255,0) 0%, rgba(221,226,233,1) 100%)', // Gradient border from top to bottom
-          transform: isHovered ? 'translateX(-50%) scale(1.02)' : 'translateX(-50%) scale(1)',
+          transform: isHovered 
+            ? `translateX(-50%) translate(${parallaxX * 0.5}px, ${parallaxY * 0.5}px) scale(1.02)`
+            : 'translateX(-50%) translate(0px, 0px) scale(1)',
           transformOrigin: 'center center',
           transition: 'top 250ms ease-in-out, transform 300ms ease-out'
         }}
@@ -282,6 +288,12 @@ const EnvelopeBoxContainer = ({
         data-name="Envelope"
         style={{ 
           zIndex: 2,
+          transform: isHovered 
+            ? `translate(${parallaxX}px, ${parallaxY}px) skewX(${skewX}deg) skewY(${skewY}deg) scale(1.02)`
+            : 'translate(0px, 0px) skewX(0deg) skewY(0deg) scale(1)',
+          transition: isHovered 
+            ? 'transform 0.15s ease-out' // Smooth transition when entering hover
+            : 'transform 0.3s ease-out', // Slower transition when leaving hover
           transform: isHovered ? 'scale(1.02)' : 'scale(1)',
           transformOrigin: 'center center',
           transition: `transform ${GIFT_BOX_TOKENS.animations.duration.fast} ${GIFT_BOX_TOKENS.animations.easing.easeOut}`

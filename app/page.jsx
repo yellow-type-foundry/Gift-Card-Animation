@@ -136,7 +136,7 @@ const ALL_SENT_DATES = [
 export default function Home() {
   const [activeTab, setActiveTab] = useState('gift') // 'gift' | 'sent'
   const [useColoredBackground, setUseColoredBackground] = useState(false) // Toggle for theming
-  const [animationType, setAnimationType] = useState('highlight') // Animation type: 'highlight', 'breathing', or 'none'
+  const [animationType, setAnimationType] = useState('highlight') // Animation type: 'highlight', 'breathing', '3d', or 'none'
   const [layoutNumber, setLayoutNumber] = useState('1') // '1' | '2' | '3' - which layout pair to use
   const [viewType, setViewType] = useState('mixed') // 'mixed' | 'batch' | 'single' - what to display
   const [mixSeed, setMixSeed] = useState(0) // Seed to regenerate mix when toggled

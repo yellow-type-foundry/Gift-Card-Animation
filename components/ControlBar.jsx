@@ -213,28 +213,31 @@ const ControlBar = ({
                           />
                         </button>
                       </div>
-                      {/* Animation selector */}
-                      <div className="flex items-center justify-between">
-                        <label htmlFor="animation-select-styling" className="text-sm text-[#525F7A]">Animation</label>
-                        <div className="relative inline-block">
-                          <select
-                            id="animation-select-styling"
-                            value={animationType}
-                            onChange={handleAnimationChange}
-                            className="py-2 pl-3 pr-8 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0 appearance-none cursor-pointer"
-                            style={animationSelectStyle}
-                          >
-                            <option value="highlight">Highlight</option>
-                            <option value="breathing">Breathing</option>
-                            <option value="none">None</option>
-                          </select>
-                          <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
-                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M3 4.5L6 7.5L9 4.5" stroke="#525F7A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
+                      {/* Animation selector - only show for layout 2 */}
+                      {layoutNumber === '2' && (
+                        <div className="flex items-center justify-between">
+                          <label htmlFor="animation-select-styling" className="text-sm text-[#525F7A]">Animation</label>
+                          <div className="relative inline-block">
+                            <select
+                              id="animation-select-styling"
+                              value={animationType}
+                              onChange={handleAnimationChange}
+                              className="py-2 pl-3 pr-8 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0 appearance-none cursor-pointer"
+                              style={animationSelectStyle}
+                            >
+                              <option value="highlight">Highlight</option>
+                              <option value="breathing">Breathing</option>
+                              <option value="3d">3D</option>
+                              <option value="none">None</option>
+                            </select>
+                            <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M3 4.5L6 7.5L9 4.5" stroke="#525F7A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                            </div>
                           </div>
                         </div>
-                      </div>
+                      )}
                       {/* View selector */}
                       <div className="flex items-center justify-between">
                         <label htmlFor="view-select-styling" className="text-sm text-[#525F7A]">View</label>
@@ -377,28 +380,31 @@ const ControlBar = ({
                       />
                     </button>
                   </div>
-                  {/* Animation selector */}
-                  <div className="flex items-center justify-between">
-                    <label htmlFor="animation-select-mobile" className="text-sm text-[#525F7A]">Animation</label>
-                    <div className="relative inline-block">
-                      <select
-                        id="animation-select-mobile"
-                        value={animationType}
-                        onChange={handleAnimationChange}
-                        className="py-2 pl-3 pr-8 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0 appearance-none cursor-pointer"
-                        style={animationSelectStyle}
-                      >
-                        <option value="highlight">Highlight</option>
-                        <option value="breathing">Breathing</option>
-                        <option value="none">None</option>
-                      </select>
-                      <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
-                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M3 4.5L6 7.5L9 4.5" stroke="#525F7A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
+                  {/* Animation selector - only show for layout 2 */}
+                  {layoutNumber === '2' && (
+                    <div className="flex items-center justify-between">
+                      <label htmlFor="animation-select-mobile" className="text-sm text-[#525F7A]">Animation</label>
+                      <div className="relative inline-block">
+                        <select
+                          id="animation-select-mobile"
+                          value={animationType}
+                          onChange={handleAnimationChange}
+                          className="py-2 pl-3 pr-8 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0 appearance-none cursor-pointer"
+                          style={animationSelectStyle}
+                        >
+                          <option value="highlight">Highlight</option>
+                          <option value="breathing">Breathing</option>
+                          <option value="3d">3D</option>
+                          <option value="none">None</option>
+                        </select>
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M3 4.5L6 7.5L9 4.5" stroke="#525F7A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
                   {/* View selector */}
                   <div className="flex items-center justify-between">
                     <label htmlFor="view-select-mobile" className="text-sm text-[#525F7A]">View</label>
