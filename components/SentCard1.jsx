@@ -182,25 +182,37 @@ const SentCard1 = ({
   
   // Calculate themed box color for GiftBoxContainer
   // For Single 2 cards, use brand color with Single 2 saturation/luminance caps
+  // IMPORTANT: For Single 2, ignore dominantColor from cover image - use brand color only
   const themedBoxColor = useMemo(() => {
     // For Single 2 cards (hideEnvelope && showGiftBoxWhenHidden), use brand color
     if (hideEnvelope && showGiftBoxWhenHidden) {
+      // Ensure svgLogoPath exists and is valid
+      if (!svgLogoPath) {
+        // If svgLogoPath is not set yet, use Columbia blue as safe fallback
+        const colorToUse = '#1987C7'
+        const [h, s, l] = hexToHsl(colorToUse)
+        const adjustedL = Math.min(100, Math.max(0, SINGLE2_LUMINANCE))
+        const adjustedS = Math.min(100, Math.max(0, Math.min(s, SINGLE2_SATURATION)))
+        return hslToHex(h, adjustedS, adjustedL)
+      }
+      
+      // Look up brand color from map
       const brandColor = LOGO_BRAND_COLORS[svgLogoPath]
       // If no brand color mapping found, use Columbia blue as fallback
       const colorToUse = brandColor || '#1987C7'
       
-      // Apply Single 2 saturation and luminance caps
-      // Use adjustToLuminance first (uses perceived luminance, not HSL lightness)
-      // Then cap saturation using HSL to preserve lightness
-      const luminanceAdjusted = adjustToLuminance(colorToUse, SINGLE2_LUMINANCE)
-      const [h, s, l] = hexToHsl(luminanceAdjusted)
-      const cappedS = Math.min(s, SINGLE2_SATURATION)
-      return hslToHex(h, cappedS, l)
+      // Apply Single 2 saturation and luminance caps using HSL directly
+      // This preserves the brand color's hue while applying luminance and saturation controls
+      // Do NOT use dominantColor from cover image for Single 2 cards
+      const [h, s, l] = hexToHsl(colorToUse)
+      const adjustedL = Math.min(100, Math.max(0, SINGLE2_LUMINANCE))
+      const adjustedS = Math.min(100, Math.max(0, Math.min(s, SINGLE2_SATURATION)))
+      return hslToHex(h, adjustedS, adjustedL)
     }
     if (headerBgOverride) return '#94d8f9' // Default when theming is disabled
-    // Create a light, vibrant box color from dominant color
+    // Create a light, vibrant box color from dominant color (for Single 1 and Batch 2)
     return capSaturation(adjustToLuminance(dominantColor, 85), 70)
-  }, [dominantColor, headerBgOverride, hideEnvelope, showGiftBoxWhenHidden, svgLogoPath, SINGLE2_LUMINANCE, SINGLE2_SATURATION])
+  }, [headerBgOverride, hideEnvelope, showGiftBoxWhenHidden, svgLogoPath, SINGLE2_LUMINANCE, SINGLE2_SATURATION, dominantColor]) // dominantColor only used for Single 1 and Batch 2, not Single 2
 
   // Calculate logo brand color (used for logo gradient ID generation)
   // Uses the same Single 2 caps as the box color for consistency
