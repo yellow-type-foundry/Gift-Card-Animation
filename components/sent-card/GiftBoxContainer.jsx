@@ -275,6 +275,7 @@ const GiftBoxContainer = ({
               borderRadius: GIFT_BOX_TOKENS.box.borderRadius,
               left: '50%',
               top: '50%',
+              scale: 1.05,
               transform: 'translate(-50%, -50%)',
               zIndex: 0,
               filter: 'blur(20px) hue-rotate(-35deg)',
@@ -425,7 +426,8 @@ const GiftBoxContainer = ({
               paddingBottom: GIFT_BOX_TOKENS.logo.containerPadding.vertical,
               ...(animationType === '3d' && isHovered
                 ? {
-                    transform: `translate(${-parallaxX * 0.5}px, ${-parallaxY * 0.5}px)`,
+                    transform: `perspective(1000px) rotateX(${tiltX * 0.05}deg) rotateY(${tiltY * 0.05}deg) translate(${parallaxX * 0.07}px, ${parallaxY * 0.07}px) skewX(${skewX * 0.01}deg) skewY(${skewY * 0.01}deg) scale(${1 * depthScale})`,
+                    transformStyle: 'preserve-3d',
                     transition: 'transform 0.15s ease-out'
                   }
                 : {})

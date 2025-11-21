@@ -469,7 +469,7 @@ export default function Home() {
           cardHandlers={cardHandlers}
           viewType={viewType}
           layoutNumber={layoutNumber}
-          useColoredBackground={useColoredBackground}
+          useColoredBackground={layoutNumber === '1' ? useColoredBackground : false}
           animationType={animationType}
           sentCards={sentCards}
           mixedCardTypes={mixedCardTypes}

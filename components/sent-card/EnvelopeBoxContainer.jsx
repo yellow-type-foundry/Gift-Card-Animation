@@ -279,7 +279,7 @@ const EnvelopeBoxContainer = ({
         data-name="Paper"
         style={{ 
           zIndex: 3, // Highest z-index
-          top: `${23 + containerPadding.top + containerMargin.top - (isHovered ? 8 : 0)}px`, // Positioned just above the envelope, adjusted for wrapper padding/margin and hover expansion (moves up 8px on hover to expand from bottom)
+          top: `${23 + containerPadding.top + containerMargin.top - (isHovered ? 16 : 0)}px`, // Positioned just above the envelope, adjusted for wrapper padding/margin and hover expansion (moves up 16px on hover to expand from bottom)
           padding: '0.5px', // Border width
           borderRadius: '8px 8px 0 0', // Rounded top corners
           background: 'linear-gradient(to top, rgba(255,255,255,0) 0%, rgba(221,226,233,1) 100%)', // Gradient border from top to bottom
@@ -304,7 +304,7 @@ const EnvelopeBoxContainer = ({
           className="bg-white overflow-clip relative rounded-[inherit] w-[144px] flex flex-col items-center" 
           style={{ 
             padding: '6px', 
-            height: isHovered ? '60px' : '52px',
+            height: isHovered ? '68px' : '52px',
             transition: 'height 250ms ease-in-out'
           }}
         >

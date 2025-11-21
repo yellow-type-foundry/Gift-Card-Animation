@@ -192,27 +192,29 @@ const ControlBar = ({
                           ))}
                         </div>
                       </div>
-                      {/* Theming toggle */}
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-[#525F7A]">Theming</span>
-                        <button
-                          onClick={() => !isSingleView && onThemingChange(!useColoredBackground)}
-                          disabled={isSingleView}
-                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
-                            useColoredBackground ? 'bg-[#5a3dff]' : 'bg-gray-300'
-                          } ${isSingleView ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'}`}
-                          role="switch"
-                          aria-checked={useColoredBackground}
-                          aria-disabled={isSingleView}
-                          aria-label="Toggle theming"
-                        >
-                          <span
-                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                              useColoredBackground ? 'translate-x-6' : 'translate-x-1'
-                            }`}
-                          />
-                        </button>
-                      </div>
+                      {/* Theming toggle - only show for layout 1 */}
+                      {layoutNumber === '1' && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-[#525F7A]">Theming</span>
+                          <button
+                            onClick={() => !isSingleView && onThemingChange(!useColoredBackground)}
+                            disabled={isSingleView}
+                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
+                              useColoredBackground ? 'bg-[#5a3dff]' : 'bg-gray-300'
+                            } ${isSingleView ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'}`}
+                            role="switch"
+                            aria-checked={useColoredBackground}
+                            aria-disabled={isSingleView}
+                            aria-label="Toggle theming"
+                          >
+                            <span
+                              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                                useColoredBackground ? 'translate-x-6' : 'translate-x-1'
+                              }`}
+                            />
+                          </button>
+                        </div>
+                      )}
                       {/* Animation selector - only show for layout 2 */}
                       {layoutNumber === '2' && (
                         <div className="flex items-center justify-between">
@@ -359,27 +361,29 @@ const ControlBar = ({
                       ))}
                     </div>
                   </div>
-                  {/* Theming toggle */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-[#525F7A]">Theming</span>
-                    <button
-                      onClick={() => !isSingleView && onThemingChange(!useColoredBackground)}
-                      disabled={isSingleView}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
-                        useColoredBackground ? 'bg-[#5a3dff]' : 'bg-gray-300'
-                      } ${isSingleView ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'}`}
-                      role="switch"
-                      aria-checked={useColoredBackground}
-                      aria-disabled={isSingleView}
-                      aria-label="Toggle theming"
-                    >
-                      <span
-                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                          useColoredBackground ? 'translate-x-6' : 'translate-x-1'
-                        }`}
-                      />
-                    </button>
-                  </div>
+                  {/* Theming toggle - only show for layout 1 */}
+                  {layoutNumber === '1' && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-[#525F7A]">Theming</span>
+                      <button
+                        onClick={() => !isSingleView && onThemingChange(!useColoredBackground)}
+                        disabled={isSingleView}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
+                          useColoredBackground ? 'bg-[#5a3dff]' : 'bg-gray-300'
+                        } ${isSingleView ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'}`}
+                        role="switch"
+                        aria-checked={useColoredBackground}
+                        aria-disabled={isSingleView}
+                        aria-label="Toggle theming"
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                            useColoredBackground ? 'translate-x-6' : 'translate-x-1'
+                          }`}
+                        />
+                      </button>
+                    </div>
+                  )}
                   {/* Animation selector - only show for layout 2 */}
                   {layoutNumber === '2' && (
                     <div className="flex items-center justify-between">

@@ -73,10 +73,10 @@ export const GIFT_BOX_TOKENS = {
       border: '16px solid transparent',
     },
     shadow: {
-      width: '162px',
-      height: '162px',
-      borderRadius: '36px',
-      blur: '14px',
+      width: '156px',
+      height: '156px',
+      borderRadius: '38px',
+      blur: '16px',
     },
     shadowWrapper: {
       width: '168px',
