@@ -148,13 +148,13 @@ const SentCard1 = ({
   const tiltX = useMemo(() => {
     if (!isHovered || !shouldApplyTilt) return 0
     // Map y position (0-1) to tilt angle (-3 to 3 degrees)
-    return (mousePosition.y - 0.5) * 6
+    return (mousePosition.y - 0.5) * 5
   }, [isHovered, shouldApplyTilt, mousePosition.y])
   
   const tiltY = useMemo(() => {
     if (!isHovered || !shouldApplyTilt) return 0
     // Map x position (0-1) to tilt angle (-3 to 3 degrees), inverted for natural feel
-    return (0.5 - mousePosition.x) * 6
+    return (0.5 - mousePosition.x) * 5
   }, [isHovered, shouldApplyTilt, mousePosition.x])
   
   // Parallax offsets for envelope/box (opposite direction, smaller magnitude)
@@ -167,19 +167,6 @@ const SentCard1 = ({
     if (!isHovered || !shouldApplyTilt) return 0
     return (mousePosition.y - 0.5) * 10 // 10px max offset
   }, [isHovered, shouldApplyTilt, mousePosition.y])
-  
-  // Skew angles for 3D effect (opposite direction of cursor)
-  const skewX = useMemo(() => {
-    if (!isHovered || !shouldApplyTilt) return 0
-    // Skew in opposite direction of Y position (when cursor moves down, skew up)
-    return (0.5 - mousePosition.y) * 1.4 // Max 1 degree skew
-  }, [isHovered, shouldApplyTilt, mousePosition.y])
-  
-  const skewY = useMemo(() => {
-    if (!isHovered || !shouldApplyTilt) return 0
-    // Skew in opposite direction of X position (when cursor moves right, skew left)
-    return (0.5 - mousePosition.x) * 1.4 // Max 1 degree skew, fully inverted
-  }, [isHovered, shouldApplyTilt, mousePosition.x])
   
   // Progress animation
   const {
@@ -763,8 +750,6 @@ const SentCard1 = ({
                 animationType={animationType}
                 parallaxX={parallaxX}
                 parallaxY={parallaxY}
-                skewX={skewX}
-                skewY={skewY}
                 tiltX={tiltX}
                 tiltY={tiltY}
               />
@@ -784,8 +769,6 @@ const SentCard1 = ({
                 isHovered={isHovered}
                 parallaxX={parallaxX}
                 parallaxY={parallaxY}
-                skewX={skewX}
-                skewY={skewY}
                 tiltX={tiltX}
                 tiltY={tiltY}
                 animationType={animationType}

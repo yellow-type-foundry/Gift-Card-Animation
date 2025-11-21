@@ -17,8 +17,6 @@ const GiftBoxContainer = ({
   animationType = 'highlight', // 'highlight', 'breathing', '3d', or 'none'
   parallaxX = 0, // Parallax offset X for tilt effect
   parallaxY = 0, // Parallax offset Y for tilt effect
-  skewX = 0, // Skew X angle for 3D effect
-  skewY = 0, // Skew Y angle for 3D effect
   tiltX = 0, // Tilt X angle for 3D effect
   tiltY = 0 // Tilt Y angle for 3D effect
 }) => {
@@ -312,7 +310,7 @@ const GiftBoxContainer = ({
           height: GIFT_BOX_TOKENS.box.height,
           borderRadius: GIFT_BOX_TOKENS.box.borderRadius,
           ...(isHovered && animationType === '3d' ? {
-            transform: `perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translate(${parallaxX}px, ${parallaxY}px) translateY(${GIFT_BOX_TOKENS.hoverEffects.transform.translateY}) skewX(${skewX}deg) skewY(${skewY}deg) scale(${1.0125 * depthScale})`,
+            transform: `perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translate(${parallaxX}px, ${parallaxY}px) translateY(${GIFT_BOX_TOKENS.hoverEffects.transform.translateY}) scale(${1.0125 * depthScale})`,
             transformStyle: 'preserve-3d',
             filter: `brightness(${brightnessShift}) blur(${depthBlur}px)`,
             transition: 'transform 0.15s ease-out, filter 0.15s ease-out'
@@ -426,7 +424,7 @@ const GiftBoxContainer = ({
               paddingBottom: GIFT_BOX_TOKENS.logo.containerPadding.vertical,
               ...(animationType === '3d' && isHovered
                 ? {
-                    transform: `perspective(1000px) rotateX(${tiltX * 0.05}deg) rotateY(${tiltY * 0.05}deg) translate(${parallaxX * 0.07}px, ${parallaxY * 0.07}px) skewX(${skewX * 0.01}deg) skewY(${skewY * 0.01}deg) scale(${1 * depthScale})`,
+                    transform: `perspective(1000px) rotateX(${tiltX * 0.05}deg) rotateY(${tiltY * 0.05}deg) translate(${parallaxX * 0.07}px, ${parallaxY * 0.07}px) scale(${1 * depthScale})`,
                     transformStyle: 'preserve-3d',
                     transition: 'transform 0.15s ease-out'
                   }

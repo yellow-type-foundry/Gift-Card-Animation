@@ -27,8 +27,6 @@ const EnvelopeBoxContainer = ({
   isHovered: externalIsHovered,
   parallaxX = 0, // Parallax offset X for tilt effect
   parallaxY = 0, // Parallax offset Y for tilt effect
-  skewX = 0, // Skew X angle for 3D effect
-  skewY = 0, // Skew Y angle for 3D effect
   tiltX = 0, // Tilt X angle for 3D effect
   tiltY = 0, // Tilt Y angle for 3D effect
   animationType = 'none' // Animation type to determine if 3D effects should be applied
@@ -285,7 +283,7 @@ const EnvelopeBoxContainer = ({
           borderRadius: '8px 8px 0 0', // Rounded top corners
           background: 'linear-gradient(to top, rgba(255,255,255,0) 0%, rgba(221,226,233,1) 100%)', // Gradient border from top to bottom
           ...(isHovered && animationType === '3d' ? {
-            transform: `translateX(-50%) perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translate(${parallaxX}px, ${parallaxY}px) skewX(${skewX}deg) skewY(${skewY}deg) scale(${1.02 * depthScale})`,
+            transform: `translateX(-50%) perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translate(${parallaxX}px, ${parallaxY}px) scale(${1.02 * depthScale})`,
             transformStyle: 'preserve-3d',
             filter: `brightness(${brightnessShift}) blur(${depthBlur}px)`,
             transition: 'top 250ms ease-in-out, transform 0.15s ease-out, filter 0.15s ease-out'
@@ -532,7 +530,7 @@ const EnvelopeBoxContainer = ({
         style={{ 
           zIndex: 2,
           ...(isHovered && animationType === '3d' ? {
-            transform: `perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translate(${parallaxX}px, ${parallaxY}px) skewX(${skewX}deg) skewY(${skewY}deg) scale(${1.02 * depthScale})`,
+            transform: `perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translate(${parallaxX}px, ${parallaxY}px) scale(${1.02 * depthScale})`,
             transformStyle: 'preserve-3d',
             filter: `brightness(${brightnessShift}) blur(${depthBlur}px)`,
             transition: 'transform 0.15s ease-out, filter 0.15s ease-out'
