@@ -85,7 +85,7 @@ export const GIFT_BOX_TOKENS = {
       border: '16px solid transparent',
     },
     specularHighlight: {
-      height: '28px',
+      height: '35px',
       horizontalOffset: '3.98%',
     },
     shadowHighlight: {

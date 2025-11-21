@@ -385,8 +385,8 @@ const EnvelopeBoxContainer = ({
               top: '50%',
               transform: 'translate(-50%, -50%)',
               zIndex: 0,
-              filter: 'blur(30px) hue-rotate(35deg)',
-              opacity: isHovered ? 0.8 : 0,
+              filter: 'blur(30px) hue-rotate(60deg)',
+              opacity: isHovered ? 0.6 : 0,
               transition: 'opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
               pointerEvents: 'none'
             }}
@@ -439,8 +439,8 @@ const EnvelopeBoxContainer = ({
               top: '50%',
               transform: 'translate(-50%, -50%)',
               zIndex: 0,
-              filter: 'blur(20px) hue-rotate(-35deg)',
-              opacity: isHovered ? 0.5 : 0,
+              filter: 'blur(20px) hue-rotate(-60deg)',
+              opacity: isHovered ? 0.4 : 0,
               transition: 'opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
               pointerEvents: 'none'
             }}
@@ -637,7 +637,7 @@ const EnvelopeBoxContainer = ({
 
             {/* Specular Highlight */}
             <div 
-              className="absolute h-[25px] left-[6.55%] mix-blend-soft-light right-[6.72%] top-0 pointer-events-none"
+              className="absolute h-[31.25px] left-[6.55%] mix-blend-soft-light right-[6.72%] top-0 pointer-events-none"
               data-name="Specular Highlight"
             >
               <div className="absolute inset-[-82.38%_-14.13%]">

@@ -570,8 +570,8 @@ const SentCard1 = ({
             style={{
               left: `${cursorPosition.x}px`,
               top: `${cursorPosition.y}px`,
-              width: '180px',
-              height: '180px',
+              width: '225px',
+              height: '225px',
               transform: 'translate(-50%, -50%)',
               borderRadius: '50%',
               background: 'radial-gradient(circle, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.3) 30%, transparent 70%)',
