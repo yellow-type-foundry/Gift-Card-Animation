@@ -197,7 +197,9 @@ const EnvelopeBoxContainer = ({
           padding: '0.5px', // Border width
           borderRadius: '8px 8px 0 0', // Rounded top corners
           background: 'linear-gradient(to top, rgba(255,255,255,0) 0%, rgba(221,226,233,1) 100%)', // Gradient border from top to bottom
-          transition: 'top 250ms ease-in-out'
+          transform: isHovered ? 'translateX(-50%) scale(1.02)' : 'translateX(-50%) scale(1)',
+          transformOrigin: 'center center',
+          transition: 'top 250ms ease-in-out, transform 300ms ease-out'
         }}
       >
         <div 
