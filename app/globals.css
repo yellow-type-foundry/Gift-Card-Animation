@@ -294,3 +294,35 @@
   opacity: 0;
   animation: controls-fade-in 0.1s ease-in-out forwards;
 }
+
+/* Single 2 metal surface highlight animation */
+@keyframes metal-shine {
+  0% {
+    transform: translateX(-100%) translateY(-100%);
+  }
+  100% {
+    transform: translateX(100%) translateY(100%);
+  }
+}
+
+.metal-shine-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+[data-name="Box"]:hover .metal-shine-overlay {
+  opacity: 1;
+}
+
+.metal-shine-gradient {
+  will-change: transform;
+}
+
+[data-name="Box"]:hover .metal-shine-gradient {
+  animation: metal-shine 1.05s ease-out; /* Adjust duration (1.5s) and easing (ease-in-out) to control pacing */
+}

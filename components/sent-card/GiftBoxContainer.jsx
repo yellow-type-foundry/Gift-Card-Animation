@@ -177,6 +177,24 @@ const GiftBoxContainer = ({
               background: GIFT_BOX_TOKENS.gradients.boxBase
             }}
           />
+          {/* Metal surface highlight animation on hover */}
+          <div 
+            className="metal-shine-overlay"
+            style={{
+              borderRadius: GIFT_BOX_TOKENS.box.borderRadius,
+            }}
+          >
+            <div
+              className="metal-shine-gradient"
+              style={{
+                width: '200%',
+                height: '200%',
+                background: 'linear-gradient(135deg, transparent 0%, transparent 20%, rgba(255, 255, 255, 0.4) 40%, rgba(255, 255, 255, 0.8) 20%, rgba(255, 255, 255, 0.4) 40%, transparent 50%, transparent 50%)',
+                transform: 'translateX(-100%) translateY(-100%)',
+                mixBlendMode: 'overlay',
+              }}
+            />
+          </div>
         </div>
 
         {/* Inner content container */}
