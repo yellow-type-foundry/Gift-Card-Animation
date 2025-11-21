@@ -34,6 +34,39 @@ const ProgressBar = ({
     return hslToHex(h, s, darkerL)
   }, [themedShadowColor, boxColor])
   
+  // When done, show only "All Accepted" text centered at bottom
+  if (isDone) {
+    return (
+      <div 
+        className="box-border content-stretch flex flex-col gap-[10px] items-center justify-center relative shrink-0 w-full"
+        style={{
+          paddingBottom: containerPadding.bottom,
+          paddingLeft: containerPadding.horizontal,
+          paddingRight: containerPadding.horizontal,
+          paddingTop: containerPadding.top
+        }}
+        data-name="Progress Bar"
+      >
+        <p 
+          className="font-['Goody_Sans:Medium',sans-serif] leading-[1.4] not-italic relative shrink-0 text-center"
+          style={{
+            fontFamily: 'var(--font-goody-sans)',
+            fontSize: '16px',
+            fontWeight: 500,
+            lineHeight: 1.4,
+            color: GIFT_BOX_TOKENS.colors.progressText,
+            zIndex: GIFT_BOX_TOKENS.zIndex.progressText,
+            mixBlendMode: GIFT_BOX_TOKENS.blendModes.overlay,
+            opacity: GIFT_BOX_TOKENS.colors.progressTextOpacity,
+            position: 'relative'
+          }}
+        >
+          All Accepted
+        </p>
+      </div>
+    )
+  }
+
   return (
     <div 
       className="box-border content-stretch flex flex-col gap-[10px] items-center justify-center relative shrink-0 w-full"
@@ -125,7 +158,7 @@ const ProgressBar = ({
                   position: 'relative'
                 }}
               >
-                {isDone ? 'Done' : `${animatedCurrent}/${validatedProgress.total}`}
+                {`${animatedCurrent}/${validatedProgress.total}`}
               </p>
               <div 
                 className="absolute inset-0 pointer-events-none"

@@ -685,6 +685,9 @@ const EnvelopeBoxContainer = ({
             <div 
               className="absolute bottom-0 h-[27px] left-[9.52%] mix-blend-multiply right-[9.52%] pointer-events-none"
               data-name="Shadow color"
+              style={{
+                opacity: isDone ? 0.2 : 1
+              }}
             >
               <div 
                 className="absolute inset-[-118.52%_-23.53%]"
