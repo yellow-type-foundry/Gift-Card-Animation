@@ -41,7 +41,7 @@ const LOGO_PNG_TO_SVG_MAP = {
 
 // Map SVG logo paths to brand colors
 const LOGO_BRAND_COLORS = {
-  '/assets/GiftSent/SVG Logo/Goody.svg': '#DACCFF',
+  '/assets/GiftSent/SVG Logo/Goody.svg': '#D6C7FF',
   '/assets/GiftSent/SVG Logo/Chipotle.svg': '#AC2318',
   '/assets/GiftSent/SVG Logo/Logo.svg': '#1987C7', // Columbia
   '/assets/GiftSent/SVG Logo/Nike.svg': '#B8B8B8',
@@ -161,7 +161,7 @@ const SentCard1 = ({
   // Single 2 Logo Brand Color Controls
   // These values control the saturation and luminance for Single 2 logo brand colors
   const SINGLE2_LOGO_LUMINANCE = 100  // Luminance for logo brand colors (0-100)
-  const SINGLE2_LOGO_SATURATION = 35  // Saturation for logo brand colors (0-100)
+  const SINGLE2_LOGO_SATURATION = 38    // Saturation for logo brand colors (0-100)
 
   // Calculate logo brand color with Single 2 saturation/luminance caps
   // These values are controlled independently from Batch 2

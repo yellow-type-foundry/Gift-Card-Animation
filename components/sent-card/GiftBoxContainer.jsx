@@ -38,10 +38,28 @@ const GiftBoxContainer = ({
         
         if (svgElement) {
           // Ensure SVG is properly sized and centered
+          // Set fixed height for specific logos based on logoPath
+          let fixedHeight = 'auto'
+          if (logoPath.includes('Goody.svg')) {
+            fixedHeight = '40px'
+          } else if (logoPath.includes('Chipotle.svg')) {
+            fixedHeight = '46px'
+          } else if (logoPath.includes('Apple.svg')) {
+            fixedHeight = '40px'
+          } else if (logoPath.includes('Nike.svg')) {
+            fixedHeight = '24px'
+          } else if (logoPath.includes('Supergoop.svg')) {
+            fixedHeight = '40px'
+          } else if (logoPath.includes('Tiffany & Co.svg')) {
+            fixedHeight = '16px'
+          } else if (logoPath.includes('Logo.svg')) { // Columbia
+            fixedHeight = '20px'
+          }
+          
           svgElement.setAttribute('width', '100%')
           svgElement.setAttribute('height', '100%')
           svgElement.setAttribute('preserveAspectRatio', 'xMidYMid meet')
-          svgElement.setAttribute('style', 'display: block; margin: 0 auto; width: auto; height: auto;')
+          svgElement.setAttribute('style', `display: block; margin: 0 auto; width: auto; height: ${fixedHeight};`)
           
           // Create gradient definition
           const defs = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'defs')
@@ -180,9 +198,10 @@ const GiftBoxContainer = ({
               style={{ 
                 width: GIFT_BOX_TOKENS.logo.width,
                 height: GIFT_BOX_TOKENS.logo.height,
-                mixBlendMode: GIFT_BOX_TOKENS.blendModes.overlay
+                mixBlendMode: GIFT_BOX_TOKENS.blendModes.overlay,
+                paddingTop: '18px'
               }}
-              data-name="Logo"
+              data-name="Logo"  
             >
               <div className="absolute inset-[-12.66%_-1.84%_-9.28%_-1.84%] flex items-center justify-center">
                 {svgContent ? (
@@ -203,7 +222,20 @@ const GiftBoxContainer = ({
                     alt="" 
                     className="block max-w-none size-full"
                     src={logoPath}
-                    style={{ display: 'block', width: 'auto', height: 'auto' }}
+                    style={{ 
+                      display: 'block', 
+                      width: 'auto', 
+                      height: (() => {
+                        if (logoPath.includes('Goody.svg')) return '40px'
+                        if (logoPath.includes('Chipotle.svg')) return '46px'
+                        if (logoPath.includes('Apple.svg')) return '40px'
+                        if (logoPath.includes('Nike.svg')) return '24px'
+                        if (logoPath.includes('Supergoop.svg')) return '40px'
+                        if (logoPath.includes('Tiffany & Co.svg')) return '16px'
+                        if (logoPath.includes('Logo.svg')) return '20px' // Columbia
+                        return 'auto'
+                      })()
+                    }}
                   />
                 )}
               </div>
