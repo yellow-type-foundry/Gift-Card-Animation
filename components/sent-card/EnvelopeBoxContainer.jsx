@@ -302,6 +302,7 @@ const EnvelopeBoxContainer = ({
       >
         <div 
           className="bg-white overflow-clip relative rounded-[inherit] w-[144px] flex flex-col items-center" 
+          data-animation-type={animationType}
           style={{ 
             padding: '6px', 
             height: isHovered ? '68px' : '52px',
@@ -371,6 +372,41 @@ const EnvelopeBoxContainer = ({
             className="absolute bg-gradient-to-b bottom-0 from-[rgba(207,237,252,0)] h-[31px] left-1/2 opacity-30 to-[#054261] translate-x-[-50%] w-[144px] pointer-events-none"
             data-name="Shadow Overlay"
           />
+
+          {/* Metal surface highlight animation on hover - only render when animationType is 'highlight' */}
+          {animationType === 'highlight' && (
+            <div 
+              className="metal-shine-overlay"
+              style={{
+                borderRadius: 'inherit',
+              }}
+            >
+              {/* First gradient highlight */}
+              <div
+                className="metal-shine-gradient"
+                style={{
+                  width: '200%',
+                  height: '200%',
+                  background: 'linear-gradient(135deg, transparent 0%, transparent 20%, rgba(255, 255, 255, 0.4) 40%, rgba(255, 255, 255, 0.8) 20%, rgba(255, 255, 255, 0.4) 40%, transparent 50%, transparent 50%)',
+                  transform: 'translateX(-100%) translateY(-100%)',
+                  mixBlendMode: 'overlay',
+                  position: 'absolute',
+                }}
+              />
+              {/* Trailing gradient highlight - faster and follows the first */}
+              <div
+                className="metal-shine-trail"
+                style={{
+                  width: '200%',
+                  height: '200%',
+                  background: 'linear-gradient(135deg, transparent 0%, transparent 20%, rgba(255, 255, 255, 0.3) 40%, rgba(255, 255, 255, 0.6) 20%, rgba(255, 255, 255, 0.3) 40%, transparent 50%, transparent 50%)',
+                  transform: 'translateX(-100%) translateY(-100%)',
+                  mixBlendMode: 'overlay',
+                  position: 'absolute',
+                }}
+              />
+            </div>
+          )}
         </div>
       </div>
 
