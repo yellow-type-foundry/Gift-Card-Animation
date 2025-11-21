@@ -8,7 +8,7 @@ import useCardTheme from '@/hooks/useCardTheme'
 import useProgressAnimation from '@/hooks/useProgressAnimation'
 import useConfetti from '@/hooks/useConfetti'
 import useComponentIds from '@/hooks/useComponentIds'
-import { capSaturation, adjustToLuminance } from '@/utils/colors'
+import { capSaturation, adjustToLuminance, hexToHsl, hslToHex } from '@/utils/colors'
 import useHover from '@/hooks/useHover'
 import Footer from '@/components/sent-card/Footer'
 import EnvelopeBase from '@/components/sent-card/EnvelopeBase'
@@ -41,7 +41,7 @@ const LOGO_PNG_TO_SVG_MAP = {
 
 // Map SVG logo paths to brand colors
 const LOGO_BRAND_COLORS = {
-  '/assets/GiftSent/SVG Logo/Goody.svg': '#D6C7FF',
+  '/assets/GiftSent/SVG Logo/Goody.svg': '#B89EFF',
   '/assets/GiftSent/SVG Logo/Chipotle.svg': '#AC2318',
   '/assets/GiftSent/SVG Logo/Logo.svg': '#1987C7', // Columbia
   '/assets/GiftSent/SVG Logo/Nike.svg': '#B8B8B8',
@@ -158,27 +158,12 @@ const SentCard1 = ({
     return '/assets/GiftSent/SVG Logo/Logo.svg'
   }, [hideEnvelope, showGiftBoxWhenHidden, giftContainerImage, validatedProgress.current, validatedProgress.total])
 
-  // Single 2 Logo Brand Color Controls
-  // These values control the saturation and luminance for Single 2 logo brand colors
-  const SINGLE2_LOGO_LUMINANCE = 100  // Luminance for logo brand colors (0-100)
-  const SINGLE2_LOGO_SATURATION = 38    // Saturation for logo brand colors (0-100)
+  // Single 2 Brand Color Controls
+  // These values control the saturation and luminance for Single 2 brand colors (box and logo)
+  // These are controlled independently from Batch 2 envelope values
+  const SINGLE2_LUMINANCE = 65  // Luminance for Single 2 brand colors (0-100)
+  const SINGLE2_SATURATION = 40  // Saturation for Single 2 brand colors (0-100)
 
-  // Calculate logo brand color with Single 2 saturation/luminance caps
-  // These values are controlled independently from Batch 2
-  // Brand colors are enabled by default - always use brand color, never fall back to blue placeholder
-  const logoBrandColor = useMemo(() => {
-    const brandColor = LOGO_BRAND_COLORS[svgLogoPath]
-    // If no brand color mapping found, use Columbia blue as fallback (not the old placeholder blue)
-    const colorToUse = brandColor || '#1987C7' // Columbia blue as default
-    
-    // Apply Single 2 logo saturation and luminance caps
-    // These are independent from Batch 2 envelope values
-    const luminanceAdjusted = adjustToLuminance(colorToUse, SINGLE2_LOGO_LUMINANCE)
-    const finalColor = capSaturation(luminanceAdjusted, SINGLE2_LOGO_SATURATION)
-    
-    return finalColor
-  }, [svgLogoPath])
-  
   // Extract dominant color from gift container image (for Single 1) or boxImage (for other layouts)
   const imageForColorExtraction = useGiftContainer && giftContainerImage ? giftContainerImage : boxImage
   const { dominantColor } = useDominantColor(imageForColorExtraction, '#f4c6fa')
@@ -196,16 +181,32 @@ const SentCard1 = ({
   } = theme
   
   // Calculate themed box color for GiftBoxContainer
-  // For Single 2 cards, use brand color instead of blue placeholder
+  // For Single 2 cards, use brand color with Single 2 saturation/luminance caps
   const themedBoxColor = useMemo(() => {
     // For Single 2 cards (hideEnvelope && showGiftBoxWhenHidden), use brand color
-    if (hideEnvelope && showGiftBoxWhenHidden && logoBrandColor) {
-      return logoBrandColor // Use brand color with Batch 2 caps applied
+    if (hideEnvelope && showGiftBoxWhenHidden) {
+      const brandColor = LOGO_BRAND_COLORS[svgLogoPath]
+      // If no brand color mapping found, use Columbia blue as fallback
+      const colorToUse = brandColor || '#1987C7'
+      
+      // Apply Single 2 saturation and luminance caps
+      // Use adjustToLuminance first (uses perceived luminance, not HSL lightness)
+      // Then cap saturation using HSL to preserve lightness
+      const luminanceAdjusted = adjustToLuminance(colorToUse, SINGLE2_LUMINANCE)
+      const [h, s, l] = hexToHsl(luminanceAdjusted)
+      const cappedS = Math.min(s, SINGLE2_SATURATION)
+      return hslToHex(h, cappedS, l)
     }
     if (headerBgOverride) return '#94d8f9' // Default when theming is disabled
     // Create a light, vibrant box color from dominant color
     return capSaturation(adjustToLuminance(dominantColor, 85), 70)
-  }, [dominantColor, headerBgOverride, hideEnvelope, showGiftBoxWhenHidden, logoBrandColor])
+  }, [dominantColor, headerBgOverride, hideEnvelope, showGiftBoxWhenHidden, svgLogoPath, SINGLE2_LUMINANCE, SINGLE2_SATURATION])
+
+  // Calculate logo brand color (used for logo gradient ID generation)
+  // Uses the same Single 2 caps as the box color for consistency
+  const logoBrandColor = useMemo(() => {
+    return themedBoxColor
+  }, [themedBoxColor])
 
   // Batch 2 Envelope and Flap Color Controls
   // These values control the saturation and luminance for Batch 2 card theming
