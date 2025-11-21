@@ -381,3 +381,17 @@
 [data-name="Gift Card"]:hover .breathing-box-2 {
   animation: breathing-2 1.75s ease-in-out infinite;
 }
+
+/* Breathing animation for envelope duplicates */
+.breathing-envelope-duplicate {
+  will-change: opacity, transform;
+  animation-fill-mode: none;
+}
+
+[data-name="Gift Card"]:hover .breathing-envelope-1 {
+  animation: breathing-1 2s ease-in-out infinite;
+}
+
+[data-name="Gift Card"]:hover .breathing-envelope-2 {
+  animation: breathing-2 1.75s ease-in-out infinite;
+}

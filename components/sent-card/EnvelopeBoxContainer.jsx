@@ -374,6 +374,120 @@ const EnvelopeBoxContainer = ({
         </div>
       </div>
 
+      {/* Breathing animation: Two duplicate envelopes behind original (only when animationType is 'breathing' or '3d') */}
+      {(animationType === 'breathing' || animationType === '3d') && (
+        <>
+          {/* First duplicate envelope - hue +15 */}
+          <div 
+            className="content-stretch flex flex-col items-start absolute shrink-0 w-[168px] breathing-envelope-duplicate breathing-envelope-1"
+            style={{ 
+              left: '50%',
+              top: '50%',
+              transform: 'translate(-50%, -50%)',
+              zIndex: 0,
+              filter: 'blur(30px) hue-rotate(35deg)',
+              opacity: isHovered ? 0.8 : 0,
+              transition: 'opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+              pointerEvents: 'none'
+            }}
+          >
+            {/* Flap (top) */}
+            <div className="h-[97px] relative shrink-0 w-[168px] overflow-visible">
+              <div 
+                className="absolute bottom-0 left-0 right-0 top-[2.39%]"
+                style={{
+                  filter: flapFilter,
+                  opacity: flapOpacity
+                }}
+              >
+                <img alt="" className="block max-w-none size-full" src={imgFlap} />
+              </div>
+            </div>
+            {/* Box (main container) */}
+            <div 
+              className="border-[0px] border-[rgba(255,255,255,0)] border-solid h-[105px] min-w-[168px] relative shrink-0 w-full overflow-hidden"
+              style={{
+                borderRadius: '0 0 32px 32px',
+                transform: 'translateY(-0.5px)'
+              }}
+            >
+              <div aria-hidden="true" className="absolute inset-0 pointer-events-none" style={{ borderRadius: '0 0 32px 32px' }}>
+                <div 
+                  className="absolute inset-0"
+                  style={{ 
+                    borderRadius: '0 0 32px 32px',
+                    backgroundColor: boxColor,
+                    opacity: boxOpacity
+                  }}
+                />
+                <div 
+                  className="absolute inset-0"
+                  style={{ 
+                    borderRadius: '0 0 32px 32px',
+                    mixBlendMode: GIFT_BOX_TOKENS.blendModes.overlay,
+                    background: GIFT_BOX_TOKENS.gradients.boxBase
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+          {/* Second duplicate envelope - hue -15 */}
+          <div 
+            className="content-stretch flex flex-col items-start absolute shrink-0 w-[168px] breathing-envelope-duplicate breathing-envelope-2"
+            style={{ 
+              left: '50%',
+              top: '50%',
+              transform: 'translate(-50%, -50%)',
+              zIndex: 0,
+              filter: 'blur(20px) hue-rotate(-35deg)',
+              opacity: isHovered ? 0.5 : 0,
+              transition: 'opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+              pointerEvents: 'none'
+            }}
+          >
+            {/* Flap (top) */}
+            <div className="h-[97px] relative shrink-0 w-[168px] overflow-visible">
+              <div 
+                className="absolute bottom-0 left-0 right-0 top-[2.39%]"
+                style={{
+                  filter: flapFilter,
+                  opacity: flapOpacity
+                }}
+              >
+                <img alt="" className="block max-w-none size-full" src={imgFlap} />
+              </div>
+            </div>
+            {/* Box (main container) */}
+            <div 
+              className="border-[0px] border-[rgba(255,255,255,0)] border-solid h-[105px] min-w-[168px] relative shrink-0 w-full overflow-hidden"
+              style={{
+                borderRadius: '0 0 32px 32px',
+                transform: 'translateY(-0.5px)'
+              }}
+            >
+              <div aria-hidden="true" className="absolute inset-0 pointer-events-none" style={{ borderRadius: '0 0 32px 32px' }}>
+                <div 
+                  className="absolute inset-0"
+                  style={{ 
+                    borderRadius: '0 0 32px 32px',
+                    backgroundColor: boxColor,
+                    opacity: boxOpacity
+                  }}
+                />
+                <div 
+                  className="absolute inset-0"
+                  style={{ 
+                    borderRadius: '0 0 32px 32px',
+                    mixBlendMode: GIFT_BOX_TOKENS.blendModes.overlay,
+                    background: GIFT_BOX_TOKENS.gradients.boxBase
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
       {/* Envelope Container - second highest z-index */}
       <div 
         className="content-stretch flex flex-col items-start relative shrink-0 w-[168px]" 
