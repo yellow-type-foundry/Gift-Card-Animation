@@ -633,6 +633,39 @@ const SentCard1 = ({
             data-name={useGiftContainer ? "Gift Container" : "Envelope"}
             data-node-id="1467:49190"
           >
+            {/* Dots background - behind Batch 2 envelope or Single 2 box */}
+            {hideEnvelope ? (
+              <div
+                className="absolute"
+                style={{
+                  left: '50%',
+                  top: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  width: '300px',
+                  height: '300px',
+                  zIndex: 0,
+                  pointerEvents: 'none',
+                  opacity: 1,
+                }}
+                aria-hidden="true"
+              >
+                <Image
+                  src="/assets/GiftSent/Gift Container/Dots-3x.png"
+                  alt=""
+                  width={210}
+                  height={150}
+                  priority={false}
+                  quality={100}
+                  unoptimized={true}
+                  style={{
+                    objectFit: 'contain',
+                    width: '100%',
+                    height: '100%',
+                    display: 'block'
+                  }}
+                />
+              </div>
+            ) : null}
             {hideEnvelope && showGiftBoxWhenHidden ? (
               // Gift Box Container (for Single 2)
               <GiftBoxContainer
