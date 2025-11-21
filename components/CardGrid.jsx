@@ -186,7 +186,7 @@ const CardGrid = ({
                 return sentCards.map((card, index) => (
                   <SentCard1
                     key={index}
-                    {...getSentCard1Props(card, layoutNumber, useColoredBackground)}
+                    {...getSentCard1Props(card, layoutNumber, useColoredBackground, animationType)}
                     hideEnvelope={true}
                     showGiftBoxWhenHidden={true}
                   />
@@ -226,7 +226,7 @@ const CardGrid = ({
             sentCards.map((card, index) => (
               <SentCard1
                 key={index}
-                {...getSentCard1Props(card, layoutNumber, useColoredBackground)}
+                {...getSentCard1Props(card, layoutNumber, useColoredBackground, animationType)}
               />
             ))
           )}
