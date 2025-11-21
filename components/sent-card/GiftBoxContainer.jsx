@@ -263,6 +263,7 @@ const GiftBoxContainer = ({
               borderRadius: GIFT_BOX_TOKENS.box.borderRadius,
             }}
           >
+            {/* First gradient highlight */}
             <div
               className="metal-shine-gradient"
               style={{
@@ -271,6 +272,19 @@ const GiftBoxContainer = ({
                 background: 'linear-gradient(135deg, transparent 0%, transparent 20%, rgba(255, 255, 255, 0.4) 40%, rgba(255, 255, 255, 0.8) 20%, rgba(255, 255, 255, 0.4) 40%, transparent 50%, transparent 50%)',
                 transform: 'translateX(-100%) translateY(-100%)',
                 mixBlendMode: 'overlay',
+                position: 'absolute',
+              }}
+            />
+            {/* Trailing gradient highlight - faster and follows the first */}
+            <div
+              className="metal-shine-trail"
+              style={{
+                width: '200%',
+                height: '200%',
+                background: 'linear-gradient(135deg, transparent 0%, transparent 20%, rgba(255, 255, 255, 0.3) 40%, rgba(255, 255, 255, 0.6) 20%, rgba(255, 255, 255, 0.3) 40%, transparent 50%, transparent 50%)',
+                transform: 'translateX(-100%) translateY(-100%)',
+                mixBlendMode: 'overlay',
+                position: 'absolute',
               }}
             />
           </div>

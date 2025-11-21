@@ -305,6 +305,15 @@
   }
 }
 
+@keyframes metal-shine-trail {
+  0% {
+    transform: translateX(-100%) translateY(-100%);
+  }
+  100% {
+    transform: translateX(100%) translateY(100%);
+  }
+}
+
 .metal-shine-overlay {
   position: absolute;
   inset: 0;
@@ -323,8 +332,16 @@
   will-change: transform;
 }
 
+.metal-shine-trail {
+  will-change: transform;
+}
+
 [data-name="Box"][data-animation-type="highlight"]:hover .metal-shine-gradient {
   animation: metal-shine 1.55s ease-out; /* Adjust duration (1.5s) and easing (ease-in-out) to control pacing */
+}
+
+[data-name="Box"][data-animation-type="highlight"]:hover .metal-shine-trail {
+  animation: metal-shine-trail 0.6s ease-out 0.3s; /* Faster trailing gradient, starts 0.3s after the first */
 }
 
 /* Breathing animation for Single 2 box */
