@@ -254,7 +254,7 @@ const SentCard1 = ({
   // Batch 2 Envelope and Flap Color Controls
   // These values control the saturation and luminance for Batch 2 card theming
   const BATCH2_ENVELOPE_LUMINANCE = 100  // Luminance for envelope box (0-100)
-  const BATCH2_ENVELOPE_SATURATION = 28 // Saturation for envelope box (0-100)
+  const BATCH2_ENVELOPE_SATURATION = 40 // Saturation for envelope box (0-100)
   const BATCH2_ENVELOPE_OPACITY = 1.0   // Opacity for envelope box (0-1)
   const BATCH2_FLAP_LUMINANCE = 100      // Luminance for flap (0-100)
   const BATCH2_FLAP_SATURATION = 100     // Saturation for flap (0-100)
