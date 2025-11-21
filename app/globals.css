@@ -324,7 +324,7 @@
 }
 
 [data-name="Box"][data-animation-type="highlight"]:hover .metal-shine-gradient {
-  animation: metal-shine 1.05s ease-out; /* Adjust duration (1.5s) and easing (ease-in-out) to control pacing */
+  animation: metal-shine 1.55s ease-out; /* Adjust duration (1.5s) and easing (ease-in-out) to control pacing */
 }
 
 /* Breathing animation for Single 2 box */
@@ -361,5 +361,5 @@
 
 [data-name="Gift Container/Goody"]:hover .breathing-box-2 {
   opacity: 1;
-  animation: breathing-2 2.5s ease-in-out infinite;
+  animation: breathing-2 1.75s ease-in-out infinite;
 }

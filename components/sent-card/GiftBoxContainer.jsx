@@ -163,7 +163,7 @@ const GiftBoxContainer = ({
               top: '50%',
               transform: 'translate(-50%, -50%)',
               zIndex: 0,
-              filter: 'blur(20px) hue-rotate(15deg)',
+              filter: 'blur(20px) hue-rotate(35deg)',
               opacity: 0,
               pointerEvents: 'none'
             }}
@@ -198,7 +198,7 @@ const GiftBoxContainer = ({
               top: '50%',
               transform: 'translate(-50%, -50%)',
               zIndex: 0,
-              filter: 'blur(20px) hue-rotate(-15deg)',
+              filter: 'blur(20px) hue-rotate(-35deg)',
               opacity: 0,
               pointerEvents: 'none'
             }}
@@ -230,9 +230,10 @@ const GiftBoxContainer = ({
           width: GIFT_BOX_TOKENS.box.width, 
           height: GIFT_BOX_TOKENS.box.height,
           borderRadius: GIFT_BOX_TOKENS.box.borderRadius,
-          transform: isHovered ? `translateY(${GIFT_BOX_TOKENS.hoverEffects.transform.translateY})` : 'translateY(0)',
+          transform: isHovered ? `translateY(${GIFT_BOX_TOKENS.hoverEffects.transform.translateY}) scale(1.0125)` : 'translateY(0) scale(1)',
           transition: `transform ${GIFT_BOX_TOKENS.animations.duration.fast} ${GIFT_BOX_TOKENS.animations.easing.easeOut}`,
-          zIndex: 1
+          zIndex: 1,
+          transformOrigin: 'center center'
         }}
         data-name="Box"
         data-animation-type={animationType}

@@ -280,8 +280,9 @@ const EnvelopeBoxContainer = ({
         data-name="Envelope"
         style={{ 
           zIndex: 2,
-          transform: 'scale(1.025)',
-          transformOrigin: 'center center'
+          transform: isHovered ? 'scale(1.02)' : 'scale(1)',
+          transformOrigin: 'center center',
+          transition: `transform ${GIFT_BOX_TOKENS.animations.duration.fast} ${GIFT_BOX_TOKENS.animations.easing.easeOut}`
         }}
       >
         {/* Flap (top) - themed using CSS filter to transform blue to themed color */}
