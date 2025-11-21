@@ -100,7 +100,7 @@ const GiftCard = ({
       return `${baseTranslate} rotate(${rotate}) translateX(${translateX}) translateY(${translateY}) scale(${scale})`
     }
     
-    return `${baseTranslate} rotate(0deg) translateX(0px) translateY(0px) scale(1)`
+    return `${baseTranslate} rotate(0deg) translateX(0px) translateY(0px) scale(0.925)`
   }, [isHovered, isUnopened, isOpening])
 
   const box2Transform = useMemo(() => {
@@ -109,7 +109,7 @@ const GiftCard = ({
     // Return to original position when accepted (after loading icon is done)
     // The bounce easing will create an interesting overshoot effect
     if (isAcceptExpanded) {
-      return `${baseTranslate} rotate(0deg) translateX(0px) translateY(0px) scale(1)`
+      return `${baseTranslate} rotate(0deg) translateX(0px) translateY(0px) scale(0.925)`
     }
     
     if (isOpening) {
@@ -117,7 +117,7 @@ const GiftCard = ({
       return `${baseTranslate} rotate(${rotate}) translateX(${translateX}) translateY(${translateY}) scale(${scale})`
     }
     
-    return `${baseTranslate} rotate(0deg) translateX(0px) translateY(0px) scale(1)`
+    return `${baseTranslate} rotate(0deg) translateX(0px) translateY(0px) scale(0.925)`
   }, [isOpening, isAcceptExpanded])
 
   // Memoized styles

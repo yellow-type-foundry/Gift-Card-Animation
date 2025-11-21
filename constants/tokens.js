@@ -92,13 +92,13 @@ export const TOKENS = {
         rotate: '15deg',
         translateX: '32px',
         translateY: '-8px',
-        scale: '0.875',
+        scale: '0.8',
       },
       hover: {
         rotate: '4deg',
         translateX: '24px',
         translateY: '-4px',
-        scale: '1',
+        scale: '0.925',
       },
     },
     box2: {
@@ -106,7 +106,7 @@ export const TOKENS = {
         rotate: '-15deg',
         translateX: '-36px',
         translateY: '-10px',
-        scale: '0.875',
+        scale: '0.8',
       },
     },
     message: {
