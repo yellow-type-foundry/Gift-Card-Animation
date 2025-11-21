@@ -48,7 +48,7 @@ const ProgressBar = ({
         data-name="Progress Bar"
       >
         <p 
-          className="font-['Goody_Sans:Medium',sans-serif] leading-[1.4] not-italic relative shrink-0 text-center"
+          className="font-['Goody_Sans:Medium',sans-serif] leading-[1.4] not-italic relative shrink-0 text-center all-accepted-text"
           style={{
             fontFamily: 'var(--font-goody-sans)',
             fontSize: '16px',

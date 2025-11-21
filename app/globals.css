@@ -422,3 +422,21 @@
     opacity: 0.6;
   }
 }
+
+/* All Accepted text glow animation on hover */
+.all-accepted-text {
+  transition: text-shadow 0.4s ease-out;
+}
+
+[data-name="Gift Card"]:hover .all-accepted-text {
+  animation: all-accepted-glow 5s ease-in-out infinite;
+}
+
+@keyframes all-accepted-glow {
+  0%, 100% {
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.8), 0 0 16px rgba(255, 255, 255, 0.8);
+  }
+  50% {
+    text-shadow: 0 0 16px rgba(255, 255, 255, 1), 0 0 32px rgba(255, 255, 255, 1), 0 0 48px rgba(255, 255, 255, 1);
+  }
+}
