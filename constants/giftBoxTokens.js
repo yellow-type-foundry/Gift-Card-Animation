@@ -11,8 +11,8 @@ export const GIFT_BOX_TOKENS = {
 
   // Logo dimensions and styling
   logo: {
-    width: '121px',
-    height: '22px',
+    width: '181.5px',
+    height: '33px',
     containerPadding: {
       horizontal: '16px',
       vertical: '20px',

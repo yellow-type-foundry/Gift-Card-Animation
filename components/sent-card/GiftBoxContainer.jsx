@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useMemo } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import useProgressAnimation from '@/hooks/useProgressAnimation'
 import useHover from '@/hooks/useHover'
 import useHoverColor from '@/hooks/useHoverColor'
@@ -10,12 +10,89 @@ import { hexToHsl } from '@/utils/colors'
 
 const GiftBoxContainer = ({
   progress = { current: 4, total: 5 },
-  boxColor = '#94d8f9',
-  isHovered: externalIsHovered
+  boxColor = '#1987C7', // Columbia blue as default (replaces old placeholder blue)
+  isHovered: externalIsHovered,
+  logoPath = '/assets/GiftSent/Gift Container/9bc812442d8f2243c9c74124dd128a8df145f983.svg',
+  logoBrandColor = null
 }) => {
   const { isHovered: internalIsHovered, handleHoverEnter, handleHoverLeave } = useHover()
   // Use external hover state if provided, otherwise use internal
   const isHovered = externalIsHovered !== undefined ? externalIsHovered : internalIsHovered
+
+  // Load SVG content and inject gradient
+  const [svgContent, setSvgContent] = useState(null)
+  const gradientId = useMemo(() => {
+    const logoKey = logoPath.replace(/[^a-zA-Z0-9]/g, '-')
+    const colorKey = logoBrandColor ? logoBrandColor.replace(/[^a-zA-Z0-9]/g, '-') : 'default'
+    return `logo-gradient-${logoKey}-${colorKey}`
+  }, [logoPath, logoBrandColor])
+
+  useEffect(() => {
+    fetch(logoPath)
+      .then(res => res.text())
+      .then(svg => {
+        // Parse SVG and inject gradient definition
+        const parser = new DOMParser()
+        const svgDoc = parser.parseFromString(svg, 'image/svg+xml')
+        const svgElement = svgDoc.querySelector('svg')
+        
+        if (svgElement) {
+          // Ensure SVG is properly sized and centered
+          svgElement.setAttribute('width', '100%')
+          svgElement.setAttribute('height', '100%')
+          svgElement.setAttribute('preserveAspectRatio', 'xMidYMid meet')
+          svgElement.setAttribute('style', 'display: block; margin: 0 auto; width: auto; height: auto;')
+          
+          // Create gradient definition
+          const defs = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'defs')
+          const gradient = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'linearGradient')
+          gradient.setAttribute('id', gradientId)
+          gradient.setAttribute('x1', '0%')
+          gradient.setAttribute('y1', '0%')
+          gradient.setAttribute('x2', '0%')
+          gradient.setAttribute('y2', '100%')
+          
+          // All SVGs use the same gradient: white to light gray
+          const gradientTopColor = '#FFFFFF' // White at top (0%)
+          const gradientBottomColor = '#E0E0E0' // Light gray at bottom (100%)
+          
+          const stop1 = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'stop')
+          stop1.setAttribute('offset', '0%')
+          stop1.setAttribute('stop-color', gradientTopColor)
+          stop1.setAttribute('stop-opacity', '1')
+          
+          const stop2 = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'stop')
+          stop2.setAttribute('offset', '100%')
+          stop2.setAttribute('stop-color', gradientBottomColor)
+          stop2.setAttribute('stop-opacity', '1')
+          
+          gradient.appendChild(stop1)
+          gradient.appendChild(stop2)
+          defs.appendChild(gradient)
+          
+          // Insert defs at the beginning of SVG
+          if (svgElement.firstChild) {
+            svgElement.insertBefore(defs, svgElement.firstChild)
+          } else {
+            svgElement.appendChild(defs)
+          }
+          
+          // Apply gradient to all paths
+          const paths = svgElement.querySelectorAll('path')
+          paths.forEach(path => {
+            path.setAttribute('fill', `url(#${gradientId})`)
+          })
+          
+          // Get the modified SVG as string
+          const serializer = new XMLSerializer()
+          setSvgContent(serializer.serializeToString(svgElement))
+        }
+      })
+      .catch(err => {
+        console.error('Failed to load SVG:', err)
+        setSvgContent(null)
+      })
+  }, [logoPath, gradientId, logoBrandColor])
 
   // Calculate hover and shadow colors using reusable hook
   const { hoverColor: hoverBoxColor, shadowColor: themedShadowColor } = useHoverColor(boxColor, isHovered)
@@ -107,12 +184,28 @@ const GiftBoxContainer = ({
               }}
               data-name="Logo"
             >
-              <div className="absolute inset-[-12.66%_-1.84%_-9.28%_-1.84%]">
-                <img 
-                  alt="" 
-                  className="block max-w-none size-full" 
-                  src="/assets/GiftSent/Gift Container/9bc812442d8f2243c9c74124dd128a8df145f983.svg"
-                />
+              <div className="absolute inset-[-12.66%_-1.84%_-9.28%_-1.84%] flex items-center justify-center">
+                {svgContent ? (
+                  <div
+                    className="block"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      filter: 'drop-shadow(0 0.557046px 0.742728px rgba(0, 0, 0, 0.5)) drop-shadow(0 -0.557046px 1.11409px rgba(255, 255, 255, 0.5))'
+                    }}
+                    dangerouslySetInnerHTML={{ __html: svgContent }}
+                  />
+                ) : (
+                  <img 
+                    alt="" 
+                    className="block max-w-none size-full"
+                    src={logoPath}
+                    style={{ display: 'block', width: 'auto', height: 'auto' }}
+                  />
+                )}
               </div>
             </div>
           </div>

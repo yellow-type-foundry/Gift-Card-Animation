@@ -8,6 +8,7 @@ import useCardTheme from '@/hooks/useCardTheme'
 import useProgressAnimation from '@/hooks/useProgressAnimation'
 import useConfetti from '@/hooks/useConfetti'
 import useComponentIds from '@/hooks/useComponentIds'
+import { capSaturation, adjustToLuminance } from '@/utils/colors'
 import useHover from '@/hooks/useHover'
 import Footer from '@/components/sent-card/Footer'
 import EnvelopeBase from '@/components/sent-card/EnvelopeBase'
@@ -15,7 +16,6 @@ import CardShape from '@/components/sent-card/CardShape'
 import GiftBoxContainer from '@/components/sent-card/GiftBoxContainer'
 import EnvelopeBoxContainer from '@/components/sent-card/EnvelopeBoxContainer'
 import { PROGRESS_PILL_RADIUS, HEADER_OVERLAY_BG, PROGRESS_GLOW_BOX_SHADOW, ENVELOPE_DIMENSIONS, FOOTER_CONFIG } from '@/constants/sentCardConstants'
-import { adjustToLuminance, capSaturation } from '@/utils/colors'
 
 // Gift container images (brand names)
 const GIFT_CONTAINER_IMAGES = [
@@ -27,6 +27,28 @@ const GIFT_CONTAINER_IMAGES = [
   '/assets/GiftSent/Gift Container/Supergoop.png',
   '/assets/GiftSent/Gift Container/Tiffany & Co.png'
 ]
+
+// Map PNG logos to SVG logos for text emboss styling
+const LOGO_PNG_TO_SVG_MAP = {
+  '/assets/GiftSent/Gift Container/Apple.png': '/assets/GiftSent/SVG Logo/Apple.svg',
+  '/assets/GiftSent/Gift Container/Chipotle.png': '/assets/GiftSent/SVG Logo/Chipotle.svg',
+  '/assets/GiftSent/Gift Container/Columbia.png': '/assets/GiftSent/SVG Logo/Logo.svg', // Using Logo.svg as default/fallback
+  '/assets/GiftSent/Gift Container/Goody.png': '/assets/GiftSent/SVG Logo/Goody.svg',
+  '/assets/GiftSent/Gift Container/Nike.png': '/assets/GiftSent/SVG Logo/Nike.svg',
+  '/assets/GiftSent/Gift Container/Supergoop.png': '/assets/GiftSent/SVG Logo/Supergoop.svg',
+  '/assets/GiftSent/Gift Container/Tiffany & Co.png': '/assets/GiftSent/SVG Logo/Tiffany & Co.svg',
+}
+
+// Map SVG logo paths to brand colors
+const LOGO_BRAND_COLORS = {
+  '/assets/GiftSent/SVG Logo/Goody.svg': '#DACCFF',
+  '/assets/GiftSent/SVG Logo/Chipotle.svg': '#AC2318',
+  '/assets/GiftSent/SVG Logo/Logo.svg': '#1987C7', // Columbia
+  '/assets/GiftSent/SVG Logo/Nike.svg': '#B8B8B8',
+  '/assets/GiftSent/SVG Logo/Apple.svg': '#D6D6D6',
+  '/assets/GiftSent/SVG Logo/Supergoop.svg': '#0000B4',
+  '/assets/GiftSent/SVG Logo/Tiffany & Co.svg': '#81D8D0',
+}
 
 const SentCard1 = ({
   from = 'Alex Torres',
@@ -116,6 +138,47 @@ const SentCard1 = ({
     return GIFT_CONTAINER_IMAGES[index]
   }, [useGiftContainer, validatedProgress.current, validatedProgress.total])
   
+  // Map PNG logo to SVG logo for Single 2 (GiftBoxContainer) text emboss styling
+  // For Single 2, select logo based on progress (similar to giftContainerImage but for SVG)
+  const svgLogoPath = useMemo(() => {
+    // For Single 2 (hideEnvelope && showGiftBoxWhenHidden), select logo based on progress
+    if (hideEnvelope && showGiftBoxWhenHidden) {
+      const progressRatio = validatedProgress.total > 0 
+        ? validatedProgress.current / validatedProgress.total 
+        : 0
+      const index = Math.min(6, Math.floor(progressRatio * 7))
+      const pngPath = GIFT_CONTAINER_IMAGES[index]
+      return LOGO_PNG_TO_SVG_MAP[pngPath] || '/assets/GiftSent/SVG Logo/Logo.svg'
+    }
+    // For Single 1 (useGiftContainer), use mapped logo
+    if (giftContainerImage) {
+      return LOGO_PNG_TO_SVG_MAP[giftContainerImage] || '/assets/GiftSent/SVG Logo/Logo.svg'
+    }
+    // Default fallback
+    return '/assets/GiftSent/SVG Logo/Logo.svg'
+  }, [hideEnvelope, showGiftBoxWhenHidden, giftContainerImage, validatedProgress.current, validatedProgress.total])
+
+  // Single 2 Logo Brand Color Controls
+  // These values control the saturation and luminance for Single 2 logo brand colors
+  const SINGLE2_LOGO_LUMINANCE = 100  // Luminance for logo brand colors (0-100)
+  const SINGLE2_LOGO_SATURATION = 35  // Saturation for logo brand colors (0-100)
+
+  // Calculate logo brand color with Single 2 saturation/luminance caps
+  // These values are controlled independently from Batch 2
+  // Brand colors are enabled by default - always use brand color, never fall back to blue placeholder
+  const logoBrandColor = useMemo(() => {
+    const brandColor = LOGO_BRAND_COLORS[svgLogoPath]
+    // If no brand color mapping found, use Columbia blue as fallback (not the old placeholder blue)
+    const colorToUse = brandColor || '#1987C7' // Columbia blue as default
+    
+    // Apply Single 2 logo saturation and luminance caps
+    // These are independent from Batch 2 envelope values
+    const luminanceAdjusted = adjustToLuminance(colorToUse, SINGLE2_LOGO_LUMINANCE)
+    const finalColor = capSaturation(luminanceAdjusted, SINGLE2_LOGO_SATURATION)
+    
+    return finalColor
+  }, [svgLogoPath])
+  
   // Extract dominant color from gift container image (for Single 1) or boxImage (for other layouts)
   const imageForColorExtraction = useGiftContainer && giftContainerImage ? giftContainerImage : boxImage
   const { dominantColor } = useDominantColor(imageForColorExtraction, '#f4c6fa')
@@ -133,12 +196,16 @@ const SentCard1 = ({
   } = theme
   
   // Calculate themed box color for GiftBoxContainer
-  // Use a light, saturated version of the dominant color
+  // For Single 2 cards, use brand color instead of blue placeholder
   const themedBoxColor = useMemo(() => {
+    // For Single 2 cards (hideEnvelope && showGiftBoxWhenHidden), use brand color
+    if (hideEnvelope && showGiftBoxWhenHidden && logoBrandColor) {
+      return logoBrandColor // Use brand color with Batch 2 caps applied
+    }
     if (headerBgOverride) return '#94d8f9' // Default when theming is disabled
     // Create a light, vibrant box color from dominant color
     return capSaturation(adjustToLuminance(dominantColor, 85), 70)
-  }, [dominantColor, headerBgOverride])
+  }, [dominantColor, headerBgOverride, hideEnvelope, showGiftBoxWhenHidden, logoBrandColor])
 
   // Batch 2 Envelope and Flap Color Controls
   // These values control the saturation and luminance for Batch 2 card theming
@@ -528,6 +595,8 @@ const SentCard1 = ({
                 progress={validatedProgress}
                 boxColor={themedBoxColor}
                 isHovered={isHovered}
+                logoPath={svgLogoPath}
+                logoBrandColor={logoBrandColor}
               />
             ) : hideEnvelope ? (
               // Envelope Box Container (for Batch 2)
