@@ -356,93 +356,6 @@ const ControlBar = ({
                       ))}
                     </div>
                   </div>
-                  {/* Styling section header */}
-                  <div className="pt-2 border-t border-[#dde2e9]">
-                    <div className="text-xs font-medium text-[#525F7A] mb-3">Styling</div>
-                    <div className="space-y-4">
-                      {/* Theming toggle */}
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-[#525F7A]">Theming</span>
-                        <button
-                          onClick={() => !isSingleView && onThemingChange(!useColoredBackground)}
-                          disabled={isSingleView}
-                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
-                            useColoredBackground ? 'bg-[#5a3dff]' : 'bg-gray-300'
-                          } ${isSingleView ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'}`}
-                          role="switch"
-                          aria-checked={useColoredBackground}
-                          aria-disabled={isSingleView}
-                          aria-label="Toggle theming"
-                        >
-                          <span
-                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                              useColoredBackground ? 'translate-x-6' : 'translate-x-1'
-                            }`}
-                          />
-                        </button>
-                      </div>
-                      {/* Animation selector */}
-                      <div className="flex items-center justify-between">
-                        <label htmlFor="animation-select-mobile" className="text-sm text-[#525F7A]">Animation</label>
-                        <div className="relative inline-block">
-                          <select
-                            id="animation-select-mobile"
-                            value={animationType}
-                            onChange={handleAnimationChange}
-                            className="py-2 pl-3 pr-8 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0 appearance-none cursor-pointer"
-                            style={animationSelectStyle}
-                          >
-                            <option value="highlight">Highlight</option>
-                            <option value="breathing">Breathing</option>
-                            <option value="none">None</option>
-                          </select>
-                          <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
-                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M3 4.5L6 7.5L9 4.5" stroke="#525F7A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                          </div>
-                        </div>
-                      </div>
-                      {/* View selector */}
-                      <div className="flex items-center justify-between">
-                        <label htmlFor="view-select-mobile" className="text-sm text-[#525F7A]">View</label>
-                        <div className="relative inline-block">
-                          <select
-                            id="view-select-mobile"
-                            value={viewType}
-                            onChange={handleViewChange}
-                            className="py-2 pl-3 pr-8 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0 appearance-none cursor-pointer"
-                            style={viewSelectStyle}
-                          >
-                            <option value="mixed">Mixed</option>
-                            <option value="batch">Batch</option>
-                            <option value="single">Single</option>
-                          </select>
-                          <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
-                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M3 4.5L6 7.5L9 4.5" stroke="#525F7A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  {/* Shuffle button */}
-                  <div className="flex items-center justify-between pt-2 border-t border-[#dde2e9]">
-                    <span className="text-sm text-[#525F7A]">Shuffle</span>
-                    <button
-                      onClick={() => {
-                        onShuffle()
-                        onSettingsMenuToggle(false)
-                      }}
-                      className="px-3 py-1.5 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] hover:bg-gray-50 active:bg-gray-100 transition-colors focus:outline-none flex items-center justify-center"
-                      aria-label="Shuffle cards"
-                    >
-                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 2L14 4L12 6M2 4H14M4 10L2 12L4 14M14 12H2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </button>
-                  </div>
                   {/* Theming toggle */}
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-[#525F7A]">Theming</span>
@@ -464,49 +377,26 @@ const ControlBar = ({
                       />
                     </button>
                   </div>
-                      {/* Animation selector */}
-                      <div className="flex items-center justify-between">
-                        <label htmlFor="animation-select-mobile-2" className="text-sm text-[#525F7A]">Animation</label>
-                        <div className="relative inline-block">
-                          <select
-                            id="animation-select-mobile-2"
-                            value={animationType}
-                            onChange={handleAnimationChange}
-                            className="py-2 pl-3 pr-8 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0 appearance-none cursor-pointer"
-                            style={animationSelectStyle}
-                          >
-                            <option value="highlight">Highlight</option>
-                            <option value="breathing">Breathing</option>
-                            <option value="none">None</option>
-                          </select>
-                          <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
-                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M3 4.5L6 7.5L9 4.5" stroke="#525F7A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                          </div>
-                        </div>
-                      </div>
-                  {/* Layout pagination */}
+                  {/* Animation selector */}
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-[#525F7A]">Layout</span>
-                    <div className="flex items-center gap-1">
-                      {[1, 2, 3].map((num) => (
-                        <button
-                          key={num}
-                          onClick={() => {
-                            onLayoutChange({ target: { value: String(num) } })
-                            onSettingsMenuToggle(false)
-                          }}
-                          className={`px-3 py-1.5 rounded-[8px] text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0 ${
-                            layoutNumber === String(num)
-                              ? 'bg-[#5a3dff] text-white'
-                              : 'bg-white border border-[#dde2e9] text-[#525F7A] hover:bg-gray-50'
-                          }`}
-                          aria-label={`Layout ${num}`}
-                        >
-                          {num}
-                        </button>
-                      ))}
+                    <label htmlFor="animation-select-mobile" className="text-sm text-[#525F7A]">Animation</label>
+                    <div className="relative inline-block">
+                      <select
+                        id="animation-select-mobile"
+                        value={animationType}
+                        onChange={handleAnimationChange}
+                        className="py-2 pl-3 pr-8 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0 appearance-none cursor-pointer"
+                        style={animationSelectStyle}
+                      >
+                        <option value="highlight">Highlight</option>
+                        <option value="breathing">Breathing</option>
+                        <option value="none">None</option>
+                      </select>
+                      <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M3 4.5L6 7.5L9 4.5" stroke="#525F7A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </div>
                     </div>
                   </div>
                   {/* View selector */}
@@ -530,6 +420,22 @@ const ControlBar = ({
                         </svg>
                       </div>
                     </div>
+                  </div>
+                  {/* Shuffle button */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-[#525F7A]">Shuffle</span>
+                    <button
+                      onClick={() => {
+                        onShuffle()
+                        onSettingsMenuToggle(false)
+                      }}
+                      className="px-3 py-1.5 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] hover:bg-gray-50 active:bg-gray-100 transition-colors focus:outline-none flex items-center justify-center"
+                      aria-label="Shuffle cards"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L14 4L12 6M2 4H14M4 10L2 12L4 14M14 12H2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </button>
                   </div>
                 </div>
               </div>
