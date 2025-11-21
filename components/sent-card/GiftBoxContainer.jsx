@@ -227,8 +227,8 @@ const GiftBoxContainer = ({
       onMouseLeave={handleHoverLeave}
       style={{ position: 'relative' }}
     >
-      {/* Breathing animation: Two duplicate boxes behind original (only when animationType is 'breathing' or '3d') */}
-      {(animationType === 'breathing' || animationType === '3d') && (
+      {/* Breathing animation: Two duplicate boxes behind original (only when animationType is 'breathing' or '3d' and card is done) */}
+      {(animationType === 'breathing' || animationType === '3d') && isDone && (
         <>
           {/* First duplicate box - hue +15 */}
           <div 
@@ -378,8 +378,8 @@ const GiftBoxContainer = ({
               background: GIFT_BOX_TOKENS.gradients.boxBase
             }}
           />
-          {/* Metal surface highlight animation on hover - only render when animationType is 'highlight' */}
-          {animationType === 'highlight' && (
+          {/* Metal surface highlight animation on hover - only render when animationType is 'highlight' and card is done */}
+          {animationType === 'highlight' && isDone && (
             <div 
               className="metal-shine-overlay"
               style={{
@@ -436,7 +436,7 @@ const GiftBoxContainer = ({
           >
             {/* Logo with text emboss style */}
             <div 
-              className={`relative shrink-0 ${animationType === '3d' ? '' : 'mix-blend-overlay'}`}
+              className={`relative shrink-0 ${animationType === '3d' ? '' : 'mix-blend-overlay'} ${!isDone ? 'logo-breathing' : ''}`}
               style={{ 
                 width: GIFT_BOX_TOKENS.logo.width,
                 height: GIFT_BOX_TOKENS.logo.height,

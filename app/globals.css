@@ -233,17 +233,27 @@
 [data-name="Box Container/Batch 2"] .grid-cell-base { opacity: 0.5; will-change: opacity; }
 [data-name="Box Container/Batch 2"] .grid-cell-overlay { opacity: 0.4; will-change: opacity; }
 
-/* Batch 2 hover breathing animation (increased by 0.3) */
-[data-name="Box Container/Batch 2"]:hover .grid-cell-base,
-[data-name="Gift Card"]:has([data-name="Box Container/Batch 2"]):hover .grid-cell-base {
+/* Disable breathing animation for done cards */
+[data-name="Box Container/Batch 2"][data-is-done="true"]:hover .grid-cell-base,
+[data-name="Gift Card"]:has([data-name="Box Container/Batch 2"][data-is-done="true"]):hover .grid-cell-base {
+  animation: none !important;
+}
+[data-name="Box Container/Batch 2"][data-is-done="true"]:hover .grid-cell-overlay,
+[data-name="Gift Card"]:has([data-name="Box Container/Batch 2"][data-is-done="true"]):hover .grid-cell-overlay {
+  animation: none !important;
+}
+
+/* Batch 2 hover breathing animation (increased by 0.3) - only for undone cards */
+[data-name="Box Container/Batch 2"]:not([data-is-done="true"]):hover .grid-cell-base,
+[data-name="Gift Card"]:has([data-name="Box Container/Batch 2"]:not([data-is-done="true"])):hover .grid-cell-base {
   animation-name: grid-breathe-base-batch2;
   animation-duration: 500ms;
   animation-timing-function: ease-in-out;
   animation-iteration-count: infinite;
   animation-direction: normal;
 }
-[data-name="Box Container/Batch 2"]:hover .grid-cell-overlay,
-[data-name="Gift Card"]:has([data-name="Box Container/Batch 2"]):hover .grid-cell-overlay {
+[data-name="Box Container/Batch 2"]:not([data-is-done="true"]):hover .grid-cell-overlay,
+[data-name="Gift Card"]:has([data-name="Box Container/Batch 2"]:not([data-is-done="true"])):hover .grid-cell-overlay {
   animation-name: grid-breathe-overlay-batch2;
   animation-duration: 1000ms;
   animation-timing-function: ease-in-out;
@@ -397,4 +407,18 @@
 
 [data-name="Gift Card"]:hover .breathing-envelope-2 {
   animation: breathing-2 1.75s ease-in-out infinite;
+}
+
+/* Logo breathing animation for undone Single 2 cards - only on hover */
+[data-name="Gift Card"]:hover .logo-breathing {
+  animation: logo-breathe 2s ease-in-out infinite;
+}
+
+@keyframes logo-breathe {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
 }

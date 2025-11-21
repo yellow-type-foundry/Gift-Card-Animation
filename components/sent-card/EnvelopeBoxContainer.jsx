@@ -219,6 +219,7 @@ const EnvelopeBoxContainer = ({
     <div 
       className="content-stretch flex flex-col gap-0 items-center justify-center relative size-full"
       data-name="Box Container/Batch 2"
+      data-is-done={isDone ? "true" : "false"}
       onMouseEnter={handleHoverEnter}
       onMouseLeave={handleHoverLeave}
     >
@@ -373,8 +374,8 @@ const EnvelopeBoxContainer = ({
             data-name="Shadow Overlay"
           />
 
-          {/* Metal surface highlight animation on hover - only render when animationType is 'highlight' */}
-          {animationType === 'highlight' && (
+          {/* Metal surface highlight animation on hover - only render when animationType is 'highlight' and card is done */}
+          {animationType === 'highlight' && isDone && (
             <div 
               className="metal-shine-overlay"
               style={{
@@ -410,8 +411,8 @@ const EnvelopeBoxContainer = ({
         </div>
       </div>
 
-      {/* Breathing animation: Two duplicate envelopes behind original (only when animationType is 'breathing' or '3d') */}
-      {(animationType === 'breathing' || animationType === '3d') && (
+      {/* Breathing animation: Two duplicate envelopes behind original (only when animationType is 'breathing' or '3d' and card is done) */}
+      {(animationType === 'breathing' || animationType === '3d') && isDone && (
         <>
           {/* First duplicate envelope - hue +15 */}
           <div 

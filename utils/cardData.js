@@ -46,30 +46,65 @@ export function generateRandomSentCardData({
   const shuffledGiftSubtitles = shuffleArray(giftSubtitles)
   const shuffledDates = shuffleArray(dates)
   
-  const randomized = Array(count).fill(null).map(() => ({
-    from: shuffledSenders[Math.floor(Math.random() * shuffledSenders.length)],
-    title: shuffledTitles[Math.floor(Math.random() * shuffledTitles.length)],
-    boxImage: shuffledCovers[Math.floor(Math.random() * shuffledCovers.length)],
-    giftTitle: shuffledGiftTitles[Math.floor(Math.random() * shuffledGiftTitles.length)],
-    giftSubtitle: shuffledGiftSubtitles[Math.floor(Math.random() * shuffledGiftSubtitles.length)],
-    progress: (() => {
-      const total = Math.floor(Math.random() * 40) + 1
-      const current = Math.floor(Math.random() * total) + 1
-      return { current, total }
-    })(),
-    sentDate: shuffledDates[Math.floor(Math.random() * shuffledDates.length)]
-  }))
+  // Track used covers to avoid duplicates
+  const usedCovers = []
   
-  // Ensure at least minDoneCards "Done" cards (current === total)
-  let doneCount = randomized.filter(c => c.progress.current === c.progress.total).length
-  let i = 0
-  while (doneCount < minDoneCards && i < randomized.length) {
-    const total = randomized[i].progress.total
-    randomized[i].progress.current = total
-    doneCount++
-    i++
+  // If count is 8, ensure exactly 4 done and 4 undone cards
+  const randomized = Array(count).fill(null).map((_, index) => {
+    const isDone = count === 8 ? index < 4 : false // First 4 are done when count is 8
+    
+    // Select a cover that hasn't been used yet in this batch
+    let selectedCover
+    // Find covers that haven't been used yet
+    const availableCovers = shuffledCovers.filter(c => !usedCovers.includes(c))
+    
+    if (availableCovers.length > 0) {
+      // Pick randomly from available covers
+      selectedCover = availableCovers[Math.floor(Math.random() * availableCovers.length)]
+    } else {
+      // If all covers have been used (shouldn't happen with 8 cards and multiple covers, but handle it)
+      // Reset and pick from all covers
+      usedCovers.length = 0
+      selectedCover = shuffledCovers[Math.floor(Math.random() * shuffledCovers.length)]
+    }
+    
+    usedCovers.push(selectedCover)
+    
+    return {
+      from: shuffledSenders[Math.floor(Math.random() * shuffledSenders.length)],
+      title: shuffledTitles[Math.floor(Math.random() * shuffledTitles.length)],
+      boxImage: selectedCover,
+      giftTitle: shuffledGiftTitles[Math.floor(Math.random() * shuffledGiftTitles.length)],
+      giftSubtitle: shuffledGiftSubtitles[Math.floor(Math.random() * shuffledGiftSubtitles.length)],
+      progress: (() => {
+        if (isDone) {
+          // Done card: current === total
+          const total = Math.floor(Math.random() * 40) + 1
+          return { current: total, total }
+        } else {
+          // Undone card: current < total
+          const total = Math.floor(Math.random() * 40) + 1
+          const current = Math.floor(Math.random() * (total - 1)) + 1 // Ensure current < total
+          return { current, total }
+        }
+      })(),
+      sentDate: shuffledDates[Math.floor(Math.random() * shuffledDates.length)]
+    }
+  })
+  
+  // If count is not 8, use the old logic to ensure at least minDoneCards "Done" cards
+  if (count !== 8) {
+    let doneCount = randomized.filter(c => c.progress.current === c.progress.total).length
+    let i = 0
+    while (doneCount < minDoneCards && i < randomized.length) {
+      const total = randomized[i].progress.total
+      randomized[i].progress.current = total
+      doneCount++
+      i++
+    }
   }
   
-  return randomized
+  // Shuffle the array to randomize the order
+  return shuffleArray(randomized)
 }
 
