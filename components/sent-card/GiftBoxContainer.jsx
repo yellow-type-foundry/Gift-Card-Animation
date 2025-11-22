@@ -6,11 +6,14 @@ import useHover from '@/hooks/useHover'
 import useHoverColor from '@/hooks/useHoverColor'
 import { GIFT_BOX_TOKENS, calculateProgressBarMaxWidth, calculateProgressBarWidth } from '@/constants/giftBoxTokens'
 import ProgressBar from '@/components/sent-card/ProgressBar'
-import { hexToHsl } from '@/utils/colors'
+import { hexToHsl, hslToHex } from '@/utils/colors'
 
 const GiftBoxContainer = ({
   progress = { current: 4, total: 5 },
   boxColor = '#1987C7', // Columbia blue as default (replaces old placeholder blue)
+  progressBarSourceColor, // Original color (before S/L) for hue extraction
+  progressBarLuminance = 60, // Luminance for progress bar indicator (0-100)
+  progressBarSaturation = 40, // Saturation for progress bar indicator (0-100)
   isHovered: externalIsHovered,
   logoPath = '/assets/GiftSent/Gift Container/9bc812442d8f2243c9c74124dd128a8df145f983.svg',
   logoBrandColor = null,
@@ -119,6 +122,17 @@ const GiftBoxContainer = ({
 
   // Calculate hover and shadow colors using reusable hook
   const { hoverColor: hoverBoxColor, shadowColor: themedShadowColor } = useHoverColor(boxColor, isHovered)
+  
+  // Progress bar indicator color - uses unified S/L values
+  const progressIndicatorColor = useMemo(() => {
+    // Create progress bar color using unified saturation and luminance values
+    // Extract hue from original source color (before S/L was applied), then apply exact progress bar S/L values
+    const sourceColor = progressBarSourceColor || hoverBoxColor
+    const [h, s, l] = hexToHsl(sourceColor)
+    const adjustedS = Math.min(100, Math.max(0, progressBarSaturation)) // Use exact progress bar saturation
+    const adjustedL = Math.min(100, Math.max(0, progressBarLuminance)) // Use exact progress bar luminance
+    return hslToHex(h, adjustedS, adjustedL)
+  }, [progressBarSourceColor, hoverBoxColor, progressBarLuminance, progressBarSaturation])
 
   // Dynamic shadow calculations based on tilt angle (for 3D effect)
   // Shadow moves opposite to tilt direction, becomes more elongated, and opacity changes
@@ -487,6 +501,7 @@ const GiftBoxContainer = ({
           <ProgressBar
             progress={progress}
             boxColor={hoverBoxColor}
+            indicatorColor={progressIndicatorColor}
             progressBarWidth={progressBarWidth}
             animatedCurrent={animatedCurrent}
             validatedProgress={validatedProgress}

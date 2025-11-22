@@ -236,11 +236,16 @@ const SentCard1 = ({
     return nameWithoutExt
   }, [svgLogoPath, giftContainerImage, hideEnvelope, showGiftBoxWhenHidden, validatedProgress.current, validatedProgress.total])
 
-  // Single 2 Brand Color Controls
-  // These values control the saturation and luminance for Single 2 brand colors (box and logo)
-  // These are controlled independently from Batch 2 envelope values
-  const SINGLE2_LUMINANCE = 65  // Luminance for Single 2 brand colors (0-100)
-  const SINGLE2_SATURATION = 40  // Saturation for Single 2 brand colors (0-100)
+  // Unified Saturation and Luminance Controls for Single 2 and Batch 2
+  // These values control the saturation and luminance for both Single 2 boxes and Batch 2 envelopes
+  const SINGLE2_LUMINANCE = 55  // Luminance for Single 2 brand colors (0-100)
+  const SINGLE2_SATURATION = 30  // Saturation for Single 2 brand colors (0-100)
+  const BATCH2_ENVELOPE_LUMINANCE = 55  // Luminance for Batch 2 envelope box (0-100)
+  const BATCH2_ENVELOPE_SATURATION = 30 // Saturation for Batch 2 envelope box (0-100)
+  
+  // Progress Bar Saturation and Luminance (unified for both Single 2 and Batch 2)
+  const PROGRESS_BAR_LUMINANCE = 70  // Luminance for progress bar indicator (0-100)
+  const PROGRESS_BAR_SATURATION = 50 // Saturation for progress bar indicator (0-100)
 
   // Extract dominant color from gift container image (for Single 1) or boxImage (for other layouts)
   const imageForColorExtraction = useGiftContainer && giftContainerImage ? giftContainerImage : boxImage
@@ -297,11 +302,23 @@ const SentCard1 = ({
   const logoBrandColor = useMemo(() => {
     return themedBoxColor
   }, [themedBoxColor])
+  
+  // Get original color for progress bar hue extraction (before S/L is applied)
+  // For Single 2: use brand color, for Batch 2: use dominantColor
+  const progressBarSourceColor = useMemo(() => {
+    if (hideEnvelope && showGiftBoxWhenHidden) {
+      // Single 2: use brand color (original, before S/L)
+      const brandColor = LOGO_BRAND_COLORS[svgLogoPath]
+      return brandColor || '#1987C7'
+    } else if (hideEnvelope && !showGiftBoxWhenHidden) {
+      // Batch 2: use dominantColor (original, before S/L)
+      return dominantColor
+    }
+    return dominantColor // Fallback
+  }, [hideEnvelope, showGiftBoxWhenHidden, svgLogoPath, dominantColor])
 
   // Batch 2 Envelope and Flap Color Controls
-  // These values control the saturation and luminance for Batch 2 card theming
-  const BATCH2_ENVELOPE_LUMINANCE = 100  // Luminance for envelope box (0-100)
-  const BATCH2_ENVELOPE_SATURATION = 40 // Saturation for envelope box (0-100)
+  // Opacity and other Batch 2-specific controls (saturation/luminance defined above)
   const BATCH2_ENVELOPE_OPACITY = 1.0   // Opacity for envelope box (0-1)
   const BATCH2_FLAP_LUMINANCE = 100      // Luminance for flap (0-100)
   const BATCH2_FLAP_SATURATION = 100     // Saturation for flap (0-100)
@@ -321,7 +338,7 @@ const SentCard1 = ({
       adjustToLuminance(dominantColor, BATCH2_ENVELOPE_LUMINANCE),
       BATCH2_ENVELOPE_SATURATION
     )
-  }, [dominantColor])
+  }, [dominantColor, BATCH2_ENVELOPE_LUMINANCE, BATCH2_ENVELOPE_SATURATION])
 
   // Separate color for flap theming with independent saturation and luminance controls
   const envelopeFlapColor = useMemo(() => {
@@ -330,7 +347,7 @@ const SentCard1 = ({
       adjustToLuminance(dominantColor, BATCH2_FLAP_LUMINANCE),
       BATCH2_FLAP_SATURATION
     )
-  }, [dominantColor])
+  }, [dominantColor, BATCH2_FLAP_LUMINANCE, BATCH2_FLAP_SATURATION])
 
   // Progress indicator shadow color - themed separately
   const progressIndicatorShadowColor = useMemo(() => {
@@ -340,7 +357,7 @@ const SentCard1 = ({
       adjustToLuminance(dominantColor, BATCH2_PROGRESS_SHADOW_LUMINANCE),
       BATCH2_PROGRESS_SHADOW_SATURATION
     )
-  }, [dominantColor])
+  }, [dominantColor, BATCH2_PROGRESS_SHADOW_LUMINANCE, BATCH2_PROGRESS_SHADOW_SATURATION])
   
   const allAccepted = isDone
   
@@ -744,6 +761,9 @@ const SentCard1 = ({
               <GiftBoxContainer
                 progress={validatedProgress}
                 boxColor={themedBoxColor}
+                progressBarSourceColor={progressBarSourceColor}
+                progressBarLuminance={PROGRESS_BAR_LUMINANCE}
+                progressBarSaturation={PROGRESS_BAR_SATURATION}
                 isHovered={isHovered}
                 logoPath={svgLogoPath}
                 logoBrandColor={logoBrandColor}
@@ -764,6 +784,9 @@ const SentCard1 = ({
                 boxOpacity={BATCH2_ENVELOPE_OPACITY}
                 flapOpacity={BATCH2_FLAP_OPACITY}
                 progressIndicatorShadowColor={progressIndicatorShadowColor}
+                progressBarSourceColor={progressBarSourceColor}
+                progressBarLuminance={PROGRESS_BAR_LUMINANCE}
+                progressBarSaturation={PROGRESS_BAR_SATURATION}
                 containerPadding={BATCH2_ENVELOPE_PADDING}
                 containerMargin={BATCH2_ENVELOPE_MARGIN}
                 isHovered={isHovered}

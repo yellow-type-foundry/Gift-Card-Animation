@@ -22,6 +22,9 @@ const EnvelopeBoxContainer = ({
   boxOpacity = 1.0, // Opacity for envelope box (0-1)
   flapOpacity = 1.0, // Opacity for flap (0-1)
   progressIndicatorShadowColor, // Optional separate shadow color for progress indicator. If not provided, calculated from boxColor
+  progressBarSourceColor, // Original color (before S/L) for hue extraction
+  progressBarLuminance = 60, // Luminance for progress bar indicator (0-100)
+  progressBarSaturation = 40, // Saturation for progress bar indicator (0-100)
   containerPadding = { top: 0, right: 0, bottom: 0, left: 0 }, // Padding from wrapper (px) - used to adjust paper position
   containerMargin = { top: 0, right: 0, bottom: 0, left: 0 }, // Margin from wrapper (px) - used to adjust paper position
   isHovered: externalIsHovered,
@@ -190,13 +193,16 @@ const EnvelopeBoxContainer = ({
     return hslToHex(h, s, lighterL)
   }, [boxColor])
 
-  // Progress bar indicator color - slightly lighter than envelope
+  // Progress bar indicator color - uses unified S/L values
   const indicatorColor = useMemo(() => {
-    // Create a slightly lighter version of the box color for progress bar indicator
-    const [h, s, l] = hexToHsl(boxColor)
-    const lighterL = Math.min(100, s + 60, l + 20,) // Lighten by 5 units
-    return hslToHex(h, s, lighterL)
-  }, [boxColor])
+    // Create progress bar color using unified saturation and luminance values
+    // Extract hue from original source color (before S/L was applied), then apply exact progress bar S/L values
+    const sourceColor = progressBarSourceColor || boxColor
+    const [h, s, l] = hexToHsl(sourceColor)
+    const adjustedS = Math.min(100, Math.max(0, progressBarSaturation)) // Use exact progress bar saturation
+    const adjustedL = Math.min(100, Math.max(0, progressBarLuminance)) // Use exact progress bar luminance
+    return hslToHex(h, adjustedS, adjustedL)
+  }, [progressBarSourceColor, boxColor, progressBarLuminance, progressBarSaturation])
 
   // Paper gradient overlay colors - themed with boxColor
   const paperGradientTopColor = useMemo(() => {
