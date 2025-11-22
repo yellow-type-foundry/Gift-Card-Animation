@@ -425,11 +425,14 @@
 
 /* All Accepted text glow animation on hover */
 .all-accepted-text {
-  transition: text-shadow 0.4s ease-out;
+  transition: text-shadow 0.6s ease-out, opacity 0.6s ease-out;
+  text-shadow: 0 0 0px rgba(255, 255, 255, 0);
+  opacity: 1;
 }
 
 [data-name="Gift Card"]:hover .all-accepted-text {
   animation: all-accepted-glow 5s ease-in-out infinite;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.8), 0 0 16px rgba(255, 255, 255, 0.8);
 }
 
 @keyframes all-accepted-glow {
@@ -438,5 +441,29 @@
   }
   50% {
     text-shadow: 0 0 16px rgba(255, 255, 255, 1), 0 0 32px rgba(255, 255, 255, 1), 0 0 48px rgba(255, 255, 255, 1);
+  }
+}
+
+/* Done progress bar glow animation on hover */
+.done-progress-bar {
+  transition: box-shadow 0.6s ease-out, filter 0.6s ease-out;
+  box-shadow: 0 0 0px rgba(255, 255, 255, 0);
+  filter: brightness(1);
+}
+
+[data-name="Gift Card"]:hover .done-progress-bar {
+  animation: done-progress-bar-glow 5s ease-in-out infinite;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.4), 0 0 16px rgba(255, 255, 255, 0.3);
+  filter: brightness(1);
+}
+
+@keyframes done-progress-bar-glow {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.4), 0 0 16px rgba(255, 255, 255, 0.3);
+    filter: brightness(1);
+  }
+  50% {
+    box-shadow: 0 0 16px rgba(255, 255, 255, 0.6), 0 0 32px rgba(255, 255, 255, 0.5), 0 0 48px rgba(255, 255, 255, 0.4);
+    filter: brightness(1.1);
   }
 }

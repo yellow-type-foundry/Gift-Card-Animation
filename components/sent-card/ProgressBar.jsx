@@ -3,6 +3,7 @@
 import React, { useMemo } from 'react'
 import { GIFT_BOX_TOKENS } from '@/constants/giftBoxTokens'
 import { hexToHsl, hslToHex } from '@/utils/colors'
+import useHover from '@/hooks/useHover'
 
 const ProgressBar = ({
   progress = { current: 4, total: 5 },
@@ -19,8 +20,23 @@ const ProgressBar = ({
     top: 0
   }
 }) => {
+  const { isHovered, handleHoverEnter, handleHoverLeave } = useHover()
+  
   // Use indicatorColor if provided, otherwise fall back to boxColor
-  const indicatorBgColor = indicatorColor || boxColor
+  // For done cards on hover, increase S/L by 5 units
+  const indicatorBgColor = useMemo(() => {
+    if (!indicatorColor) return boxColor
+    
+    if (isDone && isHovered) {
+      // Increase saturation and luminance by 5 units on hover for done cards
+      const [h, s, l] = hexToHsl(indicatorColor)
+      const adjustedS = Math.min(100, Math.max(0, s + 5))
+      const adjustedL = Math.min(100, Math.max(0, l + 5))
+      return hslToHex(h, adjustedS, adjustedL)
+    }
+    
+    return indicatorColor
+  }, [indicatorColor, boxColor, isDone, isHovered])
   
   // Use themed shadow color - should always be provided from parent component
   // Fallback to calculating from boxColor only if themedShadowColor is not provided
@@ -34,38 +50,7 @@ const ProgressBar = ({
     return hslToHex(h, s, darkerL)
   }, [themedShadowColor, boxColor])
   
-  // When done, show only "All Accepted" text centered at bottom
-  if (isDone) {
-    return (
-      <div 
-        className="box-border content-stretch flex flex-col gap-[10px] items-center justify-center relative shrink-0 w-full"
-        style={{
-          paddingBottom: containerPadding.bottom,
-          paddingLeft: containerPadding.horizontal,
-          paddingRight: containerPadding.horizontal,
-          paddingTop: containerPadding.top
-        }}
-        data-name="Progress Bar"
-      >
-        <p 
-          className="font-['Goody_Sans:Medium',sans-serif] leading-[1.4] not-italic relative shrink-0 text-center all-accepted-text"
-          style={{
-            fontFamily: 'var(--font-goody-sans)',
-            fontSize: '16px',
-            fontWeight: 500,
-            lineHeight: 1.4,
-            color: GIFT_BOX_TOKENS.colors.progressText,
-            zIndex: GIFT_BOX_TOKENS.zIndex.progressText,
-            mixBlendMode: GIFT_BOX_TOKENS.blendModes.overlay,
-            opacity: GIFT_BOX_TOKENS.colors.progressTextOpacity,
-            position: 'relative'
-          }}
-        >
-          All Accepted
-        </p>
-      </div>
-    )
-  }
+  // When done, show progress bar at 100% with "Done" text inside
 
   return (
     <div 
@@ -77,6 +62,8 @@ const ProgressBar = ({
         paddingTop: containerPadding.top
       }}
       data-name="Progress Bar"
+      onMouseEnter={handleHoverEnter}
+      onMouseLeave={handleHoverLeave}
     >
       {/* Stroke wrapper with gradient (0.5px outside) */}
       <div
@@ -122,9 +109,9 @@ const ProgressBar = ({
           {/* Progress indicator */}
           {/* Stroke wrapper with gradient (0.5px inside) */}
           <div
-            className="relative shrink-0"
+            className={`relative shrink-0 ${isDone ? 'done-progress-bar' : ''}`}
             style={{
-              width: `${progressBarWidth}px`,
+              width: isDone ? '100%' : `${progressBarWidth}px`,
               minWidth: GIFT_BOX_TOKENS.progressBar.indicator.minWidth,
               padding: GIFT_BOX_TOKENS.progressBar.indicator.strokePadding,
               borderRadius: GIFT_BOX_TOKENS.progressBar.indicator.borderRadius,
@@ -141,11 +128,11 @@ const ProgressBar = ({
                 paddingRight: GIFT_BOX_TOKENS.progressBar.indicator.horizontalPadding,
                 borderRadius: GIFT_BOX_TOKENS.progressBar.indicator.borderRadius,
                 backgroundColor: indicatorBgColor,
-                transition: `background-color ${GIFT_BOX_TOKENS.animations.duration.fast} ${GIFT_BOX_TOKENS.animations.easing.easeOut}`
+                transition: `background-color 0.6s ease-out`
               }}
             >
               <p 
-                className="font-['Goody_Sans:Medium',sans-serif] leading-[1.4] not-italic relative shrink-0 text-white w-full"
+                className={`font-['Goody_Sans:Medium',sans-serif] leading-[1.4] not-italic relative shrink-0 text-white w-full ${isDone ? 'all-accepted-text' : ''}`}
                 style={{
                   fontFamily: 'var(--font-goody-sans)',
                   fontSize: '16px',
@@ -155,10 +142,11 @@ const ProgressBar = ({
                   zIndex: GIFT_BOX_TOKENS.zIndex.progressText,
                   mixBlendMode: GIFT_BOX_TOKENS.blendModes.overlay,
                   opacity: GIFT_BOX_TOKENS.colors.progressTextOpacity,
-                  position: 'relative'
+                  position: 'relative',
+                  textAlign: isDone ? 'center' : 'left'
                 }}
               >
-                {`${animatedCurrent}/${validatedProgress.total}`}
+                {isDone ? 'Done' : `${animatedCurrent}/${validatedProgress.total}`}
               </p>
               <div 
                 className="absolute inset-0 pointer-events-none"
