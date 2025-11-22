@@ -404,10 +404,13 @@ const SentCard1 = ({
     zIndex: 0
   }), [])
 
+  // Unified confetti blur value
+  const CONFETTI_BLUR = 'blur(2px)'
+  
   const confettiCanvasStyle = useMemo(() => ({
     zIndex: 1,
     pointerEvents: 'none',
-    filter: 'blur(2.5px)'
+    filter: CONFETTI_BLUR
   }), [])
 
   const confettiWhiteOverlayStyle = useMemo(() => ({
@@ -576,6 +579,14 @@ const SentCard1 = ({
         className={`content-stretch flex flex-col items-start ${isMonochromeVariant ? 'overflow-visible' : 'overflow-hidden'} relative rounded-[inherit] w-full ${(progressOutsideEnvelope && headerHeight2 !== undefined) || (headerUseFlex && headerHeight !== undefined && !overlayProgressOnEnvelope && !progressOutsideEnvelope) || (overlayProgressOnEnvelope && headerUseFlex1 && headerHeight1 !== undefined && !progressOutsideEnvelope) ? 'h-full' : ''}`} 
         style={contentWrapperStyle}
       >
+        {/* Full card confetti canvas for Single 1 (useGiftContainer) - covers entire card */}
+        {useGiftContainer && !overlayProgressOnEnvelope && (
+          <canvas
+            ref={confettiCanvasRef}
+            className="absolute inset-0 pointer-events-none"
+            style={{ zIndex: 1, filter: CONFETTI_BLUR, position: 'absolute' }}
+          />
+        )}
         {/* Specular highlight that follows cursor (only when 3D animation is selected) */}
         {/* 6. Enhanced Specular Highlight - follows cursor and responds to tilt */}
         {shouldApplyTilt && isHovered && (
@@ -608,7 +619,7 @@ const SentCard1 = ({
             <canvas
               ref={confettiCanvasRef}
               className="absolute inset-0"
-              style={{ zIndex: 1, pointerEvents: 'none', filter: 'blur(2.5px)' }}
+              style={{ zIndex: 1, pointerEvents: 'none', filter: CONFETTI_BLUR }}
             />
             {confettiWhiteOverlay && (
               <div
@@ -649,13 +660,13 @@ const SentCard1 = ({
           data-node-id="1467:49183"
         >
           {/* Background with gradient overlay - only when overlayProgressOnEnvelope is false */}
-          {!overlayProgressOnEnvelope && (
+          {!overlayProgressOnEnvelope && !useGiftContainer && (
             <div
               aria-hidden="true"
               className="absolute inset-0 pointer-events-none"
               style={backgroundBorderRadiusStyle}
             >
-              {/* Confetti canvas (behind envelope) */}
+              {/* Confetti canvas (behind envelope) - only for non-Single 1 cards */}
               <canvas
                 ref={confettiCanvasRef}
                 className="absolute inset-0"
