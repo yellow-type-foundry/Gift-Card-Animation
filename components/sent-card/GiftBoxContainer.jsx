@@ -132,6 +132,13 @@ const GiftBoxContainer = ({
     const darkerColor = hslToHex(h, s, darkerL)
     return `linear-gradient(to bottom, ${colorToUse} 0%, ${darkerColor} 100%)`
   }, [hoverBoxColor])
+
+  // Calculate lighter color for breathing duplicate boxes (L + 10)
+  const breathingBoxColor = useMemo(() => {
+    const [h, s, l] = hexToHsl(hoverBoxColor)
+    const lighterL = Math.min(100, l + 10) // Increase L by 10 for breathing boxes
+    return hslToHex(h, s, lighterL)
+  }, [hoverBoxColor])
   
   // Progress bar indicator color - uses unified S/L values
   const progressIndicatorColor = useMemo(() => {
@@ -279,7 +286,7 @@ const GiftBoxContainer = ({
                 className="absolute inset-0"
                 style={{ 
                   borderRadius: GIFT_BOX_TOKENS.box.borderRadius,
-                  backgroundColor: hoverBoxColor,
+                  backgroundColor: breathingBoxColor,
                 }}
               />
               <div 
@@ -316,7 +323,7 @@ const GiftBoxContainer = ({
                 className="absolute inset-0"
                 style={{ 
                   borderRadius: GIFT_BOX_TOKENS.box.borderRadius,
-                  backgroundColor: hoverBoxColor,
+                  backgroundColor: breathingBoxColor,
                 }}
               />
               <div 

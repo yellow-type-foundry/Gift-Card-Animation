@@ -107,7 +107,7 @@ const ControlBar = ({
 
   return (
     <div
-      className="w-full flex items-center justify-between gap-4 mb-6 overflow-x-auto md:overflow-visible whitespace-nowrap px-5 md:px-0"
+      className="w-full grid grid-cols-3 items-center gap-4 mb-6 overflow-x-auto md:overflow-visible whitespace-nowrap px-5 md:px-0"
       style={controlBarStyle}
     >
       {/* Tabs - Left side */}
@@ -124,8 +124,24 @@ const ControlBar = ({
         />
       </div>
       
+      {/* Layout Tabs - Center (only show for Gift Sent tab) */}
+      <div className="flex items-center justify-center gap-2 shrink-0">
+        {isSentTab && (
+          <>
+            {[1, 2, 3].map((num) => (
+              <TabButton
+                key={num}
+                label={`Layout ${num}`}
+                isActive={layoutNumber === String(num)}
+                onClick={() => onLayoutChange({ target: { value: String(num) } })}
+              />
+            ))}
+          </>
+        )}
+      </div>
+      
       {/* Controls - Right side */}
-      <div className="flex items-center gap-4 shrink-0">
+      <div className="flex items-center justify-end gap-4 shrink-0">
         {/* Gift Sent specific controls */}
         {isSentTab && (
         <>
@@ -171,28 +187,8 @@ const ControlBar = ({
                   }}
                   onClick={(e) => e.stopPropagation()}
                 >
-                    <div className="space-y-4">
-                      {/* Layout pagination */}
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-[#525F7A]">Layout</span>
-                        <div className="flex items-center gap-1">
-                          {[1, 2, 3].map((num) => (
-                            <button
-                              key={num}
-                              onClick={() => onLayoutChange({ target: { value: String(num) } })}
-                              className={`px-3 py-1.5 rounded-[8px] text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0 ${
-                                layoutNumber === String(num)
-                                  ? 'bg-[#5a3dff] text-white'
-                                  : 'bg-white border border-[#dde2e9] text-[#525F7A] hover:bg-gray-50'
-                              }`}
-                              aria-label={`Layout ${num}`}
-                            >
-                              {num}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                      {/* Theming toggle - only show for layout 1 */}
+                  <div className="space-y-4">
+                    {/* Theming toggle - only show for layout 1 */}
                       {layoutNumber === '1' && (
                         <div className="flex items-center justify-between">
                           <span className="text-sm text-[#525F7A]">Theming</span>
@@ -338,29 +334,6 @@ const ControlBar = ({
                 onTouchStart={(e) => e.stopPropagation()}
               >
                 <div className="space-y-4">
-                  {/* Layout pagination */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-[#525F7A]">Layout</span>
-                    <div className="flex items-center gap-1">
-                      {[1, 2, 3].map((num) => (
-                        <button
-                          key={num}
-                          onClick={() => {
-                            onLayoutChange({ target: { value: String(num) } })
-                            onSettingsMenuToggle(false)
-                          }}
-                          className={`px-3 py-1.5 rounded-[8px] text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0 ${
-                            layoutNumber === String(num)
-                              ? 'bg-[#5a3dff] text-white'
-                              : 'bg-white border border-[#dde2e9] text-[#525F7A] hover:bg-gray-50'
-                          }`}
-                          aria-label={`Layout ${num}`}
-                        >
-                          {num}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
                   {/* Theming toggle - only show for layout 1 */}
                   {layoutNumber === '1' && (
                     <div className="flex items-center justify-between">

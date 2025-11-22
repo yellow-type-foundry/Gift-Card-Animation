@@ -53,6 +53,13 @@ const EnvelopeBoxContainer = ({
     return hslToHex(h, s, darkerL)
   }, [boxColor, progressIndicatorShadowColor])
 
+  // Calculate lighter color for breathing duplicate envelopes (L + 20)
+  const breathingBoxColor = useMemo(() => {
+    const [h, s, l] = hexToHsl(boxColor)
+    const lighterL = Math.min(100, l + 20) // Increase L by 20 for breathing boxes
+    return hslToHex(h, s, lighterL)
+  }, [boxColor])
+
   // Dynamic shadow calculations based on tilt angle (for 3D effect)
   // Shadow moves opposite to tilt direction, becomes more elongated, and opacity changes
   const shadowOffsetX = useMemo(() => {
@@ -457,7 +464,7 @@ const EnvelopeBoxContainer = ({
                   className="absolute inset-0"
                   style={{ 
                     borderRadius: '0 0 32px 32px',
-                    backgroundColor: boxColor,
+                    backgroundColor: breathingBoxColor,
                     opacity: boxOpacity
                   }}
                 />
@@ -511,7 +518,7 @@ const EnvelopeBoxContainer = ({
                   className="absolute inset-0"
                   style={{ 
                     borderRadius: '0 0 32px 32px',
-                    backgroundColor: boxColor,
+                    backgroundColor: breathingBoxColor,
                     opacity: boxOpacity
                   }}
                 />
