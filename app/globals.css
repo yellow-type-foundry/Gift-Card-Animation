@@ -28,7 +28,7 @@
 }
 [data-name="Gift Card"]:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 40px -8px rgba(0, 0, 0, 0.15), 0 4px 12px -4px rgba(0, 0, 0, 0.10);
+  box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.08), 0 2px 8px -4px rgba(0, 0, 0, 0.05);
 }
 
 /* Disable hover lift and shadow when 3D animation is active */

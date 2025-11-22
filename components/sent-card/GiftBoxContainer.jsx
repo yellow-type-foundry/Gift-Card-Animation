@@ -123,6 +123,16 @@ const GiftBoxContainer = ({
   // Calculate hover and shadow colors using reusable hook
   const { hoverColor: hoverBoxColor, shadowColor: themedShadowColor } = useHoverColor(boxColor, isHovered)
   
+  // Create gradient for Single 2 box: brand color to brand color -15 luminance (top to bottom)
+  // Use hoverBoxColor when hovered to maintain hover effects
+  const boxGradient = useMemo(() => {
+    const colorToUse = hoverBoxColor // Use hover color which already has hover effects applied
+    const [h, s, l] = hexToHsl(colorToUse)
+    const darkerL = Math.max(0, l - 7) // Second stop: -15 luminance
+    const darkerColor = hslToHex(h, s, darkerL)
+    return `linear-gradient(to bottom, ${colorToUse} 0%, ${darkerColor} 100%)`
+  }, [hoverBoxColor])
+  
   // Progress bar indicator color - uses unified S/L values
   const progressIndicatorColor = useMemo(() => {
     // Create progress bar color using unified saturation and luminance values
@@ -382,8 +392,8 @@ const GiftBoxContainer = ({
             className="absolute inset-0"
             style={{ 
               borderRadius: GIFT_BOX_TOKENS.box.borderRadius,
-              backgroundColor: hoverBoxColor,
-              transition: `background-color ${GIFT_BOX_TOKENS.animations.duration.fast} ${GIFT_BOX_TOKENS.animations.easing.easeOut}`
+              background: boxGradient,
+              transition: `background ${GIFT_BOX_TOKENS.animations.duration.fast} ${GIFT_BOX_TOKENS.animations.easing.easeOut}`
             }}
           />
           <div 
