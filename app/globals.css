@@ -410,6 +410,8 @@
 }
 
 /* Logo breathing animation for undone Single 2 cards - only on hover */
+/* Removed: Logo breathing animation - replaced with progress bar dots */
+/*
 [data-name="Gift Card"]:hover .logo-breathing {
   animation: logo-breathe 2s ease-in-out infinite;
 }
@@ -421,6 +423,43 @@
   50% {
     opacity: 0.6;
   }
+}
+*/
+
+/* Progress bar shimmer animation for undone cards - only on hover */
+@keyframes progress-shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.progress-shimmer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    transparent 100%
+  );
+  pointer-events: none;
+  border-radius: inherit;
+  opacity: 0.9;
+  mix-blend-mode: overlay;
+  transition: opacity 0.3s ease-out;
+  z-index: 2;
+  filter: blur(3px);
+}
+
+[data-name="Gift Card"]:hover .progress-shimmer {
+  opacity: 1;
+  animation: progress-shimmer 2s ease-out infinite;
 }
 
 /* All Accepted text glow animation on hover */

@@ -148,6 +148,10 @@ const ProgressBar = ({
               >
                 {isDone ? 'Done' : `${animatedCurrent}/${validatedProgress.total}`}
               </p>
+              {/* Shimmer animation for undone cards */}
+              {!isDone && (
+                <div className="progress-shimmer" />
+              )}
               <div 
                 className="absolute inset-0 pointer-events-none"
                 style={{

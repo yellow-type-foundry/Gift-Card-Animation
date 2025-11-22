@@ -32,7 +32,8 @@ const EnvelopeBoxContainer = ({
   parallaxY = 0, // Parallax offset Y for tilt effect
   tiltX = 0, // Tilt X angle for 3D effect
   tiltY = 0, // Tilt Y angle for 3D effect
-  animationType = 'none' // Animation type to determine if 3D effects should be applied
+  animationType = 'none', // Animation type: 'highlight', 'breathing', or 'none'
+  enable3D = false // Standalone 3D toggle that works with highlight or breathing
 }) => {
   const { isHovered: internalIsHovered, handleHoverEnter, handleHoverLeave } = useHover()
   // Use external hover state if provided, otherwise use internal
@@ -60,22 +61,30 @@ const EnvelopeBoxContainer = ({
     return hslToHex(h, s, lighterL)
   }, [boxColor])
 
-  // Dynamic shadow calculations based on tilt angle (for 3D effect)
-  // Shadow moves opposite to tilt direction, becomes more elongated, and opacity changes
+  // Dynamic shadow calculations based on tilt angle and cursor position (for 3D effect)
+  // Shadow moves opposite to tilt direction and cursor position (like a light source), becomes more elongated, and opacity changes
   const shadowOffsetX = useMemo(() => {
-    if (!isHovered || animationType !== '3d') return 0
+    if (!isHovered || !enable3D || (animationType !== 'highlight' && animationType !== 'breathing')) return 0
     // Shadow moves opposite to tiltY (when tilted right, shadow moves left)
-    return -tiltY * 2 // 2px per degree
-  }, [isHovered, animationType, tiltY])
+    const tiltOffset = -tiltY * 2 // 2px per degree
+    // Shadow also moves opposite to cursor X position (when cursor is right, shadow moves left)
+    // Use parallaxX as a proxy for cursor position (negative because shadow moves opposite)
+    const cursorOffset = -parallaxX * 0.8 // Scale down parallax for shadow movement
+    return tiltOffset + cursorOffset
+  }, [isHovered, animationType, tiltY, parallaxX])
 
   const shadowOffsetY = useMemo(() => {
-    if (!isHovered || animationType !== '3d') return 0
+    if (!isHovered || !enable3D || (animationType !== 'highlight' && animationType !== 'breathing')) return 0
     // Shadow moves opposite to tiltX (when tilted down, shadow moves up)
-    return -tiltX * 2 // 2px per degree
-  }, [isHovered, animationType, tiltX])
+    const tiltOffset = -tiltX * 2 // 2px per degree
+    // Shadow also moves opposite to cursor Y position (when cursor is down, shadow moves up)
+    // Use parallaxY as a proxy for cursor position (negative because shadow moves opposite)
+    const cursorOffset = -parallaxY * 0.8 // Scale down parallax for shadow movement
+    return tiltOffset + cursorOffset
+  }, [isHovered, animationType, tiltX, parallaxY])
 
   const shadowScaleX = useMemo(() => {
-    if (!isHovered || animationType !== '3d') return 1
+    if (!isHovered || !enable3D || (animationType !== 'highlight' && animationType !== 'breathing')) return 1
     // Shadow becomes more elongated when tilted
     // Calculate based on tilt angle magnitude
     const tiltMagnitude = Math.sqrt(tiltX * tiltX + tiltY * tiltY)
@@ -83,7 +92,7 @@ const EnvelopeBoxContainer = ({
   }, [isHovered, animationType, tiltX, tiltY])
 
   const shadowScaleY = useMemo(() => {
-    if (!isHovered || animationType !== '3d') return 1
+    if (!isHovered || !enable3D || (animationType !== 'highlight' && animationType !== 'breathing')) return 1
     // Shadow becomes slightly compressed when tilted
     const tiltMagnitude = Math.sqrt(tiltX * tiltX + tiltY * tiltY)
     return 1 - (tiltMagnitude / 6) * 0.1 // Up to 10% compression
@@ -91,7 +100,7 @@ const EnvelopeBoxContainer = ({
 
   const shadowOpacity = useMemo(() => {
     if (!isHovered) return GIFT_BOX_TOKENS.hoverEffects.boxShadowOpacity.default
-    if (animationType !== '3d') return GIFT_BOX_TOKENS.hoverEffects.boxShadowOpacity.hover
+    if (!enable3D || (animationType !== 'highlight' && animationType !== 'breathing')) return GIFT_BOX_TOKENS.hoverEffects.boxShadowOpacity.hover
     // Shadow opacity increases when tilted (more dramatic)
     const tiltMagnitude = Math.sqrt(tiltX * tiltX + tiltY * tiltY)
     const baseOpacity = GIFT_BOX_TOKENS.hoverEffects.boxShadowOpacity.hover
@@ -100,7 +109,7 @@ const EnvelopeBoxContainer = ({
 
   // 2. Depth-based scale: scale down when tilted away, scale up when tilted toward viewer
   const depthScale = useMemo(() => {
-    if (!isHovered || animationType !== '3d') return 1
+    if (!isHovered || !enable3D || (animationType !== 'highlight' && animationType !== 'breathing')) return 1
     // Calculate perceived distance based on tilt (negative tiltX = tilted away)
     // When tilted away (positive tiltX), scale down; when tilted toward (negative tiltX), scale up
     const distanceFactor = -tiltX / 6 // Normalize to -1 to 1 range
@@ -109,7 +118,7 @@ const EnvelopeBoxContainer = ({
 
   // 3. Lighting/brightness shifts: brighter when tilted toward light, darker when away
   const brightnessShift = useMemo(() => {
-    if (!isHovered || animationType !== '3d') return 1
+    if (!isHovered || !enable3D || (animationType !== 'highlight' && animationType !== 'breathing')) return 1
     // Light source is from top-left, so negative tiltX (tilted up) and negative tiltY (tilted left) = brighter
     const lightFactor = (-tiltX - tiltY) / 12 // Normalize to -1 to 1 range
     return 1 + lightFactor * 0.15 // Up to 15% brightness change
@@ -117,7 +126,7 @@ const EnvelopeBoxContainer = ({
 
   // 4. Edge highlighting: brighter edges when facing light
   const edgeHighlightIntensity = useMemo(() => {
-    if (!isHovered || animationType !== '3d') return 0
+    if (!isHovered || !enable3D || (animationType !== 'highlight' && animationType !== 'breathing')) return 0
     // Top and left edges are brighter when facing light
     const topEdgeFactor = Math.max(0, -tiltX / 6) // Top edge (negative tiltX = facing up)
     const leftEdgeFactor = Math.max(0, -tiltY / 6) // Left edge (negative tiltY = facing left)
@@ -126,7 +135,7 @@ const EnvelopeBoxContainer = ({
 
   // 5. Perspective blur (depth of field): blur when tilted away from viewer
   const depthBlur = useMemo(() => {
-    if (!isHovered || animationType !== '3d') return 0
+    if (!isHovered || !enable3D || (animationType !== 'highlight' && animationType !== 'breathing')) return 0
     // Blur increases when tilted away (positive tiltX)
     const blurFactor = Math.max(0, tiltX / 6) // 0 to 1 range
     return blurFactor * 2 // Up to 2px blur
@@ -246,7 +255,7 @@ const EnvelopeBoxContainer = ({
           width: GIFT_BOX_TOKENS.boxShadowBatch2.width,
           opacity: shadowOpacity,
           zIndex: GIFT_BOX_TOKENS.zIndex.boxShadow,
-          transition: isHovered && animationType === '3d'
+          transition: isHovered && enable3D && (animationType === 'highlight' || animationType === 'breathing')
             ? `opacity 0.15s ease-out, left 0.15s ease-out, top 0.15s ease-out`
             : `opacity ${GIFT_BOX_TOKENS.animations.duration.fast} ${GIFT_BOX_TOKENS.animations.easing.easeOut}`
         }}
@@ -256,7 +265,7 @@ const EnvelopeBoxContainer = ({
           className="flex-none"
           style={{
             transform: `scaleY(-1) scaleX(${shadowScaleX}) scaleY(${shadowScaleY})`,
-            transition: isHovered && animationType === '3d'
+            transition: isHovered && enable3D && (animationType === 'highlight' || animationType === 'breathing')
               ? 'transform 0.15s ease-out'
               : 'none'
           }}
@@ -295,7 +304,7 @@ const EnvelopeBoxContainer = ({
           padding: '0.5px', // Border width
           borderRadius: '8px 8px 0 0', // Rounded top corners
           background: 'linear-gradient(to top, rgba(255,255,255,0) 0%, rgba(221,226,233,1) 100%)', // Gradient border from top to bottom
-          ...(isHovered && animationType === '3d' ? {
+          ...(isHovered && enable3D && (animationType === 'highlight' || animationType === 'breathing') ? {
             transform: `translateX(-50%) perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translate(${parallaxX}px, ${parallaxY}px) scale(${1.02 * depthScale})`,
             transformStyle: 'preserve-3d',
             filter: `brightness(${brightnessShift}) blur(${depthBlur}px)`,
@@ -422,8 +431,8 @@ const EnvelopeBoxContainer = ({
         </div>
       </div>
 
-      {/* Breathing animation: Two duplicate envelopes behind original (only when animationType is 'breathing' or '3d' and card is done) */}
-      {(animationType === 'breathing' || animationType === '3d') && isDone && (
+      {/* Breathing animation: Two duplicate envelopes behind original (only when animationType is 'breathing' and card is done) */}
+      {animationType === 'breathing' && isDone && (
         <>
           {/* First duplicate envelope - hue +15 */}
           <div 
@@ -542,7 +551,7 @@ const EnvelopeBoxContainer = ({
         data-name="Envelope"
         style={{ 
           zIndex: 2,
-          ...(isHovered && animationType === '3d' ? {
+          ...(isHovered && enable3D && (animationType === 'highlight' || animationType === 'breathing') ? {
             transform: `perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translate(${parallaxX}px, ${parallaxY}px) scale(${1.02 * depthScale})`,
             transformStyle: 'preserve-3d',
             filter: `brightness(${brightnessShift}) blur(${depthBlur}px)`,
@@ -558,7 +567,7 @@ const EnvelopeBoxContainer = ({
         }}
       >
         {/* 4. Edge highlighting: brighter edges when facing light (only in 3D mode) */}
-        {isHovered && animationType === '3d' && edgeHighlightIntensity > 0 && (
+        {isHovered && enable3D && (animationType === 'highlight' || animationType === 'breathing') && edgeHighlightIntensity > 0 && (
           <>
             {/* Top edge highlight */}
             <div 

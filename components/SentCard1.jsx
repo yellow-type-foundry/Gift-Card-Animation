@@ -102,6 +102,8 @@ const SentCard1 = ({
   showGiftBoxWhenHidden = false,
   // Animation type for Single 2 cards: 'highlight', 'breathing', or 'none'
   animationType = 'highlight',
+  // Standalone 3D toggle that works with highlight or breathing
+  enable3D = false,
   // Gift container exclusive controls (for Single 1)
   giftContainerOffsetY,
   giftContainerScale,
@@ -121,11 +123,11 @@ const SentCard1 = ({
   // Generate stable IDs for SVG elements
   const ids = useComponentIds(boxImage, from)
   
-  // Mouse tracking for tilt effect (only for Single 2 and Batch 2 when animationType is '3d')
+  // Mouse tracking for tilt effect (only for Single 2 and Batch 2 when 3D is enabled)
   const [mousePosition, setMousePosition] = useState({ x: 0.5, y: 0.5 })
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 }) // Pixel position for specular highlight
   const isSingle2OrBatch2 = (hideEnvelope && showGiftBoxWhenHidden) || (hideEnvelope && !showGiftBoxWhenHidden) // Single 2 or Batch 2
-  const shouldApplyTilt = isSingle2OrBatch2 && animationType === '3d' // Only apply tilt when 3D animation is selected
+  const shouldApplyTilt = isSingle2OrBatch2 && enable3D && (animationType === 'highlight' || animationType === 'breathing') // Only apply tilt when 3D is enabled
   
   // Handle mouse move for tilt effect
   const handleMouseMove = useCallback((e) => {
@@ -176,26 +178,32 @@ const SentCard1 = ({
     isDone
   } = useProgressAnimation(progress)
   
-  // Select gift container image based on progress (cycle through brands) - only when useGiftContainer is true
+  // Select gift container image randomly but consistently per card - only when useGiftContainer is true
   const giftContainerImage = useMemo(() => {
     if (!useGiftContainer) return null
-    // Map progress to image index (0-6 for brands)
-    const progressRatio = validatedProgress.total > 0 
-      ? validatedProgress.current / validatedProgress.total 
-      : 0
-    const index = Math.min(6, Math.floor(progressRatio * 7))
+    // Use boxImage as a seed for consistent random selection per card
+    // This ensures each card gets a random brand that stays the same across re-renders
+    let hash = 0
+    for (let i = 0; i < boxImage.length; i++) {
+      hash = ((hash << 5) - hash) + boxImage.charCodeAt(i)
+      hash = hash & hash // Convert to 32-bit integer
+    }
+    const index = Math.abs(hash) % GIFT_CONTAINER_IMAGES.length
     return GIFT_CONTAINER_IMAGES[index]
-  }, [useGiftContainer, validatedProgress.current, validatedProgress.total])
+  }, [useGiftContainer, boxImage])
   
   // Map PNG logo to SVG logo for Single 2 (GiftBoxContainer) text emboss styling
-  // For Single 2, select logo based on progress (similar to giftContainerImage but for SVG)
+  // For Single 2, select logo randomly but consistently per card (same as giftContainerImage)
   const svgLogoPath = useMemo(() => {
-    // For Single 2 (hideEnvelope && showGiftBoxWhenHidden), select logo based on progress
+    // For Single 2 (hideEnvelope && showGiftBoxWhenHidden), use same random selection logic
     if (hideEnvelope && showGiftBoxWhenHidden) {
-      const progressRatio = validatedProgress.total > 0 
-        ? validatedProgress.current / validatedProgress.total 
-        : 0
-      const index = Math.min(6, Math.floor(progressRatio * 7))
+      // Use boxImage as a seed for consistent random selection per card
+      let hash = 0
+      for (let i = 0; i < boxImage.length; i++) {
+        hash = ((hash << 5) - hash) + boxImage.charCodeAt(i)
+        hash = hash & hash // Convert to 32-bit integer
+      }
+      const index = Math.abs(hash) % GIFT_CONTAINER_IMAGES.length
       const pngPath = GIFT_CONTAINER_IMAGES[index]
       return LOGO_PNG_TO_SVG_MAP[pngPath] || '/assets/GiftSent/SVG Logo/Logo.svg'
     }
@@ -205,7 +213,7 @@ const SentCard1 = ({
     }
     // Default fallback
     return '/assets/GiftSent/SVG Logo/Logo.svg'
-  }, [hideEnvelope, showGiftBoxWhenHidden, giftContainerImage, validatedProgress.current, validatedProgress.total])
+  }, [hideEnvelope, showGiftBoxWhenHidden, giftContainerImage, boxImage])
 
   // Extract brand name from logo path
   const brandName = useMemo(() => {
@@ -215,12 +223,14 @@ const SentCard1 = ({
       logoPath = giftContainerImage
     }
     if (!logoPath) {
-      // Fallback: try to get from progress-based selection
+      // Fallback: try to get from random selection (same logic as above)
       if (hideEnvelope && showGiftBoxWhenHidden) {
-        const progressRatio = validatedProgress.total > 0 
-          ? validatedProgress.current / validatedProgress.total 
-          : 0
-        const index = Math.min(6, Math.floor(progressRatio * 7))
+        let hash = 0
+        for (let i = 0; i < boxImage.length; i++) {
+          hash = ((hash << 5) - hash) + boxImage.charCodeAt(i)
+          hash = hash & hash // Convert to 32-bit integer
+        }
+        const index = Math.abs(hash) % GIFT_CONTAINER_IMAGES.length
         logoPath = GIFT_CONTAINER_IMAGES[index]
       }
     }
@@ -768,6 +778,7 @@ const SentCard1 = ({
                 logoPath={svgLogoPath}
                 logoBrandColor={logoBrandColor}
                 animationType={animationType}
+                enable3D={enable3D}
                 parallaxX={parallaxX}
                 parallaxY={parallaxY}
                 tiltX={tiltX}
@@ -795,6 +806,7 @@ const SentCard1 = ({
                 tiltX={tiltX}
                 tiltY={tiltY}
                 animationType={animationType}
+                enable3D={enable3D}
               />
             ) : useGiftContainer ? (
               // Gift Container Image (replaces envelope)

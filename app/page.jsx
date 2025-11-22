@@ -136,7 +136,8 @@ const ALL_SENT_DATES = [
 export default function Home() {
   const [activeTab, setActiveTab] = useState('gift') // 'gift' | 'sent'
   const [useColoredBackground, setUseColoredBackground] = useState(false) // Toggle for theming
-  const [animationType, setAnimationType] = useState('highlight') // Animation type: 'highlight', 'breathing', '3d', or 'none'
+  const [animationType, setAnimationType] = useState('highlight') // Animation type: 'highlight', 'breathing', or 'none'
+  const [enable3D, setEnable3D] = useState(false) // Standalone 3D toggle that works with highlight or breathing
   const [layoutNumber, setLayoutNumber] = useState('1') // '1' | '2' | '3' - which layout pair to use
   const [viewType, setViewType] = useState('mixed') // 'mixed' | 'batch' | 'single' - what to display
   const [mixSeed, setMixSeed] = useState(0) // Seed to regenerate mix when toggled
@@ -313,7 +314,7 @@ export default function Home() {
   }, [])
   
   // Helper function to get SentCard1 props based on layout number
-  const getSentCard1Props = useCallback((card, layoutNum, useColoredBackground, animationType) => {
+  const getSentCard1Props = useCallback((card, layoutNum, useColoredBackground, animationType, enable3D) => {
     // Map layout number to config key
     let layoutKey
     if (layoutNum === '1') layoutKey = 'default'
@@ -375,8 +376,9 @@ export default function Home() {
       footerTransparent2: useAlteredLayout2 ? FOOTER_CONFIG.altered2.transparent : undefined,
       progressBottomPadding2: useAlteredLayout2 ? FOOTER_CONFIG.altered2.progressOutside.bottomPadding : undefined,
       animationType: animationType,
+      enable3D: enable3D || false,
     }
-  }, [animationType])
+  }, [animationType, enable3D])
   
   const handleOpenGift = useCallback((cardId) => {
     setCardStates(prev => ({
@@ -447,6 +449,8 @@ export default function Home() {
           onThemingChange={setUseColoredBackground}
           animationType={animationType}
           onAnimationTypeChange={setAnimationType}
+          enable3D={enable3D}
+          onEnable3DChange={setEnable3D}
           layoutNumber={layoutNumber}
           onLayoutChange={(e) => setLayoutNumber(e.target.value)}
           viewType={viewType}
@@ -471,6 +475,7 @@ export default function Home() {
           layoutNumber={layoutNumber}
           useColoredBackground={layoutNumber === '1' ? useColoredBackground : false}
           animationType={animationType}
+          enable3D={enable3D}
           sentCards={sentCards}
           mixedCardTypes={mixedCardTypes}
           getSentCard1Props={getSentCard1Props}

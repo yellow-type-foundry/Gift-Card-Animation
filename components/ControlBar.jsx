@@ -14,6 +14,8 @@ const ControlBar = ({
   onThemingChange,
   animationType,
   onAnimationTypeChange,
+  enable3D,
+  onEnable3DChange,
   layoutNumber,
   onLayoutChange,
   viewType,
@@ -223,9 +225,8 @@ const ControlBar = ({
                               className="py-2 pl-3 pr-8 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0 appearance-none cursor-pointer"
                               style={animationSelectStyle}
                             >
-                              <option value="highlight">Highlight</option>
+                              <option value="highlight">Shimmer</option>
                               <option value="breathing">Breathing</option>
-                              <option value="3d">3D</option>
                               <option value="none">None</option>
                             </select>
                             <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
@@ -234,6 +235,27 @@ const ControlBar = ({
                               </svg>
                             </div>
                           </div>
+                        </div>
+                      )}
+                      {/* 3D toggle - only show for layout 2 */}
+                      {layoutNumber === '2' && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-[#525F7A]">3D Effect</span>
+                          <button
+                            onClick={() => onEnable3DChange(!enable3D)}
+                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
+                              enable3D ? 'bg-[#5a3dff]' : 'bg-gray-300'
+                            } cursor-pointer`}
+                            role="switch"
+                            aria-checked={enable3D}
+                            aria-label="Toggle 3D effect"
+                          >
+                            <span
+                              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                                enable3D ? 'translate-x-6' : 'translate-x-1'
+                              }`}
+                            />
+                          </button>
                         </div>
                       )}
                       {/* View selector */}
@@ -369,9 +391,8 @@ const ControlBar = ({
                           className="py-2 pl-3 pr-8 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0 appearance-none cursor-pointer"
                           style={animationSelectStyle}
                         >
-                          <option value="highlight">Highlight</option>
+                          <option value="highlight">Shimmer</option>
                           <option value="breathing">Breathing</option>
-                          <option value="3d">3D</option>
                           <option value="none">None</option>
                         </select>
                         <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
@@ -380,6 +401,27 @@ const ControlBar = ({
                           </svg>
                         </div>
                       </div>
+                    </div>
+                  )}
+                  {/* 3D toggle - only show for layout 2 */}
+                  {layoutNumber === '2' && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-[#525F7A]">3D Effect</span>
+                      <button
+                        onClick={() => onEnable3DChange(!enable3D)}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
+                          enable3D ? 'bg-[#5a3dff]' : 'bg-gray-300'
+                        } cursor-pointer`}
+                        role="switch"
+                        aria-checked={enable3D}
+                        aria-label="Toggle 3D effect"
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                            enable3D ? 'translate-x-6' : 'translate-x-1'
+                          }`}
+                        />
+                      </button>
                     </div>
                   )}
                   {/* View selector */}

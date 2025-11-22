@@ -48,19 +48,19 @@ const SentCard4 = ({
     isDone
   } = useProgressAnimation(progress)
   
-  // Select gift container image based on progress (cycle through brands)
-  const giftContainerIndex = useMemo(() => {
-    // Map progress to image index (0-6 for brands)
-    const progressRatio = validatedProgress.total > 0 
-      ? validatedProgress.current / validatedProgress.total 
-      : 0
-    return Math.min(6, Math.floor(progressRatio * 7))
-  }, [validatedProgress.current, validatedProgress.total])
-  
-  const giftContainerImage = useMemo(
-    () => GIFT_CONTAINER_IMAGES[giftContainerIndex],
-    [giftContainerIndex]
-  )
+  // Select gift container image randomly but consistently per card
+  // Use a hash of the card's unique identifier (title + from) as seed
+  const giftContainerImage = useMemo(() => {
+    // Use title and from as a seed for consistent random selection per card
+    const seed = `${title}${from}`
+    let hash = 0
+    for (let i = 0; i < seed.length; i++) {
+      hash = ((hash << 5) - hash) + seed.charCodeAt(i)
+      hash = hash & hash // Convert to 32-bit integer
+    }
+    const index = Math.abs(hash) % GIFT_CONTAINER_IMAGES.length
+    return GIFT_CONTAINER_IMAGES[index]
+  }, [title, from])
   
   // Extract brand name from image path
   const brandName = useMemo(() => {

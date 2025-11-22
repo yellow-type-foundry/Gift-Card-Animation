@@ -17,7 +17,8 @@ const GiftBoxContainer = ({
   isHovered: externalIsHovered,
   logoPath = '/assets/GiftSent/Gift Container/9bc812442d8f2243c9c74124dd128a8df145f983.svg',
   logoBrandColor = null,
-  animationType = 'highlight', // 'highlight', 'breathing', '3d', or 'none'
+  animationType = 'highlight', // 'highlight', 'breathing', or 'none'
+  enable3D = false, // Standalone 3D toggle that works with highlight or breathing
   parallaxX = 0, // Parallax offset X for tilt effect
   parallaxY = 0, // Parallax offset Y for tilt effect
   tiltX = 0, // Tilt X angle for 3D effect
@@ -155,22 +156,30 @@ const GiftBoxContainer = ({
     return hslToHex(h, adjustedS, adjustedL)
   }, [progressBarSourceColor, progressBarLuminance, progressBarSaturation])
 
-  // Dynamic shadow calculations based on tilt angle (for 3D effect)
-  // Shadow moves opposite to tilt direction, becomes more elongated, and opacity changes
+  // Dynamic shadow calculations based on tilt angle and cursor position (for 3D effect)
+  // Shadow moves opposite to tilt direction and cursor position (like a light source), becomes more elongated, and opacity changes
   const shadowOffsetX = useMemo(() => {
-    if (!isHovered || animationType !== '3d') return 0
+    if (!isHovered || !enable3D || (animationType !== 'highlight' && animationType !== 'breathing')) return 0
     // Shadow moves opposite to tiltY (when tilted right, shadow moves left)
-    return -tiltY * 2 // 2px per degree
-  }, [isHovered, animationType, tiltY])
+    const tiltOffset = -tiltY * 2 // 2px per degree
+    // Shadow also moves opposite to cursor X position (when cursor is right, shadow moves left)
+    // Use parallaxX as a proxy for cursor position (negative because shadow moves opposite)
+    const cursorOffset = -parallaxX * 0.8 // Scale down parallax for shadow movement
+    return tiltOffset + cursorOffset
+  }, [isHovered, animationType, tiltY, parallaxX])
 
   const shadowOffsetY = useMemo(() => {
-    if (!isHovered || animationType !== '3d') return 0
+    if (!isHovered || !enable3D || (animationType !== 'highlight' && animationType !== 'breathing')) return 0
     // Shadow moves opposite to tiltX (when tilted down, shadow moves up)
-    return -tiltX * 2 // 2px per degree
-  }, [isHovered, animationType, tiltX])
+    const tiltOffset = -tiltX * 2 // 2px per degree
+    // Shadow also moves opposite to cursor Y position (when cursor is down, shadow moves up)
+    // Use parallaxY as a proxy for cursor position (negative because shadow moves opposite)
+    const cursorOffset = -parallaxY * 0.8 // Scale down parallax for shadow movement
+    return tiltOffset + cursorOffset
+  }, [isHovered, animationType, tiltX, parallaxY])
 
   const shadowScaleX = useMemo(() => {
-    if (!isHovered || animationType !== '3d') return 1
+    if (!isHovered || !enable3D || (animationType !== 'highlight' && animationType !== 'breathing')) return 1
     // Shadow becomes more elongated when tilted
     // Calculate based on tilt angle magnitude
     const tiltMagnitude = Math.sqrt(tiltX * tiltX + tiltY * tiltY)
@@ -178,7 +187,7 @@ const GiftBoxContainer = ({
   }, [isHovered, animationType, tiltX, tiltY])
 
   const shadowScaleY = useMemo(() => {
-    if (!isHovered || animationType !== '3d') return 1
+    if (!isHovered || !enable3D || (animationType !== 'highlight' && animationType !== 'breathing')) return 1
     // Shadow becomes slightly compressed when tilted
     const tiltMagnitude = Math.sqrt(tiltX * tiltX + tiltY * tiltY)
     return 1 - (tiltMagnitude / 6) * 0.1 // Up to 10% compression
@@ -186,7 +195,7 @@ const GiftBoxContainer = ({
 
   const shadowOpacity = useMemo(() => {
     if (!isHovered) return GIFT_BOX_TOKENS.hoverEffects.boxShadowOpacity.default
-    if (animationType !== '3d') return GIFT_BOX_TOKENS.hoverEffects.boxShadowOpacity.hover
+    if (!enable3D || (animationType !== 'highlight' && animationType !== 'breathing')) return GIFT_BOX_TOKENS.hoverEffects.boxShadowOpacity.hover
     // Shadow opacity increases when tilted (more dramatic)
     const tiltMagnitude = Math.sqrt(tiltX * tiltX + tiltY * tiltY)
     const baseOpacity = GIFT_BOX_TOKENS.hoverEffects.boxShadowOpacity.hover
@@ -195,7 +204,7 @@ const GiftBoxContainer = ({
 
   // 2. Depth-based scale: scale down when tilted away, scale up when tilted toward viewer
   const depthScale = useMemo(() => {
-    if (!isHovered || animationType !== '3d') return 1
+    if (!isHovered || !enable3D || (animationType !== 'highlight' && animationType !== 'breathing')) return 1
     // Calculate perceived distance based on tilt (negative tiltX = tilted away)
     // When tilted away (positive tiltX), scale down; when tilted toward (negative tiltX), scale up
     const distanceFactor = -tiltX / 6 // Normalize to -1 to 1 range
@@ -204,7 +213,7 @@ const GiftBoxContainer = ({
 
   // 3. Lighting/brightness shifts: brighter when tilted toward light, darker when away
   const brightnessShift = useMemo(() => {
-    if (!isHovered || animationType !== '3d') return 1
+    if (!isHovered || !enable3D || (animationType !== 'highlight' && animationType !== 'breathing')) return 1
     // Light source is from top-left, so negative tiltX (tilted up) and negative tiltY (tilted left) = brighter
     const lightFactor = (-tiltX - tiltY) / 12 // Normalize to -1 to 1 range
     return 1 + lightFactor * 0.15 // Up to 15% brightness change
@@ -212,7 +221,7 @@ const GiftBoxContainer = ({
 
   // 4. Edge highlighting: brighter edges when facing light
   const edgeHighlightIntensity = useMemo(() => {
-    if (!isHovered || animationType !== '3d') return 0
+    if (!isHovered || !enable3D || (animationType !== 'highlight' && animationType !== 'breathing')) return 0
     // Top and left edges are brighter when facing light
     const topEdgeFactor = Math.max(0, -tiltX / 6) // Top edge (negative tiltX = facing up)
     const leftEdgeFactor = Math.max(0, -tiltY / 6) // Left edge (negative tiltY = facing left)
@@ -221,7 +230,7 @@ const GiftBoxContainer = ({
 
   // 5. Perspective blur (depth of field): blur when tilted away from viewer
   const depthBlur = useMemo(() => {
-    if (!isHovered || animationType !== '3d') return 0
+    if (!isHovered || !enable3D || (animationType !== 'highlight' && animationType !== 'breathing')) return 0
     // Blur increases when tilted away (positive tiltX)
     const blurFactor = Math.max(0, tiltX / 6) // 0 to 1 range
     return blurFactor * 2 // Up to 2px blur
@@ -260,8 +269,8 @@ const GiftBoxContainer = ({
       onMouseLeave={handleHoverLeave}
       style={{ position: 'relative' }}
     >
-      {/* Breathing animation: Two duplicate boxes behind original (only when animationType is 'breathing' or '3d' and card is done) */}
-      {(animationType === 'breathing' || animationType === '3d') && isDone && (
+      {/* Breathing animation: Two duplicate boxes behind original (only when animationType is 'breathing' and card is done) */}
+      {animationType === 'breathing' && isDone && (
         <>
           {/* First duplicate box - hue +15 */}
           <div 
@@ -344,7 +353,7 @@ const GiftBoxContainer = ({
           width: GIFT_BOX_TOKENS.box.width, 
           height: GIFT_BOX_TOKENS.box.height,
           borderRadius: GIFT_BOX_TOKENS.box.borderRadius,
-          ...(isHovered && animationType === '3d' ? {
+          ...(isHovered && enable3D && (animationType === 'highlight' || animationType === 'breathing') ? {
             transform: `perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translate(${parallaxX}px, ${parallaxY}px) translateY(${GIFT_BOX_TOKENS.hoverEffects.transform.translateY}) scale(${1.0125 * depthScale})`,
             transformStyle: 'preserve-3d',
             filter: `brightness(${brightnessShift}) blur(${depthBlur}px)`,
@@ -365,7 +374,7 @@ const GiftBoxContainer = ({
         data-animation-type={animationType}
       >
         {/* 4. Edge highlighting: brighter edges when facing light (only in 3D mode) */}
-        {isHovered && animationType === '3d' && edgeHighlightIntensity > 0 && (
+        {isHovered && enable3D && (animationType === 'highlight' || animationType === 'breathing') && edgeHighlightIntensity > 0 && (
           <>
             {/* Top edge highlight */}
             <div 
@@ -457,7 +466,7 @@ const GiftBoxContainer = ({
               paddingRight: GIFT_BOX_TOKENS.logo.containerPadding.horizontal,
               paddingTop: GIFT_BOX_TOKENS.logo.containerPadding.vertical,
               paddingBottom: GIFT_BOX_TOKENS.logo.containerPadding.vertical,
-              ...(animationType === '3d' && isHovered
+              ...(enable3D && (animationType === 'highlight' || animationType === 'breathing') && isHovered
                 ? {
                     transform: `perspective(1000px) rotateX(${tiltX * 0.05}deg) rotateY(${tiltY * 0.05}deg) translate(${parallaxX * 0.07}px, ${parallaxY * 0.07}px) scale(${1 * depthScale})`,
                     transformStyle: 'preserve-3d',
@@ -469,11 +478,11 @@ const GiftBoxContainer = ({
           >
             {/* Logo with text emboss style */}
             <div 
-              className={`relative shrink-0 ${animationType === '3d' ? '' : 'mix-blend-overlay'} ${!isDone ? 'logo-breathing' : ''}`}
+              className={`relative shrink-0 ${enable3D && (animationType === 'highlight' || animationType === 'breathing') ? '' : 'mix-blend-overlay'}`}
               style={{ 
                 width: GIFT_BOX_TOKENS.logo.width,
                 height: GIFT_BOX_TOKENS.logo.height,
-                mixBlendMode: animationType === '3d' ? 'normal' : GIFT_BOX_TOKENS.blendModes.overlay,
+                mixBlendMode: enable3D && (animationType === 'highlight' || animationType === 'breathing') ? 'normal' : GIFT_BOX_TOKENS.blendModes.overlay,
                 paddingTop: '18px',
                 transition: 'mix-blend-mode 0.2s ease-out' // Smooth transition between blend modes
               }}
@@ -538,7 +547,7 @@ const GiftBoxContainer = ({
               right: GIFT_BOX_TOKENS.effects.specularHighlight.horizontalOffset,
               height: GIFT_BOX_TOKENS.effects.specularHighlight.height,
               mixBlendMode: GIFT_BOX_TOKENS.blendModes.softLight,
-              ...(isHovered && animationType === '3d' ? {
+              ...(isHovered && enable3D && (animationType === 'highlight' || animationType === 'breathing') ? {
                 opacity: 0.6 + edgeHighlightIntensity * 0.4, // More intense when facing light
                 transform: `translate(${-tiltY * 0.5}px, ${-tiltX * 0.5}px)`, // Slight movement based on tilt
                 transition: 'opacity 0.15s ease-out, transform 0.15s ease-out'
@@ -676,7 +685,7 @@ const GiftBoxContainer = ({
           width: GIFT_BOX_TOKENS.boxShadow.width,
           opacity: shadowOpacity,
           zIndex: GIFT_BOX_TOKENS.zIndex.boxShadow,
-          transition: isHovered && animationType === '3d'
+          transition: isHovered && enable3D && (animationType === 'highlight' || animationType === 'breathing')
             ? `opacity 0.15s ease-out, left 0.15s ease-out, top 0.15s ease-out`
             : `opacity ${GIFT_BOX_TOKENS.animations.duration.fast} ${GIFT_BOX_TOKENS.animations.easing.easeOut}`
         }}
@@ -686,7 +695,7 @@ const GiftBoxContainer = ({
           className="flex-none"
           style={{
             transform: `scaleY(-1) scaleX(${shadowScaleX}) scaleY(${shadowScaleY})`,
-            transition: isHovered && animationType === '3d'
+            transition: isHovered && enable3D && (animationType === 'highlight' || animationType === 'breathing')
               ? 'transform 0.15s ease-out'
               : 'none'
           }}
