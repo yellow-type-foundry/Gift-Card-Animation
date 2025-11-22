@@ -213,6 +213,17 @@ const CardGrid = ({
                   />
                 ))
               }
+              // Single 2 (Layout 2) uses SentCard1 with Batch 2 props (shows gift box)
+              if (layoutNumber === '2') {
+                return sentCards.map((card, index) => (
+                  <SentCard1
+                    key={index}
+                    {...getSentCard1Props(card, layoutNumber, useColoredBackground, animationType, enable3D)}
+                    hideEnvelope={true}
+                    showGiftBoxWhenHidden={true}
+                  />
+                ))
+              }
               return sentCards.map((card, index) => {
                 const props = getSentCard4Props(card, layoutNumber, useColoredBackground)
                 if (!props) return null
