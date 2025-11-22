@@ -248,10 +248,10 @@ const SentCard1 = ({
 
   // Unified Saturation and Luminance Controls for Single 2 and Batch 2
   // These values control the saturation and luminance for both Single 2 boxes and Batch 2 envelopes
-  const SINGLE2_LUMINANCE = 56  // Luminance for Single 2 brand colors (0-100)
-  const SINGLE2_SATURATION = 44  // Saturation for Single 2 brand colors (0-100)
-  const BATCH2_ENVELOPE_LUMINANCE = 50  // Luminance for Batch 2 envelope box (0-100)
-  const BATCH2_ENVELOPE_SATURATION = 44 // Saturation for Batch 2 envelope box (0-100)
+  const SINGLE2_LUMINANCE = 62  // Luminance for Single 2 brand colors (0-100)
+  const SINGLE2_SATURATION = 40  // Saturation for Single 2 brand colors (0-100)
+  const BATCH2_ENVELOPE_LUMINANCE = 88  // Luminance for Batch 2 envelope box (0-100)
+  const BATCH2_ENVELOPE_SATURATION = 40 // Saturation for Batch 2 envelope box (0-100)
   
   // Progress Bar Saturation and Luminance (unified for both Single 2 and Batch 2)
   const PROGRESS_BAR_LUMINANCE = 60  // Luminance for progress bar indicator (0-100)
