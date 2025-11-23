@@ -44,6 +44,7 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
     const gyroscopeForceMultiplier = 0.4 // Increased from 0.15 for more noticeable effect
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
     let orientationListenerAdded = false
+    const confettiSettleFrames = 180 // Frames before gyroscope interaction starts (~3 seconds at 60fps)
     
     // Device orientation event handler
     const handleDeviceOrientation = (event) => {
@@ -639,16 +640,16 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
         p.vy += p.ay
         
         // Apply gyroscope/tilt forces on mobile devices
-        if (isMobile && orientationListenerAdded) {
-          // Convert tilt angles to acceleration forces
-          // Beta (front-to-back): positive = tilted back, particles should move "up" (negative Y)
+        // Only apply horizontal tilt (gamma) after confetti animation has settled
+        // Particles must have been active for a certain number of frames before gyroscope interaction
+        if (isMobile && orientationListenerAdded && frameCount >= confettiSettleFrames) {
+          // Only apply horizontal tilt (left-right), not vertical tilt
           // Gamma (left-to-right): positive = tilted right, particles should move right (positive X)
           const tiltForceX = (deviceTilt.gamma / 45) * gyroscopeForceMultiplier * dpr
-          const tiltForceY = -(deviceTilt.beta / 45) * gyroscopeForceMultiplier * dpr // Negative because screen Y is inverted
           
-          // Apply tilt forces to velocity (only if listener is active)
+          // Apply only horizontal tilt force to velocity (only if listener is active and settled)
           p.vx += tiltForceX
-          p.vy += tiltForceY
+          // No vertical tilt - particles maintain their natural vertical movement
         }
         
         // Update position
