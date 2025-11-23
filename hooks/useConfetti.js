@@ -41,7 +41,7 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
     
     // Gyroscope/tilt interaction for mobile devices
     let deviceTilt = { beta: 0, gamma: 0 } // beta: front-to-back, gamma: left-to-right
-    const gyroscopeForceMultiplier = 0.4 // Increased from 0.15 for more noticeable effect
+    const gyroscopeForceMultiplier = 0.2 // Reduced from 0.4 for lighter tilt effect
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
     let orientationListenerAdded = false
     const confettiSettleFrames = 180 // Frames before gyroscope interaction starts (~3 seconds at 60fps)
