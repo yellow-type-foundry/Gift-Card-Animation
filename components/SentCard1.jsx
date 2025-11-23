@@ -579,6 +579,25 @@ const SentCard1 = ({
       data-animation-type={animationType}
       data-node-id="1467:49182"
     >
+      {/* Debug: Red line at estimated envelope top edge - only for Batch 1 (at card level) - SCALE-AWARE */}
+      {(!useGiftContainer && !overlayProgressOnEnvelope && !progressOutsideEnvelope && !hideEnvelope) && (
+        <div
+          style={{
+            position: 'absolute',
+            // Scale-aware position: envelope top is at (4 + envelopeOffsetY), red line is at (1 + envelopeOffsetY) + 113
+            // With transform origin 'center top', the top edge stays fixed regardless of scale
+            top: `${(1 + (envelopeOffsetY || 0)) + 113}px`,
+            left: 0,
+            right: 0,
+            height: '1px',
+            backgroundColor: 'red',
+            zIndex: 9999,
+            pointerEvents: 'none',
+            display: 'none' // Hidden for internal knowledge only
+          }}
+          aria-label="Debug: Envelope top edge (Batch 1)"
+        />
+      )}
       <div 
         className={`content-stretch flex flex-col items-start ${isMonochromeVariant ? 'overflow-visible' : 'overflow-hidden'} relative rounded-[inherit] w-full ${(progressOutsideEnvelope && headerHeight2 !== undefined) || (headerUseFlex && headerHeight !== undefined && !overlayProgressOnEnvelope && !progressOutsideEnvelope) || (overlayProgressOnEnvelope && headerUseFlex1 && headerHeight1 !== undefined && !progressOutsideEnvelope) ? 'h-full' : ''}`} 
         style={contentWrapperStyle}
@@ -787,6 +806,27 @@ const SentCard1 = ({
             data-name={useGiftContainer ? "Gift Container" : "Envelope"}
             data-node-id="1467:49190"
           >
+            {/* Debug: Red line at estimated gift container top edge - only for Single 1 - SCALE-AWARE */}
+            {useGiftContainer && (
+              <div
+                style={{
+                  position: 'absolute',
+                  // Scale-aware position: inside envelope container, so it scales with the container
+                  // With transform origin 'center top' (or custom), the top edge position is relative to container
+                  top: giftContainerTop !== undefined 
+                    ? `${giftContainerTop - 45 + (giftContainerOffsetY !== undefined ? giftContainerOffsetY : 0)}px` // Single 1 - gift container top edge position
+                    : `${4 - 45 + (giftContainerOffsetY !== undefined ? giftContainerOffsetY : 0)}px`, // Fallback - adjusted to match
+                  left: 0,
+                  right: 0,
+                  height: '1px',
+                  backgroundColor: 'red',
+                  zIndex: 9999,
+                  pointerEvents: 'none',
+                  display: 'none' // Hidden for internal knowledge only
+                }}
+                aria-label="Debug: Gift container top edge (Single 1)"
+              />
+            )}
             {/* Dots background - behind Batch 2 envelope or Single 2 box */}
             {hideEnvelope ? (
               <div
