@@ -109,7 +109,7 @@ const ControlBar = ({
 
   return (
     <div
-      className="w-full grid grid-cols-3 items-center gap-4 mb-6 overflow-x-auto md:overflow-visible whitespace-nowrap px-5 md:px-0"
+      className="w-full grid grid-cols-2 md:grid-cols-3 items-center gap-4 mb-6 overflow-x-auto md:overflow-visible whitespace-nowrap px-5 md:px-0"
       style={controlBarStyle}
     >
       {/* Tabs - Left side */}
@@ -126,8 +126,8 @@ const ControlBar = ({
         />
       </div>
       
-      {/* Layout Tabs - Center (only show for Gift Sent tab) */}
-      <div className="flex items-center justify-center gap-2 shrink-0">
+      {/* Layout Tabs - Center (only show for Gift Sent tab, hidden on mobile) */}
+      <div className="hidden md:flex items-center justify-center gap-2 shrink-0">
         {isSentTab && (
           <>
             {[1, 2, 3].map((num) => (
@@ -356,6 +356,28 @@ const ControlBar = ({
                 onTouchStart={(e) => e.stopPropagation()}
               >
                 <div className="space-y-4">
+                  {/* Layout selector - Mobile only */}
+                  <div className="flex items-center justify-between">
+                    <label htmlFor="layout-select-mobile" className="text-sm text-[#525F7A]">Layout</label>
+                    <div className="relative inline-block">
+                      <select
+                        id="layout-select-mobile"
+                        value={layoutNumber}
+                        onChange={onLayoutChange}
+                        className="py-2 pl-3 pr-8 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0 appearance-none cursor-pointer"
+                        style={selectStyle}
+                      >
+                        <option value="1">Layout 1</option>
+                        <option value="2">Layout 2</option>
+                        <option value="3">Layout 3</option>
+                      </select>
+                      <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M3 4.5L6 7.5L9 4.5" stroke="#525F7A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
                   {/* Theming toggle - only show for layout 1 */}
                   {layoutNumber === '1' && (
                     <div className="flex items-center justify-between">
@@ -445,22 +467,6 @@ const ControlBar = ({
                         </svg>
                       </div>
                     </div>
-                  </div>
-                  {/* Shuffle button */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-[#525F7A]">Shuffle</span>
-                    <button
-                      onClick={() => {
-                        onShuffle()
-                        onSettingsMenuToggle(false)
-                      }}
-                      className="px-3 py-1.5 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] hover:bg-gray-50 active:bg-gray-100 transition-colors focus:outline-none flex items-center justify-center"
-                      aria-label="Shuffle cards"
-                    >
-                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 2L14 4L12 6M2 4H14M4 10L2 12L4 14M14 12H2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </button>
                   </div>
                 </div>
               </div>
