@@ -180,7 +180,7 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
     
     // Eruption velocity boost - particles spawn with extra velocity that decays over time
     const eruptionBoostFrames = 60 // Boost lasts for ~1 second (60 frames at 60fps)
-    const maxEruptionBoost = 2.0 // 2x velocity boost at start (very strong eruption)
+    const maxEruptionBoost = 3.0 // 2x velocity boost at start (very strong eruption)
     const minEruptionBoost = 1.0 // No boost after eruption phase
     
     const spawnParticle = (initialY = null, frameCountAtSpawn = 0) => {

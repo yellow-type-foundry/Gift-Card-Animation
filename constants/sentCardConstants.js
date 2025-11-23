@@ -10,7 +10,7 @@ export const CONFETTI_CONFIG = {
   colors: ['#7C66FF', '#5AD3FF', '#FF7AD9', '#FFD166', '#8CE99A'],
   
   // Particle count
-  maxParticles: 180, // Increased by 1.5x (was 120)
+  maxParticles: 200, 
   
   // Speed configuration
   speed: {
@@ -22,7 +22,7 @@ export const CONFETTI_CONFIG = {
   horizontalDrift: 1.5,
   
   // Gravity/acceleration (affects how fast particles slow down and fall)
-  gravity: 0.06,
+  gravity: 0.09,
   
   // Particle size (in pixels, before device pixel ratio)
   size: {

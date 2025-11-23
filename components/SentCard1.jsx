@@ -407,11 +407,11 @@ const SentCard1 = ({
   }), [])
 
   // Unified confetti blur value
-  const CONFETTI_BLUR = 'blur(1.5px)'
+  const CONFETTI_BLUR = 'blur(1.25px)'
   // Blur for back layer (behind envelope/gift container) - increased by 3px
   const CONFETTI_BACK_BLUR = 'blur(4px)' // 2px + 3px = 5px
   // Separate blur for mirrored confetti
-  const CONFETTI_MIRRORED_BLUR = 'blur(5px)'
+  const CONFETTI_MIRRORED_BLUR = 'blur(6px)'
   
   const confettiCanvasStyle = useMemo(() => ({
     zIndex: 1,
