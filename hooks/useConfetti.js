@@ -717,8 +717,6 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
         window.removeEventListener('deviceorientation', handleDeviceOrientation)
         orientationListenerAdded = false
       }
-      // Reset permission flag so it can be requested again if needed
-      permissionRequested = false
     }
   }, [isHovered, allAccepted, confettiCanvasRef, cardRef, confettiCanvasFrontRef, confettiCanvasMirroredRef])
 }
