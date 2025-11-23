@@ -75,11 +75,34 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
       }
       
       // Get Union shape bounds if it exists - use its top as the confetti floor
+      // Also calculate cutout area where particles can fall into
       let unionTop = null
+      let unionCutout = null
       if (unionEl) {
         const unionRect = unionEl.getBoundingClientRect()
         const unionOffsetY = (unionRect.top - canvasRect.top) * dpr
         unionTop = unionOffsetY
+        
+        // Calculate cutout bounds (centered, ~117px wide, ~21px deep)
+        // Cutout is centered on the card (300px wide card, cutout starts at ~91.5px from left)
+        const cutoutWidth = 117 * dpr // ~117px cutout width
+        const cutoutDepth = 21 * dpr // ~21px cutout depth
+        const cutoutLeftCard = 91.5 * dpr // Cutout left edge in card coordinates
+        const cutoutRightCard = cutoutLeftCard + cutoutWidth // Cutout right edge
+        
+        // Convert to canvas coordinates (accounting for card offset)
+        const cutoutLeftCanvas = cutoutLeftCard - cardOffsetX
+        const cutoutRightCanvas = cutoutRightCard - cardOffsetX
+        const cutoutBottom = unionTop + cutoutDepth // Bottom of cutout valley
+        
+        unionCutout = {
+          left: cutoutLeftCanvas,
+          right: cutoutRightCanvas,
+          top: unionTop,
+          bottom: cutoutBottom,
+          width: cutoutWidth,
+          depth: cutoutDepth
+        }
       }
       
       // Card bounds in canvas coordinates
@@ -97,7 +120,9 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
         // Envelope/box bounds for collision detection
         envelope: envelopeBounds,
         // Union shape top position (confetti floor)
-        unionTop: unionTop
+        unionTop: unionTop,
+        // Union cutout area where particles can fall into
+        unionCutout: unionCutout
       }
       
       return cardBounds
@@ -275,10 +300,26 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
         const minX = cardBounds.minX + halfSize
         const maxX = cardBounds.maxX - halfSize
         const minY = cardBounds.minY + halfSize
-        // Use Union top as floor if it exists, otherwise use card bottom
-        const maxY = cardBounds.unionTop !== null 
-          ? cardBounds.unionTop - halfSize  // Union top is the floor
-          : cardBounds.maxY - halfSize
+        
+        // Check if particle is within Union cutout horizontally
+        const isInCutout = cardBounds.unionCutout && 
+          p.x >= cardBounds.unionCutout.left - halfSize && 
+          p.x <= cardBounds.unionCutout.right + halfSize
+        
+        // Determine floor based on whether particle is in cutout
+        let maxY
+        if (cardBounds.unionTop !== null) {
+          if (isInCutout) {
+            // Allow particles to fall into cutout valley
+            maxY = cardBounds.unionCutout.bottom - halfSize
+          } else {
+            // Bounce at Union top if outside cutout
+            maxY = cardBounds.unionTop - halfSize
+          }
+        } else {
+          // No Union, use card bottom
+          maxY = cardBounds.maxY - halfSize
+        }
         
         // Horizontal boundaries - bounce with energy loss (more natural)
         if (p.x <= minX) {
