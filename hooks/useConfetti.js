@@ -224,10 +224,10 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
         // More natural velocity - varied angles and speeds
         vx: (Math.random() * 2 - 1) * horizontalSpread * dpr + Math.sin(angleVariation) * particleSpeed * dpr * 0.3,
         vy: -particleSpeed * dpr * Math.cos(angleVariation),
-        // Air resistance factor (confetti slows down over time)
-        airResistance: 0.97 + Math.random() * 0.02, // 0.97-0.99 (more velocity decay for natural feel)
-        // Reduced gravity so particles can reach the top of the card
-        ay: gravity * dpr * 0.4, // Reduce gravity by 60% so particles can rise higher
+        // Air resistance factor (confetti slows down over time) - reduced for heavier particles
+        airResistance: 0.98 + Math.random() * 0.01, // 0.98-0.99 (less velocity decay for heavier feel)
+        // Increased gravity for heavier particles
+        ay: gravity * dpr * 0.7, // Increased from 0.4 to 0.7 for heavier weight (was reduced by 60%, now only 30%)
         rot: Math.random() * rotation.initial,
         vr: rotationSpeed * rotationVariation, // More varied rotation
         // Circular dot size
