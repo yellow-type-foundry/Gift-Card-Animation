@@ -580,22 +580,26 @@ const SentCard1 = ({
       data-node-id="1467:49182"
     >
       {/* Debug: Red line at estimated envelope top edge - only for Batch 1 (at card level) - SCALE-AWARE */}
+      {/* This is the third floor for confetti particles - particles can land here and roll off */}
       {(!useGiftContainer && !overlayProgressOnEnvelope && !progressOutsideEnvelope && !hideEnvelope) && (
         <div
+          data-name="Second Floor"
+          data-floor-type="batch1"
           style={{
             position: 'absolute',
             // Scale-aware position: envelope top is at (4 + envelopeOffsetY), red line is at (1 + envelopeOffsetY) + 113
             // With transform origin 'center top', the top edge stays fixed regardless of scale
             top: `${(1 + (envelopeOffsetY || 0)) + 113}px`,
-            left: 0,
-            right: 0,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '160px',
             height: '1px',
             backgroundColor: 'red',
             zIndex: 9999,
             pointerEvents: 'none',
             display: 'none' // Hidden for internal knowledge only
           }}
-          aria-label="Debug: Envelope top edge (Batch 1)"
+          aria-label="Debug: Envelope top edge (Batch 1) - Third Floor"
         />
       )}
       <div 
@@ -807,24 +811,29 @@ const SentCard1 = ({
             data-node-id="1467:49190"
           >
             {/* Debug: Red line at estimated gift container top edge - only for Single 1 - SCALE-AWARE */}
+            {/* This is the second floor for confetti particles - particles can land here and roll off */}
             {useGiftContainer && (
               <div
+                data-name="Second Floor"
+                data-floor-type="single1"
                 style={{
                   position: 'absolute',
                   // Scale-aware position: inside envelope container, so it scales with the container
                   // With transform origin 'center top' (or custom), the top edge position is relative to container
+                  // Moved up 12px from original position
                   top: giftContainerTop !== undefined 
-                    ? `${giftContainerTop - 45 + (giftContainerOffsetY !== undefined ? giftContainerOffsetY : 0)}px` // Single 1 - gift container top edge position
-                    : `${4 - 45 + (giftContainerOffsetY !== undefined ? giftContainerOffsetY : 0)}px`, // Fallback - adjusted to match
-                  left: 0,
-                  right: 0,
+                    ? `${giftContainerTop - 45 + (giftContainerOffsetY !== undefined ? giftContainerOffsetY : 0)}px` // Single 1 - gift container top edge position (was -45, now -57 for +12px up)
+                    : `${4 - 45 + (giftContainerOffsetY !== undefined ? giftContainerOffsetY : 0)}px`, // Fallback - adjusted to match (was -45, now -57)
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: '95px',
                   height: '1px',
                   backgroundColor: 'red',
                   zIndex: 9999,
                   pointerEvents: 'none',
                   display: 'none' // Hidden for internal knowledge only
                 }}
-                aria-label="Debug: Gift container top edge (Single 1)"
+                aria-label="Debug: Gift container top edge (Single 1) - Second Floor"
               />
             )}
             {/* Dots background - behind Batch 2 envelope or Single 2 box */}

@@ -28,6 +28,11 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
     // Find Union shape element - use its top as the confetti floor
     const unionEl = cardEl.querySelector('[data-name="Union"]')
     
+    // Find third floor element (red line) - for Single 1 and Batch 1
+    const thirdFloorElSingle1 = cardEl.querySelector('[data-name="Second Floor"][data-floor-type="single1"]')
+    const thirdFloorElBatch1 = cardEl.querySelector('[data-name="Second Floor"][data-floor-type="batch1"]')
+    const thirdFloorEl = thirdFloorElSingle1 || thirdFloorElBatch1
+    
     const ctx = canvas.getContext('2d')
     const ctxFront = canvasFront?.getContext('2d')
     const ctxMirrored = canvasMirrored?.getContext('2d')
@@ -120,6 +125,19 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
         }
       }
       
+      // Get third floor bounds (red line - for Single 1 and Batch 1)
+      let secondFloorY = null
+      let secondFloorLeft = null
+      let secondFloorRight = null
+      if (thirdFloorEl) {
+        const thirdFloorRect = thirdFloorEl.getBoundingClientRect()
+        const thirdFloorOffsetY = (thirdFloorRect.top - canvasRect.top) * dpr
+        const thirdFloorOffsetX = (thirdFloorRect.left - canvasRect.left) * dpr
+        secondFloorY = thirdFloorOffsetY
+        secondFloorLeft = thirdFloorOffsetX
+        secondFloorRight = thirdFloorOffsetX + (thirdFloorRect.width * dpr)
+      }
+      
       // Card bounds in canvas coordinates
       // Account for the offset if canvas is positioned within a container
       const cardBounds = {
@@ -137,7 +155,11 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
         // Union shape top position (confetti floor)
         unionTop: unionTop,
         // Union cutout area where particles can fall into
-        unionCutout: unionCutout
+        unionCutout: unionCutout,
+        // Second floor position (for Single 1 only)
+        secondFloorY: secondFloorY,
+        secondFloorLeft: secondFloorLeft,
+        secondFloorRight: secondFloorRight
       }
       
       return cardBounds
@@ -156,10 +178,20 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
     // Use unified confetti configuration
     const { colors, maxParticles, speed, horizontalDrift, gravity, size, rotation } = CONFETTI_CONFIG
     
-    const spawnParticle = (initialY = null) => {
+    // Eruption velocity boost - particles spawn with extra velocity that decays over time
+    const eruptionBoostFrames = 60 // Boost lasts for ~1 second (60 frames at 60fps)
+    const maxEruptionBoost = 2.0 // 2x velocity boost at start (very strong eruption)
+    const minEruptionBoost = 1.0 // No boost after eruption phase
+    
+    const spawnParticle = (initialY = null, frameCountAtSpawn = 0) => {
+      // Calculate eruption velocity boost based on when particle spawns
+      // Early particles get massive boost, later particles get less
+      const eruptionProgress = Math.min(1, frameCountAtSpawn / eruptionBoostFrames)
+      const eruptionBoost = maxEruptionBoost - (maxEruptionBoost - minEruptionBoost) * eruptionProgress
+      
       // More varied particle speeds - some fast, some slow, more natural distribution
       const speedVariation = 0.5 + Math.random() * 1.5 // 0.5x to 2x base speed
-      const particleSpeed = (speed.min + Math.random() * speed.max) * speedVariation
+      const particleSpeed = (speed.min + Math.random() * speed.max) * speedVariation * eruptionBoost // Apply eruption boost
       
       // Circular dot dimensions
       const particleSize = (size.min + Math.random() * size.max) * dpr
@@ -176,8 +208,10 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
       const fadeInDuration = 20 + Math.random() * 30 // 20-50 frames for more variation
       
       // More varied horizontal velocity - confetti spreads out more
-      const horizontalSpread = horizontalDrift * (0.5 + Math.random() * 1.5) // 0.5x to 2x
-      const angleVariation = (Math.random() - 0.5) * 0.3 // ±15 degrees from vertical
+      // During eruption, particles spread more horizontally for dramatic effect
+      const horizontalSpreadMultiplier = eruptionBoost > 1.5 ? 1.5 : 1.0 // More spread during strong eruption
+      const horizontalSpread = horizontalDrift * (0.5 + Math.random() * 1.5) * horizontalSpreadMultiplier // 0.5x to 2x (or more during eruption)
+      const angleVariation = (Math.random() - 0.5) * (eruptionBoost > 1.5 ? 0.5 : 0.3) // Wider angles during eruption (±25° vs ±15°)
       
       // More varied rotation - confetti tumbles more
       const rotationSpeed = rotation.velocity.min + Math.random() * (rotation.velocity.max - rotation.velocity.min)
@@ -207,12 +241,18 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
         fadeInProgress: 0,
         fadeInDuration: fadeInDuration,
         // Bounce energy retention (increased by 1.25x for more bounciness)
-        bounceEnergy: (0.4 + Math.random() * 0.2) * 1.5 // 50-75% energy retention (increased from 40-60%)
+        bounceEnergy: (0.25 + Math.random() * 0.1) * 1.5, // 50-75% energy retention (increased from 40-60%)
+        // Second floor state - track if particle is landed on second floor
+        isLandedOnSecondFloor: false,
+        // Landing threshold - if vertical velocity is below this, particle "lands"
+        landingVelocityThreshold: 0.3 * dpr,
+        // Track if particle has passed through floor 2 (Union top) - required before landing on floor 3
+        hasPassedFloor2: false
       }
     }
     
     // Spawn particles from bottom for eruption effect
-    const spawnParticleFromBottom = () => {
+    const spawnParticleFromBottom = (currentFrameCount = 0) => {
       // Use average particle size for spawn calculation
       const avgSize = (size.min + size.max) / 2 * dpr
       const halfSize = avgSize / 2
@@ -230,7 +270,7 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
         spawnY = cardBounds.maxY - halfSize - 5 * dpr
       }
       // Add slight horizontal spread for more natural eruption
-      return spawnParticle(spawnY)
+      return spawnParticle(spawnY, currentFrameCount)
     }
     
     // Start with no particles - they will erupt gradually on hover
@@ -240,7 +280,7 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
     let frameCount = 0
     
     // Spawn rate starts slow and accelerates - creates eruption effect
-    const initialSpawnRate = 0.08 // 8% chance per frame initially (faster start)
+    const initialSpawnRate = 0.12 // 12% chance per frame initially (faster start for eruption)
     const maxSpawnRate = 0.5 // 50% chance per frame when fully active
     const accelerationFrames = 120 // Accelerate over ~2 seconds (120 frames at 60fps)
     
@@ -264,7 +304,7 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
       let bounced = false
       
       // More natural bounce - increased by 1.25x for more bounciness
-      const envelopeBounceEnergy = (0.5 + Math.random() * 0.2) * 1.5 // 62.5-87.5% energy retention (increased from 50-70%)
+      const envelopeBounceEnergy = (0.25 + Math.random() * 0.1) * 1.5 // 62.5-87.5% energy retention (increased from 50-70%)
       const bounceVariation = 0.15 * dpr // Less variation for more natural feel
       
       // Check collision with left edge
@@ -324,6 +364,90 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
         const maxX = cardBounds.maxX - halfSize
         const minY = cardBounds.minY + halfSize
         
+        // THIRD FLOOR INTERACTION (Single 1 and Batch 1 - red line position)
+        // Floor hierarchy: 1st floor (lowest) = cutout valley, 2nd floor (middle) = Union top, 3rd floor (highest) = red line
+        // Third floor allows both landing and bouncing
+        // Single 1: 100px width, Batch 1: 160px width
+        if (cardBounds.secondFloorY !== null) {
+          const thirdFloorTop = cardBounds.secondFloorY - halfSize
+          const thirdFloorBottom = cardBounds.secondFloorY + halfSize
+          
+          // Check if particle is within third floor horizontally (width varies: Single 1 = 100px, Batch 1 = 160px)
+          const isWithinThirdFloorX = cardBounds.secondFloorLeft !== null && cardBounds.secondFloorRight !== null &&
+            p.x >= cardBounds.secondFloorLeft - halfSize && p.x <= cardBounds.secondFloorRight + halfSize
+          
+          // Only interact with third floor if particle is within the 100px width AND is falling
+          if (isWithinThirdFloorX && p.vy > 0) {
+            // Check if particle is hitting the third floor
+            const isHittingThirdFloor = p.y >= thirdFloorTop && p.y <= thirdFloorBottom + 10 * dpr
+            
+            // Handle already landed particles on third floor
+            if (p.isLandedOnSecondFloor) {
+              // Particle is landed on third floor - allow it to roll
+              p.y = thirdFloorTop
+              
+              // Check if particle has rolled off the edge
+              if (!isWithinThirdFloorX) {
+                // Particle rolled off edge - unland it and let it fall to second floor
+                p.isLandedOnSecondFloor = false
+              } else {
+                // Still on third floor - apply friction to horizontal movement
+                p.vx *= 0.95 // Slight friction
+                // Stop vertical movement
+                p.vy = 0
+                // Apply gravity only if it's about to roll off
+                if (p.x < cardBounds.secondFloorLeft + halfSize || p.x > cardBounds.secondFloorRight - halfSize) {
+                  // Near edge, allow slight downward movement
+                  p.vy += p.ay * 0.1
+                }
+              }
+            } 
+            // Handle particles hitting the third floor - allow both landing and bouncing
+            else if (isHittingThirdFloor) {
+              // Particle is falling and hitting the third floor
+              const verticalVelocity = Math.abs(p.vy)
+              
+              // Increased landing threshold to allow more particles to land
+              const landingThreshold = p.landingVelocityThreshold * 2.0 // ~0.6 * dpr
+              
+              if (verticalVelocity < landingThreshold) {
+                // Low velocity - particle "lands" on third floor
+                p.isLandedOnSecondFloor = true
+                p.y = thirdFloorTop
+                p.vy = 0
+                // Horizontal velocity continues (allows rolling)
+              } else {
+                // High velocity - particle bounces off third floor
+                p.y = thirdFloorTop
+                p.vy = -Math.abs(p.vy) * p.bounceEnergy * 0.8 // Bounce with energy loss
+                p.vy += (Math.random() - 0.5) * 0.1 * dpr
+                // Add slight horizontal component
+                p.vx += (Math.random() - 0.5) * 0.1 * dpr
+              }
+            }
+            
+            // If particle is landed on third floor, skip normal floor collision
+            if (p.isLandedOnSecondFloor) {
+              // Particle is on third floor - handle horizontal boundaries only
+              if (p.x <= minX) {
+                p.x = minX
+                p.vx = Math.abs(p.vx) * p.bounceEnergy
+                p.vx += (Math.random() - 0.5) * 0.1 * dpr
+              } else if (p.x >= maxX) {
+                p.x = maxX
+                p.vx = -Math.abs(p.vx) * p.bounceEnergy
+                p.vx += (Math.random() - 0.5) * 0.1 * dpr
+              }
+              // Skip vertical boundary checks for landed particles on third floor
+              return
+            }
+          }
+          // If particle is outside the 100px width OR rising (vy <= 0), it passes through
+          // and continues falling to second floor (Union top, handled by normal floor collision below)
+        }
+        
+        // SECOND FLOOR (Union top) and FIRST FLOOR (cutout valley) interaction
+        // Floor hierarchy: 1st floor (lowest) = cutout valley, 2nd floor (middle) = Union top
         // Check if particle is within Union cutout horizontally
         const isInCutout = cardBounds.unionCutout && 
           p.x >= cardBounds.unionCutout.left - halfSize && 
@@ -333,10 +457,11 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
         let maxY
         if (cardBounds.unionTop !== null) {
           if (isInCutout) {
-            // Allow particles to fall into cutout valley
+            // FIRST FLOOR: Allow particles to fall into cutout valley (lowest floor)
+            // Particles should fall all the way to the bottom of the cutout
             maxY = cardBounds.unionCutout.bottom - halfSize
           } else {
-            // Bounce at Union top if outside cutout
+            // SECOND FLOOR: Bounce at Union top if outside cutout (middle floor)
             maxY = cardBounds.unionTop - halfSize
           }
         } else {
@@ -389,7 +514,7 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
           // Find first null slot
           for (let i = 0; i < particles.length; i++) {
             if (particles[i] === null) {
-              particles[i] = spawnParticleFromBottom()
+              particles[i] = spawnParticleFromBottom(frameCount)
               activeParticleCount++
               break
             }
