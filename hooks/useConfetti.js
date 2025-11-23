@@ -39,6 +39,42 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
     let animId
     const dpr = window.devicePixelRatio || 1
     
+    // Gyroscope/tilt interaction for mobile devices
+    let deviceTilt = { beta: 0, gamma: 0 } // beta: front-to-back, gamma: left-to-right
+    const gyroscopeForceMultiplier = 0.15 // Adjust this to control tilt sensitivity
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+    let orientationListenerAdded = false
+    
+    // Device orientation event handler
+    const handleDeviceOrientation = (event) => {
+      if (event.beta !== null && event.gamma !== null) {
+        // Beta: -180 to 180 (front-to-back tilt, 0 = flat)
+        // Gamma: -90 to 90 (left-to-right tilt, 0 = flat)
+        // Clamp values to reasonable ranges to avoid extreme tilts
+        deviceTilt.beta = Math.max(-45, Math.min(45, event.beta || 0))
+        deviceTilt.gamma = Math.max(-45, Math.min(45, event.gamma || 0))
+      }
+    }
+    
+    // Add device orientation listener if on mobile
+    if (isMobile && typeof DeviceOrientationEvent !== 'undefined') {
+      if (DeviceOrientationEvent.requestPermission) {
+        // iOS 13+ requires permission
+        DeviceOrientationEvent.requestPermission()
+          .then(response => {
+            if (response === 'granted') {
+              window.addEventListener('deviceorientation', handleDeviceOrientation)
+              orientationListenerAdded = true
+            }
+          })
+          .catch(console.error)
+      } else {
+        // Android and older iOS
+        window.addEventListener('deviceorientation', handleDeviceOrientation)
+        orientationListenerAdded = true
+      }
+    }
+    
     // Calculate mirror point (Union top or card bottom)
     // Will be defined after cardBounds is available
     let getMirrorY = null
@@ -553,6 +589,19 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
         // Apply gravity
         p.vy += p.ay
         
+        // Apply gyroscope/tilt forces on mobile devices
+        if (isMobile) {
+          // Convert tilt angles to acceleration forces
+          // Beta (front-to-back): positive = tilted back, particles should move "up" (negative Y)
+          // Gamma (left-to-right): positive = tilted right, particles should move right (positive X)
+          const tiltForceX = (deviceTilt.gamma / 45) * gyroscopeForceMultiplier * dpr
+          const tiltForceY = -(deviceTilt.beta / 45) * gyroscopeForceMultiplier * dpr // Negative because screen Y is inverted
+          
+          // Apply tilt forces to velocity
+          p.vx += tiltForceX
+          p.vy += tiltForceY
+        }
+        
         // Update position
         p.x += p.vx
         p.y += p.vy
@@ -614,6 +663,10 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
       ctx && ctx.clearRect(0, 0, canvas.width, canvas.height)
       if (ctxFront) ctxFront.clearRect(0, 0, canvasFront.width, canvasFront.height)
       if (ctxMirrored) ctxMirrored.clearRect(0, 0, canvasMirrored.width, canvasMirrored.height)
+      // Remove device orientation listener if it was added
+      if (orientationListenerAdded) {
+        window.removeEventListener('deviceorientation', handleDeviceOrientation)
+      }
     }
   }, [isHovered, allAccepted, confettiCanvasRef, cardRef, confettiCanvasFrontRef, confettiCanvasMirroredRef])
 }
