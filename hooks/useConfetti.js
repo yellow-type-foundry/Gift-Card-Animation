@@ -83,11 +83,11 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
         const unionOffsetY = (unionRect.top - canvasRect.top) * dpr
         unionTop = unionOffsetY
         
-        // Calculate cutout bounds (centered, ~117px wide, ~21px deep)
-        // Cutout is centered on the card (300px wide card, cutout starts at ~91.5px from left)
-        const cutoutWidth = 117 * dpr // ~117px cutout width
+        // Calculate cutout bounds (centered, 90px wide, ~21px deep)
+        // Cutout is centered on the card (300px wide card, cutout starts at 105px from left)
+        const cutoutWidth = 84 * dpr // 84px cutout width
         const cutoutDepth = 21 * dpr // ~21px cutout depth
-        const cutoutLeftCard = 91.5 * dpr // Cutout left edge in card coordinates
+        const cutoutLeftCard = 105 * dpr // Cutout left edge in card coordinates (centered: (300-90)/2 = 105)
         const cutoutRightCard = cutoutLeftCard + cutoutWidth // Cutout right edge
         
         // Convert to canvas coordinates (accounting for card offset)
@@ -183,8 +183,8 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
         opacity: 0,
         fadeInProgress: 0,
         fadeInDuration: fadeInDuration,
-        // Bounce energy retention (more loss for natural feel)
-        bounceEnergy: 0.4 + Math.random() * 0.2 // 40-60% energy retention (significant loss for natural feel)
+        // Bounce energy retention (increased by 1.25x for more bounciness)
+        bounceEnergy: (0.4 + Math.random() * 0.2) * 1.5 // 50-75% energy retention (increased from 40-60%)
       }
     }
     
@@ -240,8 +240,8 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
       const env = cardBounds.envelope
       let bounced = false
       
-      // More natural bounce - less energy retention, less dramatic
-      const envelopeBounceEnergy = 0.5 + Math.random() * 0.2 // 50-70% energy retention (more loss)
+      // More natural bounce - increased by 1.25x for more bounciness
+      const envelopeBounceEnergy = (0.5 + Math.random() * 0.2) * 1.5 // 62.5-87.5% energy retention (increased from 50-70%)
       const bounceVariation = 0.15 * dpr // Less variation for more natural feel
       
       // Check collision with left edge
