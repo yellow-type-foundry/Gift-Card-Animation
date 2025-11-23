@@ -6,13 +6,15 @@ import { CONFETTI_CONFIG } from '@/constants/sentCardConstants'
  * Uses unified configuration from CONFETTI_CONFIG
  * @param {boolean} isHovered - Whether the card is hovered
  * @param {boolean} allAccepted - Whether all items are accepted
- * @param {React.RefObject} confettiCanvasRef - Ref to the canvas element
+ * @param {React.RefObject} confettiCanvasRef - Ref to the canvas element (back layer)
  * @param {React.RefObject} cardRef - Ref to the card element
+ * @param {React.RefObject} confettiCanvasFrontRef - Optional ref to front canvas element
  */
-export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, cardRef) {
+export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, cardRef, confettiCanvasFrontRef = null) {
   useEffect(() => {
     if (!isHovered || !allAccepted) return
     const canvas = confettiCanvasRef.current
+    const canvasFront = confettiCanvasFrontRef?.current
     const cardEl = cardRef.current
     if (!canvas || !cardEl) return
     
@@ -21,7 +23,11 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
     // Only use collision for actual envelopes/boxes (Batch 2, Single 2)
     const envelopeEl = cardEl.querySelector('[data-name="Envelope"]')
     
+    // Find Union shape element - use its top as the confetti floor
+    const unionEl = cardEl.querySelector('[data-name="Union"]')
+    
     const ctx = canvas.getContext('2d')
+    const ctxFront = canvasFront?.getContext('2d')
     let animId
     const dpr = window.devicePixelRatio || 1
     
@@ -44,6 +50,14 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
       canvas.style.width = `${cardRect.width}px`
       canvas.style.height = `${cardRect.height}px`
       
+      // Set front canvas size if it exists
+      if (canvasFront) {
+        canvasFront.width = Math.max(1, Math.floor(cardWidth))
+        canvasFront.height = Math.max(1, Math.floor(cardHeight))
+        canvasFront.style.width = `${cardRect.width}px`
+        canvasFront.style.height = `${cardRect.height}px`
+      }
+      
       // Get envelope/box bounds if it exists
       let envelopeBounds = null
       if (envelopeEl) {
@@ -60,6 +74,14 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
         }
       }
       
+      // Get Union shape bounds if it exists - use its top as the confetti floor
+      let unionTop = null
+      if (unionEl) {
+        const unionRect = unionEl.getBoundingClientRect()
+        const unionOffsetY = (unionRect.top - canvasRect.top) * dpr
+        unionTop = unionOffsetY
+      }
+      
       // Card bounds in canvas coordinates
       // Account for the offset if canvas is positioned within a container
       const cardBounds = {
@@ -73,7 +95,9 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
         minY: -cardOffsetY,
         maxY: cardHeight - cardOffsetY,
         // Envelope/box bounds for collision detection
-        envelope: envelopeBounds
+        envelope: envelopeBounds,
+        // Union shape top position (confetti floor)
+        unionTop: unionTop
       }
       
       return cardBounds
@@ -89,11 +113,9 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
       const speedVariation = 0.5 + Math.random() * 1.5 // 0.5x to 2x base speed
       const particleSpeed = (speed.min + Math.random() * speed.max) * speedVariation
       
-      // Rice grain dimensions - elongated shape
-      const baseSize = (size.min + Math.random() * size.max) * dpr
-      const length = baseSize * (2.5 + Math.random() * 1.5) // 2.5x to 4x longer
-      const width = baseSize * (0.28 + Math.random() * 0.14) // 0.28x to 0.42x width (30% thinner)
-      const halfSize = length / 2 // Use length for spawn position calculation
+      // Circular dot dimensions
+      const particleSize = (size.min + Math.random() * size.max) * dpr
+      const halfSize = particleSize / 2
       
       // Calculate spawn position accounting for card offset
       // Particles should spawn within the card bounds, not canvas bounds
@@ -126,12 +148,12 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
         ay: gravity * dpr * 0.4, // Reduce gravity by 60% so particles can rise higher
         rot: Math.random() * rotation.initial,
         vr: rotationSpeed * rotationVariation, // More varied rotation
-        // Rice grain dimensions
-        length: length, // Long axis
-        width: width, // Short axis
-        size: Math.max(length, width), // For collision detection, use larger dimension
+        // Circular dot size
+        size: particleSize,
         color: colors[(Math.random() * colors.length) | 0],
-        shape: 'rice', // Elongated rice grain shape
+        shape: 'circle', // Circular dot shape
+        // Randomly assign to front or back layer for depth effect
+        layer: canvasFront && Math.random() < 0.5 ? 'front' : 'back',
         // Fade-in properties
         opacity: 0,
         fadeInProgress: 0,
@@ -141,22 +163,38 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
       }
     }
     
-    // Spawn particles throughout the card height for better distribution
-    const spawnParticleAnywhere = () => {
-      // Use average rice grain length for spawn calculation
-      const avgBaseSize = (size.min + size.max) / 2 * dpr
-      const avgLength = avgBaseSize * 3.25 // Average of 2.5-4x range
-      const halfSize = avgLength / 2
-      // Spawn throughout the entire card height (accounting for offset)
-      // Prefer lower 2/3 of card for more natural confetti burst
-      const spawnY = cardBounds.minY + halfSize + Math.random() * (cardBounds.maxY - cardBounds.minY - halfSize * 2) * 0.67
+    // Spawn particles from bottom for eruption effect
+    const spawnParticleFromBottom = () => {
+      // Use average particle size for spawn calculation
+      const avgSize = (size.min + size.max) / 2 * dpr
+      const halfSize = avgSize / 2
+      // Spawn from the top of the Union shape (confetti floor)
+      // If Union exists, use its top; otherwise fall back to envelope or card bottom
+      let spawnY
+      if (cardBounds.unionTop !== null) {
+        // Spawn at the top of the Union shape
+        spawnY = cardBounds.unionTop - halfSize
+      } else if (cardBounds.envelope) {
+        // Spawn just above the envelope/box
+        spawnY = cardBounds.envelope.bottom + halfSize + 2 * dpr
+      } else {
+        // Spawn near bottom of card
+        spawnY = cardBounds.maxY - halfSize - 5 * dpr
+      }
+      // Add slight horizontal spread for more natural eruption
       return spawnParticle(spawnY)
     }
     
-    // Spawn particles with more natural distribution - not all at once
-    // Use slightly fewer particles for more natural feel, spawn them gradually
+    // Start with no particles - they will erupt gradually on hover
     const targetParticleCount = Math.floor(maxParticles * 0.85) // 85% of max for more natural feel
-    const particles = Array.from({ length: targetParticleCount }).map(spawnParticleAnywhere)
+    const particles = Array.from({ length: targetParticleCount }).map(() => null) // Pre-allocate array, start empty
+    let activeParticleCount = 0
+    let frameCount = 0
+    
+    // Spawn rate starts slow and accelerates - creates eruption effect
+    const initialSpawnRate = 0.08 // 8% chance per frame initially (faster start)
+    const maxSpawnRate = 0.5 // 50% chance per frame when fully active
+    const accelerationFrames = 120 // Accelerate over ~2 seconds (120 frames at 60fps)
     
     // Check if particle collides with envelope/box
     const checkEnvelopeCollision = (p, halfSize) => {
@@ -223,8 +261,8 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
     
     // Bounce particles off card boundaries with more natural physics
     const constrainParticle = (p) => {
-        // For rice grains, use the length (longer dimension) for collision detection
-      const halfSize = p.shape === 'rice' ? p.length / 2 : p.size / 2
+      // Use particle size for collision detection (circular dots)
+      const halfSize = p.size / 2
       
       // First check envelope/box collision (with larger detection area for more sensitivity)
       // Use slightly larger detection area to catch particles earlier
@@ -237,7 +275,10 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
         const minX = cardBounds.minX + halfSize
         const maxX = cardBounds.maxX - halfSize
         const minY = cardBounds.minY + halfSize
-        const maxY = cardBounds.maxY - halfSize
+        // Use Union top as floor if it exists, otherwise use card bottom
+        const maxY = cardBounds.unionTop !== null 
+          ? cardBounds.unionTop - halfSize  // Union top is the floor
+          : cardBounds.maxY - halfSize
         
         // Horizontal boundaries - bounce with energy loss (more natural)
         if (p.x <= minX) {
@@ -265,13 +306,41 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
     }
     
     const draw = () => {
+      frameCount++
+      
       // Update card bounds periodically in case of resize
       if (Math.random() < 0.01) { // Update ~1% of frames to avoid performance hit
         cardBounds = updateCardBounds()
       }
       
+      // Gradually spawn particles - start slow, accelerate over time
+      if (activeParticleCount < targetParticleCount) {
+        // Calculate spawn rate that accelerates from initial to max
+        const progress = Math.min(1, frameCount / accelerationFrames)
+        const easeOutProgress = 1 - Math.pow(1 - progress, 2) // Ease-out quadratic for smooth acceleration
+        const currentSpawnRate = initialSpawnRate + (maxSpawnRate - initialSpawnRate) * easeOutProgress
+        
+        // Spawn new particles based on current rate
+        if (Math.random() < currentSpawnRate) {
+          // Find first null slot
+          for (let i = 0; i < particles.length; i++) {
+            if (particles[i] === null) {
+              particles[i] = spawnParticleFromBottom()
+              activeParticleCount++
+              break
+            }
+          }
+        }
+      }
+      
+      // Clear both canvases
       ctx.clearRect(0, 0, canvas.width, canvas.height)
-      particles.forEach(p => {
+      if (ctxFront) {
+        ctxFront.clearRect(0, 0, canvasFront.width, canvasFront.height)
+      }
+      
+      particles.forEach((p, index) => {
+        if (p === null) return // Skip null particles
         // Update fade-in progress
         if (p.fadeInProgress < p.fadeInDuration) {
           p.fadeInProgress++
@@ -301,28 +370,22 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
         
         // Only draw if particle has some opacity
         if (p.opacity > 0) {
-          ctx.save()
-          ctx.translate(p.x, p.y)
-          ctx.rotate(p.rot)
-          ctx.globalAlpha = p.opacity
-          ctx.fillStyle = p.color
+          // Choose the appropriate canvas context based on particle layer
+          const drawCtx = (p.layer === 'front' && ctxFront) ? ctxFront : ctx
           
-          // Draw elongated rice grain shape
-          if (p.shape === 'rice') {
-            // Draw elongated ellipse (rice grain shape)
-            ctx.beginPath()
-            ctx.ellipse(0, 0, p.length / 2, p.width / 2, 0, 0, Math.PI * 2)
-            ctx.closePath()
-            ctx.fill()
-          } else {
-            // Fallback to circle for other shapes
-            ctx.beginPath()
-            ctx.arc(0, 0, p.size / 2, 0, Math.PI * 2)
-            ctx.closePath()
-            ctx.fill()
-          }
+          drawCtx.save()
+          drawCtx.translate(p.x, p.y)
+          drawCtx.rotate(p.rot)
+          drawCtx.globalAlpha = p.opacity
+          drawCtx.fillStyle = p.color
           
-          ctx.restore()
+          // Draw circular dot
+          drawCtx.beginPath()
+          drawCtx.arc(0, 0, p.size / 2, 0, Math.PI * 2)
+          drawCtx.closePath()
+          drawCtx.fill()
+          
+          drawCtx.restore()
         }
       })
       animId = requestAnimationFrame(draw)
@@ -333,7 +396,8 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
     return () => {
       if (animId) cancelAnimationFrame(animId)
       ctx && ctx.clearRect(0, 0, canvas.width, canvas.height)
+      if (ctxFront) ctxFront.clearRect(0, 0, canvasFront.width, canvasFront.height)
     }
-  }, [isHovered, allAccepted, confettiCanvasRef, cardRef])
+  }, [isHovered, allAccepted, confettiCanvasRef, cardRef, confettiCanvasFrontRef])
 }
 

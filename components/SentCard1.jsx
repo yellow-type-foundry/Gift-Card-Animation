@@ -118,6 +118,7 @@ const SentCard1 = ({
   // Hooks
   const cardRef = useRef(null)
   const confettiCanvasRef = useRef(null)
+  const confettiCanvasFrontRef = useRef(null)
   const { isHovered, handleHoverEnter, handleHoverLeave } = useHover()
   
   // Generate stable IDs for SVG elements
@@ -373,7 +374,7 @@ const SentCard1 = ({
   
   // Confetti animation - disabled for Batch 2 and Single 2
   const shouldShowConfetti = !hideEnvelope
-  useConfetti(shouldShowConfetti && isHovered, shouldShowConfetti && allAccepted, confettiCanvasRef, cardRef)
+  useConfetti(shouldShowConfetti && isHovered, shouldShowConfetti && allAccepted, confettiCanvasRef, cardRef, confettiCanvasFrontRef)
 
   // Memoized style objects
   // Note: When 3D is active, we don't apply tilt to the card container itself
@@ -581,11 +582,20 @@ const SentCard1 = ({
       >
         {/* Full card confetti canvas for Single 1 (useGiftContainer) - covers entire card */}
         {useGiftContainer && !overlayProgressOnEnvelope && (
-          <canvas
-            ref={confettiCanvasRef}
-            className="absolute inset-0 pointer-events-none"
-            style={{ zIndex: 1, filter: CONFETTI_BLUR, position: 'absolute' }}
-          />
+          <>
+            {/* Back layer - behind envelope/gift container */}
+            <canvas
+              ref={confettiCanvasRef}
+              className="absolute inset-0 pointer-events-none"
+              style={{ zIndex: 1, filter: CONFETTI_BLUR, position: 'absolute' }}
+            />
+            {/* Front layer - in front of envelope/gift container */}
+            <canvas
+              ref={confettiCanvasFrontRef}
+              className="absolute inset-0 pointer-events-none"
+              style={{ zIndex: 4, filter: CONFETTI_BLUR, position: 'absolute' }}
+            />
+          </>
         )}
         {/* Specular highlight that follows cursor (only when 3D animation is selected) */}
         {/* 6. Enhanced Specular Highlight - follows cursor and responds to tilt */}
@@ -620,6 +630,12 @@ const SentCard1 = ({
               ref={confettiCanvasRef}
               className="absolute inset-0"
               style={{ zIndex: 1, pointerEvents: 'none', filter: CONFETTI_BLUR }}
+            />
+            {/* Confetti canvas (front layer - in front of envelope) */}
+            <canvas
+              ref={confettiCanvasFrontRef}
+              className="absolute inset-0"
+              style={{ zIndex: 4, pointerEvents: 'none', filter: CONFETTI_BLUR }}
             />
             {confettiWhiteOverlay && (
               <div
@@ -671,6 +687,12 @@ const SentCard1 = ({
                 ref={confettiCanvasRef}
                 className="absolute inset-0"
                 style={confettiCanvasStyle}
+              />
+              {/* Confetti canvas (front layer - in front of envelope) */}
+              <canvas
+                ref={confettiCanvasFrontRef}
+                className="absolute inset-0"
+                style={{ ...confettiCanvasStyle, zIndex: 4 }}
               />
               {confettiWhiteOverlay && (
                 <div
