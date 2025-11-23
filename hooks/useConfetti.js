@@ -59,8 +59,8 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
         deviceTilt.beta = Math.max(-45, Math.min(45, beta))
         deviceTilt.gamma = Math.max(-45, Math.min(45, gamma))
         
-        // Debug: log first few events to verify it's working
-        if (Math.random() < 0.01) { // Log ~1% of events to avoid spam
+        // Debug: log first few events to verify it's working (dev only)
+        if (process.env.NODE_ENV === 'development' && Math.random() < 0.01) { // Log ~1% of events to avoid spam
           console.log('Device orientation:', { beta: deviceTilt.beta, gamma: deviceTilt.gamma })
         }
       }
@@ -79,25 +79,37 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
             if (response === 'granted') {
               window.addEventListener('deviceorientation', handleDeviceOrientation, { passive: true })
               orientationListenerAdded = true
-              console.log('Device orientation permission granted')
+              if (process.env.NODE_ENV === 'development') {
+                console.log('Device orientation permission granted')
+              }
             } else {
-              console.log('Device orientation permission denied:', response)
+              if (process.env.NODE_ENV === 'development') {
+                console.log('Device orientation permission denied:', response)
+              }
             }
           } catch (err) {
-            console.log('Permission request error (may need user gesture):', err)
+            if (process.env.NODE_ENV === 'development') {
+              console.log('Permission request error (may need user gesture):', err)
+            }
           }
         } else {
           // Android and older iOS - try to add listener directly
           try {
             window.addEventListener('deviceorientation', handleDeviceOrientation, { passive: true })
             orientationListenerAdded = true
-            console.log('Device orientation listener added (no permission required)')
+            if (process.env.NODE_ENV === 'development') {
+              console.log('Device orientation listener added (no permission required)')
+            }
           } catch (e) {
-            console.log('Could not add device orientation listener:', e)
+            if (process.env.NODE_ENV === 'development') {
+              console.log('Could not add device orientation listener:', e)
+            }
           }
         }
       } catch (error) {
-        console.error('Error setting up device orientation:', error)
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Error setting up device orientation:', error)
+        }
       }
     }
     
@@ -583,8 +595,8 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
     const draw = () => {
       frameCount++
       
-      // Update card bounds periodically in case of resize
-      if (Math.random() < 0.01) { // Update ~1% of frames to avoid performance hit
+      // Update card bounds periodically in case of resize (every 60 frames ~1 second at 60fps)
+      if (frameCount % 60 === 0) {
         cardBounds = updateCardBounds()
       }
       
@@ -662,8 +674,15 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
         // Apply boundary constraints
         constrainParticle(p)
         
-        // Only draw if particle has some opacity
-        if (p.opacity > 0) {
+        // Cull off-screen particles (optimization: don't draw particles outside canvas)
+        const halfSize = p.size / 2
+        const isOffScreen = p.x + halfSize < 0 || 
+                           p.x - halfSize > canvas.width || 
+                           p.y + halfSize < 0 || 
+                           p.y - halfSize > canvas.height
+        
+        // Only draw if particle has some opacity and is on-screen
+        if (p.opacity > 0 && !isOffScreen) {
           // Choose the appropriate canvas context based on particle layer
           const drawCtx = (p.layer === 'front' && ctxFront) ? ctxFront : ctx
           
