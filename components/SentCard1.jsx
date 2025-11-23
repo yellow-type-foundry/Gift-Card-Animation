@@ -597,7 +597,7 @@ const SentCard1 = ({
             backgroundColor: 'red',
             zIndex: 9999,
             pointerEvents: 'none',
-            display: 'none' // Hidden for internal knowledge only
+            opacity: 0 // Hidden visually but still detectable by confetti hook
           }}
           aria-label="Debug: Envelope top edge (Batch 1) - Third Floor"
         />
@@ -831,7 +831,7 @@ const SentCard1 = ({
                   backgroundColor: 'red',
                   zIndex: 9999,
                   pointerEvents: 'none',
-                  display: 'none' // Hidden for internal knowledge only
+                  opacity: 0 // Hidden visually but still detectable by confetti hook
                 }}
                 aria-label="Debug: Gift container top edge (Single 1) - Second Floor"
               />
