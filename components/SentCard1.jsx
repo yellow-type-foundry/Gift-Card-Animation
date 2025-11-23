@@ -407,7 +407,9 @@ const SentCard1 = ({
   }), [])
 
   // Unified confetti blur value
-  const CONFETTI_BLUR = 'blur(2px)'
+  const CONFETTI_BLUR = 'blur(1.5px)'
+  // Blur for back layer (behind envelope/gift container) - increased by 3px
+  const CONFETTI_BACK_BLUR = 'blur(4px)' // 2px + 3px = 5px
   // Separate blur for mirrored confetti
   const CONFETTI_MIRRORED_BLUR = 'blur(5px)'
   
@@ -613,7 +615,7 @@ const SentCard1 = ({
             <canvas
               ref={confettiCanvasRef}
               className="absolute inset-0 pointer-events-none"
-              style={{ zIndex: 1, filter: CONFETTI_BLUR, position: 'absolute' }}
+              style={{ zIndex: 1, filter: CONFETTI_BACK_BLUR, position: 'absolute' }}
             />
             {/* Front layer - in front of envelope/gift container */}
             <canvas
@@ -661,7 +663,7 @@ const SentCard1 = ({
             <canvas
               ref={confettiCanvasRef}
               className="absolute inset-0"
-              style={{ zIndex: 1, pointerEvents: 'none', filter: CONFETTI_BLUR }}
+              style={{ zIndex: 1, pointerEvents: 'none', filter: CONFETTI_BACK_BLUR }}
             />
             {/* Confetti canvas (front layer - in front of envelope) */}
             <canvas
