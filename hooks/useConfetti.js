@@ -41,37 +41,86 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
     
     // Gyroscope/tilt interaction for mobile devices
     let deviceTilt = { beta: 0, gamma: 0 } // beta: front-to-back, gamma: left-to-right
-    const gyroscopeForceMultiplier = 0.15 // Adjust this to control tilt sensitivity
+    const gyroscopeForceMultiplier = 0.4 // Increased from 0.15 for more noticeable effect
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
     let orientationListenerAdded = false
     
     // Device orientation event handler
     const handleDeviceOrientation = (event) => {
-      if (event.beta !== null && event.gamma !== null) {
+      // Check for both absolute and relative orientation
+      const beta = event.beta !== null && event.beta !== undefined ? event.beta : null
+      const gamma = event.gamma !== null && event.gamma !== undefined ? event.gamma : null
+      
+      if (beta !== null && gamma !== null) {
         // Beta: -180 to 180 (front-to-back tilt, 0 = flat)
         // Gamma: -90 to 90 (left-to-right tilt, 0 = flat)
         // Clamp values to reasonable ranges to avoid extreme tilts
-        deviceTilt.beta = Math.max(-45, Math.min(45, event.beta || 0))
-        deviceTilt.gamma = Math.max(-45, Math.min(45, event.gamma || 0))
+        deviceTilt.beta = Math.max(-45, Math.min(45, beta))
+        deviceTilt.gamma = Math.max(-45, Math.min(45, gamma))
+        
+        // Debug: log first few events to verify it's working
+        if (Math.random() < 0.01) { // Log ~1% of events to avoid spam
+          console.log('Device orientation:', { beta: deviceTilt.beta, gamma: deviceTilt.gamma })
+        }
       }
     }
     
-    // Add device orientation listener if on mobile
-    if (isMobile && typeof DeviceOrientationEvent !== 'undefined') {
-      if (DeviceOrientationEvent.requestPermission) {
-        // iOS 13+ requires permission
-        DeviceOrientationEvent.requestPermission()
-          .then(response => {
+    // Request permission and add listener
+    const setupDeviceOrientation = async () => {
+      if (!isMobile || typeof DeviceOrientationEvent === 'undefined') return
+      if (orientationListenerAdded) return // Already set up
+      
+      try {
+        if (DeviceOrientationEvent.requestPermission) {
+          // iOS 13+ requires permission - must be called from user gesture
+          try {
+            const response = await DeviceOrientationEvent.requestPermission()
             if (response === 'granted') {
-              window.addEventListener('deviceorientation', handleDeviceOrientation)
+              window.addEventListener('deviceorientation', handleDeviceOrientation, { passive: true })
               orientationListenerAdded = true
+              console.log('Device orientation permission granted')
+            } else {
+              console.log('Device orientation permission denied:', response)
             }
-          })
-          .catch(console.error)
-      } else {
-        // Android and older iOS
-        window.addEventListener('deviceorientation', handleDeviceOrientation)
-        orientationListenerAdded = true
+          } catch (err) {
+            console.log('Permission request error (may need user gesture):', err)
+          }
+        } else {
+          // Android and older iOS - try to add listener directly
+          try {
+            window.addEventListener('deviceorientation', handleDeviceOrientation, { passive: true })
+            orientationListenerAdded = true
+            console.log('Device orientation listener added (no permission required)')
+          } catch (e) {
+            console.log('Could not add device orientation listener:', e)
+          }
+        }
+      } catch (error) {
+        console.error('Error setting up device orientation:', error)
+      }
+    }
+    
+    // On iOS, permission must be requested from a user gesture
+    // Set up listeners to request permission on first interaction
+    if (isMobile) {
+      // Try immediately for Android/older iOS
+      if (typeof DeviceOrientationEvent !== 'undefined' && !DeviceOrientationEvent.requestPermission) {
+        setupDeviceOrientation()
+      }
+      
+      // For iOS 13+, request permission on user interaction
+      const tryOnInteraction = (e) => {
+        if (!orientationListenerAdded) {
+          setupDeviceOrientation()
+        }
+      }
+      
+      // Try on various interaction events (user must interact to grant permission on iOS)
+      cardEl.addEventListener('touchstart', tryOnInteraction, { once: true, passive: true })
+      cardEl.addEventListener('touchend', tryOnInteraction, { once: true, passive: true })
+      // Also try on mouse events for testing on desktop with device orientation simulation
+      if (typeof window !== 'undefined' && window.DeviceOrientationEvent) {
+        cardEl.addEventListener('click', tryOnInteraction, { once: true, passive: true })
       }
     }
     
@@ -590,14 +639,14 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
         p.vy += p.ay
         
         // Apply gyroscope/tilt forces on mobile devices
-        if (isMobile) {
+        if (isMobile && orientationListenerAdded) {
           // Convert tilt angles to acceleration forces
           // Beta (front-to-back): positive = tilted back, particles should move "up" (negative Y)
           // Gamma (left-to-right): positive = tilted right, particles should move right (positive X)
           const tiltForceX = (deviceTilt.gamma / 45) * gyroscopeForceMultiplier * dpr
           const tiltForceY = -(deviceTilt.beta / 45) * gyroscopeForceMultiplier * dpr // Negative because screen Y is inverted
           
-          // Apply tilt forces to velocity
+          // Apply tilt forces to velocity (only if listener is active)
           p.vx += tiltForceX
           p.vy += tiltForceY
         }
@@ -666,7 +715,10 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
       // Remove device orientation listener if it was added
       if (orientationListenerAdded) {
         window.removeEventListener('deviceorientation', handleDeviceOrientation)
+        orientationListenerAdded = false
       }
+      // Reset permission flag so it can be requested again if needed
+      permissionRequested = false
     }
   }, [isHovered, allAccepted, confettiCanvasRef, cardRef, confettiCanvasFrontRef, confettiCanvasMirroredRef])
 }
