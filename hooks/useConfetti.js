@@ -9,12 +9,14 @@ import { CONFETTI_CONFIG } from '@/constants/sentCardConstants'
  * @param {React.RefObject} confettiCanvasRef - Ref to the canvas element (back layer)
  * @param {React.RefObject} cardRef - Ref to the card element
  * @param {React.RefObject} confettiCanvasFrontRef - Optional ref to front canvas element
+ * @param {React.RefObject} confettiCanvasMirroredRef - Optional ref to vertically mirrored canvas element
  */
-export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, cardRef, confettiCanvasFrontRef = null) {
+export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, cardRef, confettiCanvasFrontRef = null, confettiCanvasMirroredRef = null) {
   useEffect(() => {
     if (!isHovered || !allAccepted) return
     const canvas = confettiCanvasRef.current
     const canvasFront = confettiCanvasFrontRef?.current
+    const canvasMirrored = confettiCanvasMirroredRef?.current
     const cardEl = cardRef.current
     if (!canvas || !cardEl) return
     
@@ -28,8 +30,13 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
     
     const ctx = canvas.getContext('2d')
     const ctxFront = canvasFront?.getContext('2d')
+    const ctxMirrored = canvasMirrored?.getContext('2d')
     let animId
     const dpr = window.devicePixelRatio || 1
+    
+    // Calculate mirror point (Union top or card bottom)
+    // Will be defined after cardBounds is available
+    let getMirrorY = null
     
     // Get card's bounding box for particle constraints
     const updateCardBounds = () => {
@@ -56,6 +63,14 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
         canvasFront.height = Math.max(1, Math.floor(cardHeight))
         canvasFront.style.width = `${cardRect.width}px`
         canvasFront.style.height = `${cardRect.height}px`
+      }
+      
+      // Set mirrored canvas size if it exists
+      if (canvasMirrored) {
+        canvasMirrored.width = Math.max(1, Math.floor(cardWidth))
+        canvasMirrored.height = Math.max(1, Math.floor(cardHeight))
+        canvasMirrored.style.width = `${cardRect.width}px`
+        canvasMirrored.style.height = `${cardRect.height}px`
       }
       
       // Get envelope/box bounds if it exists
@@ -129,6 +144,14 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
     }
     
     let cardBounds = updateCardBounds()
+    
+    // Define mirror point function after cardBounds is available
+    getMirrorY = () => {
+      if (cardBounds.unionTop !== null) {
+        return cardBounds.unionTop
+      }
+      return cardBounds.maxY
+    }
     
     // Use unified confetti configuration
     const { colors, maxParticles, speed, horizontalDrift, gravity, size, rotation } = CONFETTI_CONFIG
@@ -374,11 +397,17 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
         }
       }
       
-      // Clear both canvases
+      // Clear all canvases
       ctx.clearRect(0, 0, canvas.width, canvas.height)
       if (ctxFront) {
         ctxFront.clearRect(0, 0, canvasFront.width, canvasFront.height)
       }
+      if (ctxMirrored) {
+        ctxMirrored.clearRect(0, 0, canvasMirrored.width, canvasMirrored.height)
+      }
+      
+      // Get mirror point for this frame
+      const mirrorY = getMirrorY()
       
       particles.forEach((p, index) => {
         if (p === null) return // Skip null particles
@@ -427,6 +456,27 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
           drawCtx.fill()
           
           drawCtx.restore()
+          
+          // Draw mirrored version if mirrored canvas exists
+          if (ctxMirrored && p.opacity > 0) {
+            // Calculate mirrored Y position (flip across mirrorY)
+            const mirroredY = mirrorY + (mirrorY - p.y)
+            
+            ctxMirrored.save()
+            ctxMirrored.translate(p.x, mirroredY)
+            ctxMirrored.rotate(-p.rot) // Reverse rotation for mirror
+            ctxMirrored.globalAlpha = p.opacity * 1.0 // Full opacity for brighter effect (was 0.6)
+            ctxMirrored.fillStyle = p.color
+            
+            // Draw circular dot - 1.5x bigger for mirrored particles
+            const mirroredSize = p.size * 1.5
+            ctxMirrored.beginPath()
+            ctxMirrored.arc(0, 0, mirroredSize / 2, 0, Math.PI * 2)
+            ctxMirrored.closePath()
+            ctxMirrored.fill()
+            
+            ctxMirrored.restore()
+          }
         }
       })
       animId = requestAnimationFrame(draw)
@@ -438,7 +488,8 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
       if (animId) cancelAnimationFrame(animId)
       ctx && ctx.clearRect(0, 0, canvas.width, canvas.height)
       if (ctxFront) ctxFront.clearRect(0, 0, canvasFront.width, canvasFront.height)
+      if (ctxMirrored) ctxMirrored.clearRect(0, 0, canvasMirrored.width, canvasMirrored.height)
     }
-  }, [isHovered, allAccepted, confettiCanvasRef, cardRef, confettiCanvasFrontRef])
+  }, [isHovered, allAccepted, confettiCanvasRef, cardRef, confettiCanvasFrontRef, confettiCanvasMirroredRef])
 }
 

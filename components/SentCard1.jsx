@@ -119,6 +119,7 @@ const SentCard1 = ({
   const cardRef = useRef(null)
   const confettiCanvasRef = useRef(null)
   const confettiCanvasFrontRef = useRef(null)
+  const confettiCanvasMirroredRef = useRef(null)
   const { isHovered, handleHoverEnter, handleHoverLeave } = useHover()
   
   // Generate stable IDs for SVG elements
@@ -374,7 +375,7 @@ const SentCard1 = ({
   
   // Confetti animation - disabled for Batch 2 and Single 2
   const shouldShowConfetti = !hideEnvelope
-  useConfetti(shouldShowConfetti && isHovered, shouldShowConfetti && allAccepted, confettiCanvasRef, cardRef, confettiCanvasFrontRef)
+  useConfetti(shouldShowConfetti && isHovered, shouldShowConfetti && allAccepted, confettiCanvasRef, cardRef, confettiCanvasFrontRef, confettiCanvasMirroredRef)
 
   // Memoized style objects
   // Note: When 3D is active, we don't apply tilt to the card container itself
@@ -407,6 +408,8 @@ const SentCard1 = ({
 
   // Unified confetti blur value
   const CONFETTI_BLUR = 'blur(2px)'
+  // Separate blur for mirrored confetti
+  const CONFETTI_MIRRORED_BLUR = 'blur(5px)'
   
   const confettiCanvasStyle = useMemo(() => ({
     zIndex: 1,
@@ -416,7 +419,7 @@ const SentCard1 = ({
 
   const confettiWhiteOverlayStyle = useMemo(() => ({
     zIndex: 2,
-    background: 'linear-gradient(to top, rgba(255,255,255,0.8) 0%, rgba(255, 255, 255, 0.33) 30%, rgba(255,255,255,0.0) 100%)'
+    background: 'linear-gradient(to top, rgba(255,255,255,0.2) 0%, rgba(255, 255, 255, 0.0825) 30%, rgba(255,255,255,0.0) 100%)' // Reduced by 75% (0.8->0.2, 0.33->0.0825)
   }), [])
 
   const headerBgBaseStyle = useMemo(() => ({
@@ -595,6 +598,12 @@ const SentCard1 = ({
               className="absolute inset-0 pointer-events-none"
               style={{ zIndex: 4, filter: CONFETTI_BLUR, position: 'absolute' }}
             />
+            {/* Mirrored layer - vertically mirrored confetti */}
+            <canvas
+              ref={confettiCanvasMirroredRef}
+              className="absolute inset-0 pointer-events-none"
+              style={{ zIndex: 1, filter: CONFETTI_MIRRORED_BLUR, position: 'absolute' }}
+            />
           </>
         )}
         {/* Specular highlight that follows cursor (only when 3D animation is selected) */}
@@ -637,6 +646,12 @@ const SentCard1 = ({
               className="absolute inset-0"
               style={{ zIndex: 4, pointerEvents: 'none', filter: CONFETTI_BLUR }}
             />
+            {/* Mirrored layer - vertically mirrored confetti */}
+            <canvas
+              ref={confettiCanvasMirroredRef}
+              className="absolute inset-0"
+              style={{ zIndex: 1, pointerEvents: 'none', filter: CONFETTI_MIRRORED_BLUR }}
+            />
             {confettiWhiteOverlay && (
               <div
                 aria-hidden="true"
@@ -644,7 +659,7 @@ const SentCard1 = ({
                 style={{
                   zIndex: 2,
                   background:
-                    'linear-gradient(to top, rgba(255,255,255,0.8) 0%, rgba(255, 255, 255, 0.33) 30%, rgba(255,255,255,0.0) 100%)'
+                    'linear-gradient(to top, rgba(255,255,255,0.2) 0%, rgba(255, 255, 255, 0.0825) 30%, rgba(255,255,255,0.0) 100%)' // Reduced by 75%
                 }}
               />
             )}
@@ -693,6 +708,12 @@ const SentCard1 = ({
                 ref={confettiCanvasFrontRef}
                 className="absolute inset-0"
                 style={{ ...confettiCanvasStyle, zIndex: 4 }}
+              />
+              {/* Mirrored layer - vertically mirrored confetti */}
+              <canvas
+                ref={confettiCanvasMirroredRef}
+                className="absolute inset-0"
+                style={{ ...confettiCanvasStyle, filter: CONFETTI_MIRRORED_BLUR }}
               />
               {confettiWhiteOverlay && (
                 <div
