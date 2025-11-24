@@ -128,8 +128,8 @@ const ALL_GIFT_SUBTITLES = [
 ]
 
 const ALL_SENT_DATES = [
-  '1 day ago', '2 days ago', '3 days ago', '4 days ago', '5 days ago',
-  '1 week ago', '2 weeks ago', '3 weeks ago', '1 month ago'
+  '1d ago', '2d ago', '3d ago', '4d ago', '5d ago',
+  '1w ago', '2w ago', '3w ago', '1mo ago'
 ]
 
 
