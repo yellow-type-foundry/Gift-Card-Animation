@@ -24,11 +24,24 @@ const GiftBoxContainer = ({
   tiltX = 0, // Tilt X angle for 3D effect
   tiltY = 0, // Tilt Y angle for 3D effect
   hideProgressBar = false, // Hide progress bar (for Single 1A)
-  centerLogo = false // Center logo at the very center of the box (for Single 0)
+  centerLogo = false, // Center logo at the very center of the box (for Single 0)
+  // Layout 0 specific box controls (overrides GIFT_BOX_TOKENS when provided)
+  boxWidth, // Custom box width (e.g., '176px')
+  boxHeight, // Custom box height (e.g., '176px')
+  boxBorderRadius, // Custom box border radius (e.g., '32px')
+  boxScale // Custom box scale (e.g., 1.125)
 }) => {
   const { isHovered: internalIsHovered, handleHoverEnter, handleHoverLeave } = useHover()
   // Use external hover state if provided, otherwise use internal
   const isHovered = externalIsHovered !== undefined ? externalIsHovered : internalIsHovered
+
+  // Layout 0 specific box controls: Use custom props if provided, otherwise fall back to GIFT_BOX_TOKENS
+  const boxTokens = useMemo(() => ({
+    width: boxWidth || GIFT_BOX_TOKENS.box.width,
+    height: boxHeight || GIFT_BOX_TOKENS.box.height,
+    borderRadius: boxBorderRadius || GIFT_BOX_TOKENS.box.borderRadius,
+    scale: boxScale || 1,
+  }), [boxWidth, boxHeight, boxBorderRadius, boxScale])
 
   // Load SVG content and inject gradient
   const [svgContent, setSvgContent] = useState(null)
@@ -278,9 +291,9 @@ const GiftBoxContainer = ({
           <div 
             className="border-[0.5px] border-[rgba(255,255,255,0)] border-solid absolute shrink-0 overflow-hidden breathing-box-duplicate breathing-box-1"
             style={{ 
-              width: GIFT_BOX_TOKENS.box.width, 
-              height: GIFT_BOX_TOKENS.box.height,
-              borderRadius: GIFT_BOX_TOKENS.box.borderRadius,
+              width: boxTokens.width, 
+              height: boxTokens.height,
+              borderRadius: boxTokens.borderRadius,
               left: '50%',
               top: '50%',
               transform: 'translate(-50%, -50%)',
@@ -292,18 +305,18 @@ const GiftBoxContainer = ({
             }}
           >
             {/* Duplicate box content */}
-            <div aria-hidden="true" className="absolute inset-0 pointer-events-none" style={{ borderRadius: GIFT_BOX_TOKENS.box.borderRadius }}>
+            <div aria-hidden="true" className="absolute inset-0 pointer-events-none" style={{ borderRadius: boxTokens.borderRadius }}>
               <div 
                 className="absolute inset-0"
                 style={{ 
-                  borderRadius: GIFT_BOX_TOKENS.box.borderRadius,
+                  borderRadius: boxTokens.borderRadius,
                   backgroundColor: breathingBoxColor,
                 }}
               />
               <div 
                 className="absolute inset-0"
                 style={{ 
-                  borderRadius: GIFT_BOX_TOKENS.box.borderRadius,
+                  borderRadius: boxTokens.borderRadius,
                   mixBlendMode: GIFT_BOX_TOKENS.blendModes.overlay,
                   background: GIFT_BOX_TOKENS.gradients.boxBase
                 }}
@@ -314,9 +327,9 @@ const GiftBoxContainer = ({
           <div 
             className="border-[0.5px] border-[rgba(255,255,255,0)] border-solid absolute shrink-0 overflow-hidden breathing-box-duplicate breathing-box-2"
             style={{ 
-              width: GIFT_BOX_TOKENS.box.width, 
-              height: GIFT_BOX_TOKENS.box.height,
-              borderRadius: GIFT_BOX_TOKENS.box.borderRadius,
+              width: boxTokens.width, 
+              height: boxTokens.height,
+              borderRadius: boxTokens.borderRadius,
               left: '50%',
               top: '50%',
               scale: 1.05,
@@ -329,18 +342,18 @@ const GiftBoxContainer = ({
             }}
           >
             {/* Duplicate box content */}
-            <div aria-hidden="true" className="absolute inset-0 pointer-events-none" style={{ borderRadius: GIFT_BOX_TOKENS.box.borderRadius }}>
+            <div aria-hidden="true" className="absolute inset-0 pointer-events-none" style={{ borderRadius: boxTokens.borderRadius }}>
               <div 
                 className="absolute inset-0"
                 style={{ 
-                  borderRadius: GIFT_BOX_TOKENS.box.borderRadius,
+                  borderRadius: boxTokens.borderRadius,
                   backgroundColor: breathingBoxColor,
                 }}
               />
               <div 
                 className="absolute inset-0"
                 style={{ 
-                  borderRadius: GIFT_BOX_TOKENS.box.borderRadius,
+                  borderRadius: boxTokens.borderRadius,
                   mixBlendMode: GIFT_BOX_TOKENS.blendModes.overlay,
                   background: GIFT_BOX_TOKENS.gradients.boxBase
                 }}
@@ -352,18 +365,18 @@ const GiftBoxContainer = ({
       <div 
         className="border-[0.5px] border-[rgba(255,255,255,0)] border-solid relative shrink-0 overflow-hidden"
         style={{ 
-          width: GIFT_BOX_TOKENS.box.width, 
-          height: GIFT_BOX_TOKENS.box.height,
-          borderRadius: GIFT_BOX_TOKENS.box.borderRadius,
+          width: boxTokens.width, 
+          height: boxTokens.height,
+          borderRadius: boxTokens.borderRadius,
           ...(isHovered && enable3D && (animationType === 'highlight' || animationType === 'breathing') ? {
-            transform: `perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translate(${parallaxX}px, ${parallaxY}px) translateY(${GIFT_BOX_TOKENS.hoverEffects.transform.translateY}) scale(${1.0125 * depthScale})`,
+            transform: `scale(${boxTokens.scale}) perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translate(${parallaxX}px, ${parallaxY}px) translateY(${GIFT_BOX_TOKENS.hoverEffects.transform.translateY}) scale(${1.0125 * depthScale})`,
             transformStyle: 'preserve-3d',
             filter: `brightness(${brightnessShift}) blur(${depthBlur}px)`,
             transition: 'transform 0.15s ease-out, filter 0.15s ease-out'
           } : {
             transform: isHovered
-              ? `translateY(${GIFT_BOX_TOKENS.hoverEffects.transform.translateY}) scale(1.0125)`
-              : `translateY(0) scale(1)`,
+              ? `scale(${boxTokens.scale}) translateY(${GIFT_BOX_TOKENS.hoverEffects.transform.translateY}) scale(1.0125)`
+              : `scale(${boxTokens.scale})`,
             filter: 'none',
             transition: isHovered
               ? `transform 0.15s ease-out`
@@ -386,7 +399,7 @@ const GiftBoxContainer = ({
                 background: `linear-gradient(to right, transparent 0%, rgba(255, 255, 255, ${edgeHighlightIntensity}) 50%, transparent 100%)`,
                 mixBlendMode: 'overlay',
                 zIndex: 10,
-                borderRadius: `${GIFT_BOX_TOKENS.box.borderRadius} ${GIFT_BOX_TOKENS.box.borderRadius} 0 0`,
+                borderRadius: `${boxTokens.borderRadius} ${boxTokens.borderRadius} 0 0`,
                 transition: 'opacity 0.15s ease-out'
               }}
             />
@@ -398,18 +411,18 @@ const GiftBoxContainer = ({
                 background: `linear-gradient(to bottom, transparent 0%, rgba(255, 255, 255, ${edgeHighlightIntensity}) 50%, transparent 100%)`,
                 mixBlendMode: 'overlay',
                 zIndex: 10,
-                borderRadius: `${GIFT_BOX_TOKENS.box.borderRadius} 0 0 ${GIFT_BOX_TOKENS.box.borderRadius}`,
+                borderRadius: `${boxTokens.borderRadius} 0 0 ${boxTokens.borderRadius}`,
                 transition: 'opacity 0.15s ease-out'
               }}
             />
           </>
         )}
         {/* Base background and gradient overlay */}
-        <div aria-hidden="true" className="absolute inset-0 pointer-events-none" style={{ borderRadius: GIFT_BOX_TOKENS.box.borderRadius }}>
+        <div aria-hidden="true" className="absolute inset-0 pointer-events-none" style={{ borderRadius: boxTokens.borderRadius }}>
           <div 
             className="absolute inset-0"
             style={{ 
-              borderRadius: GIFT_BOX_TOKENS.box.borderRadius,
+              borderRadius: boxTokens.borderRadius,
               background: boxGradient,
               transition: `background ${GIFT_BOX_TOKENS.animations.duration.fast} ${GIFT_BOX_TOKENS.animations.easing.easeOut}`
             }}
@@ -417,7 +430,7 @@ const GiftBoxContainer = ({
           <div 
             className="absolute inset-0"
             style={{ 
-              borderRadius: GIFT_BOX_TOKENS.box.borderRadius,
+              borderRadius: boxTokens.borderRadius,
               mixBlendMode: GIFT_BOX_TOKENS.blendModes.overlay,
               background: GIFT_BOX_TOKENS.gradients.boxBase
             }}
@@ -427,7 +440,7 @@ const GiftBoxContainer = ({
             <div 
               className="metal-shine-overlay"
               style={{
-                borderRadius: GIFT_BOX_TOKENS.box.borderRadius,
+                borderRadius: boxTokens.borderRadius,
               }}
             >
               {/* First gradient highlight */}
@@ -459,7 +472,7 @@ const GiftBoxContainer = ({
         </div>
 
         {/* Inner content container */}
-        <div className={`content-stretch flex flex-col ${centerLogo ? 'items-center justify-center' : 'items-start'} overflow-hidden relative rounded-[inherit] w-full h-full`} style={{ width: GIFT_BOX_TOKENS.box.width, height: GIFT_BOX_TOKENS.box.height }}>
+        <div className={`content-stretch flex flex-col ${centerLogo ? 'items-center justify-center' : 'items-start'} overflow-hidden relative rounded-[inherit] w-full h-full`} style={{ width: boxTokens.width, height: boxTokens.height }}>
           {/* Logo Container (top, flex-grow) */}
           <div 
             className={`${centerLogo ? 'flex-1' : 'basis-0'} box-border content-stretch flex flex-col ${centerLogo ? 'justify-center' : ''} ${centerLogo ? '' : 'grow'} items-center min-h-px min-w-px relative shrink-0 w-full`}
@@ -665,7 +678,7 @@ const GiftBoxContainer = ({
         <div 
           className="absolute inset-0 pointer-events-none"
           style={{
-            borderRadius: GIFT_BOX_TOKENS.box.borderRadius,
+            borderRadius: boxTokens.borderRadius,
             zIndex: GIFT_BOX_TOKENS.zIndex.noise,
             opacity: isHovered ? GIFT_BOX_TOKENS.hoverEffects.noiseOpacity.hover : GIFT_BOX_TOKENS.hoverEffects.noiseOpacity.default,
             mixBlendMode: GIFT_BOX_TOKENS.blendModes.overlay,

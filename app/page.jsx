@@ -358,6 +358,11 @@ export default function Home() {
       hideProgressBarInBox: layoutConfig.hideProgressBarInBox || false,
       // Box logo centering setting
       centerLogoInBox: layoutConfig.centerLogoInBox || false,
+      // Box settings (Layout 0 specific)
+      boxWidth: layoutConfig.box?.width,
+      boxHeight: layoutConfig.box?.height,
+      boxBorderRadius: layoutConfig.box?.borderRadius,
+      boxScale: layoutConfig.box?.scale,
       // Confetti and redline settings
       enableConfetti: layoutConfig.enableConfetti || false,
       showRedline: layoutConfig.showRedline || false,

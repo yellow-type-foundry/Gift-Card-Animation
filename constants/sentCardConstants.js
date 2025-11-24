@@ -28,6 +28,13 @@ export const CONFETTI_CONFIG_LAYOUT_0 = {
     showBounds: false, // Show green outline for box bounds (dev only) - hidden
     borderRadius: 32, // Box border radius for debug outline
   },
+  // Layout 0 box styling (separate from Single 2 box)
+  box: {
+    width: '176px', // Box width (can be overridden)
+    height: '176px', // Box height (can be overridden)
+    borderRadius: '32px', // Box border radius (can be overridden)
+    scale: 1.125, // Box scale (matches envelope.scale in single0 config)
+  },
 }
 
 // Confetti animation configuration
@@ -266,6 +273,13 @@ export const LAYOUT_CONFIG = {
       right: undefined,
       top: undefined,
       transformOrigin: undefined,
+    },
+    // Box settings (Layout 0 specific - separate from Single 2)
+    box: {
+      width: '176px', // Box width (default: 176px, matches GIFT_BOX_TOKENS)
+      height: '176px', // Box height (default: 176px, matches GIFT_BOX_TOKENS)
+      borderRadius: '40px', // Box border radius (default: 32px, matches GIFT_BOX_TOKENS)
+      scale: 1, // Box scale (matches envelope.scale)
     },
     // Layout flags
     hideUnion: false,

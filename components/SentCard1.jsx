@@ -105,6 +105,11 @@ const SentCard1 = ({
   hideProgressBarInBox = false,
   // Center logo at the very center of the box (for Single 0)
   centerLogoInBox = false,
+  // Box settings (Layout 0 specific - separate from Single 2)
+  boxWidth,
+  boxHeight,
+  boxBorderRadius,
+  boxScale,
   // Enable confetti (for Single 0)
   enableConfetti = false,
   // Show redline (for Single 0)
@@ -1006,6 +1011,11 @@ const SentCard1 = ({
                 tiltY={tiltY}
                 hideProgressBar={hideProgressBarInBox}
                 centerLogo={centerLogoInBox}
+                // Layout 0 specific box controls (overrides GIFT_BOX_TOKENS when provided)
+                boxWidth={boxWidth}
+                boxHeight={boxHeight}
+                boxBorderRadius={boxBorderRadius}
+                boxScale={boxScale}
               />
             ) : hideEnvelope ? (
               // Envelope Box Container (for Batch 2)
