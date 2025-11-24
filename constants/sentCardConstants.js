@@ -10,7 +10,7 @@ export const CONFETTI_CONFIG = {
   colors: ['#7C66FF', '#5AD3FF', '#FF7AD9', '#FFD166', '#8CE99A'],
   
   // Particle count
-  maxParticles: 200, 
+  maxParticles: 240, 
   
   // Speed configuration
   speed: {
