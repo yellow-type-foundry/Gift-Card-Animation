@@ -373,7 +373,11 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
     
     // Start with no particles - they will erupt gradually on hover
     const targetParticleCount = Math.floor(maxParticles * 0.85) // 85% of max for more natural feel
-    const particles = Array.from({ length: targetParticleCount }).map(() => null) // Pre-allocate array, start empty
+    // Pre-allocate array (optimized: use for loop instead of map)
+    const particles = new Array(targetParticleCount)
+    for (let i = 0; i < targetParticleCount; i++) {
+      particles[i] = null
+    }
     let activeParticleCount = 0
     let frameCount = 0
     
@@ -632,8 +636,10 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
       // Get mirror point for this frame
       const mirrorY = getMirrorY()
       
-      particles.forEach((p, index) => {
-        if (p === null) return // Skip null particles
+      // Optimized: use for loop instead of forEach for better performance
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i]
+        if (p === null) continue // Skip null particles
         // Update fade-in progress
         if (p.fadeInProgress < p.fadeInDuration) {
           p.fadeInProgress++
@@ -721,7 +727,7 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
             ctxMirrored.restore()
           }
         }
-      })
+      }
       animId = requestAnimationFrame(draw)
     }
     
