@@ -450,9 +450,12 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
     }
     
     // Bounce particles off card boundaries with more natural physics
-    const constrainParticle = (p) => {
+    const constrainParticle = (p, halfSize) => {
       // Use particle size for collision detection (circular dots)
-      const halfSize = p.size / 2
+      // halfSize is passed in to avoid recalculating (optimization)
+      if (halfSize === undefined) {
+        halfSize = p.size / 2 // Fallback if not provided
+      }
       
       // First check envelope/box collision (with larger detection area for more sensitivity)
       // Use slightly larger detection area to catch particles earlier
@@ -645,6 +648,10 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
       for (let i = 0; i < particles.length; i++) {
         const p = particles[i]
         if (p === null) continue // Skip null particles
+        
+        // Cache frequently used values (optimization: calculate once per particle)
+        const halfSize = p.size / 2
+        
         // Update fade-in progress
         if (p.fadeInProgress < p.fadeInDuration) {
           p.fadeInProgress++
@@ -684,11 +691,10 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
         // Update rotation (more tumbling)
         p.rot += p.vr
         
-        // Apply boundary constraints
-        constrainParticle(p)
+        // Apply boundary constraints (pass halfSize to avoid recalculating)
+        constrainParticle(p, halfSize)
         
         // Cull off-screen particles (optimization: don't draw particles outside canvas)
-        const halfSize = p.size / 2
         const isOffScreen = p.x + halfSize < 0 || 
                            p.x - halfSize > canvas.width || 
                            p.y + halfSize < 0 || 
@@ -705,9 +711,9 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
           drawCtx.globalAlpha = p.opacity
           drawCtx.fillStyle = p.color
           
-          // Draw circular dot (optimized: use cached TWO_PI constant)
+          // Draw circular dot (optimized: use cached TWO_PI constant and halfSize)
           drawCtx.beginPath()
-          drawCtx.arc(0, 0, p.size / 2, 0, TWO_PI)
+          drawCtx.arc(0, 0, halfSize, 0, TWO_PI)
           drawCtx.closePath()
           drawCtx.fill()
           
@@ -724,10 +730,10 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
             ctxMirrored.globalAlpha = p.opacity * 1.0 // Full opacity for brighter effect (was 0.6)
             ctxMirrored.fillStyle = p.color
             
-            // Draw circular dot - 1.5x bigger for mirrored particles (optimized: use cached TWO_PI constant)
-            const mirroredSize = p.size * 1.5
-            ctxMirrored.beginPath()
-            ctxMirrored.arc(0, 0, mirroredSize / 2, 0, TWO_PI)
+          // Draw circular dot - 1.5x bigger for mirrored particles (optimized: use cached TWO_PI constant and halfSize)
+          const mirroredHalfSize = halfSize * 1.5
+          ctxMirrored.beginPath()
+          ctxMirrored.arc(0, 0, mirroredHalfSize, 0, TWO_PI)
             ctxMirrored.closePath()
             ctxMirrored.fill()
             
