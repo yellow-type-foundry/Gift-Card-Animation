@@ -2,6 +2,7 @@
 
 import React, { useRef, useMemo, useState, useCallback } from 'react'
 import Image from 'next/image'
+import html2canvas from 'html2canvas'
 import { TOKENS } from '@/constants/tokens'
 import useDominantColor from '@/hooks/useDominantColor'
 import useCardTheme from '@/hooks/useCardTheme'
@@ -16,6 +17,7 @@ import EnvelopeBase from '@/components/sent-card/EnvelopeBase'
 import CardShape from '@/components/sent-card/CardShape'
 import GiftBoxContainer from '@/components/sent-card/GiftBoxContainer'
 import EnvelopeBoxContainer from '@/components/sent-card/EnvelopeBoxContainer'
+import ShareModal from '@/components/ShareModal'
 import { PROGRESS_PILL_RADIUS, HEADER_OVERLAY_BG, PROGRESS_GLOW_BOX_SHADOW, ENVELOPE_DIMENSIONS, FOOTER_CONFIG } from '@/constants/sentCardConstants'
 
 // Gift container images (brand names)
@@ -131,6 +133,7 @@ const SentCard1 = ({
 }) => {
   // Hooks
   const cardRef = useRef(null)
+  const cardContentRef = useRef(null) // Ref for card content (excluding footer)
   const confettiCanvasRef = useRef(null)
   const confettiCanvasFrontRef = useRef(null)
   const confettiCanvasMirroredRef = useRef(null)
@@ -140,6 +143,10 @@ const SentCard1 = ({
   const confettiCanvasBlur3Ref = useRef(null) // 4-6px blur
   const confettiCanvasBlur4Ref = useRef(null) // 6-8px blur
   const { isHovered, handleHoverEnter, handleHoverLeave } = useHover()
+  
+  // Share modal state
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false)
+  const [capturedImage, setCapturedImage] = useState(null)
   
   // Generate stable IDs for SVG elements
   const ids = useComponentIds(boxImage, from)
@@ -166,6 +173,29 @@ const SentCard1 = ({
     handleHoverLeave()
     setMousePosition({ x: 0.5, y: 0.5 })
   }, [handleHoverLeave])
+  
+  // Handle card capture for sharing
+  const handleCaptureCard = useCallback(async () => {
+    if (!cardContentRef.current) return
+    
+    try {
+      // Capture the card content (excluding footer) while confetti is erupting
+      const canvas = await html2canvas(cardContentRef.current, {
+        backgroundColor: null,
+        scale: 2, // Higher quality
+        useCORS: true,
+        logging: false,
+        allowTaint: false
+      })
+      
+      // Convert canvas to image data URL
+      const imageDataUrl = canvas.toDataURL('image/png')
+      setCapturedImage(imageDataUrl)
+      setIsShareModalOpen(true)
+    } catch (error) {
+      console.error('Error capturing card:', error)
+    }
+  }, [])
   
   // Calculate tilt angles based on mouse position
   const tiltX = useMemo(() => {
@@ -735,6 +765,7 @@ const SentCard1 = ({
         </>
       )}
       <div 
+        ref={cardContentRef}
         className={`content-stretch flex flex-col items-start ${isMonochromeVariant ? 'overflow-visible' : 'overflow-hidden'} relative rounded-[inherit] w-full ${(progressOutsideEnvelope && headerHeight2 !== undefined) || (headerUseFlex && headerHeight !== undefined && !overlayProgressOnEnvelope && !progressOutsideEnvelope) || (overlayProgressOnEnvelope && headerUseFlex1 && headerHeight1 !== undefined && !progressOutsideEnvelope) ? 'h-full' : ''}`} 
         style={contentWrapperStyle}
       >
@@ -1523,6 +1554,7 @@ const SentCard1 = ({
               : FOOTER_CONFIG.default.transparent
           }
           hideInfoOnHover={!progressOutsideEnvelope}
+          onShareClick={handleCaptureCard}
         />
 
         {/* Progress bar outside envelope (for Altered Layout 2) - positioned relatively under gift info */}
@@ -1667,6 +1699,16 @@ const SentCard1 = ({
         )}
 
       </div>
+      
+      {/* Share Modal */}
+      <ShareModal
+        isOpen={isShareModalOpen}
+        onClose={() => {
+          setIsShareModalOpen(false)
+          setCapturedImage(null)
+        }}
+        capturedImage={capturedImage}
+      />
     </div>
   )
 }

@@ -19,7 +19,8 @@ function Footer({
   transparent = false,
   hideInfoOnHover = true,
   progressStartColor,
-  progressEndColor
+  progressEndColor,
+  onShareClick
 }) {
   return (
     <div
@@ -201,7 +202,7 @@ function Footer({
             </div>
           </div>
           )}
-          {showReminder && !isDone && (
+          {showReminder && (
             <div
               data-name="ReminderBar"
               className="absolute inset-0 flex items-center justify-center"
@@ -224,6 +225,12 @@ function Footer({
                   height: infoInSlot ? '44px' : '36px',
                   transition: 'transform 200ms ease-out, box-shadow 200ms ease-out, outline-color 200ms ease-out, background-color 200ms ease-out'
                 }}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  if (onShareClick) {
+                    onShareClick()
+                  }
+                }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-2px)'
                   e.currentTarget.style.boxShadow = '0 8px 24px -8px rgba(0,0,0,0.15), 0 3px 10px -4px rgba(0,0,0,0.10)'
@@ -244,7 +251,7 @@ function Footer({
                 }}
                 type="button"
               >
-                Send a reminder
+                {isDone ? 'Share to Social' : 'Send a reminder'}
               </button>
             </div>
           )}
