@@ -149,6 +149,17 @@ const CardGrid = ({
                     />
                   )
                 } else {
+                  // Single 0 uses SentCard1 with envelope hidden (shows gift box, like Single 2)
+                  if (layoutNumber === '0') {
+                    return (
+                      <SentCard1
+                        key={index}
+                        {...getSentCard1Props(card, layoutNumber, useColoredBackground, animationType, enable3D, true)}
+                        hideEnvelope={true}
+                        showGiftBoxWhenHidden={true}
+                      />
+                    )
+                  }
                   // Single 1 uses SentCard1 (with gift container replacing envelope)
                   if (layoutNumber === '1') {
                     return (
@@ -203,6 +214,17 @@ const CardGrid = ({
                     No cards available for this layout
                   </div>
                 )
+              }
+              // Single 0 uses SentCard1 with envelope hidden (shows gift box, like Single 2)
+              if (layoutNumber === '0') {
+                return sentCards.map((card, index) => (
+                  <SentCard1
+                    key={index}
+                    {...getSentCard1Props(card, layoutNumber, useColoredBackground, animationType, enable3D, true)}
+                    hideEnvelope={true}
+                    showGiftBoxWhenHidden={true}
+                  />
+                ))
               }
               // Single 1 uses SentCard1 (with gift container replacing envelope)
               if (layoutNumber === '1') {

@@ -130,7 +130,7 @@ const ControlBar = ({
       <div className="hidden md:flex items-center justify-center gap-2 shrink-0">
         {isSentTab && (
           <>
-            {[1, 2, 3].map((num) => (
+            {[0, 1, 2, 3].map((num) => (
               <TabButton
                 key={num}
                 label={`Layout ${num}`}
@@ -190,8 +190,8 @@ const ControlBar = ({
                   onClick={(e) => e.stopPropagation()}
                 >
                   <div className="space-y-4">
-                    {/* Theming toggle - only show for layout 1 */}
-                      {layoutNumber === '1' && (
+                    {/* Theming toggle - only show for layout 0 and 1 */}
+                      {(layoutNumber === '0' || layoutNumber === '1') && (
                         <div className="flex items-center justify-between">
                           <span className="text-sm text-[#525F7A]">Theming</span>
                           <button
@@ -367,6 +367,7 @@ const ControlBar = ({
                         className="py-2 pl-3 pr-8 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0 appearance-none cursor-pointer"
                         style={selectStyle}
                       >
+                        <option value="0">Layout 0</option>
                         <option value="1">Layout 1</option>
                         <option value="2">Layout 2</option>
                         <option value="3">Layout 3</option>
@@ -378,8 +379,8 @@ const ControlBar = ({
                       </div>
                     </div>
                   </div>
-                  {/* Theming toggle - only show for layout 1 */}
-                  {layoutNumber === '1' && (
+                  {/* Theming toggle - only show for layout 0 and 1 */}
+                  {(layoutNumber === '0' || layoutNumber === '1') && (
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-[#525F7A]">Theming</span>
                       <button

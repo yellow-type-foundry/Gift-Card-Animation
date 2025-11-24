@@ -46,6 +46,18 @@ export const CONFETTI_CONFIG = {
 // Footer configuration for Gift Sent cards
 // All footer settings are unified here for easy management
 export const FOOTER_CONFIG = {
+  // Default layout (Batch - Layout 0)
+  default0: {
+    equalPadding: false,
+    topPadding: undefined, // Uses default from Footer component
+    bottomPadding: 16,
+    transparent: false,
+    showProgress: true,
+    showReminder: true,
+    infoInSlot: false,
+    hideInfoOnHover: true,
+  },
+  
   // Default layout (Batch - Layout 1)
   default: {
     equalPadding: false,
@@ -114,6 +126,30 @@ export const FOOTER_CONFIG = {
 //
 // Footer settings are in FOOTER_CONFIG above
 export const LAYOUT_CONFIG = {
+  // Default layout (Batch - Layout 0)
+  default0: {
+    // Header settings
+    header: {
+      height: 280, // minHeight when useFlex is true
+      useFlex: true, // Whether to use flex: 1 for fill height
+    },
+    // Envelope settings
+    envelope: {
+      scale: 1,
+      offsetY: 0,
+      left: undefined, // Uses default positioning
+      right: undefined,
+      top: undefined,
+      transformOrigin: undefined,
+    },
+    // Layout flags
+    hideUnion: false,
+    confettiWhiteOverlay: false,
+    envelopeHighZ: false,
+    overlayProgressOnEnvelope: false,
+    progressOutsideEnvelope: false,
+  },
+  
   // Default layout (Batch - Layout 1)
   default: {
     // Header settings
@@ -185,6 +221,33 @@ export const LAYOUT_CONFIG = {
     envelopeHighZ: true,
     overlayProgressOnEnvelope: true,
     progressOutsideEnvelope: true,
+  },
+  
+  // Single card layout 0 (SentCard1)
+  single0: {
+    // Header settings
+    header: {
+      height: 280, // minHeight when useFlex is true
+      useFlex: true, // Fill available height
+    },
+    // Envelope settings
+    envelope: {
+      scale: 1.125, // Scaled up 1.125x
+      offsetY: 32, // Moved down 32px
+      left: undefined, // Uses default positioning
+      right: undefined,
+      top: undefined,
+      transformOrigin: undefined,
+    },
+    // Layout flags
+    hideUnion: false,
+    confettiWhiteOverlay: false,
+    envelopeHighZ: false,
+    overlayProgressOnEnvelope: false,
+    progressOutsideEnvelope: false,
+    hideEnvelope: true, // Hide envelope and show gift box instead (like Single 2)
+    hideProgressBarInBox: true, // Hide progress bar inside the box
+    centerLogoInBox: true, // Center logo at the very center of the box
   },
   
   // Single card layout 1 (SentCard4) - Exact duplicate of Batch 1 (default)

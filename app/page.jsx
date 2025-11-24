@@ -225,6 +225,7 @@ export default function Home() {
     if (viewType === 'single') {
       return `single${layoutNum}`
     } else if (viewType === 'batch') {
+      if (layoutNum === '0') return 'default0'
       if (layoutNum === '1') return 'default'
       if (layoutNum === '2') return 'altered1'
       if (layoutNum === '3') return 'altered2'
@@ -275,7 +276,7 @@ export default function Home() {
     // Map layout number to single config key
     const singleConfigKey = `single${layoutNum}`
     const layoutConfig = LAYOUT_CONFIG[singleConfigKey] || LAYOUT_CONFIG.single1 // Fallback to single1
-    const footerConfig = layoutNum === '1' ? FOOTER_CONFIG.default : FOOTER_CONFIG.single // Single 1 uses default footer config (same as Batch 1)
+    const footerConfig = (layoutNum === '0' || layoutNum === '1') ? (layoutNum === '0' ? FOOTER_CONFIG.default0 : FOOTER_CONFIG.default) : FOOTER_CONFIG.single // Single 0/1 uses default footer config (same as Batch 0/1)
     
     return {
       from: card.from,
@@ -316,19 +317,26 @@ export default function Home() {
   }, [])
   
   // Helper function to get SentCard1 props based on layout number
-  const getSentCard1Props = useCallback((card, layoutNum, useColoredBackground, animationType, enable3D) => {
+  const getSentCard1Props = useCallback((card, layoutNum, useColoredBackground, animationType, enable3D, useSingleConfig = false) => {
     // Map layout number to config key
     let layoutKey
-    if (layoutNum === '1') layoutKey = 'default'
-    else if (layoutNum === '2') layoutKey = 'altered1'
-    else if (layoutNum === '3') layoutKey = 'altered2'
+    if (useSingleConfig) {
+      // For single views, use single config
+      layoutKey = `single${layoutNum}`
+    } else {
+      // For batch views, use batch config
+      if (layoutNum === '0') layoutKey = 'default0'
+      else if (layoutNum === '1') layoutKey = 'default'
+      else if (layoutNum === '2') layoutKey = 'altered1'
+      else if (layoutNum === '3') layoutKey = 'altered2'
+    }
     
     const layoutConfig = LAYOUT_CONFIG[layoutKey]
-    const footerConfig = layoutNum === '1' ? FOOTER_CONFIG.default : (layoutNum === '2' ? FOOTER_CONFIG.altered1 : FOOTER_CONFIG.altered2)
+    const footerConfig = layoutNum === '0' ? FOOTER_CONFIG.default0 : (layoutNum === '1' ? FOOTER_CONFIG.default : (layoutNum === '2' ? FOOTER_CONFIG.altered1 : FOOTER_CONFIG.altered2))
     
     const useAlteredLayout1 = layoutNum === '2'
     const useAlteredLayout2 = layoutNum === '3'
-    const useAlteredLayout = layoutNum !== '1'
+    const useAlteredLayout = layoutNum !== '0' && layoutNum !== '1'
     
     return {
       from: card.from,
@@ -346,6 +354,10 @@ export default function Home() {
       overlayProgressOnEnvelope: layoutConfig.overlayProgressOnEnvelope,
       progressOutsideEnvelope: layoutConfig.progressOutsideEnvelope,
       hideEnvelope: layoutConfig.hideEnvelope || false,
+      // Box progress bar setting
+      hideProgressBarInBox: layoutConfig.hideProgressBarInBox || false,
+      // Box logo centering setting
+      centerLogoInBox: layoutConfig.centerLogoInBox || false,
       // Envelope settings
       envelopeScale: layoutConfig.envelope.scale,
       envelopeOffsetY: layoutConfig.envelope.offsetY,

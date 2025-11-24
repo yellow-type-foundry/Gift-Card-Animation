@@ -23,7 +23,8 @@ const GiftBoxContainer = ({
   parallaxY = 0, // Parallax offset Y for tilt effect
   tiltX = 0, // Tilt X angle for 3D effect
   tiltY = 0, // Tilt Y angle for 3D effect
-  hideProgressBar = false // Hide progress bar (for Single 1A)
+  hideProgressBar = false, // Hide progress bar (for Single 1A)
+  centerLogo = false // Center logo at the very center of the box (for Single 0)
 }) => {
   const { isHovered: internalIsHovered, handleHoverEnter, handleHoverLeave } = useHover()
   // Use external hover state if provided, otherwise use internal
@@ -458,15 +459,15 @@ const GiftBoxContainer = ({
         </div>
 
         {/* Inner content container */}
-        <div className="content-stretch flex flex-col items-start overflow-hidden relative rounded-[inherit] w-full h-full" style={{ width: GIFT_BOX_TOKENS.box.width, height: GIFT_BOX_TOKENS.box.height }}>
+        <div className={`content-stretch flex flex-col ${centerLogo ? 'items-center justify-center' : 'items-start'} overflow-hidden relative rounded-[inherit] w-full h-full`} style={{ width: GIFT_BOX_TOKENS.box.width, height: GIFT_BOX_TOKENS.box.height }}>
           {/* Logo Container (top, flex-grow) */}
           <div 
-            className="basis-0 box-border content-stretch flex flex-col grow items-center min-h-px min-w-px relative shrink-0 w-full"
+            className={`${centerLogo ? 'flex-1' : 'basis-0'} box-border content-stretch flex flex-col ${centerLogo ? 'justify-center' : ''} ${centerLogo ? '' : 'grow'} items-center min-h-px min-w-px relative shrink-0 w-full`}
             style={{
-              paddingLeft: GIFT_BOX_TOKENS.logo.containerPadding.horizontal,
-              paddingRight: GIFT_BOX_TOKENS.logo.containerPadding.horizontal,
-              paddingTop: GIFT_BOX_TOKENS.logo.containerPadding.vertical,
-              paddingBottom: GIFT_BOX_TOKENS.logo.containerPadding.vertical,
+              paddingLeft: centerLogo ? 0 : GIFT_BOX_TOKENS.logo.containerPadding.horizontal,
+              paddingRight: centerLogo ? 0 : GIFT_BOX_TOKENS.logo.containerPadding.horizontal,
+              paddingTop: centerLogo ? 0 : GIFT_BOX_TOKENS.logo.containerPadding.vertical,
+              paddingBottom: centerLogo ? 0 : GIFT_BOX_TOKENS.logo.containerPadding.vertical,
               ...(enable3D && (animationType === 'highlight' || animationType === 'breathing') && isHovered
                 ? {
                     transform: `perspective(1000px) rotateX(${tiltX * 0.05}deg) rotateY(${tiltY * 0.05}deg) translate(${parallaxX * 0.07}px, ${parallaxY * 0.07}px) scale(${1 * depthScale})`,
@@ -483,6 +484,7 @@ const GiftBoxContainer = ({
               style={{ 
                 width: GIFT_BOX_TOKENS.logo.width,
                 height: GIFT_BOX_TOKENS.logo.height,
+                transform: centerLogo ? 'scale(1.3)' : 'none',
                 mixBlendMode: enable3D && (animationType === 'highlight' || animationType === 'breathing') ? 'normal' : GIFT_BOX_TOKENS.blendModes.overlay,
                 paddingTop: '18px',
                 transition: 'mix-blend-mode 0.2s ease-out' // Smooth transition between blend modes

@@ -100,6 +100,10 @@ const SentCard1 = ({
   hideEnvelope = false,
   // Show gift box when envelope is hidden (for Single 2)
   showGiftBoxWhenHidden = false,
+  // Hide progress bar inside the box (for Single 0)
+  hideProgressBarInBox = false,
+  // Center logo at the very center of the box (for Single 0)
+  centerLogoInBox = false,
   // Animation type for Single 2 cards: 'highlight', 'breathing', or 'none'
   animationType = 'highlight',
   // Standalone 3D toggle that works with highlight or breathing
@@ -883,7 +887,7 @@ const SentCard1 = ({
               </div>
             ) : null}
             {hideEnvelope && showGiftBoxWhenHidden ? (
-              // Gift Box Container (for Single 2)
+              // Gift Box Container (for Single 2 and Single 0)
               <GiftBoxContainer
                 progress={validatedProgress}
                 boxColor={themedBoxColor}
@@ -899,6 +903,8 @@ const SentCard1 = ({
                 parallaxY={parallaxY}
                 tiltX={tiltX}
                 tiltY={tiltY}
+                hideProgressBar={hideProgressBarInBox}
+                centerLogo={centerLogoInBox}
               />
             ) : hideEnvelope ? (
               // Envelope Box Container (for Batch 2)
