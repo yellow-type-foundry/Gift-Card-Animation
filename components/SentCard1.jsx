@@ -511,10 +511,6 @@ const SentCard1 = ({
             flex: 1,
             minHeight: 0,
             overflow: 'visible',
-            // Apply offsetY for Single 1A and Single 2 (when showGiftBoxWhenHidden is true)
-            ...(showGiftBoxWhenHidden && envelopeOffsetY ? {
-              transform: `translateY(${envelopeOffsetY}px)`
-            } : {}),
             ...(isBatch2 ? {
               paddingTop: `${BATCH2_ENVELOPE_PADDING.top}px`,
               paddingRight: `${BATCH2_ENVELOPE_PADDING.right}px`,
