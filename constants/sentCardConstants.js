@@ -276,8 +276,8 @@ export const LAYOUT_CONFIG = {
     },
     // Box settings (Layout 0 specific - separate from Single 2)
     box: {
-      width: '176px', // Box width (default: 176px, matches GIFT_BOX_TOKENS)
-      height: '176px', // Box height (default: 176px, matches GIFT_BOX_TOKENS)
+      width: '172px', // Box width (default: 176px, matches GIFT_BOX_TOKENS)
+      height: '172px', // Box height (default: 176px, matches GIFT_BOX_TOKENS)
       borderRadius: '40px', // Box border radius (default: 32px, matches GIFT_BOX_TOKENS)
       scale: 1, // Box scale (matches envelope.scale)
     },

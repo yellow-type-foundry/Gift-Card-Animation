@@ -149,12 +149,16 @@ const GiftBoxContainer = ({
     return `linear-gradient(to bottom, ${colorToUse} 0%, ${darkerColor} 100%)`
   }, [hoverBoxColor])
 
-  // Calculate lighter color for breathing duplicate boxes (L + 10)
+  // Calculate lighter color for breathing duplicate boxes
+  // Layout 0: L + 20, Other layouts: L + 10
   const breathingBoxColor = useMemo(() => {
     const [h, s, l] = hexToHsl(hoverBoxColor)
-    const lighterL = Math.min(100, l + 10) // Increase L by 10 for breathing boxes
+    // Detect Layout 0: if custom box props are provided, it's Layout 0
+    const isLayout0 = boxWidth !== undefined || boxHeight !== undefined || boxBorderRadius !== undefined
+    const lIncrease = isLayout0 ? 20 : 10 // Layout 0: +20, others: +10
+    const lighterL = Math.min(100, l + lIncrease)
     return hslToHex(h, s, lighterL)
-  }, [hoverBoxColor])
+  }, [hoverBoxColor, boxWidth, boxHeight, boxBorderRadius])
   
   // Progress bar indicator color - uses unified S/L values
   const progressIndicatorColor = useMemo(() => {
