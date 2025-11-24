@@ -399,19 +399,20 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
     }
     
     // Bounce particles off envelope/box boundaries with more natural, subtle effect
-    const handleEnvelopeCollision = (p, halfSize) => {
+    const handleEnvelopeCollision = (p, detectionSize) => {
       if (!cardBounds.envelope) return false
       
       const env = cardBounds.envelope
       let bounced = false
       
       // More natural bounce - increased by 1.25x for more bounciness
+      // Optimized: calculate bounce energy once per collision check
       const envelopeBounceEnergy = (0.25 + Math.random() * 0.1) * 1.5 // 62.5-87.5% energy retention (increased from 50-70%)
       const bounceVariation = 0.15 * dpr // Less variation for more natural feel
       
       // Check collision with left edge
-      if (p.x < env.left + halfSize && p.vx < 0) {
-        p.x = env.left + halfSize
+      if (p.x < env.left + detectionSize && p.vx < 0) {
+        p.x = env.left + detectionSize
         // Natural bounce - reverse with significant energy loss
         p.vx = -p.vx * envelopeBounceEnergy
         p.vx += (Math.random() - 0.5) * bounceVariation
@@ -420,8 +421,8 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
         bounced = true
       }
       // Check collision with right edge
-      else if (p.x > env.right - halfSize && p.vx > 0) {
-        p.x = env.right - halfSize
+      else if (p.x > env.right - detectionSize && p.vx > 0) {
+        p.x = env.right - detectionSize
         p.vx = -p.vx * envelopeBounceEnergy
         p.vx += (Math.random() - 0.5) * bounceVariation
         p.vy += (Math.random() - 0.5) * bounceVariation * 0.3
@@ -429,8 +430,8 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
       }
       
       // Check collision with top edge
-      if (p.y < env.top + halfSize && p.vy < 0) {
-        p.y = env.top + halfSize
+      if (p.y < env.top + detectionSize && p.vy < 0) {
+        p.y = env.top + detectionSize
         p.vy = -p.vy * envelopeBounceEnergy
         p.vy += (Math.random() - 0.5) * bounceVariation
         // Add slight horizontal component for more natural bounce
@@ -438,8 +439,8 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
         bounced = true
       }
       // Check collision with bottom edge
-      else if (p.y > env.bottom - halfSize && p.vy > 0) {
-        p.y = env.bottom - halfSize
+      else if (p.y > env.bottom - detectionSize && p.vy > 0) {
+        p.y = env.bottom - detectionSize
         p.vy = -p.vy * envelopeBounceEnergy
         p.vy += (Math.random() - 0.5) * bounceVariation
         p.vx += (Math.random() - 0.5) * bounceVariation * 0.3
