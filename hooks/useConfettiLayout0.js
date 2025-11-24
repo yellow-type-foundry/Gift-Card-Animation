@@ -34,18 +34,37 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
   const hasInitializedRef = useRef(false)
   const animIdRef = useRef(null)
   const prevForceHoveredRef = useRef(forceHovered)
+  const prevIsHoveredRef = useRef(isHovered)
+  const isFadingOutRef = useRef(false) // Track if particles are fading out
+  const fadeOutStartTimeRef = useRef(null) // Track when fade-out started
+  const fadeOutDuration = 800 // Fade-out duration in milliseconds
   
   useEffect(() => {
     // Detect if forceHovered changed from false to true (modal opened)
     if (!prevForceHoveredRef.current && forceHovered) {
       console.log('[Confetti Layout0] Modal opened - resetting initialization flag')
       hasInitializedRef.current = false
+      isFadingOutRef.current = false
+      fadeOutStartTimeRef.current = null
       if (animIdRef.current) {
         cancelAnimationFrame(animIdRef.current)
         animIdRef.current = null
       }
     }
     prevForceHoveredRef.current = forceHovered
+    
+    // Detect if hover ended (isHovered changed from true to false)
+    if (prevIsHoveredRef.current && !isHovered && !forceHovered) {
+      console.log('[Confetti Layout0] Hover ended - starting fade-out')
+      isFadingOutRef.current = true
+      fadeOutStartTimeRef.current = performance.now()
+    }
+    // Reset fade-out if hover starts again
+    if (!prevIsHoveredRef.current && isHovered) {
+      isFadingOutRef.current = false
+      fadeOutStartTimeRef.current = null
+    }
+    prevIsHoveredRef.current = isHovered
     
     // Use forceHovered if provided, otherwise use isHovered
     const shouldStart = forceHovered || isHovered
@@ -974,6 +993,22 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
           p.opacity = 1
         }
         
+        // Apply fade-out if hover ended
+        if (isFadingOutRef.current && fadeOutStartTimeRef.current !== null) {
+          const fadeOutElapsed = performance.now() - fadeOutStartTimeRef.current
+          const fadeOutProgress = Math.min(1, fadeOutElapsed / fadeOutDuration)
+          // Smooth fade-out using ease-in curve
+          const fadeOutMultiplier = 1 - fadeOutProgress * fadeOutProgress * fadeOutProgress // Ease-in cubic
+          p.opacity *= fadeOutMultiplier
+          
+          // Remove particle when fully faded
+          if (fadeOutProgress >= 1 && p.opacity <= 0) {
+            particles[i] = null
+            activeParticleCount--
+            continue
+          }
+        }
+        
         // Apply slow-motion effect after 1400ms - particles float in space
         let currentSlowMotionFactor = 1.0
         if (isSlowMotion) {
@@ -1117,6 +1152,32 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
         return // Stop the animation loop
       }
       
+      // Check if fade-out is complete and all particles are gone
+      if (isFadingOutRef.current && fadeOutStartTimeRef.current !== null) {
+        const fadeOutElapsed = performance.now() - fadeOutStartTimeRef.current
+        if (fadeOutElapsed >= fadeOutDuration && activeParticleCount === 0) {
+          console.log('[Confetti Layout0] Fade-out complete - stopping animation')
+          if (animId) {
+            cancelAnimationFrame(animId)
+            animId = null
+            animIdRef.current = null
+          }
+          // Clear canvases after fade-out
+          ctx && ctx.clearRect(0, 0, canvas.width, canvas.height)
+          if (ctxFront) ctxFront.clearRect(0, 0, canvasFront.width, canvasFront.height)
+          if (ctxMirrored) ctxMirrored.clearRect(0, 0, canvasMirrored.width, canvasMirrored.height)
+          blurContexts.forEach(blurCtx => {
+            if (blurCtx && blurCtx.canvas) {
+              blurCtx.clearRect(0, 0, blurCtx.canvas.width, blurCtx.canvas.height)
+            }
+          })
+          hasInitializedRef.current = false
+          isFadingOutRef.current = false
+          fadeOutStartTimeRef.current = null
+          return // Stop the animation loop
+        }
+      }
+      
       // Continue animation loop
       animId = requestAnimationFrame(draw)
       animIdRef.current = animId // Store in ref
@@ -1138,7 +1199,8 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
     return () => {
       // CRITICAL: Only cleanup if this is a real unmount/condition change
       // Don't cleanup on every re-render - that causes infinite loops
-      const shouldCleanup = !forceHovered && !isHovered
+      // Also, don't cleanup immediately if fading out - let fade-out complete
+      const shouldCleanup = !forceHovered && !isHovered && !isFadingOutRef.current
       
       if (shouldCleanup) {
         console.log('[Confetti Layout0] Cleanup - conditions changed, full cleanup')
@@ -1153,16 +1215,22 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
         ctx && ctx.clearRect(0, 0, canvas.width, canvas.height)
         if (ctxFront) ctxFront.clearRect(0, 0, canvasFront.width, canvasFront.height)
         if (ctxMirrored) ctxMirrored.clearRect(0, 0, canvasMirrored.width, canvasMirrored.height)
+        blurContexts.forEach(blurCtx => {
+          if (blurCtx && blurCtx.canvas) {
+            blurCtx.clearRect(0, 0, blurCtx.canvas.width, blurCtx.canvas.height)
+          }
+        })
         hasInitializedRef.current = false
+        isFadingOutRef.current = false
+        fadeOutStartTimeRef.current = null
         // Remove device orientation listener if it was added
         if (orientationListenerAdded) {
           window.removeEventListener('deviceorientation', handleDeviceOrientation)
           orientationListenerAdded = false
         }
       } else {
-        // Conditions still valid - don't cleanup, animation should continue
-        // This prevents cleanup from canceling animation when effect re-runs
-        console.log('[Confetti Layout0] Cleanup - conditions still valid, skipping cleanup', { forceHovered, isHovered, hasInitialized: hasInitializedRef.current })
+        // Conditions still valid or fading out - don't cleanup, animation should continue
+        console.log('[Confetti Layout0] Cleanup - conditions still valid or fading out, skipping cleanup', { forceHovered, isHovered, isFadingOut: isFadingOutRef.current, hasInitialized: hasInitializedRef.current })
       }
     }
   }, [isHovered, allAccepted, confettiCanvasRef, cardRef, confettiCanvasFrontRef, confettiCanvasMirroredRef, blurCanvasRefs, forceHovered])
