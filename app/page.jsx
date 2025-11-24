@@ -138,7 +138,7 @@ export default function Home() {
   const [useColoredBackground, setUseColoredBackground] = useState(false) // Toggle for theming
   const [animationType, setAnimationType] = useState('highlight') // Animation type: 'highlight', 'breathing', or 'none'
   const [enable3D, setEnable3D] = useState(false) // Standalone 3D toggle that works with highlight or breathing
-  const [layoutNumber, setLayoutNumber] = useState('1') // '1' | '2' | '3' - which layout pair to use
+  const [layoutNumber, setLayoutNumber] = useState('0') // '0' | '1' | '2' | '3' - which layout pair to use
   const [viewType, setViewType] = useState('mixed') // 'mixed' | 'batch' | 'single' - what to display
   const [mixSeed, setMixSeed] = useState(0) // Seed to regenerate mix when toggled
   const [showSettingsMenu, setShowSettingsMenu] = useState(false) // Mobile settings menu visibility

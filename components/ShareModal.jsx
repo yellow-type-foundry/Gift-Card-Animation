@@ -1,22 +1,44 @@
 'use client'
 
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
+import SentCard1 from '@/components/SentCard1'
 
-function ShareModal({ isOpen, onClose, capturedImage }) {
+function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti }) {
+  const [pauseConfetti, setPauseConfetti] = useState(false)
+  
   useEffect(() => {
     if (isOpen) {
+      console.log('[ShareModal] Modal opened - resetting pause state')
       // Prevent body scroll when modal is open
       document.body.style.overflow = 'hidden'
+      
+      // Reset pause state when modal opens
+      setPauseConfetti(false)
+      
+      // Pause confetti during peak eruption (around frame 50-60, ~1000ms at 60fps)
+      // Peak eruption happens during the eruption boost phase (0-63 frames, ~1.05 seconds)
+      // We want to pause at the middle/peak of this phase
+      const pauseTimeout = setTimeout(() => {
+        console.log('[ShareModal] 1000ms elapsed - setting pauseConfetti to true')
+        setPauseConfetti(true)
+        if (onPauseConfetti) {
+          onPauseConfetti()
+        }
+      }, 1300) // ~1000ms = ~60 frames at 60fps, which is peak eruption
+      
+      return () => {
+        clearTimeout(pauseTimeout)
+        document.body.style.overflow = ''
+        setPauseConfetti(false)
+      }
     } else {
       document.body.style.overflow = ''
+      setPauseConfetti(false)
     }
-    return () => {
-      document.body.style.overflow = ''
-    }
-  }, [isOpen])
+  }, [isOpen, onPauseConfetti])
 
-  if (!isOpen || !capturedImage) return null
+  if (!isOpen || !cardProps) return null
 
   const handleBackdropClick = (e) => {
     if (e.target === e.currentTarget) {
@@ -72,7 +94,7 @@ function ShareModal({ isOpen, onClose, capturedImage }) {
           </svg>
         </button>
 
-        {/* Captured card image - maintains card's natural size and aspect ratio */}
+        {/* Render actual card component - pixel perfect */}
         <div
           className="relative"
           style={{
@@ -81,23 +103,16 @@ function ShareModal({ isOpen, onClose, capturedImage }) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '0'
+            padding: '0',
+            overflow: 'hidden'
           }}
         >
-          <img
-            src={capturedImage}
-            alt="Captured card"
-            style={{
-              maxWidth: '100%',
-              maxHeight: '100%',
-              width: 'auto',
-              height: 'auto',
-              objectFit: 'contain',
-              borderRadius: '12px',
-              border: '1px solid #dde2e9',
-              outline: 'none',
-              display: 'block'
-            }}
+          <SentCard1
+            {...cardProps}
+            showFooterReminder={false}
+            showFooterProgress={false}
+            pauseConfetti={pauseConfetti}
+            forceHovered={true}
           />
         </div>
       </div>

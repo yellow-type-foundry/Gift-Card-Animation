@@ -16,10 +16,45 @@ import { CONFETTI_CONFIG, CONFETTI_CONFIG_LAYOUT_0 } from '@/constants/sentCardC
  * @param {React.RefObject} confettiCanvasFrontRef - Optional ref to front canvas element
  * @param {React.RefObject} confettiCanvasMirroredRef - Optional ref to vertically mirrored canvas element
  * @param {Array} blurCanvasRefs - Array of refs to blur canvas layers (Layout 0 only)
+ * @param {boolean} shouldPause - Whether to pause the animation (freeze particles)
  */
-export default function useConfettiLayout0(isHovered, allAccepted, confettiCanvasRef, cardRef, confettiCanvasFrontRef = null, confettiCanvasMirroredRef = null, blurCanvasRefs = null) {
+export default function useConfettiLayout0(isHovered, allAccepted, confettiCanvasRef, cardRef, confettiCanvasFrontRef = null, confettiCanvasMirroredRef = null, blurCanvasRefs = null, shouldPause = false, forceHovered = false) {
+  // Use a ref to track pause state without causing effect re-runs
+  // Initialize as false to ensure animation starts, then update from prop
+  const pauseRef = useRef(false)
   useEffect(() => {
-    if (!isHovered || !allAccepted) return
+    const prevPause = pauseRef.current
+    pauseRef.current = shouldPause
+    if (prevPause !== shouldPause) {
+      console.log('[Confetti Layout0] Pause state changed:', { from: prevPause, to: shouldPause, timestamp: Date.now() })
+    }
+  }, [shouldPause])
+  
+  useEffect(() => {
+    // Use forceHovered if provided, otherwise use isHovered
+    const shouldStart = forceHovered || isHovered
+    // Check shouldPause directly (not pauseRef) to avoid timing issues
+    // pauseRef is for checking during animation, but we need to check the prop here
+    console.log('[Confetti Layout0] Effect triggered:', { 
+      isHovered, 
+      forceHovered, 
+      shouldStart, 
+      allAccepted, 
+      shouldPause: shouldPause,
+      pauseRefCurrent: pauseRef.current,
+      willStart: shouldStart && allAccepted && !shouldPause,
+      timestamp: Date.now()
+    })
+    if (!shouldStart || !allAccepted) {
+      console.log('[Confetti Layout0] Not starting - conditions not met')
+      return
+    }
+    // Don't start if already paused - wait for pause to be cleared
+    if (shouldPause) {
+      console.log('[Confetti Layout0] WARNING: Starting in paused state! Waiting for pause to clear...')
+      return
+    }
+    console.log('[Confetti Layout0] Starting animation...')
     const canvas = confettiCanvasRef.current
     const canvasFront = confettiCanvasFrontRef?.current
     const canvasMirrored = confettiCanvasMirroredRef?.current
@@ -713,7 +748,87 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
     const TWO_PI = Math.PI * 2
     
     const draw = () => {
+      // If paused, draw particles in current state but don't update or continue animation
+      // Use ref to check pause state without causing effect re-run
+      if (pauseRef.current) {
+        console.log('[Confetti Layout0] Draw called while PAUSED - freezing particles at frame', frameCount, 'Active particles:', activeParticleCount)
+        // Draw particles frozen in their current positions
+        // Clear and redraw to show current state
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+        if (ctxFront) {
+          ctxFront.clearRect(0, 0, canvasFront.width, canvasFront.height)
+        }
+        if (ctxMirrored) {
+          ctxMirrored.clearRect(0, 0, canvasMirrored.width, canvasMirrored.height)
+        }
+        blurContexts.forEach(blurCtx => {
+          if (blurCtx && blurCtx.canvas) {
+            blurCtx.clearRect(0, 0, blurCtx.canvas.width, blurCtx.canvas.height)
+          }
+        })
+        
+        // Draw all particles in their current frozen state
+        const TWO_PI = Math.PI * 2
+        for (let i = 0; i < particles.length; i++) {
+          const p = particles[i]
+          if (p === null || p.opacity <= 0) continue
+          
+          const halfSize = p.size / 2
+          const isOffScreen = p.x + halfSize < 0 || 
+                             p.x - halfSize > canvas.width || 
+                             p.y + halfSize < 0 || 
+                             p.y - halfSize > canvas.height
+          if (isOffScreen) continue
+          
+          // Draw to appropriate canvas layer
+          let drawCtx = null
+          if (p.blurLevel !== null && blurContexts[p.blurLevel]) {
+            drawCtx = blurContexts[p.blurLevel]
+          } else {
+            const isFrontLayer = p.layer === 'front'
+            drawCtx = (isFrontLayer && ctxFront) ? ctxFront : ctx
+          }
+          
+          if (drawCtx) {
+            drawCtx.save()
+            drawCtx.translate(p.x, p.y)
+            drawCtx.rotate(p.rot)
+            drawCtx.globalAlpha = p.opacity
+            drawCtx.fillStyle = p.color
+            drawCtx.beginPath()
+            drawCtx.arc(0, 0, halfSize, 0, TWO_PI)
+            drawCtx.closePath()
+            drawCtx.fill()
+            drawCtx.restore()
+          }
+          
+          // Draw mirrored version if mirrored canvas exists
+          if (ctxMirrored) {
+            const mirrorY = getMirrorY()
+            const mirroredY = mirrorY + (mirrorY - p.y)
+            ctxMirrored.save()
+            ctxMirrored.translate(p.x, mirroredY)
+            ctxMirrored.rotate(-p.rot)
+            ctxMirrored.globalAlpha = p.opacity * 1.0
+            ctxMirrored.fillStyle = p.color
+            const mirroredHalfSize = halfSize * 1.5
+            ctxMirrored.beginPath()
+            ctxMirrored.arc(0, 0, mirroredHalfSize, 0, TWO_PI)
+            ctxMirrored.closePath()
+            ctxMirrored.fill()
+            ctxMirrored.restore()
+          }
+        }
+        console.log('[Confetti Layout0] Paused - stopping animation loop')
+        return // Don't continue animation loop - particles are frozen
+      }
+      
       frameCount++
+      
+      // Debug log every 30 frames
+      if (frameCount % 30 === 0) {
+        console.log('[Confetti Layout0] Frame:', frameCount, 'Active particles:', activeParticleCount, 'Paused:', pauseRef.current)
+      }
       
       // Update card bounds periodically in case of resize (every 60 frames ~1 second at 60fps)
       if (frameCount % 60 === 0) {
@@ -920,10 +1035,35 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
           }
         }
       }
+      
+      // Check if we should pause before continuing the loop
+      // Use ref to check pause state without causing effect re-run
+      if (pauseRef.current) {
+        console.log('[Confetti Layout0] Pause detected in draw loop at frame', frameCount, '- stopping animation')
+        // Cancel any pending animation frame
+        if (animId) {
+          cancelAnimationFrame(animId)
+          animId = null
+        }
+        // Draw particles frozen in their current state one more time
+        // (they were already drawn above, but this ensures final state is shown)
+        return // Stop the animation loop
+      }
+      
+      // Continue animation loop
       animId = requestAnimationFrame(draw)
     }
     
-    animId = requestAnimationFrame(draw)
+    // Only start animation if not paused
+    if (!pauseRef.current) {
+      console.log('[Confetti Layout0] Starting animation loop - not paused')
+      animId = requestAnimationFrame(draw)
+    } else {
+      console.log('[Confetti Layout0] Already paused - drawing frozen state once')
+      // If paused, draw once to show particles in current state (frozen)
+      // But don't start the animation loop
+      draw()
+    }
     
     return () => {
       if (animId) cancelAnimationFrame(animId)
@@ -936,6 +1076,6 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
         orientationListenerAdded = false
       }
     }
-  }, [isHovered, allAccepted, confettiCanvasRef, cardRef, confettiCanvasFrontRef, confettiCanvasMirroredRef, blurCanvasRefs])
+  }, [isHovered, allAccepted, confettiCanvasRef, cardRef, confettiCanvasFrontRef, confettiCanvasMirroredRef, blurCanvasRefs, forceHovered])
 }
 

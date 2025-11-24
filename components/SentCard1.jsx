@@ -1,8 +1,7 @@
 'use client'
 
-import React, { useRef, useMemo, useState, useCallback } from 'react'
+import React, { useRef, useMemo, useState, useCallback, useEffect } from 'react'
 import Image from 'next/image'
-import html2canvas from 'html2canvas'
 import { TOKENS } from '@/constants/tokens'
 import useDominantColor from '@/hooks/useDominantColor'
 import useCardTheme from '@/hooks/useCardTheme'
@@ -129,7 +128,10 @@ const SentCard1 = ({
   giftContainerLeft,
   giftContainerRight,
   giftContainerBottom,
-  giftContainerTransformOrigin
+  giftContainerTransformOrigin,
+  // Modal/sharing mode props
+  forceHovered = false,
+  pauseConfetti = false
 }) => {
   // Hooks
   const cardRef = useRef(null)
@@ -144,9 +146,26 @@ const SentCard1 = ({
   const confettiCanvasBlur4Ref = useRef(null) // 6-8px blur
   const { isHovered, handleHoverEnter, handleHoverLeave } = useHover()
   
+  // Use forceHovered if provided (for modal), otherwise use actual hover state
+  const effectiveHovered = forceHovered || isHovered
+  
+  // When forceHovered is true, automatically trigger hover state immediately
+  useEffect(() => {
+    if (forceHovered) {
+      console.log('[SentCard1] forceHovered is true - triggering hover state')
+      // Use a small timeout to ensure the component is fully mounted
+      const timeout = setTimeout(() => {
+        console.log('[SentCard1] Calling handleHoverEnter()')
+        handleHoverEnter()
+      }, 0)
+      return () => clearTimeout(timeout)
+    }
+  }, [forceHovered, handleHoverEnter])
+  
   // Share modal state
   const [isShareModalOpen, setIsShareModalOpen] = useState(false)
-  const [capturedImage, setCapturedImage] = useState(null)
+  const [cardPropsForShare, setCardPropsForShare] = useState(null)
+  const [shouldPauseConfetti, setShouldPauseConfetti] = useState(false)
   
   // Generate stable IDs for SVG elements
   const ids = useComponentIds(boxImage, from)
@@ -174,28 +193,89 @@ const SentCard1 = ({
     setMousePosition({ x: 0.5, y: 0.5 })
   }, [handleHoverLeave])
   
-  // Handle card capture for sharing
-  const handleCaptureCard = useCallback(async () => {
-    if (!cardContentRef.current) return
-    
-    try {
-      // Capture the card content (excluding footer) while confetti is erupting
-      const canvas = await html2canvas(cardContentRef.current, {
-        backgroundColor: null,
-        scale: 2, // Higher quality
-        useCORS: true,
-        logging: false,
-        allowTaint: false
-      })
-      
-      // Convert canvas to image data URL
-      const imageDataUrl = canvas.toDataURL('image/png')
-      setCapturedImage(imageDataUrl)
-      setIsShareModalOpen(true)
-    } catch (error) {
-      console.error('Error capturing card:', error)
+  // Handle card capture for sharing - pass card props to modal instead of capturing
+  const handleCaptureCard = useCallback(() => {
+    // Collect all card props to pass to the modal
+    const cardPropsToShare = {
+      from,
+      title,
+      boxImage,
+      giftTitle,
+      giftSubtitle,
+      progress,
+      sentDate,
+      headerBgOverride,
+      hideUnion,
+      footerPadEqual,
+      envelopeScale,
+      envelopeOffsetY,
+      confettiWhiteOverlay,
+      envelopeHighZ,
+      overlayProgressOnEnvelope,
+      showFooterProgress: false, // Hide footer in modal
+      progressOutsideEnvelope,
+      showFooterReminder: false, // Hide footer in modal
+      footerBottomPadding,
+      footerTopPadding,
+      footerTransparent,
+      headerHeight,
+      headerUseFlex,
+      headerHeight1,
+      headerUseFlex1,
+      envelopeScale2,
+      envelopeOffsetY2,
+      envelopeLeft2,
+      envelopeRight2,
+      envelopeTopBase2,
+      headerHeight2,
+      headerUseFlex2,
+      transformOrigin2,
+      footerTopPadding2,
+      footerBottomPadding2,
+      footerPadEqual2,
+      footerTransparent2,
+      progressBottomPadding2,
+      useGiftContainer,
+      hideEnvelope,
+      showGiftBoxWhenHidden,
+      hideProgressBarInBox,
+      centerLogoInBox,
+      boxWidth,
+      boxHeight,
+      boxBorderRadius,
+      boxScale,
+      enableConfetti,
+      showRedline,
+      animationType,
+      enable3D,
+      giftContainerOffsetY,
+      giftContainerScale,
+      giftContainerWidth,
+      giftContainerHeight,
+      giftContainerTop,
+      giftContainerLeft,
+      giftContainerRight,
+      giftContainerBottom,
+      giftContainerTransformOrigin,
+      forceHovered: true // Force hover state in modal so confetti plays
     }
-  }, [])
+    
+    setCardPropsForShare(cardPropsToShare)
+    setIsShareModalOpen(true)
+  }, [
+    from, title, boxImage, giftTitle, giftSubtitle, progress, sentDate,
+    headerBgOverride, hideUnion, footerPadEqual, envelopeScale, envelopeOffsetY,
+    confettiWhiteOverlay, envelopeHighZ, overlayProgressOnEnvelope, progressOutsideEnvelope,
+    footerBottomPadding, footerTopPadding, footerTransparent, headerHeight, headerUseFlex,
+    headerHeight1, headerUseFlex1, envelopeScale2, envelopeOffsetY2, envelopeLeft2,
+    envelopeRight2, envelopeTopBase2, headerHeight2, headerUseFlex2, transformOrigin2,
+    footerTopPadding2, footerBottomPadding2, footerPadEqual2, footerTransparent2,
+    progressBottomPadding2, useGiftContainer, hideEnvelope, showGiftBoxWhenHidden,
+    hideProgressBarInBox, centerLogoInBox, boxWidth, boxHeight, boxBorderRadius, boxScale,
+    enableConfetti, showRedline, animationType, enable3D, giftContainerOffsetY,
+    giftContainerScale, giftContainerWidth, giftContainerHeight, giftContainerTop,
+    giftContainerLeft, giftContainerRight, giftContainerBottom, giftContainerTransformOrigin
+  ])
   
   // Calculate tilt angles based on mouse position
   const tiltX = useMemo(() => {
@@ -442,18 +522,31 @@ const SentCard1 = ({
   
   // COMPLETELY SEPARATE: Layout 0 and Layout 1 use different hooks
   // Layout 0: Uses separate hook with all Layout 0 features (gift box collision, blur layers, etc.)
+  const finalPauseState = pauseConfetti || shouldPauseConfetti
+  if (isLayout0 && shouldShowConfetti) {
+    console.log('[SentCard1] Calling useConfettiLayout0 with:', {
+      effectiveHovered,
+      allAccepted,
+      finalPauseState,
+      forceHovered,
+      isLayout0,
+      shouldShowConfetti
+    })
+  }
   useConfettiLayout0(
-    isLayout0 && shouldShowConfetti && isHovered, 
+    isLayout0 && shouldShowConfetti && effectiveHovered, 
     isLayout0 && shouldShowConfetti && allAccepted, 
     confettiCanvasRef, 
     cardRef, 
     confettiCanvasFrontRef, 
     confettiCanvasMirroredRef, 
-    blurCanvasRefs
+    blurCanvasRefs,
+    finalPauseState,
+    forceHovered // Pass forceHovered directly to hook
   )
   // Layout 1: Uses original, untouched hook (no Layout 0 features)
   useConfettiLayout1(
-    !isLayout0 && shouldShowConfetti && isHovered, 
+    !isLayout0 && shouldShowConfetti && effectiveHovered, 
     !isLayout0 && shouldShowConfetti && allAccepted, 
     confettiCanvasRef, 
     cardRef, 
@@ -1705,9 +1798,11 @@ const SentCard1 = ({
         isOpen={isShareModalOpen}
         onClose={() => {
           setIsShareModalOpen(false)
-          setCapturedImage(null)
+          setCardPropsForShare(null)
+          setShouldPauseConfetti(false)
         }}
-        capturedImage={capturedImage}
+        cardProps={cardPropsForShare}
+        onPauseConfetti={() => setShouldPauseConfetti(true)}
       />
     </div>
   )
