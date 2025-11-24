@@ -511,6 +511,10 @@ const SentCard1 = ({
             flex: 1,
             minHeight: 0,
             overflow: 'visible',
+            // Apply offsetY for Single 1A and Single 2 (when showGiftBoxWhenHidden is true)
+            ...(showGiftBoxWhenHidden && envelopeOffsetY ? {
+              transform: `translateY(${envelopeOffsetY}px)`
+            } : {}),
             ...(isBatch2 ? {
               paddingTop: `${BATCH2_ENVELOPE_PADDING.top}px`,
               paddingRight: `${BATCH2_ENVELOPE_PADDING.right}px`,
@@ -551,7 +555,11 @@ const SentCard1 = ({
           bottom: '0px'
         }),
     zIndex: envelopeHighZ ? 50 : (overlayProgressOnEnvelope ? 2 : 2),
-    transform: hideEnvelope ? 'none' : `scale(${useGiftContainer && giftContainerScale !== undefined ? giftContainerScale : (progressOutsideEnvelope && envelopeScale2 !== undefined ? envelopeScale2 : envelopeScale)})`,
+    transform: hideEnvelope 
+      ? (showGiftBoxWhenHidden && envelopeOffsetY 
+          ? `translateY(${envelopeOffsetY}px) scale(${envelopeScale})` 
+          : 'none')
+      : `scale(${useGiftContainer && giftContainerScale !== undefined ? giftContainerScale : (progressOutsideEnvelope && envelopeScale2 !== undefined ? envelopeScale2 : envelopeScale)})`,
     transformOrigin: hideEnvelope ? 'center center' : (useGiftContainer && giftContainerTransformOrigin !== undefined ? giftContainerTransformOrigin : (progressOutsideEnvelope && transformOrigin2 !== undefined ? transformOrigin2 : 'center top'))
   }}, [hideEnvelope, showGiftBoxWhenHidden, useGiftContainer, giftContainerTop, giftContainerOffsetY, giftContainerLeft, giftContainerRight, giftContainerBottom, progressOutsideEnvelope, envelopeTopBase2, envelopeOffsetY2, envelopeOffsetY, envelopeLeft2, envelopeRight2, envelopeHighZ, overlayProgressOnEnvelope, giftContainerScale, envelopeScale2, envelopeScale, giftContainerTransformOrigin, transformOrigin2, BATCH2_ENVELOPE_PADDING, BATCH2_ENVELOPE_MARGIN])
 
