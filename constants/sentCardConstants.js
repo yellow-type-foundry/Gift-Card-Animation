@@ -266,10 +266,10 @@ export const LAYOUT_CONFIG = {
       height: 280, // minHeight when useFlex is true
       useFlex: true, // Fill available height
     },
-    // Envelope settings - scaled 1.1x and moved down 20px
+    // Envelope settings - scaled 1.1x and moved down 40px total
     envelope: {
       scale: 1.1, // 0.95 * 1.1 ≈ 1.045, but using 1.1 as requested
-      offsetY: 36, // 16 + 20 = 36
+      offsetY: 56, // 16 + 20 + 20 = 56
       left: undefined,
       right: undefined,
       top: undefined,
