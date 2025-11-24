@@ -702,8 +702,10 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
         
         // Only draw if particle has some opacity and is on-screen
         if (p.opacity > 0 && !isOffScreen) {
+          // Cache layer check result (optimization: avoid repeated property access)
+          const isFrontLayer = p.layer === 'front'
           // Choose the appropriate canvas context based on particle layer
-          const drawCtx = (p.layer === 'front' && ctxFront) ? ctxFront : ctx
+          const drawCtx = (isFrontLayer && ctxFront) ? ctxFront : ctx
           
           drawCtx.save()
           drawCtx.translate(p.x, p.y)
@@ -719,8 +721,8 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
           
           drawCtx.restore()
           
-          // Draw mirrored version if mirrored canvas exists
-          if (ctxMirrored && p.opacity > 0) {
+          // Draw mirrored version if mirrored canvas exists (optimization: opacity already checked above)
+          if (ctxMirrored) {
             // Calculate mirrored Y position (flip across mirrorY)
             const mirroredY = mirrorY + (mirrorY - p.y)
             
