@@ -6,6 +6,8 @@ import SentCard1 from '@/components/SentCard1'
 
 function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
   const [pauseConfetti, setPauseConfetti] = useState(false)
+  const [capturedImage, setCapturedImage] = useState(null)
+  const [isCapturing, setIsCapturing] = useState(false)
   
   useEffect(() => {
     if (isOpen) {
@@ -25,12 +27,39 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
       // Peak eruption happens during the eruption boost phase (0-63 frames, ~1.05 seconds)
       // We want to pause at the middle/peak of this phase
       const pauseTimeout = setTimeout(() => {
-        console.log('[ShareModal] 1000ms elapsed - setting pauseConfetti to true')
+        console.log('[ShareModal] 1400ms elapsed - setting pauseConfetti to true')
         setPauseConfetti(true)
         if (onPauseConfetti) {
           onPauseConfetti()
         }
-      }, 1400) // ~1000ms = ~60 frames at 60fps, which is peak eruption
+        
+        // Capture the card using server-side Puppeteer after a delay
+        setTimeout(async () => {
+          setIsCapturing(true)
+          try {
+            const response = await fetch('/api/capture-card', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(cardProps),
+            })
+            
+            if (response.ok) {
+              const blob = await response.blob()
+              const imageUrl = URL.createObjectURL(blob)
+              setCapturedImage(imageUrl)
+              console.log('[ShareModal] Card captured successfully')
+            } else {
+              console.error('[ShareModal] Failed to capture card:', await response.text())
+            }
+          } catch (error) {
+            console.error('[ShareModal] Error capturing card:', error)
+          } finally {
+            setIsCapturing(false)
+          }
+        }, 500) // Wait 500ms after pause to ensure card is fully rendered
+      }, 1400) // ~1400ms = peak eruption
       
       return () => {
         clearTimeout(pauseTimeout)
@@ -40,8 +69,10 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
     } else {
       document.body.style.overflow = ''
       setPauseConfetti(false)
+      setCapturedImage(null) // Reset captured image when modal closes
+      setIsCapturing(false)
     }
-  }, [isOpen, onPauseConfetti])
+  }, [isOpen, onPauseConfetti, onOpen, cardProps])
 
   if (!isOpen || !cardProps) return null
 
@@ -99,7 +130,7 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
           </svg>
         </button>
 
-        {/* Render actual card component - pixel perfect */}
+        {/* Render actual card component or captured image */}
         <div
           className="relative"
           style={{
@@ -112,13 +143,46 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
             overflow: 'hidden'
           }}
         >
-          <SentCard1
-            {...cardProps}
-            showFooterReminder={false}
-            showFooterProgress={false}
-            pauseConfetti={pauseConfetti}
-            forceHovered={true}
-          />
+          {capturedImage ? (
+            <img
+              src={capturedImage}
+              alt="Captured card"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain',
+                borderRadius: '12px'
+              }}
+            />
+          ) : (
+            <>
+              <SentCard1
+                {...cardProps}
+                showFooterReminder={false}
+                showFooterProgress={false}
+                pauseConfetti={pauseConfetti}
+                forceHovered={true}
+              />
+              {isCapturing && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    background: 'rgba(0, 0, 0, 0.7)',
+                    color: 'white',
+                    padding: '12px 24px',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    zIndex: 1000
+                  }}
+                >
+                  Capturing...
+                </div>
+              )}
+            </>
+          )}
         </div>
       </div>
 
