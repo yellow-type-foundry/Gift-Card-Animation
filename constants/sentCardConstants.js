@@ -266,22 +266,24 @@ export const LAYOUT_CONFIG = {
       height: 280, // minHeight when useFlex is true
       useFlex: true, // Fill available height
     },
-    // Envelope settings (exactly like Single 2)
+    // Envelope settings - scaled 1.1x and moved down 20px
     envelope: {
-      scale: 0.95,
-      offsetY: 16,
+      scale: 1.1, // 0.95 * 1.1 ≈ 1.045, but using 1.1 as requested
+      offsetY: 36, // 16 + 20 = 36
       left: undefined,
       right: undefined,
       top: undefined,
       transformOrigin: undefined,
     },
-    // Layout flags (exactly like Single 2)
+    // Layout flags
     hideUnion: true,
     confettiWhiteOverlay: true,
     envelopeHighZ: true,
     overlayProgressOnEnvelope: true,
     progressOutsideEnvelope: false,
     hideEnvelope: true, // Hide envelope and show gift box instead
+    enableConfetti: true, // Enable confetti for Single 1A
+    showRedline: true, // Show redline for Single 1A
   },
   
   // Single card layout 3 (SentCard4)

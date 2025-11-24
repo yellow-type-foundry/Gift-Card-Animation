@@ -353,6 +353,9 @@ export default function Home() {
       // Envelope settings
       envelopeScale: layoutConfig.envelope.scale,
       envelopeOffsetY: layoutConfig.envelope.offsetY,
+      // Single 1A specific flags
+      enableConfetti: layoutConfig.enableConfetti || false,
+      showRedline: layoutConfig.showRedline || false,
       // Header settings (for all layouts)
       headerHeight: layoutConfig.header.height,
       headerUseFlex: layoutConfig.header.useFlex,
