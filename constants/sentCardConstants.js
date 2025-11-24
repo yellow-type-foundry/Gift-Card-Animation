@@ -259,40 +259,29 @@ export const LAYOUT_CONFIG = {
     progressOutsideEnvelope: false,
   },
   
-  // Single card layout 1A (SentCard4) - Duplicate of Batch 1A (default1a)
+  // Single card layout 1A - Uses box from Single 2 (envelope with hideEnvelope=true)
   single1a: {
     // Header settings
     header: {
       height: 280, // minHeight when useFlex is true
-      useFlex: true, // Whether to use flex: 1 for fill height
+      useFlex: true, // Fill available height
     },
-    // Envelope settings (not used when useGiftContainer is true)
+    // Envelope settings (exactly like Single 2)
     envelope: {
-      scale: 1,
-      offsetY: 0,
-      left: undefined, // Uses default positioning
+      scale: 0.95,
+      offsetY: 16,
+      left: undefined,
       right: undefined,
       top: undefined,
       transformOrigin: undefined,
     },
-    // Gift container settings (exclusive to Single 1A)
-    giftContainer: {
-      scale: 1,
-      offsetY: 0,
-      width: 360,
-      height: 300,
-      top: 80, // Uses default positioning (inset-0)
-      left: undefined,
-      right: undefined,
-      bottom: undefined,
-      transformOrigin: 'center top',
-    },
-    // Layout flags
-    hideUnion: false,
-    confettiWhiteOverlay: false,
-    envelopeHighZ: false,
-    overlayProgressOnEnvelope: false,
+    // Layout flags (exactly like Single 2)
+    hideUnion: true,
+    confettiWhiteOverlay: true,
+    envelopeHighZ: true,
+    overlayProgressOnEnvelope: true,
     progressOutsideEnvelope: false,
+    hideEnvelope: true, // Hide envelope and show gift box instead
   },
   
   // Single card layout 3 (SentCard4)
