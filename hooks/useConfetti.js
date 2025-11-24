@@ -596,6 +596,9 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
       }
     }
     
+    // Cache constants for better performance
+    const TWO_PI = Math.PI * 2
+    
     const draw = () => {
       frameCount++
       
@@ -608,7 +611,9 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
       if (activeParticleCount < targetParticleCount) {
         // Calculate spawn rate that accelerates from initial to max
         const progress = Math.min(1, frameCount / accelerationFrames)
-        const easeOutProgress = 1 - Math.pow(1 - progress, 2) // Ease-out quadratic for smooth acceleration
+        // Optimized: cache (1 - progress) to avoid recalculating
+        const oneMinusProgress = 1 - progress
+        const easeOutProgress = 1 - oneMinusProgress * oneMinusProgress // Ease-out quadratic for smooth acceleration
         const currentSpawnRate = initialSpawnRate + (maxSpawnRate - initialSpawnRate) * easeOutProgress
         
         // Spawn new particles based on current rate
@@ -645,7 +650,9 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
           p.fadeInProgress++
           // Smooth fade-in using ease-out curve
           const progress = p.fadeInProgress / p.fadeInDuration
-          p.opacity = 1 - Math.pow(1 - progress, 3) // Ease-out cubic
+          // Optimized: cache (1 - progress) to avoid recalculating
+          const oneMinusProgress = 1 - progress
+          p.opacity = 1 - oneMinusProgress * oneMinusProgress * oneMinusProgress // Ease-out cubic
         } else {
           p.opacity = 1
         }
@@ -698,9 +705,9 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
           drawCtx.globalAlpha = p.opacity
           drawCtx.fillStyle = p.color
           
-          // Draw circular dot
+          // Draw circular dot (optimized: use cached TWO_PI constant)
           drawCtx.beginPath()
-          drawCtx.arc(0, 0, p.size / 2, 0, Math.PI * 2)
+          drawCtx.arc(0, 0, p.size / 2, 0, TWO_PI)
           drawCtx.closePath()
           drawCtx.fill()
           
@@ -717,10 +724,10 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
             ctxMirrored.globalAlpha = p.opacity * 1.0 // Full opacity for brighter effect (was 0.6)
             ctxMirrored.fillStyle = p.color
             
-            // Draw circular dot - 1.5x bigger for mirrored particles
+            // Draw circular dot - 1.5x bigger for mirrored particles (optimized: use cached TWO_PI constant)
             const mirroredSize = p.size * 1.5
             ctxMirrored.beginPath()
-            ctxMirrored.arc(0, 0, mirroredSize / 2, 0, Math.PI * 2)
+            ctxMirrored.arc(0, 0, mirroredSize / 2, 0, TWO_PI)
             ctxMirrored.closePath()
             ctxMirrored.fill()
             
