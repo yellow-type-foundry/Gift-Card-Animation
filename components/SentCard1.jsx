@@ -128,6 +128,11 @@ const SentCard1 = ({
   const confettiCanvasRef = useRef(null)
   const confettiCanvasFrontRef = useRef(null)
   const confettiCanvasMirroredRef = useRef(null)
+  // LAYOUT 0: Multiple canvas layers for varied blur (0.5px to 8px)
+  const confettiCanvasBlur1Ref = useRef(null) // 0.5-2px blur
+  const confettiCanvasBlur2Ref = useRef(null) // 2-4px blur
+  const confettiCanvasBlur3Ref = useRef(null) // 4-6px blur
+  const confettiCanvasBlur4Ref = useRef(null) // 6-8px blur
   const { isHovered, handleHoverEnter, handleHoverLeave } = useHover()
   
   // Generate stable IDs for SVG elements
@@ -387,7 +392,9 @@ const SentCard1 = ({
   
   // Confetti animation - disabled for Batch 2 and Single 2, but can be enabled via prop (for Single 0)
   const shouldShowConfetti = enableConfetti || !hideEnvelope
-  useConfetti(shouldShowConfetti && isHovered, shouldShowConfetti && allAccepted, confettiCanvasRef, cardRef, confettiCanvasFrontRef, confettiCanvasMirroredRef)
+  // LAYOUT 0: Pass blur canvas refs array for varied blur effect
+  const blurCanvasRefs = isLayout0 ? [confettiCanvasBlur1Ref, confettiCanvasBlur2Ref, confettiCanvasBlur3Ref, confettiCanvasBlur4Ref] : null
+  useConfetti(shouldShowConfetti && isHovered, shouldShowConfetti && allAccepted, confettiCanvasRef, cardRef, confettiCanvasFrontRef, confettiCanvasMirroredRef, blurCanvasRefs)
 
   // Memoized style objects
   // Note: When 3D is active, we don't apply tilt to the card container itself
@@ -418,10 +425,16 @@ const SentCard1 = ({
     zIndex: 0
   }), [])
 
-  // LAYOUT 0: Use Layout 0 specific blur values (completely separate from Layout 1)
+  // LAYOUT 0: Use Layout 0 specific blur values with variation (completely separate from Layout 1)
   // LAYOUT 1: Use original blur values
-  const CONFETTI_BLUR = isLayout0 ? 'blur(1.25px)' : 'blur(1.25px)' // Same for both
-  const CONFETTI_BACK_BLUR = isLayout0 ? 'blur(18px)' : 'blur(4px)' // Layout 0: 18px, Layout 1: 4px
+  // LAYOUT 0: Varied blur layers (1px to 24px) - replaces old front/back system
+  const CONFETTI_BLUR_1 = isLayout0 ? 'blur(1px)' : null // 1px blur
+  const CONFETTI_BLUR_2 = isLayout0 ? 'blur(3px)' : null // 3px blur
+  const CONFETTI_BLUR_3 = isLayout0 ? 'blur(7px)' : null // 8px blur
+  const CONFETTI_BLUR_4 = isLayout0 ? 'blur(10px)' : null // 24px blur
+  // LAYOUT 1: Original front/back blur values (only used for Layout 1)
+  const CONFETTI_BLUR = isLayout0 ? null : 'blur(1.25px)' // Layout 1 only
+  const CONFETTI_BACK_BLUR = isLayout0 ? null : 'blur(4px)' // Layout 1 only
   // Separate blur for mirrored confetti
   const CONFETTI_MIRRORED_BLUR = 'blur(6px)' // Same for both
   
@@ -632,24 +645,58 @@ const SentCard1 = ({
       {/* Full card confetti canvas for Single 0 (enableConfetti) - at card level to avoid overflow clipping */}
       {enableConfetti && hideEnvelope && showGiftBoxWhenHidden && (
         <>
-          {/* Back layer - behind envelope/gift container */}
-          <canvas
-            ref={confettiCanvasRef}
-            className="absolute inset-0 pointer-events-none"
-            style={{ zIndex: 1, filter: CONFETTI_BACK_BLUR, position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
-          />
-          {/* Front layer - in front of envelope/gift container */}
-          <canvas
-            ref={confettiCanvasFrontRef}
-            className="absolute inset-0 pointer-events-none"
-            style={{ zIndex: 5, filter: CONFETTI_BLUR, position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
-          />
-          {/* Mirrored layer - vertically mirrored confetti */}
-          <canvas
-            ref={confettiCanvasMirroredRef}
-            className="absolute inset-0 pointer-events-none"
-            style={{ zIndex: 1, filter: CONFETTI_MIRRORED_BLUR, position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
-          />
+          {/* LAYOUT 0: Multiple blur layers for varied blur (1px to 24px) - replaces old front/back system */}
+          {isLayout0 && CONFETTI_BLUR_1 ? (
+            <>
+              <canvas
+                ref={confettiCanvasBlur1Ref}
+                className="absolute inset-0 pointer-events-none"
+                style={{ zIndex: 3, filter: CONFETTI_BLUR_1, position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+              />
+              <canvas
+                ref={confettiCanvasBlur2Ref}
+                className="absolute inset-0 pointer-events-none"
+                style={{ zIndex: 3, filter: CONFETTI_BLUR_2, position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+              />
+              <canvas
+                ref={confettiCanvasBlur3Ref}
+                className="absolute inset-0 pointer-events-none"
+                style={{ zIndex: 3, filter: CONFETTI_BLUR_3, position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+              />
+              <canvas
+                ref={confettiCanvasBlur4Ref}
+                className="absolute inset-0 pointer-events-none"
+                style={{ zIndex: 3, filter: CONFETTI_BLUR_4, position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+              />
+              {/* Mirrored layer - vertically mirrored confetti */}
+              <canvas
+                ref={confettiCanvasMirroredRef}
+                className="absolute inset-0 pointer-events-none"
+                style={{ zIndex: 1, filter: CONFETTI_MIRRORED_BLUR, position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+              />
+            </>
+          ) : (
+            <>
+              {/* Layout 1: Back layer - behind envelope/gift container */}
+              <canvas
+                ref={confettiCanvasRef}
+                className="absolute inset-0 pointer-events-none"
+                style={{ zIndex: 1, filter: CONFETTI_BACK_BLUR, position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+              />
+              {/* Layout 1: Front layer - in front of envelope/gift container */}
+              <canvas
+                ref={confettiCanvasFrontRef}
+                className="absolute inset-0 pointer-events-none"
+                style={{ zIndex: 5, filter: CONFETTI_BLUR, position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+              />
+              {/* Mirrored layer - vertically mirrored confetti */}
+              <canvas
+                ref={confettiCanvasMirroredRef}
+                className="absolute inset-0 pointer-events-none"
+                style={{ zIndex: 1, filter: CONFETTI_MIRRORED_BLUR, position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+              />
+            </>
+          )}
         </>
       )}
       <div 

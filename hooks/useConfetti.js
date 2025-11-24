@@ -11,12 +11,15 @@ import { CONFETTI_CONFIG, CONFETTI_CONFIG_LAYOUT_0 } from '@/constants/sentCardC
  * @param {React.RefObject} confettiCanvasFrontRef - Optional ref to front canvas element
  * @param {React.RefObject} confettiCanvasMirroredRef - Optional ref to vertically mirrored canvas element
  */
-export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, cardRef, confettiCanvasFrontRef = null, confettiCanvasMirroredRef = null) {
+export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, cardRef, confettiCanvasFrontRef = null, confettiCanvasMirroredRef = null, blurCanvasRefs = null) {
   useEffect(() => {
     if (!isHovered || !allAccepted) return
     const canvas = confettiCanvasRef.current
     const canvasFront = confettiCanvasFrontRef?.current
     const canvasMirrored = confettiCanvasMirroredRef?.current
+    // LAYOUT 0: Multiple blur canvas layers for varied blur
+    const blurCanvases = blurCanvasRefs?.map(ref => ref?.current).filter(Boolean) || []
+    const blurContexts = blurCanvases.map(c => c?.getContext('2d')).filter(Boolean)
     const cardEl = cardRef.current
     if (!canvas || !cardEl) return
     
@@ -174,6 +177,16 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
         canvasFront.style.width = `${cardRect.width}px`
         canvasFront.style.height = `${cardRect.height}px`
       }
+      
+      // LAYOUT 0: Set blur canvas sizes for varied blur layers
+      blurCanvases.forEach(blurCanvas => {
+        if (blurCanvas) {
+          blurCanvas.width = Math.max(1, Math.floor(cardWidth))
+          blurCanvas.height = Math.max(1, Math.floor(cardHeight))
+          blurCanvas.style.width = `${cardRect.width}px`
+          blurCanvas.style.height = `${cardRect.height}px`
+        }
+      })
       
       // Set mirrored canvas size if it exists
       if (canvasMirrored) {
@@ -377,13 +390,14 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
         size: particleSize,
         color: colors[(Math.random() * colors.length) | 0],
         shape: 'circle', // Circular dot shape
-        // LAYOUT 0 ONLY: Position-based layer assignment (behind/in front of box)
-        // LAYOUT 1: Random layer assignment (original behavior)
+        // Layer assignment: Random for both Layout 0 and Layout 1 (same as Layout 1)
         layer: canvasFront 
-          ? (cardBounds.isLayout0 && cardBounds.giftBox && CONFETTI_CONFIG_LAYOUT_0.layer.usePositionBased
-              ? (spawnY < cardBounds.giftBox.top ? 'back' : 'front') // Behind box = back, in front = front (Layout 0 only)
-              : (Math.random() < 0.5 ? 'front' : 'back')) // Random for Layout 1 and other layouts
+          ? (Math.random() < 0.5 ? 'front' : 'back') // Random 50/50 for both Layout 0 and Layout 1
           : 'back',
+        // LAYOUT 0 ONLY: Assign blur level (0-3) for varied blur (0.5px to 8px)
+        blurLevel: (cardBounds.isLayout0 && blurContexts.length > 0) 
+          ? Math.floor(Math.random() * blurContexts.length) // Random blur level 0-3
+          : null, // No blur level for Layout 1
         // Fade-in properties
         opacity: 0,
         fadeInProgress: 0,
@@ -752,6 +766,12 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
       if (ctxMirrored) {
         ctxMirrored.clearRect(0, 0, canvasMirrored.width, canvasMirrored.height)
       }
+      // LAYOUT 0: Clear blur canvas layers
+      blurContexts.forEach(blurCtx => {
+        if (blurCtx && blurCtx.canvas) {
+          blurCtx.clearRect(0, 0, blurCtx.canvas.width, blurCtx.canvas.height)
+        }
+      })
       
       // LAYOUT 0 ONLY: Debug visualization for gift box bounds (dev only)
       if (cardBounds.isLayout0 && cardBounds.giftBox && CONFETTI_CONFIG_LAYOUT_0.debug.showBounds && process.env.NODE_ENV === 'development') {
@@ -846,24 +866,32 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
         
         // Only draw if particle has some opacity and is on-screen
         if (p.opacity > 0 && !isOffScreen) {
-          // Cache layer check result (optimization: avoid repeated property access)
-          const isFrontLayer = p.layer === 'front'
-          // Choose the appropriate canvas context based on particle layer
-          const drawCtx = (isFrontLayer && ctxFront) ? ctxFront : ctx
+          // LAYOUT 0: Use blur canvas layers for varied blur, otherwise use standard front/back
+          let drawCtx = null
+          if (cardBounds.isLayout0 && p.blurLevel !== null && blurContexts[p.blurLevel]) {
+            // Layout 0: Draw to blur canvas layer based on blurLevel
+            drawCtx = blurContexts[p.blurLevel]
+          } else {
+            // Layout 1 or no blur level: Use standard front/back layers
+            const isFrontLayer = p.layer === 'front'
+            drawCtx = (isFrontLayer && ctxFront) ? ctxFront : ctx
+          }
           
-          drawCtx.save()
-          drawCtx.translate(p.x, p.y)
-          drawCtx.rotate(p.rot)
-          drawCtx.globalAlpha = p.opacity
-          drawCtx.fillStyle = p.color
-          
-          // Draw circular dot (optimized: use cached TWO_PI constant and halfSize)
-          drawCtx.beginPath()
-          drawCtx.arc(0, 0, halfSize, 0, TWO_PI)
-          drawCtx.closePath()
-          drawCtx.fill()
-          
-          drawCtx.restore()
+          if (drawCtx) {
+            drawCtx.save()
+            drawCtx.translate(p.x, p.y)
+            drawCtx.rotate(p.rot)
+            drawCtx.globalAlpha = p.opacity
+            drawCtx.fillStyle = p.color
+            
+            // Draw circular dot (optimized: use cached TWO_PI constant and halfSize)
+            drawCtx.beginPath()
+            drawCtx.arc(0, 0, halfSize, 0, TWO_PI)
+            drawCtx.closePath()
+            drawCtx.fill()
+            
+            drawCtx.restore()
+          }
           
           // Draw mirrored version if mirrored canvas exists (optimization: opacity already checked above)
           if (ctxMirrored) {
