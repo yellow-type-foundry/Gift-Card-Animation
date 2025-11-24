@@ -6,7 +6,8 @@ import { TOKENS } from '@/constants/tokens'
 import useDominantColor from '@/hooks/useDominantColor'
 import useCardTheme from '@/hooks/useCardTheme'
 import useProgressAnimation from '@/hooks/useProgressAnimation'
-import useConfetti from '@/hooks/useConfetti'
+import useConfettiLayout1 from '@/hooks/useConfettiLayout1'
+import useConfettiLayout0 from '@/hooks/useConfettiLayout0'
 import useComponentIds from '@/hooks/useComponentIds'
 import { capSaturation, adjustToLuminance, hexToHsl, hslToHex } from '@/utils/colors'
 import useHover from '@/hooks/useHover'
@@ -394,7 +395,27 @@ const SentCard1 = ({
   const shouldShowConfetti = enableConfetti || !hideEnvelope
   // LAYOUT 0: Pass blur canvas refs array for varied blur effect
   const blurCanvasRefs = isLayout0 ? [confettiCanvasBlur1Ref, confettiCanvasBlur2Ref, confettiCanvasBlur3Ref, confettiCanvasBlur4Ref] : null
-  useConfetti(shouldShowConfetti && isHovered, shouldShowConfetti && allAccepted, confettiCanvasRef, cardRef, confettiCanvasFrontRef, confettiCanvasMirroredRef, blurCanvasRefs)
+  
+  // COMPLETELY SEPARATE: Layout 0 and Layout 1 use different hooks
+  // Layout 0: Uses separate hook with all Layout 0 features (gift box collision, blur layers, etc.)
+  useConfettiLayout0(
+    isLayout0 && shouldShowConfetti && isHovered, 
+    isLayout0 && shouldShowConfetti && allAccepted, 
+    confettiCanvasRef, 
+    cardRef, 
+    confettiCanvasFrontRef, 
+    confettiCanvasMirroredRef, 
+    blurCanvasRefs
+  )
+  // Layout 1: Uses original, untouched hook (no Layout 0 features)
+  useConfettiLayout1(
+    !isLayout0 && shouldShowConfetti && isHovered, 
+    !isLayout0 && shouldShowConfetti && allAccepted, 
+    confettiCanvasRef, 
+    cardRef, 
+    confettiCanvasFrontRef, 
+    confettiCanvasMirroredRef
+  )
 
   // Memoized style objects
   // Note: When 3D is active, we don't apply tilt to the card container itself
