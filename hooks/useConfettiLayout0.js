@@ -516,8 +516,8 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
     }
     let activeParticleCount = 0
     let frameCount = 0
-    const slowMotionStartTime = 1000 // Start slow motion after 1400ms
-    const slowMotionFactor = 0.075 // Slow down to 15% of normal speed (very slow, floating effect)
+    const slowMotionStartTime = 1300 // Start slow motion after 1400ms
+    const slowMotionFactor = 0.095 // Slow down to 15% of normal speed (very slow, floating effect)
     let animationStartTime = null // Track when animation started
     
     // Spawn rate starts slow and accelerates - creates eruption effect
