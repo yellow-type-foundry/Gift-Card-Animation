@@ -516,6 +516,9 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
     }
     let activeParticleCount = 0
     let frameCount = 0
+    const slowMotionStartTime = 1000 // Start slow motion after 1400ms
+    const slowMotionFactor = 0.075 // Slow down to 15% of normal speed (very slow, floating effect)
+    let animationStartTime = null // Track when animation started
     
     // Spawn rate starts slow and accelerates - creates eruption effect
     const initialSpawnRate = 0.25 // 12% chance per frame initially (faster start for eruption)
@@ -866,11 +869,20 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
         return // Don't continue animation loop - particles are frozen
       }
       
+      // Track animation start time on first frame
+      if (animationStartTime === null) {
+        animationStartTime = performance.now()
+      }
+      
       frameCount++
+      
+      // Calculate elapsed time in milliseconds and check if slow motion should be active
+      const elapsedTime = performance.now() - animationStartTime
+      const isSlowMotion = elapsedTime >= slowMotionStartTime
       
       // Debug log every 30 frames
       if (frameCount % 30 === 0) {
-        console.log('[Confetti Layout0] Frame:', frameCount, 'Active particles:', activeParticleCount, 'Paused:', pauseRef.current)
+        console.log('[Confetti Layout0] Frame:', frameCount, 'Active particles:', activeParticleCount, 'Paused:', pauseRef.current, 'Slow motion:', isSlowMotion, 'Elapsed:', elapsedTime.toFixed(0) + 'ms')
       }
       
       // Update card bounds periodically in case of resize (every 60 frames ~1 second at 60fps)
@@ -962,9 +974,19 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
           p.opacity = 1
         }
         
+        // Apply slow-motion effect after 1400ms - particles float in space
+        let currentSlowMotionFactor = 1.0
+        if (isSlowMotion) {
+          currentSlowMotionFactor = slowMotionFactor
+        }
+        
         // Apply air resistance (confetti slows down naturally)
-        p.vx *= p.airResistance
-        p.vy *= p.airResistance
+        // In slow motion, air resistance is less effective (particles maintain momentum longer)
+        const effectiveAirResistance = isSlowMotion ? 
+          (1 - (1 - p.airResistance) * slowMotionFactor) : // Scale air resistance effect
+          p.airResistance
+        p.vx *= effectiveAirResistance
+        p.vy *= effectiveAirResistance
         
         // LAYOUT 0: Floating behavior after eruption - especially for high blur particles
         const framesSinceSpawn = frameCount - p.spawnFrame
@@ -974,21 +996,23 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
           // Floating particles: reduce gravity significantly and add slight upward drift
           // Higher blur particles (blurLevel 3) float more
           const blurFloatMultiplier = p.blurLevel !== null ? (0.1 + (p.blurLevel / 3) * 0.15) : 0.1 // 0.1 for blurLevel 0, up to 0.25 for blurLevel 3
-          const floatGravity = p.ay * blurFloatMultiplier // Much reduced gravity
+          const floatGravity = p.ay * blurFloatMultiplier * currentSlowMotionFactor // Apply slow motion to gravity
           p.vy += floatGravity
           
           // Add slight upward drift for more floaty effect (especially high blur)
           if (p.blurLevel !== null && p.blurLevel >= 2) {
-            const upwardDrift = (0.02 + (p.blurLevel - 2) * 0.03) * dpr // 0.02 for blurLevel 2, 0.05 for blurLevel 3
+            const upwardDrift = (0.02 + (p.blurLevel - 2) * 0.03) * dpr * currentSlowMotionFactor // Apply slow motion
             p.vy -= upwardDrift * (0.5 + Math.random() * 0.5) // Random variation
           }
           
           // Reduce air resistance for floating particles (they maintain momentum longer)
-          p.vx *= 0.995 // Slightly less air resistance
-          p.vy *= 0.995
+          const floatAirResistance = isSlowMotion ? 0.998 : 0.995 // Even less air resistance in slow motion
+          p.vx *= floatAirResistance
+          p.vy *= floatAirResistance
         } else {
           // Normal gravity for non-floating particles or during eruption
-          p.vy += p.ay
+          // Apply slow motion to gravity
+          p.vy += p.ay * currentSlowMotionFactor
         }
         
         // Apply gyroscope/tilt forces on mobile devices
@@ -997,19 +1021,19 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
         if (isMobile && orientationListenerAdded && frameCount >= confettiSettleFrames) {
           // Only apply horizontal tilt (left-right), not vertical tilt
           // Gamma (left-to-right): positive = tilted right, particles should move right (positive X)
-          const tiltForceX = (deviceTilt.gamma / 45) * gyroscopeForceMultiplier * dpr
+          const tiltForceX = (deviceTilt.gamma / 45) * gyroscopeForceMultiplier * dpr * currentSlowMotionFactor // Apply slow motion
           
           // Apply only horizontal tilt force to velocity (only if listener is active and settled)
           p.vx += tiltForceX
           // No vertical tilt - particles maintain their natural vertical movement
         }
         
-        // Update position
-        p.x += p.vx
-        p.y += p.vy
+        // Update position - apply slow motion to movement
+        p.x += p.vx * currentSlowMotionFactor
+        p.y += p.vy * currentSlowMotionFactor
         
-        // Update rotation (more tumbling)
-        p.rot += p.vr
+        // Update rotation (more tumbling) - apply slow motion to rotation
+        p.rot += p.vr * currentSlowMotionFactor
         
         // LAYOUT 0: Update layer based on position relative to box (dynamic layer assignment)
         if (cardBounds.giftBox && canvasFront && CONFETTI_CONFIG_LAYOUT_0.layer.usePositionBased) {
