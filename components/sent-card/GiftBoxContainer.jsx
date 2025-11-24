@@ -139,6 +139,31 @@ const GiftBoxContainer = ({
   // Calculate hover and shadow colors using reusable hook
   const { hoverColor: hoverBoxColor, shadowColor: themedShadowColor } = useHoverColor(boxColor, isHovered)
   
+  // Layout 0: Create dark themed color for inner shadow (50% darker)
+  const darkThemedColor = useMemo(() => {
+    // Detect Layout 0: if custom box props are provided, it's Layout 0
+    const isLayout0 = boxWidth !== undefined || boxHeight !== undefined || boxBorderRadius !== undefined
+    if (!isLayout0) return null
+    
+    const [h, s, l] = hexToHsl(boxColor)
+    const darkerL = Math.max(0, l - 50) // Darken by 50%
+    return hslToHex(h, s, darkerL)
+  }, [boxColor, boxWidth, boxHeight, boxBorderRadius])
+  
+  // Layout 0: Inner shadow style (only for Layout 0)
+  const innerShadowStyle = useMemo(() => {
+    if (!darkThemedColor) return {}
+    
+    // Convert hex to rgba with 50% opacity
+    const r = parseInt(darkThemedColor.slice(1, 3), 16)
+    const g = parseInt(darkThemedColor.slice(3, 5), 16)
+    const b = parseInt(darkThemedColor.slice(5, 7), 16)
+    
+    return {
+      boxShadow: `inset 0 0 18px rgba(${r}, ${g}, ${b}, 0.15)`
+    }
+  }, [darkThemedColor])
+  
   // Create gradient for Single 2 box: brand color to brand color -15 luminance (top to bottom)
   // Use hoverBoxColor when hovered to maintain hover effects
   const boxGradient = useMemo(() => {
@@ -428,7 +453,8 @@ const GiftBoxContainer = ({
             style={{ 
               borderRadius: boxTokens.borderRadius,
               background: boxGradient,
-              transition: `background ${GIFT_BOX_TOKENS.animations.duration.fast} ${GIFT_BOX_TOKENS.animations.easing.easeOut}`
+              transition: `background ${GIFT_BOX_TOKENS.animations.duration.fast} ${GIFT_BOX_TOKENS.animations.easing.easeOut}`,
+              ...innerShadowStyle // Layout 0 inner shadow - applied to background layer with gradient
             }}
           />
           <div 
