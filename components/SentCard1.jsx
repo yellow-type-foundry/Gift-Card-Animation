@@ -381,6 +381,10 @@ const SentCard1 = ({
   
   const allAccepted = isDone
   
+  // LAYOUT 0 DETECTION: Check if this is Layout 0 (has Box element and specific props)
+  // Must be defined before cardContainerStyle useMemo
+  const isLayout0 = hideEnvelope && showGiftBoxWhenHidden && hideProgressBarInBox
+  
   // Confetti animation - disabled for Batch 2 and Single 2, but can be enabled via prop (for Single 0)
   const shouldShowConfetti = enableConfetti || !hideEnvelope
   useConfetti(shouldShowConfetti && isHovered, shouldShowConfetti && allAccepted, confettiCanvasRef, cardRef, confettiCanvasFrontRef, confettiCanvasMirroredRef)
@@ -414,12 +418,12 @@ const SentCard1 = ({
     zIndex: 0
   }), [])
 
-  // Unified confetti blur value
-  const CONFETTI_BLUR = 'blur(1.25px)'
-  // Blur for back layer (behind envelope/gift container) - increased by 3px
-  const CONFETTI_BACK_BLUR = 'blur(4px)' // 2px + 3px = 5px
+  // LAYOUT 0: Use Layout 0 specific blur values (completely separate from Layout 1)
+  // LAYOUT 1: Use original blur values
+  const CONFETTI_BLUR = isLayout0 ? 'blur(1.25px)' : 'blur(1.25px)' // Same for both
+  const CONFETTI_BACK_BLUR = isLayout0 ? 'blur(18px)' : 'blur(4px)' // Layout 0: 18px, Layout 1: 4px
   // Separate blur for mirrored confetti
-  const CONFETTI_MIRRORED_BLUR = 'blur(6px)'
+  const CONFETTI_MIRRORED_BLUR = 'blur(6px)' // Same for both
   
   const confettiCanvasStyle = useMemo(() => ({
     zIndex: 1,
@@ -561,14 +565,16 @@ const SentCard1 = ({
         }),
     zIndex: envelopeHighZ ? 50 : (overlayProgressOnEnvelope ? 2 : 2),
     transform: hideEnvelope 
-      ? (showGiftBoxWhenHidden && envelopeOffsetY !== undefined && envelopeOffsetY !== 0
+      ? (isLayout0
+          ? `translateY(12px) scale(${envelopeScale})` // LAYOUT 0: Combine translateY and scale
+          : (showGiftBoxWhenHidden && envelopeOffsetY !== undefined && envelopeOffsetY !== 0
           ? `scale(${envelopeScale})` 
           : showGiftBoxWhenHidden && envelopeScale !== undefined && envelopeScale !== 1
           ? `scale(${envelopeScale})`
-          : 'none')
+          : 'none'))
       : `scale(${useGiftContainer && giftContainerScale !== undefined ? giftContainerScale : (progressOutsideEnvelope && envelopeScale2 !== undefined ? envelopeScale2 : envelopeScale)})`,
     transformOrigin: hideEnvelope ? 'center center' : (useGiftContainer && giftContainerTransformOrigin !== undefined ? giftContainerTransformOrigin : (progressOutsideEnvelope && transformOrigin2 !== undefined ? transformOrigin2 : 'center top'))
-  }}, [hideEnvelope, showGiftBoxWhenHidden, useGiftContainer, giftContainerTop, giftContainerOffsetY, giftContainerLeft, giftContainerRight, giftContainerBottom, progressOutsideEnvelope, envelopeTopBase2, envelopeOffsetY2, envelopeOffsetY, envelopeLeft2, envelopeRight2, envelopeHighZ, overlayProgressOnEnvelope, giftContainerScale, envelopeScale2, envelopeScale, giftContainerTransformOrigin, transformOrigin2, BATCH2_ENVELOPE_PADDING, BATCH2_ENVELOPE_MARGIN])
+  }}, [hideEnvelope, showGiftBoxWhenHidden, useGiftContainer, giftContainerTop, giftContainerOffsetY, giftContainerLeft, giftContainerRight, giftContainerBottom, progressOutsideEnvelope, envelopeTopBase2, envelopeOffsetY2, envelopeOffsetY, envelopeLeft2, envelopeRight2, envelopeHighZ, overlayProgressOnEnvelope, giftContainerScale, envelopeScale2, envelopeScale, giftContainerTransformOrigin, transformOrigin2, BATCH2_ENVELOPE_PADDING, BATCH2_ENVELOPE_MARGIN, isLayout0])
 
   const giftContainerWrapperStyle = useMemo(() => ({
     position: 'relative',

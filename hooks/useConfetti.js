@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { CONFETTI_CONFIG } from '@/constants/sentCardConstants'
+import { CONFETTI_CONFIG, CONFETTI_CONFIG_LAYOUT_0 } from '@/constants/sentCardConstants'
 
 /**
  * Custom hook for confetti animation on canvas
@@ -26,12 +26,16 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
     // Single 0 doesn't have third floor, so exclude it
     const thirdFloorEl = thirdFloorElSingle1 || thirdFloorElBatch1
     
+    // LAYOUT 0 DETECTION: Check for Box element (specific to Layout 0)
+    // Layout 0 has [data-name="Box"] element, Layout 1 does not
+    const giftBoxEl = cardEl.querySelector('[data-name="Box"]')
+    const isLayout0 = !!giftBoxEl // Layout 0 detection: presence of Box element
+    
     // Find envelope/box element for collision detection
     // For Single 1 (Gift Container) and Single 0 (GiftBoxContainer), we don't want collision detection as it blocks particles
     // Only use collision for actual envelopes/boxes (Batch 2, Single 2)
-    // Single 0 doesn't have third floor, so check for GiftBoxContainer instead
     const giftBoxContainerEl = cardEl.querySelector('[data-name="Gift Container/Goody"]')
-    const envelopeEl = giftBoxContainerEl ? null : cardEl.querySelector('[data-name="Envelope"]')
+    const envelopeEl = (giftBoxEl || giftBoxContainerEl) ? null : cardEl.querySelector('[data-name="Envelope"]')
     
     // Find Union shape element - use its top as the confetti floor
     const unionEl = cardEl.querySelector('[data-name="Union"]')
@@ -195,6 +199,33 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
         }
       }
       
+      // LAYOUT 0 ONLY: Get box illustration bounds (completely separate from Layout 1)
+      // Query for gift box element inside updateCardBounds to ensure we get current element
+      const currentGiftBoxEl = cardEl.querySelector('[data-name="Box"]')
+      const currentIsLayout0 = !!currentGiftBoxEl
+      let giftBoxBounds = null
+      if (currentIsLayout0 && currentGiftBoxEl) {
+        const giftBoxRect = currentGiftBoxEl.getBoundingClientRect()
+        const giftBoxOffsetX = (giftBoxRect.left - canvasRect.left) * dpr
+        const giftBoxOffsetY = (giftBoxRect.top - canvasRect.top) * dpr
+        giftBoxBounds = {
+          left: giftBoxOffsetX,
+          top: giftBoxOffsetY,
+          right: giftBoxOffsetX + (giftBoxRect.width * dpr),
+          bottom: giftBoxOffsetY + (giftBoxRect.height * dpr),
+          width: giftBoxRect.width * dpr,
+          height: giftBoxRect.height * dpr
+        }
+        // Debug: log box bounds once (dev only)
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Layout 0 GiftBox bounds:', {
+            screen: { width: giftBoxRect.width, height: giftBoxRect.height, left: giftBoxRect.left, top: giftBoxRect.top },
+            canvas: { width: giftBoxBounds.width / dpr, height: giftBoxBounds.height / dpr, left: giftBoxBounds.left / dpr, top: giftBoxBounds.top / dpr },
+            expected: { width: 176 * 1.125, height: 176 * 1.125 } // 198px x 198px for Layout 0
+          })
+        }
+      }
+      
       // Get Union shape bounds if it exists - use its top as the confetti floor
       // Also calculate cutout area where particles can fall into
       let unionTop = null
@@ -253,6 +284,8 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
         maxY: cardHeight - cardOffsetY,
         // Envelope/box bounds for collision detection
         envelope: envelopeBounds,
+        giftBox: giftBoxBounds, // Layout 0 only
+        isLayout0: currentIsLayout0, // Layout 0 detection flag
         // Union shape top position (confetti floor)
         unionTop: unionTop,
         // Union cutout area where particles can fall into
@@ -330,11 +363,12 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
         y: spawnY,
         // More natural velocity - varied angles and speeds
         vx: (Math.random() * 2 - 1) * horizontalSpread * dpr + Math.sin(angleVariation) * particleSpeed * dpr * 0.3,
-        // Increase upward velocity for Single 0 only to ensure particles can reach the top of the card
-        // Layout 1 (Single 1) should not be affected
-        vy: -particleSpeed * dpr * Math.cos(angleVariation) * (isSingle0 ? 1.5 : 1.0), // 50% boost only for Single 0
-        // Air resistance factor (confetti slows down over time) - reduced for heavier particles
-        airResistance: 0.98 + Math.random() * 0.01, // 0.98-0.99 (less velocity decay for heavier feel)
+        // LAYOUT 0 ONLY: Velocity boost (Layout 1 uses normal velocity)
+        vy: -particleSpeed * dpr * Math.cos(angleVariation) * (cardBounds.isLayout0 ? CONFETTI_CONFIG_LAYOUT_0.velocity.boostMultiplier : 1.0),
+        // Air resistance factor (confetti slows down over time) - increased for Layout 0 to preserve momentum better
+        airResistance: cardBounds.isLayout0 
+          ? 0.985 + Math.random() * 0.01 // 0.985-0.995 for Layout 0 (better momentum preservation)
+          : 0.98 + Math.random() * 0.01, // 0.98-0.99 for Layout 1 (original)
         // Increased gravity for heavier particles
         ay: gravity * dpr * 0.7, // Increased from 0.4 to 0.7 for heavier weight (was reduced by 60%, now only 30%)
         rot: Math.random() * rotation.initial,
@@ -343,8 +377,13 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
         size: particleSize,
         color: colors[(Math.random() * colors.length) | 0],
         shape: 'circle', // Circular dot shape
-        // Randomly assign to front or back layer for depth effect
-        layer: canvasFront && Math.random() < 0.5 ? 'front' : 'back',
+        // LAYOUT 0 ONLY: Position-based layer assignment (behind/in front of box)
+        // LAYOUT 1: Random layer assignment (original behavior)
+        layer: canvasFront 
+          ? (cardBounds.isLayout0 && cardBounds.giftBox && CONFETTI_CONFIG_LAYOUT_0.layer.usePositionBased
+              ? (spawnY < cardBounds.giftBox.top ? 'back' : 'front') // Behind box = back, in front = front (Layout 0 only)
+              : (Math.random() < 0.5 ? 'front' : 'back')) // Random for Layout 1 and other layouts
+          : 'back',
         // Fade-in properties
         opacity: 0,
         fadeInProgress: 0,
@@ -356,7 +395,9 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
         // Landing threshold - if vertical velocity is below this, particle "lands"
         landingVelocityThreshold: 0.3 * dpr,
         // Track if particle has passed through floor 2 (Union top) - required before landing on floor 3
-        hasPassedFloor2: false
+        hasPassedFloor2: false,
+        // LAYOUT 0 ONLY: Track if particle is landed on gift box top
+        isLandedOnGiftBox: false
       }
     }
     
@@ -461,6 +502,56 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
       return bounced
     }
     
+    // LAYOUT 0 ONLY: Handle collision with gift box top edge (completely separate from Layout 1)
+    const handleGiftBoxCollision = (p, cardBounds) => {
+      if (!cardBounds.isLayout0 || !cardBounds.giftBox) return false
+      
+      const box = cardBounds.giftBox
+      const config = CONFETTI_CONFIG_LAYOUT_0.giftBox
+      const halfSize = p.size / 2
+      
+      // Only check top edge (one-way collision: particles can pass upward, but land when moving down)
+      const boxTop = box.top
+      const isNearTop = p.y >= boxTop - halfSize && p.y <= boxTop + halfSize * 2
+      
+      if (isNearTop) {
+        // Calculate landing width (70% of box width, centered)
+        const landingWidth = box.width * config.landingWidthPercent
+        const landingLeft = box.left + (box.width - landingWidth) / 2
+        const landingRight = landingLeft + landingWidth
+        const isWithinBoxWidth = p.x >= landingLeft && p.x <= landingRight
+        
+        // Only allow landing for downward-moving particles (erupting particles pass through)
+        if (p.vy > 0 && isWithinBoxWidth) {
+          // Land on top edge
+          p.y = boxTop
+          // Reduce vertical velocity but allow slight downward for rolling
+          p.vy = Math.min(0, p.vy * config.verticalMomentumReduction)
+          // Apply horizontal friction
+          p.vx *= config.momentumPreservation
+          // Mark as landed
+          p.isLandedOnGiftBox = true
+          return true
+        }
+      }
+      
+      // Handle landed particles: allow rolling with momentum
+      if (p.isLandedOnGiftBox) {
+        // Apply slight gravity for rolling off edges
+        p.vy += p.ay * config.gravityAssist
+        // Check if particle rolled off the landing area
+        const landingWidth = box.width * config.landingWidthPercent
+        const landingLeft = box.left + (box.width - landingWidth) / 2
+        const landingRight = landingLeft + landingWidth
+        if (p.x < landingLeft || p.x > landingRight) {
+          // Particle rolled off, remove landing state and let it fall
+          p.isLandedOnGiftBox = false
+        }
+      }
+      
+      return false
+    }
+    
     // Bounce particles off card boundaries with more natural physics
     const constrainParticle = (p, halfSize) => {
       // Use particle size for collision detection (circular dots)
@@ -469,13 +560,20 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
         halfSize = p.size / 2 // Fallback if not provided
       }
       
+      // LAYOUT 0 ONLY: Check gift box collision first (completely separate from Layout 1)
+      let giftBoxCollision = false
+      if (cardBounds.isLayout0) {
+        giftBoxCollision = handleGiftBoxCollision(p, cardBounds)
+      }
+      
       // First check envelope/box collision (with larger detection area for more sensitivity)
       // Use slightly larger detection area to catch particles earlier
+      // LAYOUT 0: Skip envelope collision (gift box handles it)
       const detectionPadding = halfSize * 1.5
-      const envelopeCollision = handleEnvelopeCollision(p, detectionPadding)
+      const envelopeCollision = cardBounds.isLayout0 ? false : handleEnvelopeCollision(p, detectionPadding)
       
-      // If no envelope collision, check card boundaries
-      if (!envelopeCollision) {
+      // If no envelope or gift box collision, check card boundaries
+      if (!envelopeCollision && !giftBoxCollision) {
         // Use card bounds (accounting for offset) instead of canvas bounds
         const minX = cardBounds.minX + halfSize
         const maxX = cardBounds.maxX - halfSize
@@ -655,6 +753,30 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
         ctxMirrored.clearRect(0, 0, canvasMirrored.width, canvasMirrored.height)
       }
       
+      // LAYOUT 0 ONLY: Debug visualization for gift box bounds (dev only)
+      if (cardBounds.isLayout0 && cardBounds.giftBox && CONFETTI_CONFIG_LAYOUT_0.debug.showBounds && process.env.NODE_ENV === 'development') {
+        const box = cardBounds.giftBox
+        const borderRadius = CONFETTI_CONFIG_LAYOUT_0.debug.borderRadius * dpr
+        ctx.save()
+        ctx.strokeStyle = '#00ff00'
+        ctx.lineWidth = 2 * dpr
+        ctx.globalAlpha = 0.5
+        // Draw rounded rectangle outline matching box bounds
+        ctx.beginPath()
+        ctx.moveTo(box.left + borderRadius, box.top)
+        ctx.lineTo(box.right - borderRadius, box.top)
+        ctx.arcTo(box.right, box.top, box.right, box.top + borderRadius, borderRadius)
+        ctx.lineTo(box.right, box.bottom - borderRadius)
+        ctx.arcTo(box.right, box.bottom, box.right - borderRadius, box.bottom, borderRadius)
+        ctx.lineTo(box.left + borderRadius, box.bottom)
+        ctx.arcTo(box.left, box.bottom, box.left, box.bottom - borderRadius, borderRadius)
+        ctx.lineTo(box.left, box.top + borderRadius)
+        ctx.arcTo(box.left, box.top, box.left + borderRadius, box.top, borderRadius)
+        ctx.closePath()
+        ctx.stroke()
+        ctx.restore()
+      }
+      
       // Get mirror point for this frame
       const mirrorY = getMirrorY()
       
@@ -704,6 +826,14 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
         
         // Update rotation (more tumbling)
         p.rot += p.vr
+        
+        // LAYOUT 0 ONLY: Update layer based on position relative to box (dynamic layer assignment)
+        // Layout 1 and other layouts keep their random layer assignment from spawn (original behavior)
+        if (cardBounds.isLayout0 && cardBounds.giftBox && canvasFront && CONFETTI_CONFIG_LAYOUT_0.layer.usePositionBased) {
+          // Particles behind box (above box top) = back layer (more blur)
+          // Particles in front of box (below box top) = front layer (less blur)
+          p.layer = p.y < cardBounds.giftBox.top ? 'back' : 'front'
+        }
         
         // Apply boundary constraints (pass halfSize to avoid recalculating)
         constrainParticle(p, halfSize)

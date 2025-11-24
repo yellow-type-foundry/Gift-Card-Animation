@@ -3,8 +3,36 @@ export const PROGRESS_PILL_RADIUS = '100px'
 export const HEADER_OVERLAY_BG = 'linear-gradient(to bottom, rgba(255, 253, 253, 0.3) 00%, rgba(255, 255, 255, 0.95) 95%)'
 export const PROGRESS_GLOW_BOX_SHADOW = '0px 2px 4px -8px rgba(46,10,255,0.1), 0px 2px 2px 0px rgba(90,61,255,0.08), 0px 4px 8px -4px rgba(16,0,112,0.15)'
 
+// Layout 0 specific confetti settings (completely separate from Layout 1)
+export const CONFETTI_CONFIG_LAYOUT_0 = {
+  // Gift box collision settings
+  giftBox: {
+    landingWidthPercent: 0.7, // 70% of box width for landing area (centered)
+    topEdgeOnly: true, // Only top edge interaction, ignore other edges
+    momentumPreservation: 0.98, // Horizontal momentum preservation (friction)
+    verticalMomentumReduction: 0.3, // Vertical velocity reduction on landing
+    gravityAssist: 0.1, // Gravity assist for rolling off edges
+  },
+  // Layer assignment
+  layer: {
+    usePositionBased: true, // Use position-based layer assignment (behind/in front of box)
+    backBlur: 'blur(18px)', // Blur for particles behind box
+    frontBlur: 'blur(1.25px)', // Blur for particles in front of box
+  },
+  // Velocity
+  velocity: {
+    boostMultiplier: 1.75, // 75% velocity boost for Layout 0 (increased from 1.5x for more momentum)
+  },
+  // Debug
+  debug: {
+    showBounds: false, // Show green outline for box bounds (dev only) - hidden
+    borderRadius: 32, // Box border radius for debug outline
+  },
+}
+
 // Confetti animation configuration
 // All confetti animations use these unified settings
+// Layout 1 and other layouts use this config (Layout 0 uses CONFETTI_CONFIG_LAYOUT_0)
 export const CONFETTI_CONFIG = {
   // Color palette (multi-hue, soft pastels)
   colors: ['#7C66FF', '#5AD3FF', '#FF7AD9', '#FFD166', '#8CE99A'],
@@ -233,7 +261,7 @@ export const LAYOUT_CONFIG = {
     // Envelope settings
     envelope: {
       scale: 1.125, // Scaled up 1.125x
-      offsetY: 32, // Moved down 32px
+      offsetY: 32, //
       left: undefined, // Uses default positioning
       right: undefined,
       top: undefined,
