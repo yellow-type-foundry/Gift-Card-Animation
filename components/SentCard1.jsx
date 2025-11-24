@@ -104,10 +104,6 @@ const SentCard1 = ({
   animationType = 'highlight',
   // Standalone 3D toggle that works with highlight or breathing
   enable3D = false,
-  // Enable confetti (for Single 1A)
-  enableConfetti = false,
-  // Show redline (for Single 1A)
-  showRedline = false,
   // Gift container exclusive controls (for Single 1)
   giftContainerOffsetY,
   giftContainerScale,
@@ -377,8 +373,8 @@ const SentCard1 = ({
   
   const allAccepted = isDone
   
-  // Confetti animation - disabled for Batch 2 and Single 2, but can be enabled via prop (for Single 1A)
-  const shouldShowConfetti = enableConfetti || !hideEnvelope
+  // Confetti animation - disabled for Batch 2 and Single 2
+  const shouldShowConfetti = !hideEnvelope
   useConfetti(shouldShowConfetti && isHovered, shouldShowConfetti && allAccepted, confettiCanvasRef, cardRef, confettiCanvasFrontRef, confettiCanvasMirroredRef)
 
   // Memoized style objects
@@ -511,6 +507,11 @@ const SentCard1 = ({
             flex: 1,
             minHeight: 0,
             overflow: 'visible',
+            // Apply marginTop for offsetY when showGiftBoxWhenHidden is true (Single 1A/Single 2)
+            // Use marginTop instead of translateY because container is position: relative in flex layout
+            ...(showGiftBoxWhenHidden && envelopeOffsetY !== undefined ? {
+              marginTop: `${envelopeOffsetY}px`
+            } : {}),
             ...(isBatch2 ? {
               paddingTop: `${BATCH2_ENVELOPE_PADDING.top}px`,
               paddingRight: `${BATCH2_ENVELOPE_PADDING.right}px`,
@@ -552,8 +553,10 @@ const SentCard1 = ({
         }),
     zIndex: envelopeHighZ ? 50 : (overlayProgressOnEnvelope ? 2 : 2),
     transform: hideEnvelope 
-      ? (showGiftBoxWhenHidden && envelopeOffsetY 
-          ? `translateY(${envelopeOffsetY}px) scale(${envelopeScale})` 
+      ? (showGiftBoxWhenHidden && envelopeOffsetY !== undefined && envelopeOffsetY !== 0
+          ? `scale(${envelopeScale})` 
+          : showGiftBoxWhenHidden && envelopeScale !== undefined && envelopeScale !== 1
+          ? `scale(${envelopeScale})`
           : 'none')
       : `scale(${useGiftContainer && giftContainerScale !== undefined ? giftContainerScale : (progressOutsideEnvelope && envelopeScale2 !== undefined ? envelopeScale2 : envelopeScale)})`,
     transformOrigin: hideEnvelope ? 'center center' : (useGiftContainer && giftContainerTransformOrigin !== undefined ? giftContainerTransformOrigin : (progressOutsideEnvelope && transformOrigin2 !== undefined ? transformOrigin2 : 'center top'))
@@ -589,16 +592,15 @@ const SentCard1 = ({
       data-animation-type={animationType}
       data-node-id="1467:49182"
     >
-      {/* Debug: Red line at estimated envelope top edge - only for Batch 1 and Single 1A (at card level) - SCALE-AWARE */}
+      {/* Debug: Red line at estimated envelope top edge - only for Batch 1 (at card level) - SCALE-AWARE */}
       {/* This is the third floor for confetti particles - particles can land here and roll off */}
-      {((!useGiftContainer && !overlayProgressOnEnvelope && !progressOutsideEnvelope && !hideEnvelope) || (showRedline && hideEnvelope)) && (
+      {(!useGiftContainer && !overlayProgressOnEnvelope && !progressOutsideEnvelope && !hideEnvelope) && (
         <div
           data-name="Second Floor"
-          data-floor-type={showRedline ? "single1a" : "batch1"}
+          data-floor-type="batch1"
           style={{
             position: 'absolute',
             // Scale-aware position: envelope top is at (4 + envelopeOffsetY), red line is at (1 + envelopeOffsetY) + 113
-            // For Single 1A: adjust based on envelopeOffsetY (36px) and scale (1.1x)
             // With transform origin 'center top', the top edge stays fixed regardless of scale
             top: `${(1 + (envelopeOffsetY || 0)) + 113}px`,
             left: '50%',
@@ -608,9 +610,9 @@ const SentCard1 = ({
             backgroundColor: 'red',
             zIndex: 9999,
             pointerEvents: 'none',
-            opacity: showRedline ? 1 : 0 // Show redline for Single 1A, hidden for Batch 1
+            opacity: 0 // Hidden visually but still detectable by confetti hook
           }}
-          aria-label={showRedline ? "Debug: Envelope top edge (Single 1A) - Third Floor" : "Debug: Envelope top edge (Batch 1) - Third Floor"}
+          aria-label="Debug: Envelope top edge (Batch 1) - Third Floor"
         />
       )}
       <div 
@@ -1242,11 +1244,12 @@ const SentCard1 = ({
           <div
             className="absolute"
             style={{
-              bottom: -.5,
+              bottom: '-0.5px',
               left: 0,
               right: 0,
               height: '36px',
-              zIndex: 10
+              zIndex: 25, // Increased to be above footer (zIndex: 20) and other elements
+              pointerEvents: 'none'
             }}
             data-name="Union"
             data-node-id="1467:49199"

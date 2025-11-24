@@ -22,7 +22,8 @@ const GiftBoxContainer = ({
   parallaxX = 0, // Parallax offset X for tilt effect
   parallaxY = 0, // Parallax offset Y for tilt effect
   tiltX = 0, // Tilt X angle for 3D effect
-  tiltY = 0 // Tilt Y angle for 3D effect
+  tiltY = 0, // Tilt Y angle for 3D effect
+  hideProgressBar = false // Hide progress bar (for Single 1A)
 }) => {
   const { isHovered: internalIsHovered, handleHoverEnter, handleHoverLeave } = useHover()
   // Use external hover state if provided, otherwise use internal
@@ -528,16 +529,18 @@ const GiftBoxContainer = ({
           </div>
 
           {/* Progress Bar (bottom, fixed) */}
-          <ProgressBar
-            progress={progress}
-            boxColor={hoverBoxColor}
-            indicatorColor={progressIndicatorColor}
-            progressBarWidth={progressBarWidth}
-            animatedCurrent={animatedCurrent}
-            validatedProgress={validatedProgress}
-            isDone={isDone}
-            themedShadowColor={themedShadowColor}
-          />
+          {!hideProgressBar && (
+            <ProgressBar
+              progress={progress}
+              boxColor={hoverBoxColor}
+              indicatorColor={progressIndicatorColor}
+              progressBarWidth={progressBarWidth}
+              animatedCurrent={animatedCurrent}
+              validatedProgress={validatedProgress}
+              isDone={isDone}
+              themedShadowColor={themedShadowColor}
+            />
+          )}
 
           {/* 6. Enhanced Specular Highlight - more directional and responsive to tilt */}
           <div 
@@ -673,55 +676,6 @@ const GiftBoxContainer = ({
         />
       </div>
 
-      {/* Box Shadow - only visible on hover */}
-      {/* Dynamic shadow that responds to tilt angle in 3D mode */}
-      <div 
-        className="absolute flex items-center justify-center pointer-events-none"
-        style={{
-          left: `calc(50% + ${GIFT_BOX_TOKENS.boxShadow.leftOffset} + ${shadowOffsetX}px)`,
-          top: `calc(${GIFT_BOX_TOKENS.boxShadow.top} + ${shadowOffsetY}px)`,
-          transform: 'translateX(-50%)',
-          height: GIFT_BOX_TOKENS.boxShadow.height,
-          width: GIFT_BOX_TOKENS.boxShadow.width,
-          opacity: shadowOpacity,
-          zIndex: GIFT_BOX_TOKENS.zIndex.boxShadow,
-          transition: isHovered && enable3D && (animationType === 'highlight' || animationType === 'breathing')
-            ? `opacity 0.15s ease-out, left 0.15s ease-out, top 0.15s ease-out`
-            : `opacity ${GIFT_BOX_TOKENS.animations.duration.fast} ${GIFT_BOX_TOKENS.animations.easing.easeOut}`
-        }}
-        data-name="Box Shadow"
-      >
-        <div 
-          className="flex-none"
-          style={{
-            transform: `scaleY(-1) scaleX(${shadowScaleX}) scaleY(${shadowScaleY})`,
-            transition: isHovered && enable3D && (animationType === 'highlight' || animationType === 'breathing')
-              ? 'transform 0.15s ease-out'
-              : 'none'
-          }}
-        >
-          <div 
-            className="relative"
-            style={{
-              height: GIFT_BOX_TOKENS.boxShadow.imageSize.height,
-              width: GIFT_BOX_TOKENS.boxShadow.imageSize.width
-            }}
-          >
-            <div 
-              className="absolute"
-              style={{
-                inset: GIFT_BOX_TOKENS.boxShadow.imageInset
-              }}
-            >
-              <img 
-                alt="" 
-                className="block max-w-none size-full" 
-                src={GIFT_BOX_TOKENS.assets.boxShadow}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   )
 }

@@ -158,8 +158,8 @@ const CardGrid = ({
                       />
                     )
                   }
-                  // Single 1A and Single 2 use SentCard1 with envelope hidden (shows gift box)
-                  if (layoutNumber === '1a' || layoutNumber === '2') {
+                  // Single 2 uses SentCard1 with envelope hidden (shows gift box)
+                  if (layoutNumber === '2') {
                     return (
                       <SentCard1
                         key={index}
@@ -213,8 +213,8 @@ const CardGrid = ({
                   />
                 ))
               }
-              // Single 1A and Single 2 use SentCard1 with envelope hidden (shows gift box)
-              if (layoutNumber === '1a' || layoutNumber === '2') {
+              // Single 2 uses SentCard1 with envelope hidden (shows gift box)
+              if (layoutNumber === '2') {
                 return sentCards.map((card, index) => (
                   <SentCard1
                     key={index}

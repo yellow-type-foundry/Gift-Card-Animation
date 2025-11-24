@@ -130,19 +130,7 @@ const ControlBar = ({
       <div className="hidden md:flex items-center justify-center gap-2 shrink-0">
         {isSentTab && (
           <>
-            <TabButton
-              key="1"
-              label="Layout 1"
-              isActive={layoutNumber === '1'}
-              onClick={() => onLayoutChange({ target: { value: '1' } })}
-            />
-            <TabButton
-              key="1a"
-              label="Layout 1A"
-              isActive={layoutNumber === '1a'}
-              onClick={() => onLayoutChange({ target: { value: '1a' } })}
-            />
-            {[2, 3].map((num) => (
+            {[1, 2, 3].map((num) => (
               <TabButton
                 key={num}
                 label={`Layout ${num}`}
@@ -202,8 +190,8 @@ const ControlBar = ({
                   onClick={(e) => e.stopPropagation()}
                 >
                   <div className="space-y-4">
-                    {/* Theming toggle - only show for layout 1 and 1A */}
-                      {(layoutNumber === '1' || layoutNumber === '1a') && (
+                    {/* Theming toggle - only show for layout 1 */}
+                      {layoutNumber === '1' && (
                         <div className="flex items-center justify-between">
                           <span className="text-sm text-[#525F7A]">Theming</span>
                           <button
@@ -380,7 +368,6 @@ const ControlBar = ({
                         style={selectStyle}
                       >
                         <option value="1">Layout 1</option>
-                        <option value="1a">Layout 1A</option>
                         <option value="2">Layout 2</option>
                         <option value="3">Layout 3</option>
                       </select>
@@ -391,8 +378,8 @@ const ControlBar = ({
                       </div>
                     </div>
                   </div>
-                  {/* Theming toggle - only show for layout 1 and 1A */}
-                  {(layoutNumber === '1' || layoutNumber === '1a') && (
+                  {/* Theming toggle - only show for layout 1 */}
+                  {layoutNumber === '1' && (
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-[#525F7A]">Theming</span>
                       <button

@@ -58,18 +58,6 @@ export const FOOTER_CONFIG = {
     hideInfoOnHover: true,
   },
   
-  // Layout 1A (Batch - Duplicate of Layout 1)
-  default1a: {
-    equalPadding: false,
-    topPadding: undefined, // Uses default from Footer component
-    bottomPadding: 16,
-    transparent: false,
-    showProgress: true,
-    showReminder: true,
-    infoInSlot: false,
-    hideInfoOnHover: true,
-  },
-  
   // Altered Layout 1 (Batch - Layout 2)
   altered1: {
     equalPadding: true,
@@ -128,30 +116,6 @@ export const FOOTER_CONFIG = {
 export const LAYOUT_CONFIG = {
   // Default layout (Batch - Layout 1)
   default: {
-    // Header settings
-    header: {
-      height: 280, // minHeight when useFlex is true
-      useFlex: true, // Whether to use flex: 1 for fill height
-    },
-    // Envelope settings
-    envelope: {
-      scale: 1,
-      offsetY: 0,
-      left: undefined, // Uses default positioning
-      right: undefined,
-      top: undefined,
-      transformOrigin: undefined,
-    },
-    // Layout flags
-    hideUnion: false,
-    confettiWhiteOverlay: false,
-    envelopeHighZ: false,
-    overlayProgressOnEnvelope: false,
-    progressOutsideEnvelope: false,
-  },
-  
-  // Layout 1A (Batch - Duplicate of Layout 1)
-  default1a: {
     // Header settings
     header: {
       height: 280, // minHeight when useFlex is true
@@ -257,33 +221,6 @@ export const LAYOUT_CONFIG = {
     envelopeHighZ: false,
     overlayProgressOnEnvelope: false,
     progressOutsideEnvelope: false,
-  },
-  
-  // Single card layout 1A - Uses box from Single 2 (envelope with hideEnvelope=true)
-  single1a: {
-    // Header settings
-    header: {
-      height: 280, // minHeight when useFlex is true
-      useFlex: true, // Fill available height
-    },
-    // Envelope settings - scaled 1.1x and moved down 40px total
-    envelope: {
-      scale: 1.1, // 0.95 * 1.1 ≈ 1.045, but using 1.1 as requested
-      offsetY: 56, // 16 + 20 + 20 = 56
-      left: undefined,
-      right: undefined,
-      top: undefined,
-      transformOrigin: undefined,
-    },
-    // Layout flags
-    hideUnion: true,
-    confettiWhiteOverlay: true,
-    envelopeHighZ: true,
-    overlayProgressOnEnvelope: true,
-    progressOutsideEnvelope: false,
-    hideEnvelope: true, // Hide envelope and show gift box instead
-    enableConfetti: true, // Enable confetti for Single 1A
-    showRedline: true, // Show redline for Single 1A
   },
   
   // Single card layout 3 (SentCard4)
