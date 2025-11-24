@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import SentCard1 from '@/components/SentCard1'
 
-function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti }) {
+function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
   const [pauseConfetti, setPauseConfetti] = useState(false)
   
   useEffect(() => {
@@ -16,6 +16,11 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti }) {
       // Reset pause state when modal opens
       setPauseConfetti(false)
       
+      // Notify parent to reset pause state
+      if (onOpen) {
+        onOpen()
+      }
+      
       // Pause confetti during peak eruption (around frame 50-60, ~1000ms at 60fps)
       // Peak eruption happens during the eruption boost phase (0-63 frames, ~1.05 seconds)
       // We want to pause at the middle/peak of this phase
@@ -25,7 +30,7 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti }) {
         if (onPauseConfetti) {
           onPauseConfetti()
         }
-      }, 1300) // ~1000ms = ~60 frames at 60fps, which is peak eruption
+      }, 1400) // ~1000ms = ~60 frames at 60fps, which is peak eruption
       
       return () => {
         clearTimeout(pauseTimeout)

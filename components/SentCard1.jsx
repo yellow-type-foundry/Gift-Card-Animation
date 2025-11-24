@@ -518,7 +518,10 @@ const SentCard1 = ({
   // Confetti animation - disabled for Batch 2 and Single 2, but can be enabled via prop (for Single 0)
   const shouldShowConfetti = enableConfetti || !hideEnvelope
   // LAYOUT 0: Pass blur canvas refs array for varied blur effect
-  const blurCanvasRefs = isLayout0 ? [confettiCanvasBlur1Ref, confettiCanvasBlur2Ref, confettiCanvasBlur3Ref, confettiCanvasBlur4Ref] : null
+  // Memoize to prevent effect re-runs - array is recreated on every render otherwise
+  const blurCanvasRefs = useMemo(() => {
+    return isLayout0 ? [confettiCanvasBlur1Ref, confettiCanvasBlur2Ref, confettiCanvasBlur3Ref, confettiCanvasBlur4Ref] : null
+  }, [isLayout0])
   
   // COMPLETELY SEPARATE: Layout 0 and Layout 1 use different hooks
   // Layout 0: Uses separate hook with all Layout 0 features (gift box collision, blur layers, etc.)
@@ -1799,6 +1802,10 @@ const SentCard1 = ({
         onClose={() => {
           setIsShareModalOpen(false)
           setCardPropsForShare(null)
+          setShouldPauseConfetti(false)
+        }}
+        onOpen={() => {
+          // Reset pause state when modal opens to ensure animation can start
           setShouldPauseConfetti(false)
         }}
         cardProps={cardPropsForShare}

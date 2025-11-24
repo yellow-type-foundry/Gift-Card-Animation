@@ -30,31 +30,74 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
     }
   }, [shouldPause])
   
+  // Track if animation has been initialized to prevent restarts
+  const hasInitializedRef = useRef(false)
+  const animIdRef = useRef(null)
+  const prevForceHoveredRef = useRef(forceHovered)
+  
   useEffect(() => {
+    // Detect if forceHovered changed from false to true (modal opened)
+    if (!prevForceHoveredRef.current && forceHovered) {
+      console.log('[Confetti Layout0] Modal opened - resetting initialization flag')
+      hasInitializedRef.current = false
+      if (animIdRef.current) {
+        cancelAnimationFrame(animIdRef.current)
+        animIdRef.current = null
+      }
+    }
+    prevForceHoveredRef.current = forceHovered
+    
     // Use forceHovered if provided, otherwise use isHovered
     const shouldStart = forceHovered || isHovered
-    // Check shouldPause directly (not pauseRef) to avoid timing issues
-    // pauseRef is for checking during animation, but we need to check the prop here
+    // For modal (forceHovered), allow confetti even if allAccepted is false
+    const canStart = forceHovered ? shouldStart : (shouldStart && allAccepted)
+    
     console.log('[Confetti Layout0] Effect triggered:', { 
       isHovered, 
       forceHovered, 
       shouldStart, 
       allAccepted, 
+      canStart,
       shouldPause: shouldPause,
-      pauseRefCurrent: pauseRef.current,
-      willStart: shouldStart && allAccepted && !shouldPause,
+      hasInitialized: hasInitializedRef.current,
+      animIdExists: animIdRef.current !== null,
       timestamp: Date.now()
     })
-    if (!shouldStart || !allAccepted) {
+    
+    // CRITICAL: If animation is already initialized, don't restart
+    // This prevents infinite loops when effect re-runs due to dependency changes
+    if (hasInitializedRef.current) {
+      console.log('[Confetti Layout0] Animation already initialized - skipping restart', { 
+        animIdExists: animIdRef.current !== null,
+        forceHovered,
+        isHovered,
+        canStart
+      })
+      // Early return with no-op cleanup to prevent cleanup from canceling animation
+      return
+    }
+    
+    if (!canStart) {
       console.log('[Confetti Layout0] Not starting - conditions not met')
+      hasInitializedRef.current = false
       return
     }
-    // Don't start if already paused - wait for pause to be cleared
-    if (shouldPause) {
-      console.log('[Confetti Layout0] WARNING: Starting in paused state! Waiting for pause to clear...')
+    
+    // For forceHovered (modal), allow animation to start even if paused
+    // The draw loop will handle pausing after particles spawn
+    if (shouldPause && !forceHovered) {
+      console.log('[Confetti Layout0] Paused (not force hovered) - waiting for pause to clear')
+      hasInitializedRef.current = false
       return
     }
-    console.log('[Confetti Layout0] Starting animation...')
+    
+    // If forceHovered and paused, still allow initialization (particles will spawn, then pause)
+    if (shouldPause && forceHovered) {
+      console.log('[Confetti Layout0] Force hovered and paused - will start animation, pause in draw loop')
+    }
+    
+    console.log('[Confetti Layout0] Initializing animation...')
+    hasInitializedRef.current = true
     const canvas = confettiCanvasRef.current
     const canvasFront = confettiCanvasFrontRef?.current
     const canvasMirrored = confettiCanvasMirroredRef?.current
@@ -1052,28 +1095,50 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
       
       // Continue animation loop
       animId = requestAnimationFrame(draw)
+      animIdRef.current = animId // Store in ref
     }
     
-    // Only start animation if not paused
-    if (!pauseRef.current) {
-      console.log('[Confetti Layout0] Starting animation loop - not paused')
+    // Start animation loop
+    // If forceHovered, always start (even if paused) so particles can spawn
+    // The draw loop will handle pausing after particles are visible
+    if (!pauseRef.current || forceHovered) {
+      console.log('[Confetti Layout0] Starting animation loop', { paused: pauseRef.current, forceHovered })
       animId = requestAnimationFrame(draw)
+      animIdRef.current = animId // Store in ref immediately
     } else {
-      console.log('[Confetti Layout0] Already paused - drawing frozen state once')
-      // If paused, draw once to show particles in current state (frozen)
-      // But don't start the animation loop
+      console.log('[Confetti Layout0] Paused and not force hovered - drawing frozen state once')
+      // If paused and not force hovered, draw once to show particles in current state (frozen)
       draw()
     }
     
     return () => {
-      if (animId) cancelAnimationFrame(animId)
-      ctx && ctx.clearRect(0, 0, canvas.width, canvas.height)
-      if (ctxFront) ctxFront.clearRect(0, 0, canvasFront.width, canvasFront.height)
-      if (ctxMirrored) ctxMirrored.clearRect(0, 0, canvasMirrored.width, canvasMirrored.height)
-      // Remove device orientation listener if it was added
-      if (orientationListenerAdded) {
-        window.removeEventListener('deviceorientation', handleDeviceOrientation)
-        orientationListenerAdded = false
+      // CRITICAL: Only cleanup if this is a real unmount/condition change
+      // Don't cleanup on every re-render - that causes infinite loops
+      const shouldCleanup = !forceHovered && !isHovered
+      
+      if (shouldCleanup) {
+        console.log('[Confetti Layout0] Cleanup - conditions changed, full cleanup')
+        if (animIdRef.current) {
+          cancelAnimationFrame(animIdRef.current)
+          animIdRef.current = null
+        }
+        if (animId) {
+          cancelAnimationFrame(animId)
+          animId = null
+        }
+        ctx && ctx.clearRect(0, 0, canvas.width, canvas.height)
+        if (ctxFront) ctxFront.clearRect(0, 0, canvasFront.width, canvasFront.height)
+        if (ctxMirrored) ctxMirrored.clearRect(0, 0, canvasMirrored.width, canvasMirrored.height)
+        hasInitializedRef.current = false
+        // Remove device orientation listener if it was added
+        if (orientationListenerAdded) {
+          window.removeEventListener('deviceorientation', handleDeviceOrientation)
+          orientationListenerAdded = false
+        }
+      } else {
+        // Conditions still valid - don't cleanup, animation should continue
+        // This prevents cleanup from canceling animation when effect re-runs
+        console.log('[Confetti Layout0] Cleanup - conditions still valid, skipping cleanup', { forceHovered, isHovered, hasInitialized: hasInitializedRef.current })
       }
     }
   }, [isHovered, allAccepted, confettiCanvasRef, cardRef, confettiCanvasFrontRef, confettiCanvasMirroredRef, blurCanvasRefs, forceHovered])
