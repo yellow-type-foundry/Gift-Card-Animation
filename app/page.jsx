@@ -226,6 +226,7 @@ export default function Home() {
       return `single${layoutNum}`
     } else if (viewType === 'batch') {
       if (layoutNum === '1') return 'default'
+      if (layoutNum === '1a') return 'default1a'
       if (layoutNum === '2') return 'altered1'
       if (layoutNum === '3') return 'altered2'
     }
@@ -271,9 +272,11 @@ export default function Home() {
   }, [])
   
   // Helper function to get Single 1 specific props (with gift container controls)
-  const getSingle1Props = useCallback((card, useColoredBackground) => {
-    const layoutConfig = LAYOUT_CONFIG.single1
-    const footerConfig = FOOTER_CONFIG.default // Single 1 uses default footer config (same as Batch 1)
+  const getSingle1Props = useCallback((card, useColoredBackground, layoutNum = '1') => {
+    // Map layout number to single config key
+    const singleConfigKey = `single${layoutNum}`
+    const layoutConfig = LAYOUT_CONFIG[singleConfigKey] || LAYOUT_CONFIG.single1 // Fallback to single1
+    const footerConfig = (layoutNum === '1' || layoutNum === '1a') ? FOOTER_CONFIG.default : FOOTER_CONFIG.single // Single 1/1A uses default footer config (same as Batch 1)
     
     return {
       from: card.from,
@@ -318,15 +321,18 @@ export default function Home() {
     // Map layout number to config key
     let layoutKey
     if (layoutNum === '1') layoutKey = 'default'
+    else if (layoutNum === '1a') layoutKey = 'default1a'
     else if (layoutNum === '2') layoutKey = 'altered1'
     else if (layoutNum === '3') layoutKey = 'altered2'
     
     const layoutConfig = LAYOUT_CONFIG[layoutKey]
-    const footerConfig = layoutNum === '1' ? FOOTER_CONFIG.default : (layoutNum === '2' ? FOOTER_CONFIG.altered1 : FOOTER_CONFIG.altered2)
+    const footerConfig = layoutNum === '1' ? FOOTER_CONFIG.default : 
+                        (layoutNum === '1a' ? FOOTER_CONFIG.default1a :
+                        (layoutNum === '2' ? FOOTER_CONFIG.altered1 : FOOTER_CONFIG.altered2))
     
     const useAlteredLayout1 = layoutNum === '2'
     const useAlteredLayout2 = layoutNum === '3'
-    const useAlteredLayout = layoutNum !== '1'
+    const useAlteredLayout = layoutNum !== '1' && layoutNum !== '1a'
     
     return {
       from: card.from,
@@ -473,7 +479,7 @@ export default function Home() {
           cardHandlers={cardHandlers}
           viewType={viewType}
           layoutNumber={layoutNumber}
-          useColoredBackground={layoutNumber === '1' ? useColoredBackground : false}
+          useColoredBackground={(layoutNumber === '1' || layoutNumber === '1a') ? useColoredBackground : false}
           animationType={animationType}
           enable3D={enable3D}
           sentCards={sentCards}

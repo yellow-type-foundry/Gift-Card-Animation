@@ -149,12 +149,12 @@ const CardGrid = ({
                     />
                   )
                 } else {
-                  // Single 1 uses SentCard1 (with gift container replacing envelope)
-                  if (layoutNumber === '1') {
+                  // Single 1 and 1A use SentCard1 (with gift container replacing envelope)
+                  if (layoutNumber === '1' || layoutNumber === '1a') {
                     return (
                       <SentCard1
                         key={index}
-                        {...getSingle1Props(card, useColoredBackground)}
+                        {...getSingle1Props(card, useColoredBackground, layoutNumber)}
                       />
                     )
                   }
@@ -204,12 +204,12 @@ const CardGrid = ({
                   </div>
                 )
               }
-              // Single 1 uses SentCard1 (with gift container replacing envelope), others use SentCard4 (with gift container)
-              if (layoutNumber === '1') {
+              // Single 1 and 1A use SentCard1 (with gift container replacing envelope), others use SentCard4 (with gift container)
+              if (layoutNumber === '1' || layoutNumber === '1a') {
                 return sentCards.map((card, index) => (
                   <SentCard1
                     key={index}
-                    {...getSingle1Props(card, useColoredBackground)}
+                    {...getSingle1Props(card, useColoredBackground, layoutNumber)}
                   />
                 ))
               }

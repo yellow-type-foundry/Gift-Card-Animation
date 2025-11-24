@@ -58,6 +58,18 @@ export const FOOTER_CONFIG = {
     hideInfoOnHover: true,
   },
   
+  // Layout 1A (Batch - Duplicate of Layout 1)
+  default1a: {
+    equalPadding: false,
+    topPadding: undefined, // Uses default from Footer component
+    bottomPadding: 16,
+    transparent: false,
+    showProgress: true,
+    showReminder: true,
+    infoInSlot: false,
+    hideInfoOnHover: true,
+  },
+  
   // Altered Layout 1 (Batch - Layout 2)
   altered1: {
     equalPadding: true,
@@ -116,6 +128,30 @@ export const FOOTER_CONFIG = {
 export const LAYOUT_CONFIG = {
   // Default layout (Batch - Layout 1)
   default: {
+    // Header settings
+    header: {
+      height: 280, // minHeight when useFlex is true
+      useFlex: true, // Whether to use flex: 1 for fill height
+    },
+    // Envelope settings
+    envelope: {
+      scale: 1,
+      offsetY: 0,
+      left: undefined, // Uses default positioning
+      right: undefined,
+      top: undefined,
+      transformOrigin: undefined,
+    },
+    // Layout flags
+    hideUnion: false,
+    confettiWhiteOverlay: false,
+    envelopeHighZ: false,
+    overlayProgressOnEnvelope: false,
+    progressOutsideEnvelope: false,
+  },
+  
+  // Layout 1A (Batch - Duplicate of Layout 1)
+  default1a: {
     // Header settings
     header: {
       height: 280, // minHeight when useFlex is true
@@ -204,6 +240,42 @@ export const LAYOUT_CONFIG = {
       transformOrigin: undefined,
     },
     // Gift container settings (exclusive to Single 1)
+    giftContainer: {
+      scale: 1,
+      offsetY: 0,
+      width: 360,
+      height: 300,
+      top: 80, // Uses default positioning (inset-0)
+      left: undefined,
+      right: undefined,
+      bottom: undefined,
+      transformOrigin: 'center top',
+    },
+    // Layout flags
+    hideUnion: false,
+    confettiWhiteOverlay: false,
+    envelopeHighZ: false,
+    overlayProgressOnEnvelope: false,
+    progressOutsideEnvelope: false,
+  },
+  
+  // Single card layout 1A (SentCard4) - Duplicate of Batch 1A (default1a)
+  single1a: {
+    // Header settings
+    header: {
+      height: 280, // minHeight when useFlex is true
+      useFlex: true, // Whether to use flex: 1 for fill height
+    },
+    // Envelope settings (not used when useGiftContainer is true)
+    envelope: {
+      scale: 1,
+      offsetY: 0,
+      left: undefined, // Uses default positioning
+      right: undefined,
+      top: undefined,
+      transformOrigin: undefined,
+    },
+    // Gift container settings (exclusive to Single 1A)
     giftContainer: {
       scale: 1,
       offsetY: 0,
