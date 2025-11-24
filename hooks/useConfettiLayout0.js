@@ -309,8 +309,8 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
     const { colors, maxParticles, speed, horizontalDrift, gravity, size, rotation } = CONFETTI_CONFIG
     
     // Eruption velocity boost - particles spawn with extra velocity that decays over time
-    const eruptionBoostFrames = 60 // Boost lasts for ~1 second (60 frames at 60fps)
-    const maxEruptionBoost = 3.0 // 2x velocity boost at start (very strong eruption)
+    const eruptionBoostFrames = 63 // Reduced by 30%: ~1.05 seconds (63 frames at 60fps, was 90)
+    const maxEruptionBoost = 4.5 // Increased from 3.0 to 4.5 for stronger entrance eruption
     const minEruptionBoost = 1.0 // No boost after eruption phase
     
     // LAYOUT 0: Always has gift box, no envelope
@@ -336,8 +336,8 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
         ? initialY 
         : (cardBounds.maxY - halfSize - 2 * dpr) // Spawn near bottom of card
       
-      // Fade-in duration in frames (60fps = ~0.5 seconds)
-      const fadeInDuration = 20 + Math.random() * 30 // 20-50 frames for more variation
+      // Fade-in duration in frames (60fps = ~0.35 seconds, reduced by 30%)
+      const fadeInDuration = Math.floor((14 + Math.random() * 21)) // 14-35 frames (reduced from 20-50)
       
       // More varied horizontal velocity - confetti spreads out more
       // During eruption, particles spread more horizontally for dramatic effect
@@ -380,7 +380,7 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
         fadeInProgress: 0,
         fadeInDuration: fadeInDuration,
         // Bounce energy retention (increased by 1.25x for more bounciness)
-        bounceEnergy: (0.25 + Math.random() * 0.1) * 1.5, // 50-75% energy retention (increased from 40-60%)
+        bounceEnergy: (0.1 + Math.random() * 0.1) * 1.125, // 50-75% energy retention (increased from 40-60%)
         // Second floor state - track if particle is landed on second floor
         isLandedOnSecondFloor: false,
         // Landing threshold - if vertical velocity is below this, particle "lands"
@@ -388,8 +388,21 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
         // Track if particle has passed through floor 2 (Union top) - required before landing on floor 3
         hasPassedFloor2: false,
         // LAYOUT 0: Track if particle is landed on gift box top
-        isLandedOnGiftBox: false
+        isLandedOnGiftBox: false,
+        // LAYOUT 0: Track spawn frame for floating behavior after eruption
+        spawnFrame: frameCountAtSpawn
       }
+      
+      // LAYOUT 0: Determine if particle should float (higher blur = higher chance)
+      // Calculate after blurLevel is assigned
+      if (p.blurLevel !== null) {
+        const blurLevel = p.blurLevel
+        p.shouldFloat = Math.random() < (0.3 + blurLevel * 0.2) // 30% base + 20% per blur level (max 90% for blurLevel 3)
+      } else {
+        p.shouldFloat = false
+      }
+      
+      return p
     }
     
     // Spawn particles from bottom for eruption effect
@@ -415,7 +428,7 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
     }
     
     // Start with no particles - they will erupt gradually on hover
-    const targetParticleCount = Math.floor(maxParticles * 0.85) // 85% of max for more natural feel
+    const targetParticleCount = Math.floor(maxParticles * 0.85 * 1.25) // 85% of max * 1.25x = 106.25% for Layout 0 (increased particle amount)
     // Pre-allocate array (optimized: use for loop instead of map)
     const particles = new Array(targetParticleCount)
     for (let i = 0; i < targetParticleCount; i++) {
@@ -425,9 +438,9 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
     let frameCount = 0
     
     // Spawn rate starts slow and accelerates - creates eruption effect
-    const initialSpawnRate = 0.12 // 12% chance per frame initially (faster start for eruption)
-    const maxSpawnRate = 0.5 // 50% chance per frame when fully active
-    const accelerationFrames = 120 // Accelerate over ~2 seconds (120 frames at 60fps)
+    const initialSpawnRate = 0.25 // 12% chance per frame initially (faster start for eruption)
+    const maxSpawnRate = 0.95 // 50% chance per frame when fully active
+    const accelerationFrames = 30 // Reduced by 30%: ~1.4 seconds (84 frames at 60fps, was 120)
     
     // Check if particle collides with envelope/box
     const checkEnvelopeCollision = (p, halfSize) => {
@@ -793,8 +806,30 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
         p.vx *= p.airResistance
         p.vy *= p.airResistance
         
-        // Apply gravity
-        p.vy += p.ay
+        // LAYOUT 0: Floating behavior after eruption - especially for high blur particles
+        const framesSinceSpawn = frameCount - p.spawnFrame
+        const isAfterEruption = framesSinceSpawn > eruptionBoostFrames
+        
+        if (isAfterEruption && p.shouldFloat && !p.isLandedOnGiftBox && !p.isLandedOnSecondFloor) {
+          // Floating particles: reduce gravity significantly and add slight upward drift
+          // Higher blur particles (blurLevel 3) float more
+          const blurFloatMultiplier = p.blurLevel !== null ? (0.1 + (p.blurLevel / 3) * 0.15) : 0.1 // 0.1 for blurLevel 0, up to 0.25 for blurLevel 3
+          const floatGravity = p.ay * blurFloatMultiplier // Much reduced gravity
+          p.vy += floatGravity
+          
+          // Add slight upward drift for more floaty effect (especially high blur)
+          if (p.blurLevel !== null && p.blurLevel >= 2) {
+            const upwardDrift = (0.02 + (p.blurLevel - 2) * 0.03) * dpr // 0.02 for blurLevel 2, 0.05 for blurLevel 3
+            p.vy -= upwardDrift * (0.5 + Math.random() * 0.5) // Random variation
+          }
+          
+          // Reduce air resistance for floating particles (they maintain momentum longer)
+          p.vx *= 0.995 // Slightly less air resistance
+          p.vy *= 0.995
+        } else {
+          // Normal gravity for non-floating particles or during eruption
+          p.vy += p.ay
+        }
         
         // Apply gyroscope/tilt forces on mobile devices
         // Only apply horizontal tilt (gamma) after confetti animation has settled
