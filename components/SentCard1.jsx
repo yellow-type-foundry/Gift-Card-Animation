@@ -1246,8 +1246,8 @@ const SentCard1 = ({
             <div
               className="absolute inset-0"
               style={{
-                backdropFilter: 'blur(1.5px)',
-                WebkitBackdropFilter: 'blur(2px)',
+                backdropFilter: 'blur(.35px)',
+                WebkitBackdropFilter: 'blur(.35px)',
                 pointerEvents: 'none'
               }}
               aria-hidden="true"
