@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import SentCard1 from '@/components/SentCard1'
 
@@ -8,42 +8,79 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
   const [pauseConfetti, setPauseConfetti] = useState(false)
   const [capturedImage, setCapturedImage] = useState(null)
   const [isCapturing, setIsCapturing] = useState(false)
+  const hasCapturedRef = useRef(false) // Track if we've already captured
+  const cardPropsRef = useRef(cardProps) // Store cardProps in ref to avoid dependency issues
   
+  // Update ref when cardProps changes
+  useEffect(() => {
+    cardPropsRef.current = cardProps
+  }, [cardProps])
+  
+  // Separate effect for modal open/close state
   useEffect(() => {
     if (isOpen) {
-      console.log('[ShareModal] Modal opened - resetting pause state')
-      // Prevent body scroll when modal is open
       document.body.style.overflow = 'hidden'
-      
-      // Reset pause state when modal opens
+      // Reset capture flag and state when modal opens
+      hasCapturedRef.current = false
       setPauseConfetti(false)
-      
-      // Notify parent to reset pause state
-      if (onOpen) {
-        onOpen()
+      setCapturedImage(null)
+      setIsCapturing(false)
+    } else {
+      document.body.style.overflow = ''
+      setPauseConfetti(false)
+      setCapturedImage(null)
+      setIsCapturing(false)
+      hasCapturedRef.current = false
+    }
+    
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [isOpen])
+
+  // Separate effect for animation and capture - only run when modal is open
+  useEffect(() => {
+    if (!isOpen || !cardProps) return
+    
+    console.log('[ShareModal] Setting up animation and capture')
+    
+    // Notify parent to reset pause state
+    if (onOpen) {
+      onOpen()
+    }
+    
+    // Pause confetti during peak eruption (around frame 50-60, ~1000ms at 60fps)
+    // Peak eruption happens during the eruption boost phase (0-63 frames, ~1.05 seconds)
+    // We want to pause at the middle/peak of this phase
+    const pauseTimeout = setTimeout(() => {
+      console.log('[ShareModal] 1400ms elapsed - setting pauseConfetti to true')
+      setPauseConfetti(true)
+      if (onPauseConfetti) {
+        onPauseConfetti()
       }
       
-      // Pause confetti during peak eruption (around frame 50-60, ~1000ms at 60fps)
-      // Peak eruption happens during the eruption boost phase (0-63 frames, ~1.05 seconds)
-      // We want to pause at the middle/peak of this phase
-      const pauseTimeout = setTimeout(() => {
-        console.log('[ShareModal] 1400ms elapsed - setting pauseConfetti to true')
-        setPauseConfetti(true)
-        if (onPauseConfetti) {
-          onPauseConfetti()
-        }
-        
-        // Capture the card using server-side Puppeteer after a delay
-        setTimeout(async () => {
+      // Capture the card using server-side Puppeteer after a delay
+      // Only capture once - check if we've already captured
+      if (!hasCapturedRef.current) {
+        const captureTimeout = setTimeout(async () => {
+          // Double-check we haven't captured yet (race condition protection)
+          if (hasCapturedRef.current) {
+            console.log('[ShareModal] Already captured, skipping')
+            return
+          }
+          
+          hasCapturedRef.current = true // Mark as capturing
           setIsCapturing(true)
+          
           try {
-            const response = await fetch('/api/capture-card', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(cardProps),
-            })
+            console.log('[ShareModal] Starting capture...')
+              const response = await fetch('/api/capture-card', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(cardPropsRef.current),
+              })
             
             if (response.ok) {
               const blob = await response.blob()
@@ -52,27 +89,28 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
               console.log('[ShareModal] Card captured successfully')
             } else {
               console.error('[ShareModal] Failed to capture card:', await response.text())
+              hasCapturedRef.current = false // Reset on error so user can try again
             }
           } catch (error) {
             console.error('[ShareModal] Error capturing card:', error)
+            hasCapturedRef.current = false // Reset on error so user can try again
           } finally {
             setIsCapturing(false)
           }
         }, 500) // Wait 500ms after pause to ensure card is fully rendered
-      }, 1400) // ~1400ms = peak eruption
-      
-      return () => {
-        clearTimeout(pauseTimeout)
-        document.body.style.overflow = ''
-        setPauseConfetti(false)
+        
+        return () => {
+          clearTimeout(captureTimeout)
+        }
+      } else {
+        console.log('[ShareModal] Capture already initiated, skipping duplicate')
       }
-    } else {
-      document.body.style.overflow = ''
-      setPauseConfetti(false)
-      setCapturedImage(null) // Reset captured image when modal closes
-      setIsCapturing(false)
+    }, 1400) // ~1400ms = peak eruption
+    
+    return () => {
+      clearTimeout(pauseTimeout)
     }
-  }, [isOpen, onPauseConfetti, onOpen, cardProps])
+  }, [isOpen, onPauseConfetti, onOpen]) // Removed cardProps from dependencies to prevent re-runs
 
   if (!isOpen || !cardProps) return null
 
@@ -97,8 +135,8 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
       <div
         className="relative bg-white rounded-[24px] shadow-2xl"
         style={{
-          width: '512px',
-          height: '512px',
+          width: '640px',
+          height: '480px',
           padding: '24px',
           display: 'flex',
           alignItems: 'center',

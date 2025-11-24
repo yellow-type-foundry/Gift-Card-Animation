@@ -22,10 +22,12 @@ export async function POST(request) {
     
     const page = await browser.newPage()
     
-    // Set viewport size
+    // Set viewport size - 4:3 aspect ratio
+    const captureWidth = 640
+    const captureHeight = 480 // 4:3 ratio (640 * 3/4 = 480)
     await page.setViewport({
-      width: 512,
-      height: 512,
+      width: captureWidth,
+      height: captureHeight,
       deviceScaleFactor: 2 // Higher DPI for better quality
     })
     
@@ -45,15 +47,15 @@ export async function POST(request) {
     // Use a simple delay function since waitForTimeout was removed
     await new Promise(resolve => setTimeout(resolve, 2000))
     
-    // Take screenshot of the entire page
+    // Take screenshot of the entire page - 4:3 ratio
     const screenshot = await page.screenshot({
       type: 'png',
       fullPage: false,
       clip: {
         x: 0,
         y: 0,
-        width: 512,
-        height: 512
+        width: captureWidth,
+        height: captureHeight
       }
     })
     
