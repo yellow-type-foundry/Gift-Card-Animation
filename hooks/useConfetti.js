@@ -20,18 +20,21 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
     const cardEl = cardRef.current
     if (!canvas || !cardEl) return
     
+    // Find third floor element (red line) - for Single 1 and Batch 1 only (Single 0 doesn't have third floor)
+    const thirdFloorElSingle1 = cardEl.querySelector('[data-name="Second Floor"][data-floor-type="single1"]')
+    const thirdFloorElBatch1 = cardEl.querySelector('[data-name="Second Floor"][data-floor-type="batch1"]')
+    // Single 0 doesn't have third floor, so exclude it
+    const thirdFloorEl = thirdFloorElSingle1 || thirdFloorElBatch1
+    
     // Find envelope/box element for collision detection
-    // For Single 1 (Gift Container), we don't want collision detection as it blocks particles
+    // For Single 1 (Gift Container) and Single 0 (GiftBoxContainer), we don't want collision detection as it blocks particles
     // Only use collision for actual envelopes/boxes (Batch 2, Single 2)
-    const envelopeEl = cardEl.querySelector('[data-name="Envelope"]')
+    // Single 0 doesn't have third floor, so check for GiftBoxContainer instead
+    const giftBoxContainerEl = cardEl.querySelector('[data-name="Gift Container/Goody"]')
+    const envelopeEl = giftBoxContainerEl ? null : cardEl.querySelector('[data-name="Envelope"]')
     
     // Find Union shape element - use its top as the confetti floor
     const unionEl = cardEl.querySelector('[data-name="Union"]')
-    
-    // Find third floor element (red line) - for Single 1 and Batch 1
-    const thirdFloorElSingle1 = cardEl.querySelector('[data-name="Second Floor"][data-floor-type="single1"]')
-    const thirdFloorElBatch1 = cardEl.querySelector('[data-name="Second Floor"][data-floor-type="batch1"]')
-    const thirdFloorEl = thirdFloorElSingle1 || thirdFloorElBatch1
     
     const ctx = canvas.getContext('2d')
     const ctxFront = canvasFront?.getContext('2d')
@@ -281,6 +284,12 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
     const maxEruptionBoost = 3.0 // 2x velocity boost at start (very strong eruption)
     const minEruptionBoost = 1.0 // No boost after eruption phase
     
+    // Check if this is Single 0: has GiftBoxContainer and no third floor
+    // Single 0 uses GiftBoxContainer (hideEnvelope=true, showGiftBoxWhenHidden=true) but no envelope collision
+    // Single 1 uses useGiftContainer (different from GiftBoxContainer) and has third floor
+    // Single 2 has envelope but hideEnvelope=true
+    const isSingle0 = !!giftBoxContainerEl && !thirdFloorEl
+    
     const spawnParticle = (initialY = null, frameCountAtSpawn = 0) => {
       // Calculate eruption velocity boost based on when particle spawns
       // Early particles get massive boost, later particles get less
@@ -321,7 +330,9 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
         y: spawnY,
         // More natural velocity - varied angles and speeds
         vx: (Math.random() * 2 - 1) * horizontalSpread * dpr + Math.sin(angleVariation) * particleSpeed * dpr * 0.3,
-        vy: -particleSpeed * dpr * Math.cos(angleVariation),
+        // Increase upward velocity for Single 0 only to ensure particles can reach the top of the card
+        // Layout 1 (Single 1) should not be affected
+        vy: -particleSpeed * dpr * Math.cos(angleVariation) * (isSingle0 ? 1.5 : 1.0), // 50% boost only for Single 0
         // Air resistance factor (confetti slows down over time) - reduced for heavier particles
         airResistance: 0.98 + Math.random() * 0.01, // 0.98-0.99 (less velocity decay for heavier feel)
         // Increased gravity for heavier particles
@@ -468,17 +479,19 @@ export default function useConfetti(isHovered, allAccepted, confettiCanvasRef, c
         // Use card bounds (accounting for offset) instead of canvas bounds
         const minX = cardBounds.minX + halfSize
         const maxX = cardBounds.maxX - halfSize
+        // For canvas at card level (Single 0), cardOffsetY should be 0, so minY should be 0
+        // But allow particles to reach the very top by using the actual card top (minY)
         const minY = cardBounds.minY + halfSize
         
-        // THIRD FLOOR INTERACTION (Single 1 and Batch 1 - red line position)
+        // THIRD FLOOR INTERACTION (Single 0, Single 1, and Batch 1 - red line position)
         // Floor hierarchy: 1st floor (lowest) = cutout valley, 2nd floor (middle) = Union top, 3rd floor (highest) = red line
         // Third floor allows both landing and bouncing
-        // Single 1: 100px width, Batch 1: 160px width
+        // Single 0: 100px width, Single 1: 100px width, Batch 1: 160px width
         if (cardBounds.secondFloorY !== null) {
           const thirdFloorTop = cardBounds.secondFloorY - halfSize
           const thirdFloorBottom = cardBounds.secondFloorY + halfSize
           
-          // Check if particle is within third floor horizontally (width varies: Single 1 = 100px, Batch 1 = 160px)
+          // Check if particle is within third floor horizontally (width varies: Single 0/1 = 100px, Batch 1 = 160px)
           const isWithinThirdFloorX = cardBounds.secondFloorLeft !== null && cardBounds.secondFloorRight !== null &&
             p.x >= cardBounds.secondFloorLeft - halfSize && p.x <= cardBounds.secondFloorRight + halfSize
           

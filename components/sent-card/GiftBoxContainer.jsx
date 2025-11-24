@@ -484,7 +484,7 @@ const GiftBoxContainer = ({
               style={{ 
                 width: GIFT_BOX_TOKENS.logo.width,
                 height: GIFT_BOX_TOKENS.logo.height,
-                transform: centerLogo ? 'scale(1.3)' : 'none',
+                transform: centerLogo ? 'scale(1.4)' : 'none',
                 mixBlendMode: enable3D && (animationType === 'highlight' || animationType === 'breathing') ? 'normal' : GIFT_BOX_TOKENS.blendModes.overlay,
                 paddingTop: '18px',
                 transition: 'mix-blend-mode 0.2s ease-out' // Smooth transition between blend modes

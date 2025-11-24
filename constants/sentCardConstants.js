@@ -248,6 +248,8 @@ export const LAYOUT_CONFIG = {
     hideEnvelope: true, // Hide envelope and show gift box instead (like Single 2)
     hideProgressBarInBox: true, // Hide progress bar inside the box
     centerLogoInBox: true, // Center logo at the very center of the box
+    enableConfetti: true, // Enable confetti for Single 0
+    showRedline: false, // Hide redline for Single 0
   },
   
   // Single card layout 1 (SentCard4) - Exact duplicate of Batch 1 (default)

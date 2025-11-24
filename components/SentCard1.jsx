@@ -104,6 +104,10 @@ const SentCard1 = ({
   hideProgressBarInBox = false,
   // Center logo at the very center of the box (for Single 0)
   centerLogoInBox = false,
+  // Enable confetti (for Single 0)
+  enableConfetti = false,
+  // Show redline (for Single 0)
+  showRedline = false,
   // Animation type for Single 2 cards: 'highlight', 'breathing', or 'none'
   animationType = 'highlight',
   // Standalone 3D toggle that works with highlight or breathing
@@ -377,8 +381,8 @@ const SentCard1 = ({
   
   const allAccepted = isDone
   
-  // Confetti animation - disabled for Batch 2 and Single 2
-  const shouldShowConfetti = !hideEnvelope
+  // Confetti animation - disabled for Batch 2 and Single 2, but can be enabled via prop (for Single 0)
+  const shouldShowConfetti = enableConfetti || !hideEnvelope
   useConfetti(shouldShowConfetti && isHovered, shouldShowConfetti && allAccepted, confettiCanvasRef, cardRef, confettiCanvasFrontRef, confettiCanvasMirroredRef)
 
   // Memoized style objects
@@ -596,7 +600,7 @@ const SentCard1 = ({
       data-animation-type={animationType}
       data-node-id="1467:49182"
     >
-      {/* Debug: Red line at estimated envelope top edge - only for Batch 1 (at card level) - SCALE-AWARE */}
+      {/* Debug: Red line at estimated envelope top edge - for Batch 1 only (at card level) - SCALE-AWARE */}
       {/* This is the third floor for confetti particles - particles can land here and roll off */}
       {(!useGiftContainer && !overlayProgressOnEnvelope && !progressOutsideEnvelope && !hideEnvelope) && (
         <div
@@ -609,7 +613,7 @@ const SentCard1 = ({
             top: `${(1 + (envelopeOffsetY || 0)) + 113}px`,
             left: '50%',
             transform: 'translateX(-50%)',
-            width: '160px',
+            width: '160px', // Batch 1 uses 160px width
             height: '1px',
             backgroundColor: 'red',
             zIndex: 9999,
@@ -618,6 +622,29 @@ const SentCard1 = ({
           }}
           aria-label="Debug: Envelope top edge (Batch 1) - Third Floor"
         />
+      )}
+      {/* Full card confetti canvas for Single 0 (enableConfetti) - at card level to avoid overflow clipping */}
+      {enableConfetti && hideEnvelope && showGiftBoxWhenHidden && (
+        <>
+          {/* Back layer - behind envelope/gift container */}
+          <canvas
+            ref={confettiCanvasRef}
+            className="absolute inset-0 pointer-events-none"
+            style={{ zIndex: 1, filter: CONFETTI_BACK_BLUR, position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+          />
+          {/* Front layer - in front of envelope/gift container */}
+          <canvas
+            ref={confettiCanvasFrontRef}
+            className="absolute inset-0 pointer-events-none"
+            style={{ zIndex: 5, filter: CONFETTI_BLUR, position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+          />
+          {/* Mirrored layer - vertically mirrored confetti */}
+          <canvas
+            ref={confettiCanvasMirroredRef}
+            className="absolute inset-0 pointer-events-none"
+            style={{ zIndex: 1, filter: CONFETTI_MIRRORED_BLUR, position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+          />
+        </>
       )}
       <div 
         className={`content-stretch flex flex-col items-start ${isMonochromeVariant ? 'overflow-visible' : 'overflow-hidden'} relative rounded-[inherit] w-full ${(progressOutsideEnvelope && headerHeight2 !== undefined) || (headerUseFlex && headerHeight !== undefined && !overlayProgressOnEnvelope && !progressOutsideEnvelope) || (overlayProgressOnEnvelope && headerUseFlex1 && headerHeight1 !== undefined && !progressOutsideEnvelope) ? 'h-full' : ''}`} 
