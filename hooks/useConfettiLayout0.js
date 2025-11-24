@@ -307,6 +307,8 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
     
     // Use unified confetti configuration
     const { colors, maxParticles, speed, horizontalDrift, gravity, size, rotation } = CONFETTI_CONFIG
+    // LAYOUT 0: Override maxParticles to 300 (Layout 1 uses CONFETTI_CONFIG.maxParticles)
+    const layout0MaxParticles = 300
     
     // Eruption velocity boost - particles spawn with extra velocity that decays over time
     const eruptionBoostFrames = 63 // Reduced by 30%: ~1.05 seconds (63 frames at 60fps, was 90)
@@ -428,7 +430,7 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
     }
     
     // Start with no particles - they will erupt gradually on hover
-    const targetParticleCount = Math.floor(maxParticles * 0.85 * 1.25) // 85% of max * 1.25x = 106.25% for Layout 0 (increased particle amount)
+    const targetParticleCount = 270 // 270 particles for Layout 0
     // Pre-allocate array (optimized: use for loop instead of map)
     const particles = new Array(targetParticleCount)
     for (let i = 0; i < targetParticleCount; i++) {
