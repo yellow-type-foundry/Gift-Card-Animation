@@ -38,8 +38,8 @@ export default function CapturePage() {
   if (!cardProps) {
     return (
       <div style={{ 
-        width: '720px', 
-        height: '540px', 
+        width: '540px', 
+        height: '720px', 
         display: 'flex', 
         alignItems: 'center', 
         justifyContent: 'center',
@@ -54,8 +54,8 @@ export default function CapturePage() {
 
   return (
     <div style={{
-      width: '720px',
-      height: '540px',
+      width: '540px',
+      height: '720px',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -91,8 +91,8 @@ export default function CapturePage() {
           html, body {
             margin: 0 !important;
             padding: 0 !important;
-            width: 720px;
-            height: 540px;
+            width: 540px;
+            height: 720px;
             overflow: hidden;
           }
           /* Hide progress bar and center gift info in capture */
