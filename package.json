@@ -10,11 +10,11 @@
     "postinstall": "node scripts/postinstall.mjs"
   },
   "dependencies": {
-    "@sparticuz/chromium": "^131.0.0",
-    "@sparticuz/chromium-min": "^131.0.0",
+    "@sparticuz/chromium": "^141.0.0",
+    "@sparticuz/chromium-min": "^141.0.0",
     "dom-to-image-more": "^3.7.2",
     "html2canvas": "^1.4.1",
-    "next": "^14.0.0",
+    "next": "^16.0.0",
     "puppeteer-core": "^24.31.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"

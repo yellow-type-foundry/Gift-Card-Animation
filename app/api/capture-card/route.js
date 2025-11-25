@@ -34,6 +34,8 @@ let downloadPromise = null
 /**
  * Downloads and caches the Chromium executable path.
  * Uses a download promise to prevent concurrent downloads.
+ * 
+ * First tries the custom tar file, then falls back to chromium-min's default download.
  */
 async function getChromiumPath() {
   // Return cached path if available
@@ -45,24 +47,37 @@ async function getChromiumPath() {
   // Prevent concurrent downloads by reusing the same promise
   if (!downloadPromise) {
     console.log('[DEBUG] Starting Chromium download from:', CHROMIUM_PACK_URL)
+    
+    // Try custom tar file first
     downloadPromise = chromium
       .executablePath(CHROMIUM_PACK_URL)
       .then((path) => {
         cachedExecutablePath = path
-        console.log('[DEBUG] Chromium path resolved successfully:', path)
+        console.log('[DEBUG] Chromium path resolved successfully from custom tar:', path)
         return path
       })
-      .catch((error) => {
-        console.error('[ERROR] Failed to get Chromium path from URL:', CHROMIUM_PACK_URL)
-        console.error('[ERROR] Error details:', error.message)
-        console.error('[ERROR] Error stack:', error.stack)
-        downloadPromise = null // Reset on error to allow retry
+      .catch((customTarError) => {
+        console.warn('[WARN] Failed to download from custom tar, trying default download:', customTarError.message)
         
-        // Provide helpful error message
-        throw new Error(
-          `Failed to download Chromium from ${CHROMIUM_PACK_URL}: ${error.message}. ` +
-          `Make sure the chromium-pack.tar file is accessible at this URL.`
-        )
+        // Fallback to chromium-min's default download (from GitHub releases)
+        // This includes all necessary libraries
+        return chromium
+          .executablePath() // No URL = use default GitHub releases
+          .then((path) => {
+            cachedExecutablePath = path
+            console.log('[DEBUG] Chromium path resolved successfully from default source:', path)
+            return path
+          })
+          .catch((defaultError) => {
+            console.error('[ERROR] Failed to get Chromium path from both sources')
+            console.error('[ERROR] Custom tar error:', customTarError.message)
+            console.error('[ERROR] Default download error:', defaultError.message)
+            downloadPromise = null // Reset on error to allow retry
+            
+            throw new Error(
+              `Failed to download Chromium: Custom tar (${customTarError.message}), Default (${defaultError.message})`
+            )
+          })
       })
   }
 
