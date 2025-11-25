@@ -3,7 +3,7 @@
 ## 🎯 Quick Wins (High Impact, Low Effort)
 
 ### 1. **Remove Console Logs from Production**
-**Location:** `hooks/useConfetti.js` (7 console.log statements)
+**Location:** `hooks/useConfettiLayout0.js` and `hooks/useConfettiLayout1.js` (console.log statements)
 **Impact:** Reduces bundle size, improves performance
 **Priority:** High
 **Fix:**
@@ -15,7 +15,7 @@ if (process.env.NODE_ENV === 'development') {
 ```
 
 ### 2. **Optimize Canvas Rendering**
-**Location:** `hooks/useConfetti.js` - `draw()` function
+**Location:** `hooks/useConfettiLayout0.js` and `hooks/useConfettiLayout1.js` - `draw()` function
 **Issue:** Clearing entire canvas every frame, drawing all particles even if off-screen
 **Impact:** Significant performance improvement on mobile devices
 **Priority:** High
@@ -26,7 +26,7 @@ if (process.env.NODE_ENV === 'development') {
 - Consider using `willReadFrequently: false` for better GPU acceleration
 
 ### 3. **Debounce Card Bounds Updates**
-**Location:** `hooks/useConfetti.js` line 587
+**Location:** `hooks/useConfettiLayout0.js` and `hooks/useConfettiLayout1.js`
 **Issue:** Random 1% chance to update bounds is inefficient
 **Impact:** More predictable performance
 **Priority:** Medium
@@ -58,7 +58,8 @@ if (frameCount % 60 === 0) { // Update every 60 frames (~1 second)
 **Priority:** Low
 **Fix:**
 ```javascript
-const useConfetti = lazy(() => import('@/hooks/useConfetti'))
+const useConfettiLayout0 = lazy(() => import('@/hooks/useConfettiLayout0'))
+const useConfettiLayout1 = lazy(() => import('@/hooks/useConfettiLayout1'))
 // Only load when card is hovered
 ```
 
@@ -76,7 +77,7 @@ const useConfetti = lazy(() => import('@/hooks/useConfetti'))
 ## ⚡ Performance Optimizations
 
 ### 7. **Optimize Particle Array Operations**
-**Location:** `hooks/useConfetti.js` - particle spawning/updating
+**Location:** `hooks/useConfettiLayout0.js` and `hooks/useConfettiLayout1.js` - particle spawning/updating
 **Issue:** Using `Array.from()` and `forEach()` for large arrays
 **Impact:** Better performance with 200+ particles
 **Priority:** Medium
@@ -123,7 +124,7 @@ const useConfetti = lazy(() => import('@/hooks/useConfetti'))
 ## 🔍 Code Quality
 
 ### 12. **Remove Debug Code**
-**Location:** `hooks/useConfetti.js` - debug red lines (already hidden with opacity: 0)
+**Location:** `hooks/useConfettiLayout0.js` and `hooks/useConfettiLayout1.js` - debug code
 **Impact:** Cleaner code
 **Priority:** Low
 **Recommendation:** Remove debug elements or wrap in `__DEV__` flag
