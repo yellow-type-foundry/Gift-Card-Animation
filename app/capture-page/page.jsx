@@ -83,15 +83,19 @@ export default function CapturePage() {
           [data-node-id="1467:49205"] {
             padding-bottom: 0 !important;
           }
+          /* Canvas layers: Back z-index 1, Box z-index 2, Front z-index 4-5 */
+          /* Ensure box is between back and front canvas layers */
+          /* For Layout 0: Blur canvases z-index 3, Front canvas z-index 4 */
+          /* For Layout 1: Back canvas z-index 1, Front canvas z-index 5 */
           [data-name="Envelope"],
           [data-name="Gift Container"] {
-            z-index: 20 !important;
+            z-index: 2 !important;
           }
           [data-name="Gift Container/Goody"] {
-            z-index: 20 !important;
+            z-index: 2 !important;
           }
           [data-name="Box"] {
-            z-index: 1 !important;
+            z-index: 2 !important;
           }
         `}</style>
       </div>

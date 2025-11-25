@@ -340,11 +340,14 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
         const unionOffsetY = (unionRect.top - canvasRect.top) * dpr
         unionTop = unionOffsetY
         
-        // Calculate cutout bounds (centered, 90px wide, ~21px deep)
-        // Cutout is centered on the card (300px wide card, cutout starts at 105px from left)
-        const cutoutWidth = 84 * dpr // 84px cutout width
-        const cutoutDepth = 21 * dpr // ~21px cutout depth
-        const cutoutLeftCard = 105 * dpr // Cutout left edge in card coordinates (centered: (300-90)/2 = 105)
+        // Calculate cutout bounds (centered, 84px wide, ~21px deep)
+        // Cutout is centered on the card - use actual card width, not hardcoded 300px
+        // cardWidth is already in DPR-scaled pixels (cardRect.width * dpr)
+        const cutoutWidth = 84 * dpr // 84px cutout width in DPR-scaled pixels
+        const cutoutDepth = 21 * dpr // ~21px cutout depth in DPR-scaled pixels
+        // Calculate cutout position - centered on card
+        // cutoutLeftCard = (cardWidth - cutoutWidth) / 2
+        const cutoutLeftCard = (cardWidth - cutoutWidth) / 2 // Centered cutout (already in DPR pixels)
         const cutoutRightCard = cutoutLeftCard + cutoutWidth // Cutout right edge
         
         // Convert to canvas coordinates (accounting for card offset)
@@ -764,9 +767,10 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
         // SECOND FLOOR (Union top) and FIRST FLOOR (cutout valley) interaction
         // Floor hierarchy: 1st floor (lowest) = cutout valley, 2nd floor (middle) = Union top
         // Check if particle is within Union cutout horizontally
+        // Use more lenient bounds check to ensure particles can enter cutout
         const isInCutout = cardBounds.unionCutout && 
-          p.x >= cardBounds.unionCutout.left - halfSize && 
-          p.x <= cardBounds.unionCutout.right + halfSize
+          p.x >= cardBounds.unionCutout.left - halfSize * 2 && 
+          p.x <= cardBounds.unionCutout.right + halfSize * 2
         
         // Determine floor based on whether particle is in cutout
         let maxY
