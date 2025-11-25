@@ -946,7 +946,13 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
       
       // Debug log every 30 frames
       if (frameCount % 30 === 0) {
-        console.log('[Confetti Layout0] Frame:', frameCount, 'Active particles:', activeParticleCount, 'Paused:', pauseRef.current, 'Slow motion:', isSlowMotion, 'Elapsed:', elapsedTime.toFixed(0) + 'ms')
+        const targetFrame = pauseAtFrameRef.current
+        console.log('[Confetti Layout0] Frame:', frameCount, 'Active particles:', activeParticleCount, 'Paused:', pauseRef.current, 'Slow motion:', isSlowMotion, 'Target frame:', targetFrame, 'Elapsed:', elapsedTime.toFixed(0) + 'ms')
+      }
+      
+      // CRITICAL: Log when we reach target frame for capture
+      if (pauseAtFrameRef.current !== null && frameCount === pauseAtFrameRef.current) {
+        console.log('[Confetti Layout0] ⚠️ REACHED TARGET FRAME', pauseAtFrameRef.current, '- SHOULD PAUSE NOW!')
       }
       
       // Update card bounds periodically in case of resize (every 60 frames ~1 second at 60fps)

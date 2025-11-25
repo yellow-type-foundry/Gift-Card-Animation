@@ -287,12 +287,20 @@ export async function POST(request) {
         const frameWaitTime = Date.now() - frameWaitStart
         const finalFrameCount = await page.evaluate(() => window.__confettiFrameCount || 0)
         const isPaused = await page.evaluate(() => window.__confettiPaused || false)
-        console.log('[DEBUG] Animation reached frame 180 and paused in', frameWaitTime, 'ms')
-        console.log('[DEBUG] Final frame count:', finalFrameCount, 'Paused:', isPaused)
+        console.log('[DEBUG] ✅ Animation reached frame 180 and paused in', frameWaitTime, 'ms')
+        console.log('[DEBUG] ✅ Final frame count:', finalFrameCount, 'Paused:', isPaused)
         
         // Verify we're at the correct frame (should be 180, but allow 180-183 for flexibility)
         if (finalFrameCount < 180 || finalFrameCount > 183) {
-          console.warn('[WARN] Frame count is', finalFrameCount, 'but expected 180-183')
+          console.warn('[WARN] ⚠️ Frame count is', finalFrameCount, 'but expected 180-183')
+        } else {
+          console.log('[DEBUG] ✅ Frame count is correct (180-183)')
+        }
+        
+        if (!isPaused) {
+          console.error('[ERROR] ❌ Animation is NOT paused! This is a problem!')
+        } else {
+          console.log('[DEBUG] ✅ Animation is correctly paused')
         }
         
         // Small buffer to ensure pause is fully applied and rendering is complete
