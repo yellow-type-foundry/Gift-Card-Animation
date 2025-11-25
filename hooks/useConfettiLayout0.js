@@ -22,6 +22,11 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
   // Use a ref to track pause state without causing effect re-runs
   // Initialize as false to ensure animation starts, then update from prop
   const pauseRef = useRef(false)
+  // Store pauseAtFrame in a ref to ensure it's accessible in closures
+  const pauseAtFrameRef = useRef(pauseAtFrame)
+  useEffect(() => {
+    pauseAtFrameRef.current = pauseAtFrame
+  }, [pauseAtFrame])
   useEffect(() => {
     const prevPause = pauseRef.current
     pauseRef.current = shouldPause
@@ -543,7 +548,7 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
     let animationStartTime = null // Track when animation started
     
     // Expose frameCount and pause state for Puppeteer to check (capture mode)
-    if (typeof window !== 'undefined' && pauseAtFrame !== null) {
+    if (typeof window !== 'undefined' && pauseAtFrameRef.current !== null) {
       window.__confettiFrameCount = 0
       window.__confettiPaused = false
     }
@@ -907,8 +912,9 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
       
       // CRITICAL: Check if we should pause at a specific frame (for capture)
       // This MUST happen immediately after incrementing frameCount
-      if (pauseAtFrame !== null && frameCount >= pauseAtFrame && !pauseRef.current) {
-        console.log('[Confetti Layout0] CRITICAL: Reached/past target frame', pauseAtFrame, 'at frame', frameCount, '- pausing immediately!')
+      const targetFrame = pauseAtFrameRef.current
+      if (targetFrame !== null && frameCount >= targetFrame && !pauseRef.current) {
+        console.log('[Confetti Layout0] CRITICAL: Reached/past target frame', targetFrame, 'at frame', frameCount, '- pausing immediately!')
         pauseRef.current = true
         // Stop the animation loop immediately
         if (animId) {
@@ -928,7 +934,7 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
       }
       
       // Expose frameCount for Puppeteer (capture mode)
-      if (typeof window !== 'undefined' && pauseAtFrame !== null) {
+      if (typeof window !== 'undefined' && targetFrame !== null) {
         window.__confettiFrameCount = frameCount
         window.__confettiPaused = pauseRef.current
       }
@@ -936,7 +942,7 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
       // Calculate elapsed time in milliseconds and check if slow motion should be active
       // DISABLE slow motion for capture mode (pauseAtFrame is set)
       const elapsedTime = performance.now() - animationStartTime
-      const isSlowMotion = pauseAtFrame === null && elapsedTime >= slowMotionStartTime
+      const isSlowMotion = targetFrame === null && elapsedTime >= slowMotionStartTime
       
       // Debug log every 30 frames
       if (frameCount % 30 === 0) {
@@ -1051,7 +1057,7 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
         // Apply slow-motion effect after 1400ms - particles float in space
         // DISABLE slow motion for capture mode (pauseAtFrame is set)
         let currentSlowMotionFactor = 1.0
-        if (isSlowMotion && pauseAtFrame === null) {
+        if (isSlowMotion && pauseAtFrameRef.current === null) {
           currentSlowMotionFactor = slowMotionFactor
         }
         
@@ -1197,8 +1203,9 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
       }
       
       // CRITICAL: Double-check pause state before continuing (safety check)
-      if (pauseAtFrame !== null && frameCount >= pauseAtFrame) {
-        console.log('[Confetti Layout0] SAFETY CHECK: Past target frame', pauseAtFrame, 'at frame', frameCount, '- forcing pause!')
+      const targetFrameCheck = pauseAtFrameRef.current
+      if (targetFrameCheck !== null && frameCount >= targetFrameCheck) {
+        console.log('[Confetti Layout0] SAFETY CHECK: Past target frame', targetFrameCheck, 'at frame', frameCount, '- forcing pause!')
         pauseRef.current = true
         if (animId) {
           cancelAnimationFrame(animId)
