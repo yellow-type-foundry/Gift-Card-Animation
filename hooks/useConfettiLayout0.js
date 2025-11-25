@@ -18,7 +18,7 @@ import { CONFETTI_CONFIG, CONFETTI_CONFIG_LAYOUT_0 } from '@/constants/sentCardC
  * @param {Array} blurCanvasRefs - Array of refs to blur canvas layers (Layout 0 only)
  * @param {boolean} shouldPause - Whether to pause the animation (freeze particles)
  */
-export default function useConfettiLayout0(isHovered, allAccepted, confettiCanvasRef, cardRef, confettiCanvasFrontRef = null, confettiCanvasMirroredRef = null, blurCanvasRefs = null, shouldPause = false, forceHovered = false) {
+export default function useConfettiLayout0(isHovered, allAccepted, confettiCanvasRef, cardRef, confettiCanvasFrontRef = null, confettiCanvasMirroredRef = null, blurCanvasRefs = null, shouldPause = false, forceHovered = false, pauseAtFrame = null) {
   // Use a ref to track pause state without causing effect re-runs
   // Initialize as false to ensure animation starts, then update from prop
   const pauseRef = useRef(false)
@@ -898,6 +898,20 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
       }
       
       frameCount++
+      
+      // Check if we should pause at a specific frame (for capture)
+      // Pause when we reach the target frame (allows a small range for flexibility)
+      if (pauseAtFrame !== null && frameCount >= pauseAtFrame && frameCount <= pauseAtFrame + 3) {
+        if (!pauseRef.current) {
+          console.log('[Confetti Layout0] Pausing at frame', frameCount, 'for capture (target:', pauseAtFrame, ')')
+          pauseRef.current = true
+          // Stop the animation loop
+          if (animId) {
+            cancelAnimationFrame(animId)
+            animId = null
+          }
+        }
+      }
       
       // Calculate elapsed time in milliseconds and check if slow motion should be active
       const elapsedTime = performance.now() - animationStartTime

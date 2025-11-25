@@ -60,6 +60,7 @@ export default function CapturePage() {
           showFooterProgress={false}
           pauseConfetti={false}
           forceHovered={true}
+          pauseAtFrame={180} // Pause at frame 180 (~3000ms at 60fps = well after peak, maximum particles visible)
         />
         <style jsx global>{`
           [data-name="InfoBarContent"] {

@@ -246,8 +246,8 @@ export async function POST(request) {
       throw new Error(`Page redirected to login page. Target was: ${targetUrl}, but ended up at: ${finalUrl}`)
     }
     
-    // Wait for React to hydrate and confetti canvas to appear (ensures confetti has started)
-    // Then wait for confetti to reach peak (slow motion starts at 1300ms, peak at ~1400ms)
+    // Wait for React to hydrate and confetti canvas to appear
+    // Animation will auto-pause at frame 84 (peak), so we just need to wait for it to reach that frame
     console.log('[DEBUG] Waiting for confetti canvas...')
     const canvasWaitStart = Date.now()
     try {
@@ -258,19 +258,21 @@ export async function POST(request) {
       const canvasWaitTime = Date.now() - canvasWaitStart
       console.log('[DEBUG] Canvas found in', canvasWaitTime, 'ms')
       
-      // Confetti peaks at ~1400ms from when animation starts (when canvas appears)
-      // Wait 1400ms from when canvas appears to ensure we capture at peak
-      const remainingTime = Math.max(0, 1400 - canvasWaitTime)
+      // Wait for animation to reach frame 180 - at 60fps, frame 180 = ~3000ms
+      // Animation will auto-pause at frame 180, so we just need to wait for it to reach that frame
+      // Reduce wait time: give it 2800ms total from canvas appearance (saves ~250ms)
+      const remainingTime = Math.max(0, 1800 - canvasWaitTime)
       if (remainingTime > 0) {
-        console.log('[DEBUG] Waiting for confetti peak (', remainingTime, 'ms remaining)...')
+        console.log('[DEBUG] Waiting for animation to reach pause frame (', remainingTime, 'ms remaining)...')
         await new Promise(resolve => setTimeout(resolve, remainingTime))
-      } else {
-        console.log('[DEBUG] Canvas wait took', canvasWaitTime, 'ms, confetti should already be at peak')
       }
+      // Give a small buffer to ensure pause has been applied
+      await new Promise(resolve => setTimeout(resolve, 100))
+      console.log('[DEBUG] Animation should be paused at frame 180')
     } catch (e) {
-      console.warn('[WARN] Canvas not found, using fallback timing (1400ms)')
-      // Fallback: wait 1400ms if canvas detection fails
-      await new Promise(resolve => setTimeout(resolve, 1400))
+      console.warn('[WARN] Canvas not found, using fallback timing (2800ms)')
+      // Fallback: wait 2800ms if canvas detection fails (frame 180 at 60fps)
+      await new Promise(resolve => setTimeout(resolve, 1800))
     }
     
     // Take screenshot of the entire page - 4:3 ratio

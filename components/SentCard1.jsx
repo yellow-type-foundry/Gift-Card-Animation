@@ -131,7 +131,8 @@ const SentCard1 = ({
   giftContainerTransformOrigin,
   // Modal/sharing mode props
   forceHovered = false,
-  pauseConfetti = false
+  pauseConfetti = false,
+  pauseAtFrame = null // Pause animation at specific frame for capture (e.g., 84 for peak)
 }) => {
   // Hooks
   const cardRef = useRef(null)
@@ -545,7 +546,8 @@ const SentCard1 = ({
     confettiCanvasMirroredRef, 
     blurCanvasRefs,
     finalPauseState,
-    forceHovered // Pass forceHovered directly to hook
+    forceHovered, // Pass forceHovered directly to hook
+    pauseAtFrame // Pass pauseAtFrame for frame-based capture
   )
   // Layout 1: Uses original, untouched hook (no Layout 0 features)
   useConfettiLayout1(
