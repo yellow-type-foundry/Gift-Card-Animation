@@ -9,12 +9,23 @@ export const runtime = 'nodejs'
 export const maxDuration = 30
 
 // URL to the Chromium binary package hosted in /public
-// In production, use the Vercel URL; otherwise use a fallback
-const CHROMIUM_PACK_URL = process.env.VERCEL_PROJECT_PRODUCTION_URL
-  ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}/chromium-pack.tar`
-  : process.env.VERCEL_URL
-  ? `https://${process.env.VERCEL_URL}/chromium-pack.tar`
-  : 'http://localhost:3004/chromium-pack.tar'
+// Construct URL based on available environment variables
+function getChromiumPackUrl() {
+  // Try different Vercel environment variables
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+    return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}/chromium-pack.tar`
+  }
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}/chromium-pack.tar`
+  }
+  if (process.env.NEXT_PUBLIC_BASE_URL) {
+    return `${process.env.NEXT_PUBLIC_BASE_URL}/chromium-pack.tar`
+  }
+  // Local development fallback
+  return 'http://localhost:3004/chromium-pack.tar'
+}
+
+const CHROMIUM_PACK_URL = getChromiumPackUrl()
 
 // Cache the Chromium executable path to avoid re-downloading on subsequent requests
 let cachedExecutablePath = null
@@ -33,17 +44,25 @@ async function getChromiumPath() {
 
   // Prevent concurrent downloads by reusing the same promise
   if (!downloadPromise) {
+    console.log('[DEBUG] Starting Chromium download from:', CHROMIUM_PACK_URL)
     downloadPromise = chromium
       .executablePath(CHROMIUM_PACK_URL)
       .then((path) => {
         cachedExecutablePath = path
-        console.log('[DEBUG] Chromium path resolved:', path)
+        console.log('[DEBUG] Chromium path resolved successfully:', path)
         return path
       })
       .catch((error) => {
-        console.error('[ERROR] Failed to get Chromium path:', error)
+        console.error('[ERROR] Failed to get Chromium path from URL:', CHROMIUM_PACK_URL)
+        console.error('[ERROR] Error details:', error.message)
+        console.error('[ERROR] Error stack:', error.stack)
         downloadPromise = null // Reset on error to allow retry
-        throw error
+        
+        // Provide helpful error message
+        throw new Error(
+          `Failed to download Chromium from ${CHROMIUM_PACK_URL}: ${error.message}. ` +
+          `Make sure the chromium-pack.tar file is accessible at this URL.`
+        )
       })
   }
 

@@ -35,7 +35,7 @@ export default function EnvelopeBase({ ids, baseTintColor }) {
         aria-hidden="true"
       />
       <svg
-        preserveAspectRatio="true"
+        preserveAspectRatio="xMidYMid meet"
         width="100%"
         height="100%"
         overflow="visible"
