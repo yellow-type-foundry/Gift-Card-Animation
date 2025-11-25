@@ -276,20 +276,22 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
         style={{
           width: '720px',
           height: '540px',
-          padding: '12px',
+          padding: capturedImage ? '0' : '24px',
+          margin: 0,
           display: 'flex',
-          overflow: 'auto',
+          overflow: 'hidden',
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          animation: 'scaleIn 0.2s ease-out'
+          animation: 'scaleIn 0.2s ease-out',
+          boxSizing: 'border-box'
         }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close button */}
         <button
           onClick={handleClose}
-          className="absolute top-6 right-6 w-10 h-10 flex items-center justify-center rounded-full bg-white/90 hover:bg-white shadow-lg transition-colors z-10"
+          className={`absolute ${capturedImage ? 'top-4 right-4' : 'top-4 right-4'} w-10 h-10 flex items-center justify-center rounded-full bg-white/90 hover:bg-white shadow-lg transition-colors z-20`}
           aria-label="Close"
         >
           <svg
@@ -315,11 +317,14 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
             position: 'relative',
             width: '100%',
             height: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            overflow: 'hidden'
+            display: capturedImage ? 'block' : 'flex',
+            flexDirection: capturedImage ? 'unset' : 'column',
+            alignItems: capturedImage ? 'unset' : 'center',
+            justifyContent: capturedImage ? 'unset' : 'center',
+            overflow: 'hidden',
+            gap: capturedImage ? '0' : '20px',
+            margin: 0,
+            padding: 0
           }}
         >
           {capturedImage ? (
@@ -328,16 +333,24 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
               src={capturedImage}
               alt="Captured card"
               style={{
-                  position: 'relative',
+                position: 'absolute',
+                top: 0,
+                left: 0,
                 width: '100%',
-                  maxHeight: 'calc(100% - 100px)',
-                objectFit: 'contain',
-                  borderRadius: '16px',
-                  flexShrink: 1
+                height: '100%',
+                objectFit: 'cover',
+                display: 'block',
+                margin: 0,
+                padding: 0
               }}
             />
               {/* Action buttons - only show when image is captured */}
-              <div className="relative flex items-center gap-3 mx-auto flex-shrink-0">
+              <div 
+                className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex items-center gap-3 z-20"
+                style={{
+                  pointerEvents: 'auto'
+                }}
+              >
                 {/* Recapture button */}
                 <button
                   onClick={handleRecapture}

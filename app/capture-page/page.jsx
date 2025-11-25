@@ -38,12 +38,14 @@ export default function CapturePage() {
   if (!cardProps) {
     return (
       <div style={{ 
-        width: '640px', 
-        height: '480px', 
+        width: '720px', 
+        height: '540px', 
         display: 'flex', 
         alignItems: 'center', 
         justifyContent: 'center',
-        background: 'white'
+        background: 'white',
+        margin: 0,
+        padding: 0
       }}>
         Loading...
       </div>
@@ -52,20 +54,24 @@ export default function CapturePage() {
 
   return (
     <div style={{
-      width: '640px',
-      height: '480px',
+      width: '720px',
+      height: '540px',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       background: 'white',
-      padding: '24px'
+      margin: 0,
+      padding: 0,
+      overflow: 'hidden'
     }}>
       <div style={{
         width: '100%',
         height: '100%',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        margin: 0,
+        padding: 0
       }}>
         <SentCard1
           {...cardProps}
@@ -76,6 +82,19 @@ export default function CapturePage() {
           forceHovered={!isStatic} // Only force hover if not static
         />
         <style jsx global>{`
+          /* Remove all default margins and padding */
+          * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+          }
+          html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 720px;
+            height: 540px;
+            overflow: hidden;
+          }
           /* Hide progress bar and center gift info in capture */
           [data-name="InfoBarContent"] {
             gap: 0 !important;
