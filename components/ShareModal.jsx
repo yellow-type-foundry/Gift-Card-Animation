@@ -20,21 +20,33 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden'
+      // Add class to body to pause all animations
+      document.body.classList.add('share-modal-open')
+      
       // Pause ALL CSS animations and transitions in the background
       // Create a style element to inject global CSS
       const style = document.createElement('style')
       style.id = 'share-modal-pause-animations'
       style.textContent = `
         /* Pause all animations and transitions when ShareModal is open */
-        /* Exclude the modal itself and its children */
-        body > *:not([data-share-modal]),
-        body > *:not([data-share-modal]) *,
-        body > *:not([data-share-modal]) *::before,
-        body > *:not([data-share-modal]) *::after {
+        /* Target everything, then exclude the modal and its children */
+        body.share-modal-open *,
+        body.share-modal-open *::before,
+        body.share-modal-open *::after {
           animation-play-state: paused !important;
           animation-duration: 0s !important;
           transition-duration: 0s !important;
           transition-delay: 0s !important;
+        }
+        /* Exception: Allow animations in the modal */
+        body.share-modal-open [data-share-modal],
+        body.share-modal-open [data-share-modal] *,
+        body.share-modal-open [data-share-modal] *::before,
+        body.share-modal-open [data-share-modal] *::after {
+          animation-play-state: running !important;
+          animation-duration: unset !important;
+          transition-duration: unset !important;
+          transition-delay: unset !important;
         }
       `
       document.head.appendChild(style)
@@ -47,6 +59,7 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
       setIsCapturing(true)
     } else {
       document.body.style.overflow = ''
+      document.body.classList.remove('share-modal-open')
       // Remove the style element to restore animations
       const style = document.getElementById('share-modal-pause-animations')
       if (style) {
@@ -60,6 +73,7 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
     
     return () => {
       document.body.style.overflow = ''
+      document.body.classList.remove('share-modal-open')
       // Cleanup: remove style element if modal is closed
       const style = document.getElementById('share-modal-pause-animations')
       if (style) {
