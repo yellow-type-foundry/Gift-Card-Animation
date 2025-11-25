@@ -98,15 +98,20 @@ export default function CapturePage() {
             overflow: hidden;
           }
           /* Make SentCard1 fill the entire capture area - override default 300px width */
-          /* Scale card from 300px to 720px = 2.4x scale */
           [data-name="Gift Card"] {
-            width: 300px !important;
-            height: auto !important;
-            transform: scale(2.4) !important;
-            transform-origin: center center !important;
+            width: 100% !important;
+            max-width: 720px !important;
+            height: 100% !important;
+            max-height: 540px !important;
             margin: 0 !important;
+            transform: none !important;
           }
-          /* Ensure the scaled card fits within 720x540 */
+          /* Override Tailwind responsive width constraint */
+          [data-name="Gift Card"].md\\:w-\\[300px\\] {
+            width: 100% !important;
+            max-width: 720px !important;
+          }
+          /* Ensure card content fills container */
           [data-name="Gift Card"] > div {
             width: 100% !important;
             height: 100% !important;
