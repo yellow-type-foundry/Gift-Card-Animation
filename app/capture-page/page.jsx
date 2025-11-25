@@ -62,17 +62,19 @@ export default function CapturePage() {
       background: 'white',
       margin: 0,
       padding: '24px',
-      boxSizing: 'border-box'
+      boxSizing: 'border-box',
+      overflow: 'hidden'
     }}>
       <div style={{
-        width: '100%',
-        height: '100%',
+        width: '720px',
+        height: '540px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         margin: 0,
         padding: 0,
-        position: 'relative'
+        position: 'relative',
+        overflow: 'hidden'
       }}>
         <div style={{
           width: '100%',
@@ -114,6 +116,7 @@ export default function CapturePage() {
             height: 540px;
             overflow: hidden;
           }
+<<<<<<< HEAD
           /* Make card responsive and proportionally scaled to fit padded area */
           /* Available space after 24px padding: 672px wide x 492px tall */
           /* Card should scale to fit BOTH width and height to ensure 24px padding all sides */

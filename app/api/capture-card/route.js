@@ -282,8 +282,8 @@ export async function POST(request) {
       }
     })
     
-    // Set viewport size - 4:3 aspect ratio
-    // Reduced deviceScaleFactor from 2 to 1 for faster rendering (still good quality at 720p)
+    // Set viewport size - 4:3 aspect ratio (landscape)
+    // Reduced deviceScaleFactor from 2 to 1 for faster rendering (still good quality)
     const captureWidth = 720
     const captureHeight = 540 // 4:3 ratio (720 * 3/4 = 540)
     await page.setViewport({
@@ -471,7 +471,7 @@ export async function POST(request) {
       }
     }
     
-    // Take screenshot of the entire page - 4:3 ratio
+    // Take screenshot of the entire page - 4:3 ratio (landscape)
     // Using JPEG with high quality (0.95) for faster encoding while maintaining excellent quality
     // JPEG at 0.95 quality is visually indistinguishable from PNG for social media sharing
     console.log('[TIMING] Taking screenshot...')
