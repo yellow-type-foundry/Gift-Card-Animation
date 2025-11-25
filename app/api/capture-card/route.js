@@ -192,8 +192,12 @@ export async function POST(request) {
     })
     
     // Navigate to the capture page with card props
-    // Detect base URL - use Vercel URL in production, or environment variable, or localhost
-    const baseUrl = process.env.VERCEL_URL
+    // Detect base URL - prioritize production URL (public), then preview URL, then env var, then localhost
+    // VERCEL_PROJECT_PRODUCTION_URL is the public production URL (no auth required)
+    // VERCEL_URL is the preview URL (may require auth)
+    const baseUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+      : process.env.VERCEL_URL
       ? `https://${process.env.VERCEL_URL}`
       : process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3004'
     
@@ -210,6 +214,13 @@ export async function POST(request) {
       timeout: 30000,
     })
     console.log('[DEBUG] Page loaded in', Date.now() - navigationStart, 'ms')
+    
+    // Verify we're on the correct page (not redirected to login)
+    const finalUrl = page.url()
+    console.log('[DEBUG] Final URL after navigation:', finalUrl)
+    if (finalUrl.includes('vercel.com/login') || finalUrl.includes('vercel.com/signin')) {
+      throw new Error(`Page redirected to login page. Target was: ${targetUrl}, but ended up at: ${finalUrl}`)
+    }
     
     // Simple fixed delay - no selector waiting (matches working example pattern)
     // Wait for React hydration + confetti animation to reach peak
