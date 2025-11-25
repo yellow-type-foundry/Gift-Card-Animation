@@ -44,39 +44,40 @@ async function getChromiumPath() {
 
   // Prevent concurrent downloads by reusing the same promise
   if (!downloadPromise) {
-    console.log('[DEBUG] Starting Chromium download from:', CHROMIUM_PACK_URL)
+    console.log('[DEBUG] Starting Chromium download')
     
     // Dynamically import chromium-min (matches working example)
     const chromium = (await import('@sparticuz/chromium-min')).default
     
-    // Try custom tar file first
+    // Try default download first (faster, may be cached by Vercel)
+    // Then fallback to custom tar if needed
     downloadPromise = chromium
-      .executablePath(CHROMIUM_PACK_URL)
+      .executablePath() // No URL = use default GitHub releases (faster, cached)
       .then((path) => {
         cachedExecutablePath = path
-        console.log('[DEBUG] Chromium path resolved successfully from custom tar:', path)
+        console.log('[DEBUG] Chromium path resolved successfully from default source:', path)
         return path
       })
-      .catch((customTarError) => {
-        console.warn('[WARN] Failed to download from custom tar, trying default download:', customTarError.message)
+      .catch((defaultError) => {
+        console.warn('[WARN] Failed to download from default source, trying custom tar:', defaultError.message)
+        console.log('[DEBUG] Custom tar URL:', CHROMIUM_PACK_URL)
         
-        // Fallback to chromium-min's default download (from GitHub releases)
-        // This includes all necessary libraries
+        // Fallback to custom tar file
         return chromium
-          .executablePath() // No URL = use default GitHub releases
+          .executablePath(CHROMIUM_PACK_URL)
           .then((path) => {
             cachedExecutablePath = path
-            console.log('[DEBUG] Chromium path resolved successfully from default source:', path)
+            console.log('[DEBUG] Chromium path resolved successfully from custom tar:', path)
             return path
           })
-          .catch((defaultError) => {
+          .catch((customTarError) => {
             console.error('[ERROR] Failed to get Chromium path from both sources')
-            console.error('[ERROR] Custom tar error:', customTarError.message)
             console.error('[ERROR] Default download error:', defaultError.message)
+            console.error('[ERROR] Custom tar error:', customTarError.message)
             downloadPromise = null // Reset on error to allow retry
             
             throw new Error(
-              `Failed to download Chromium: Custom tar (${customTarError.message}), Default (${defaultError.message})`
+              `Failed to download Chromium: Default (${defaultError.message}), Custom tar (${customTarError.message})`
             )
           })
       })
@@ -124,6 +125,8 @@ function findChromeExecutable() {
 
 export async function POST(request) {
   let browser = null
+  const requestStartTime = Date.now()
+  
   try {
     const cardProps = await request.json()
     
@@ -142,6 +145,7 @@ export async function POST(request) {
     // Launch Puppeteer browser with Vercel-optimized configuration
     // Use dynamic imports like working example
     let puppeteer, launchOptions
+    let chromiumPathTime = null // Track timing for logging
     
     if (isVercel) {
       // Vercel: use chromium-min with URL-based extraction
@@ -149,11 +153,16 @@ export async function POST(request) {
       console.log('[DEBUG] Chromium pack URL:', CHROMIUM_PACK_URL)
       
       // Dynamically import (matches working example)
+      const chromiumImportStart = Date.now()
       const chromium = (await import('@sparticuz/chromium-min')).default
       puppeteer = await import('puppeteer-core')
+      console.log('[DEBUG] Chromium imports took', Date.now() - chromiumImportStart, 'ms')
       
       // Get executable path using URL-based approach (downloads and extracts to /tmp)
+      const chromiumPathStart = Date.now()
       const executablePath = await getChromiumPath()
+      chromiumPathTime = Date.now() - chromiumPathStart
+      console.log('[DEBUG] Chromium path resolution took', chromiumPathTime, 'ms')
       
       console.log('[DEBUG] Chromium args count:', chromium.args?.length || 0)
       
@@ -199,9 +208,10 @@ export async function POST(request) {
       ...launchOptions,
       executablePath: launchOptions.executablePath ? '[REDACTED]' : undefined,
     })
-    const startTime = Date.now()
+    const browserLaunchStart = Date.now()
     browser = await puppeteer.launch(launchOptions)
-    console.log('[DEBUG] Browser launched in', Date.now() - startTime, 'ms')
+    const browserLaunchTime = Date.now() - browserLaunchStart
+    console.log('[DEBUG] Browser launched in', browserLaunchTime, 'ms')
     
     const page = await browser.newPage()
     
@@ -247,15 +257,16 @@ export async function POST(request) {
     }
     
     // Wait for React to hydrate and confetti canvas to appear
-    // Animation will auto-pause at frame 84 (peak), so we just need to wait for it to reach that frame
+    // Animation will auto-pause at frame 180 (peak), so we just need to wait for it to reach that frame
     console.log('[DEBUG] Waiting for confetti canvas...')
     const canvasWaitStart = Date.now()
+    let canvasWaitTime = null
     try {
       await page.waitForFunction(() => {
         const canvases = document.querySelectorAll('canvas')
         return canvases.length > 0
       }, { timeout: 2000 })
-      const canvasWaitTime = Date.now() - canvasWaitStart
+      canvasWaitTime = Date.now() - canvasWaitStart
       console.log('[DEBUG] Canvas found in', canvasWaitTime, 'ms')
       
       // Wait for animation to reach frame 180 - at 60fps, frame 180 = ~3000ms
@@ -288,11 +299,21 @@ export async function POST(request) {
         height: captureHeight,
       },
     })
-    console.log('[DEBUG] Screenshot taken in', Date.now() - screenshotStart, 'ms')
+    const screenshotTime = Date.now() - screenshotStart
+    console.log('[DEBUG] Screenshot taken in', screenshotTime, 'ms')
     console.log('[DEBUG] Screenshot size:', screenshot.length, 'bytes')
     
     await browser.close()
-    console.log('[DEBUG] Browser closed. Total time:', Date.now() - startTime, 'ms')
+    const totalTime = Date.now() - requestStartTime
+    console.log('[DEBUG] Browser closed. Total request time:', totalTime, 'ms')
+    console.log('[DEBUG] Time breakdown:')
+    if (isVercel) {
+      console.log('  - Chromium path:', chromiumPathTime || 'N/A', 'ms')
+    }
+    console.log('  - Browser launch:', browserLaunchTime, 'ms')
+    console.log('  - Page load:', pageLoadTime, 'ms')
+    console.log('  - Canvas wait:', canvasWaitTime || 'N/A', 'ms')
+    console.log('  - Screenshot:', screenshotTime, 'ms')
     
     // Return the screenshot as PNG
     return new NextResponse(screenshot, {
