@@ -166,9 +166,32 @@ export async function POST(request) {
     } else {
       // Local development: use regular puppeteer with bundled Chromium (matches working example)
       console.log('[DEBUG] Using local development configuration')
-      puppeteer = await import('puppeteer')
-      launchOptions = {
-        headless: true,
+      try {
+        puppeteer = await import('puppeteer')
+        launchOptions = {
+          headless: true,
+        }
+      } catch (importError) {
+        console.error('[ERROR] Failed to import puppeteer:', importError.message)
+        console.log('[DEBUG] Falling back to puppeteer-core with system Chrome')
+        // Fallback: use puppeteer-core with system Chrome
+        puppeteer = await import('puppeteer-core')
+        const chromePath = findChromeExecutable()
+        if (!chromePath) {
+          throw new Error(
+            'Puppeteer not found in devDependencies and Chrome/Chromium not found. ' +
+            'Please run: npm install --save-dev puppeteer'
+          )
+        }
+        launchOptions = {
+          executablePath: chromePath,
+          headless: true,
+          args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+          ],
+        }
       }
     }
     
