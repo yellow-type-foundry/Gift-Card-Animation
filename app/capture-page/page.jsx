@@ -63,6 +63,23 @@ export default function CapturePage() {
           pauseAtFrame={180} // Pause at frame 180 (~3000ms at 60fps = well after peak, maximum particles visible)
         />
         <style jsx global>{`
+          /* CRITICAL: Pause ALL CSS animations and transitions in capture mode */
+          /* Only confetti animation (JavaScript-controlled) should run - everything else is frozen */
+          *,
+          *::before,
+          *::after {
+            animation-play-state: paused !important;
+            animation-duration: 0s !important;
+            transition-duration: 0s !important;
+            transition-delay: 0s !important;
+          }
+          
+          /* Exception: Confetti canvas elements (they're controlled by JavaScript, not CSS) */
+          canvas {
+            animation-play-state: running !important;
+            animation-duration: unset !important;
+          }
+          
           [data-name="InfoBarContent"] {
             gap: 0 !important;
             padding-bottom: 16px !important;
