@@ -142,9 +142,14 @@ export async function POST(request) {
   }
 
   try {
+    // Check for static mode (from query param or body)
+    const url = new URL(request.url)
+    const isStaticMode = url.searchParams.get('static') === 'true'
+    
     const cardProps = await request.json()
     console.log('[TIMING] ========== CAPTURE REQUEST STARTED ==========')
     console.log('[TIMING] Request started at:', new Date(requestStartTime).toISOString())
+    console.log('[TIMING] Static mode:', isStaticMode ? 'ENABLED (no animation wait)' : 'DISABLED (wait for frame 180)')
     
     // Debug: Log environment detection
     console.log('[DEBUG] Environment check:')
@@ -212,11 +217,11 @@ export async function POST(request) {
         }
         launchOptions = {
           executablePath: chromePath,
-          headless: true,
-          args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-dev-shm-usage',
+      headless: true,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
           ],
         }
       }
@@ -254,7 +259,8 @@ export async function POST(request) {
       : process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3004'
     
     const propsString = encodeURIComponent(JSON.stringify(cardProps))
-    const targetUrl = `${baseUrl}/capture-page?props=${propsString}`
+    const staticParam = isStaticMode ? '&static=true' : ''
+    const targetUrl = `${baseUrl}/capture-page?props=${propsString}${staticParam}`
     
     console.log('[DEBUG] Base URL:', baseUrl)
     console.log('[DEBUG] Target URL:', targetUrl)
@@ -276,111 +282,131 @@ export async function POST(request) {
       throw new Error(`Page redirected to login page. Target was: ${targetUrl}, but ended up at: ${finalUrl}`)
     }
     
-    // Wait for React to hydrate and confetti canvas to appear
-    // Animation will auto-pause at frame 180 (peak), so we just need to wait for it to reach that frame
-    console.log('[TIMING] Waiting for confetti canvas and animation to start...')
-    const canvasWaitStart = Date.now()
-    try {
-      // Wait for canvas AND animation to start in one check (faster)
-      await page.waitForFunction(() => {
-        const canvases = document.querySelectorAll('canvas')
-        const frameCount = window.__confettiFrameCount || 0
-        return canvases.length > 0 && frameCount > 0
-      }, { timeout: 2000, polling: 50 })
-      timings.canvasWait = Date.now() - canvasWaitStart
-      timings.animationStart = Date.now()
-      console.log('[TIMING] Canvas found and animation started:', timings.canvasWait, 'ms')
-      console.log('[TIMING] Time since request start:', Date.now() - requestStartTime, 'ms')
-      
-      // Get initial frame count for debugging
-      const initialFrame = await page.evaluate(() => window.__confettiFrameCount || 0)
-      console.log('[TIMING] Initial frame count when animation detected:', initialFrame)
-      
-      // Now wait for frame 180 to be reached (animation should pause automatically)
-      // At 60fps, 180 frames = 3 seconds from when animation starts
-      console.log('[TIMING] Waiting for animation to reach frame 180...')
-      const frameWaitStart = Date.now()
+    // Wait for React to hydrate and page to be ready
+    if (isStaticMode) {
+      // Static mode: just wait for page to be ready (no animation)
+      console.log('[TIMING] Static mode: waiting for page to be ready (no animation)...')
+      const staticWaitStart = Date.now()
       try {
+        // Wait for the capture-ready indicator (set immediately in static mode)
         await page.waitForFunction(() => {
+          return document.getElementById('capture-ready') !== null
+        }, { timeout: 2000, polling: 50 })
+        timings.canvasWait = Date.now() - staticWaitStart
+        console.log('[TIMING] Page ready in static mode:', timings.canvasWait, 'ms')
+        console.log('[TIMING] Time since request start:', Date.now() - requestStartTime, 'ms')
+        // Small delay to ensure render is complete
+        await new Promise(resolve => setTimeout(resolve, 100))
+      } catch (e) {
+        console.warn('[WARN] Capture-ready indicator not found, using fallback timing')
+        await new Promise(resolve => setTimeout(resolve, 500))
+      }
+    } else {
+      // Animation mode: wait for confetti canvas and animation to reach frame 180
+      console.log('[TIMING] Waiting for confetti canvas and animation to start...')
+      const canvasWaitStart = Date.now()
+      try {
+        // Wait for canvas AND animation to start in one check (faster)
+        await page.waitForFunction(() => {
+          const canvases = document.querySelectorAll('canvas')
           const frameCount = window.__confettiFrameCount || 0
-          return frameCount >= 180
-        }, { 
-          timeout: 3200, // Max 3.2 seconds (180 frames at 60fps = 3s, plus small buffer)
-          polling: 50 // Check every 50ms for faster response
-        })
+          return canvases.length > 0 && frameCount > 0
+        }, { timeout: 2000, polling: 50 })
+        timings.canvasWait = Date.now() - canvasWaitStart
+        timings.animationStart = Date.now()
+        console.log('[TIMING] Canvas found and animation started:', timings.canvasWait, 'ms')
+        console.log('[TIMING] Time since request start:', Date.now() - requestStartTime, 'ms')
         
-        timings.frame180Reached = Date.now() - frameWaitStart
-        const timeFromAnimationStart = Date.now() - timings.animationStart
-        console.log('[TIMING] Frame 180 reached in:', timings.frame180Reached, 'ms')
-        console.log('[TIMING] Time from animation start to frame 180:', timeFromAnimationStart, 'ms')
-        console.log('[TIMING] Effective FPS:', (180 / (timeFromAnimationStart / 1000)).toFixed(1))
+        // Get initial frame count for debugging
+        const initialFrame = await page.evaluate(() => window.__confettiFrameCount || 0)
+        console.log('[TIMING] Initial frame count when animation detected:', initialFrame)
         
-        // Once frame 180 is reached, wait a tiny bit for pause to be applied
-        const pauseWaitStart = Date.now()
-        await new Promise(resolve => setTimeout(resolve, 30))
-        
-        // Verify pause state
-        const { frameCount: finalFrameCount, isPaused } = await page.evaluate(() => ({
-          frameCount: window.__confettiFrameCount || 0,
-          isPaused: window.__confettiPaused || false
-        }))
-        
-        timings.pauseApplied = Date.now() - pauseWaitStart
-        console.log('[TIMING] Pause applied in:', timings.pauseApplied, 'ms')
-        console.log('[TIMING] Final frame count:', finalFrameCount, 'Paused:', isPaused)
-        
-        // If not paused, force pause
-        if (!isPaused && finalFrameCount >= 180) {
-          console.log('[TIMING] Animation not paused, forcing pause...')
-          const forcePauseStart = Date.now()
-          await page.evaluate(() => {
-            if (window.__confettiPaused !== undefined) {
-              window.__confettiPaused = true
-            }
+        // Now wait for frame 180 to be reached (animation should pause automatically)
+        // At 60fps, 180 frames = 3 seconds from when animation starts
+        console.log('[TIMING] Waiting for animation to reach frame 180...')
+        const frameWaitStart = Date.now()
+        try {
+          await page.waitForFunction(() => {
+            const frameCount = window.__confettiFrameCount || 0
+            return frameCount >= 180
+          }, { 
+            timeout: 3200, // Max 3.2 seconds (180 frames at 60fps = 3s, plus small buffer)
+            polling: 50 // Check every 50ms for faster response
           })
+          
+          timings.frame180Reached = Date.now() - frameWaitStart
+          const timeFromAnimationStart = Date.now() - timings.animationStart
+          console.log('[TIMING] Frame 180 reached in:', timings.frame180Reached, 'ms')
+          console.log('[TIMING] Time from animation start to frame 180:', timeFromAnimationStart, 'ms')
+          console.log('[TIMING] Effective FPS:', (180 / (timeFromAnimationStart / 1000)).toFixed(1))
+          
+          // Once frame 180 is reached, wait a tiny bit for pause to be applied
+          const pauseWaitStart = Date.now()
           await new Promise(resolve => setTimeout(resolve, 30))
-          console.log('[TIMING] Force pause took:', Date.now() - forcePauseStart, 'ms')
-        }
-        
-        // Verify we're at the correct frame (should be 180, but allow 180-183 for flexibility)
-        if (finalFrameCount < 180 || finalFrameCount > 183) {
-          console.warn('[WARN] ⚠️ Frame count is', finalFrameCount, 'but expected 180-183')
-        } else {
-          console.log('[TIMING] ✅ Frame count is correct (180-183)')
-        }
-      } catch (frameWaitError) {
-        console.error('[ERROR] Frame wait timeout!', frameWaitError.message)
-        // Batch evaluations to reduce round-trips
-        const { frameCount: currentFrame, isPaused } = await page.evaluate(() => ({
-          frameCount: window.__confettiFrameCount || 0,
-          isPaused: window.__confettiPaused || false
-        }))
-        console.error('[ERROR] Current frame:', currentFrame, 'Paused:', isPaused)
-        
-        // If we're at or past frame 180, proceed immediately (don't wait more)
-        if (currentFrame >= 180) {
-          console.log('[DEBUG] Already at frame 180+, proceeding with capture')
-          if (!isPaused) {
-            console.log('[DEBUG] Forcing pause at frame', currentFrame)
+          
+          // Verify pause state
+          const { frameCount: finalFrameCount, isPaused } = await page.evaluate(() => ({
+            frameCount: window.__confettiFrameCount || 0,
+            isPaused: window.__confettiPaused || false
+          }))
+          
+          timings.pauseApplied = Date.now() - pauseWaitStart
+          console.log('[TIMING] Pause applied in:', timings.pauseApplied, 'ms')
+          console.log('[TIMING] Final frame count:', finalFrameCount, 'Paused:', isPaused)
+          
+          // If not paused, force pause
+          if (!isPaused && finalFrameCount >= 180) {
+            console.log('[TIMING] Animation not paused, forcing pause...')
+            const forcePauseStart = Date.now()
             await page.evaluate(() => {
               if (window.__confettiPaused !== undefined) {
                 window.__confettiPaused = true
               }
             })
             await new Promise(resolve => setTimeout(resolve, 30))
+            console.log('[TIMING] Force pause took:', Date.now() - forcePauseStart, 'ms')
           }
-        } else {
-          // If we're not at frame 180 yet, wait a bit more (but not too long)
-          const remainingFrames = 180 - currentFrame
-          const estimatedWait = Math.min((remainingFrames / 60) * 1000, 1500) // Max 1.5 seconds
-          console.log('[DEBUG] Not at frame 180 yet (at', currentFrame, '), waiting', estimatedWait.toFixed(0), 'ms...')
-          await new Promise(resolve => setTimeout(resolve, estimatedWait))
+          
+          // Verify we're at the correct frame (should be 180, but allow 180-183 for flexibility)
+          if (finalFrameCount < 180 || finalFrameCount > 183) {
+            console.warn('[WARN] ⚠️ Frame count is', finalFrameCount, 'but expected 180-183')
+          } else {
+            console.log('[TIMING] ✅ Frame count is correct (180-183)')
+          }
+        } catch (frameWaitError) {
+          console.error('[ERROR] Frame wait timeout!', frameWaitError.message)
+          // Batch evaluations to reduce round-trips
+          const { frameCount: currentFrame, isPaused } = await page.evaluate(() => ({
+            frameCount: window.__confettiFrameCount || 0,
+            isPaused: window.__confettiPaused || false
+          }))
+          console.error('[ERROR] Current frame:', currentFrame, 'Paused:', isPaused)
+          
+          // If we're at or past frame 180, proceed immediately (don't wait more)
+          if (currentFrame >= 180) {
+            console.log('[DEBUG] Already at frame 180+, proceeding with capture')
+            if (!isPaused) {
+              console.log('[DEBUG] Forcing pause at frame', currentFrame)
+              await page.evaluate(() => {
+                if (window.__confettiPaused !== undefined) {
+                  window.__confettiPaused = true
+                }
+              })
+              await new Promise(resolve => setTimeout(resolve, 30))
+            }
+          } else {
+            // If we're not at frame 180 yet, wait a bit more (but not too long)
+            const remainingFrames = 180 - currentFrame
+            const estimatedWait = Math.min((remainingFrames / 60) * 1000, 1500) // Max 1.5 seconds
+            console.log('[DEBUG] Not at frame 180 yet (at', currentFrame, '), waiting', estimatedWait.toFixed(0), 'ms...')
+            await new Promise(resolve => setTimeout(resolve, estimatedWait))
+          }
         }
+      } catch (e) {
+        console.warn('[WARN] Canvas not found, using fallback timing')
+        // Fallback: wait 3000ms if canvas detection fails (frame 180 at 60fps = 3 seconds)
+        await new Promise(resolve => setTimeout(resolve, 3000))
       }
-    } catch (e) {
-      console.warn('[WARN] Canvas not found, using fallback timing')
-      // Fallback: wait 3000ms if canvas detection fails (frame 180 at 60fps = 3 seconds)
-      await new Promise(resolve => setTimeout(resolve, 3000))
     }
     
     // Take screenshot of the entire page - 4:3 ratio
@@ -437,7 +463,7 @@ export async function POST(request) {
     
     if (browser) {
       try {
-        await browser.close()
+      await browser.close()
         console.log('[DEBUG] Browser closed after error')
       } catch (closeError) {
         console.error('[ERROR] Failed to close browser:', closeError.message)

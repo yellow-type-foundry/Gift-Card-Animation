@@ -167,7 +167,7 @@ const SentCard1 = ({
       }, 0)
       return () => {
         clearTimeout(timeout)
-      }
+    }
     }
     // Note: We don't call handleHoverLeave() here because:
     // 1. When modal closes, the modal's SentCard1 is unmounted (so this effect cleanup runs)

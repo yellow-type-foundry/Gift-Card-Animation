@@ -17,7 +17,7 @@ export default function useProgressAnimation(progress) {
   // Use useMemo to prevent recalculation on every render
   const targetProgressPercentage = useMemo(() => 
     validatedProgress.total > 0 
-      ? (validatedProgress.current / validatedProgress.total) * 100 
+    ? (validatedProgress.current / validatedProgress.total) * 100 
       : 0,
     [validatedProgress.current, validatedProgress.total]
   )

@@ -5,16 +5,30 @@ import SentCard1 from '@/components/SentCard1'
 
 export default function CapturePage() {
   const [cardProps, setCardProps] = useState(null)
+  const [isReady, setIsReady] = useState(false)
+  const [isStatic, setIsStatic] = useState(false)
 
   useEffect(() => {
     // Get props from URL query params
     const params = new URLSearchParams(window.location.search)
     const propsParam = params.get('props')
+    const staticMode = params.get('static') === 'true'
+    setIsStatic(staticMode)
     
     if (propsParam) {
       try {
         const props = JSON.parse(decodeURIComponent(propsParam))
         setCardProps(props)
+        
+        if (staticMode) {
+          // Static mode: mark ready immediately (no animation wait)
+          setIsReady(true)
+        } else {
+          // Wait for confetti animation to reach peak (1400ms) then mark as ready
+          setTimeout(() => {
+            setIsReady(true)
+          }, 2000) // Wait 2 seconds for animation to reach peak
+        }
       } catch (error) {
         console.error('Error parsing card props:', error)
       }
@@ -24,8 +38,8 @@ export default function CapturePage() {
   if (!cardProps) {
     return (
       <div style={{ 
-        width: '720px', 
-        height: '540px', 
+        width: '640px', 
+        height: '480px', 
         display: 'flex', 
         alignItems: 'center', 
         justifyContent: 'center',
@@ -38,8 +52,8 @@ export default function CapturePage() {
 
   return (
     <div style={{
-      width: '720px',
-      height: '540px',
+      width: '640px',
+      height: '480px',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -58,65 +72,55 @@ export default function CapturePage() {
           boxScale={1.3}
           showFooterReminder={false}
           showFooterProgress={false}
-          pauseConfetti={false}
-          forceHovered={true}
-          pauseAtFrame={180} // Pause at frame 180 (~3000ms at 60fps = well after peak, maximum particles visible)
+          pauseConfetti={isStatic} // Disable confetti in static mode
+          forceHovered={!isStatic} // Only force hover if not static
         />
         <style jsx global>{`
-          /* CRITICAL: Pause ALL CSS animations and transitions in capture mode */
-          /* Only confetti animation (JavaScript-controlled) should run - everything else is frozen */
-          *,
-          *::before,
-          *::after {
-            animation-play-state: paused !important;
-            animation-duration: 0s !important;
-            transition-duration: 0s !important;
-            transition-delay: 0s !important;
-          }
-          
-          /* Exception: Confetti canvas elements (they're controlled by JavaScript, not CSS) */
-          canvas {
-            animation-play-state: running !important;
-            animation-duration: unset !important;
-          }
-          
+          /* Hide progress bar and center gift info in capture */
           [data-name="InfoBarContent"] {
             gap: 0 !important;
             padding-bottom: 16px !important;
           }
+          /* Hide progress bar container */
           [data-name="ProgressSlot"] {
             display: none !important;
           }
+          /* Hide reminder bar container */
           [data-name="ReminderBar"] {
             display: none !important;
           }
+          /* Remove minHeight from progress/reminder slot container when both are hidden */
           [data-name="InfoBarContent"] > div.relative {
             min-height: 0 !important;
           }
+          /* Center gift info block */
           [data-name="Gift Message"] {
             align-items: center !important;
             text-align: center !important;
             margin: 0 auto !important;
           }
+          /* Reduce footer bottom padding to remove extra space */
           [data-node-id="1467:49205"] {
             padding-bottom: 0 !important;
           }
-          /* Canvas layers: Back z-index 1, Box z-index 2, Front z-index 4-5 */
-          /* Ensure box is between back and front canvas layers */
-          /* For Layout 0: Blur canvases z-index 3, Front canvas z-index 4 */
-          /* For Layout 1: Back canvas z-index 1, Front canvas z-index 5 */
+          /* Ensure box/envelope container stays behind union shape (z-index 25) */
           [data-name="Envelope"],
           [data-name="Gift Container"] {
-            z-index: 2 !important;
+            z-index: 20 !important;
           }
+          /* Ensure gift box container stays behind union shape */
           [data-name="Gift Container/Goody"] {
-            z-index: 2 !important;
+            z-index: 20 !important;
           }
           [data-name="Box"] {
-            z-index: 2 !important;
+            z-index: 1 !important;
           }
         `}</style>
       </div>
+      {isReady && (
+        <div id="capture-ready" style={{ display: 'none' }}>Ready</div>
+      )}
     </div>
   )
 }
+

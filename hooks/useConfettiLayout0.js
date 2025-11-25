@@ -1362,8 +1362,8 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
       
       // Continue animation loop ONLY if not paused
       if (!pauseRef.current) {
-        animId = requestAnimationFrame(draw)
-        animIdRef.current = animId // Store in ref
+      animId = requestAnimationFrame(draw)
+      animIdRef.current = animId // Store in ref
       } else {
         console.log('[Confetti Layout0] Skipping requestAnimationFrame - paused at frame', frameCount)
       }
@@ -1388,14 +1388,14 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
       // The effect will restart if conditions are still met
       
       // ALWAYS cancel animation frames to prevent infinite loops
-      if (animIdRef.current) {
-        cancelAnimationFrame(animIdRef.current)
-        animIdRef.current = null
-      }
-      if (animId) {
-        cancelAnimationFrame(animId)
-        animId = null
-      }
+        if (animIdRef.current) {
+          cancelAnimationFrame(animIdRef.current)
+          animIdRef.current = null
+        }
+        if (animId) {
+          cancelAnimationFrame(animId)
+          animId = null
+        }
       
       // Only clear canvases and reset state if conditions are no longer met
       // This prevents clearing during fade-out or when conditions are still valid
@@ -1404,13 +1404,13 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
       if (shouldFullCleanup) {
         // Defer canvas clearing to avoid blocking
         requestAnimationFrame(() => {
-          ctx && ctx.clearRect(0, 0, canvas.width, canvas.height)
-          if (ctxFront) ctxFront.clearRect(0, 0, canvasFront.width, canvasFront.height)
-          if (ctxMirrored) ctxMirrored.clearRect(0, 0, canvasMirrored.width, canvasMirrored.height)
-          blurContexts.forEach(blurCtx => {
-            if (blurCtx && blurCtx.canvas) {
-              blurCtx.clearRect(0, 0, blurCtx.canvas.width, blurCtx.canvas.height)
-            }
+        ctx && ctx.clearRect(0, 0, canvas.width, canvas.height)
+        if (ctxFront) ctxFront.clearRect(0, 0, canvasFront.width, canvasFront.height)
+        if (ctxMirrored) ctxMirrored.clearRect(0, 0, canvasMirrored.width, canvasMirrored.height)
+        blurContexts.forEach(blurCtx => {
+          if (blurCtx && blurCtx.canvas) {
+            blurCtx.clearRect(0, 0, blurCtx.canvas.width, blurCtx.canvas.height)
+          }
           })
         })
         hasInitializedRef.current = false

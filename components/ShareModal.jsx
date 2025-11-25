@@ -179,50 +179,54 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
     }
     
     // Start capture immediately - server handles all timing
-    // Only capture once - check if we've already captured
-    if (!hasCapturedRef.current) {
-      const captureTimeout = setTimeout(async () => {
-        // Double-check we haven't captured yet (race condition protection)
-        if (hasCapturedRef.current) {
-          console.log('[ShareModal] Already captured, skipping')
-          return
-        }
-        
-        hasCapturedRef.current = true // Mark as capturing
-        setIsCapturing(true)
-        
-        try {
-          console.log('[ShareModal] Starting capture...')
-          const response = await fetch('/api/capture-card', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(cardPropsRef.current),
-          })
-          
-          if (response.ok) {
-            const blob = await response.blob()
-            const imageUrl = URL.createObjectURL(blob)
-            setCapturedImage(imageUrl)
-            console.log('[ShareModal] Card captured successfully')
-          } else {
-            console.error('[ShareModal] Failed to capture card:', await response.text())
-            hasCapturedRef.current = false // Reset on error so user can try again
+      // Only capture once - check if we've already captured
+      if (!hasCapturedRef.current) {
+        const captureTimeout = setTimeout(async () => {
+          // Double-check we haven't captured yet (race condition protection)
+          if (hasCapturedRef.current) {
+            console.log('[ShareModal] Already captured, skipping')
+            return
           }
-        } catch (error) {
-          console.error('[ShareModal] Error capturing card:', error)
-          hasCapturedRef.current = false // Reset on error so user can try again
-        } finally {
-          setIsCapturing(false)
-        }
+          
+          hasCapturedRef.current = true // Mark as capturing
+          setIsCapturing(true)
+          
+          try {
+            console.log('[ShareModal] Starting capture...')
+            // TESTING: Enable static mode by adding ?static=true to skip animation wait
+            // Change to false to test with animation
+            const USE_STATIC_MODE = true
+            const apiUrl = USE_STATIC_MODE ? '/api/capture-card?static=true' : '/api/capture-card'
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(cardPropsRef.current),
+              })
+            
+            if (response.ok) {
+              const blob = await response.blob()
+              const imageUrl = URL.createObjectURL(blob)
+              setCapturedImage(imageUrl)
+              console.log('[ShareModal] Card captured successfully')
+            } else {
+              console.error('[ShareModal] Failed to capture card:', await response.text())
+              hasCapturedRef.current = false // Reset on error so user can try again
+            }
+          } catch (error) {
+            console.error('[ShareModal] Error capturing card:', error)
+            hasCapturedRef.current = false // Reset on error so user can try again
+          } finally {
+            setIsCapturing(false)
+          }
       }, 0) // Start capture immediately - server handles timing
-      
-      return () => {
-        clearTimeout(captureTimeout)
-      }
-    } else {
-      console.log('[ShareModal] Capture already initiated, skipping duplicate')
+        
+        return () => {
+          clearTimeout(captureTimeout)
+        }
+      } else {
+        console.log('[ShareModal] Capture already initiated, skipping duplicate')
     }
   }, [isOpen, onPauseConfetti, onOpen]) // Removed cardProps from dependencies to prevent re-runs
 
@@ -288,21 +292,21 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
           className="absolute top-6 right-6 w-10 h-10 flex items-center justify-center rounded-full bg-white/90 hover:bg-white shadow-lg transition-colors z-10"
           aria-label="Close"
         >
-            <svg
+          <svg
               width="18"
               height="18"
-              viewBox="0 0 16 16"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M12 4L4 12M4 4L12 12"
-                stroke="#525F7A"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+            viewBox="0 0 16 16"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M12 4L4 12M4 4L12 12"
+              stroke="#525F7A"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
         </button>
 
         {/* Render actual card component or captured image */}
@@ -320,18 +324,18 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
         >
           {capturedImage ? (
             <>
-              <img
-                src={capturedImage}
-                alt="Captured card"
-                style={{
+            <img
+              src={capturedImage}
+              alt="Captured card"
+              style={{
                   position: 'relative',
-                  width: '100%',
+                width: '100%',
                   maxHeight: 'calc(100% - 100px)',
-                  objectFit: 'contain',
+                objectFit: 'contain',
                   borderRadius: '16px',
                   flexShrink: 1
-                }}
-              />
+              }}
+            />
               {/* Action buttons - only show when image is captured */}
               <div className="relative flex items-center gap-3 mx-auto flex-shrink-0">
                 {/* Recapture button */}
@@ -396,13 +400,13 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
                     justifyContent: 'center' 
                   }}
                 >
-                  <SentCard1
-                    {...cardProps}
-                    showFooterReminder={false}
-                    showFooterProgress={false}
-                    pauseConfetti={pauseConfetti}
-                    forceHovered={true}
-                  />
+              <SentCard1
+                {...cardProps}
+                showFooterReminder={false}
+                showFooterProgress={false}
+                pauseConfetti={pauseConfetti}
+                forceHovered={true}
+              />
                 </div>
               )}
               {/* Show capturing badge when capturing */}
@@ -420,16 +424,16 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
                   <div
                     style={{
                       background: 'rgba(0, 0, 0, 0.75)',
-                      color: 'white',
+                    color: 'white',
                       padding: '16px 28px',
                       borderRadius: '12px',
                       fontSize: '15px',
                       fontWeight: 500,
                       backdropFilter: 'blur(8px)',
                       boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
-                    }}
-                  >
-                    Capturing...
+                  }}
+                >
+                  Capturing...
                   </div>
                 </div>
               )}
