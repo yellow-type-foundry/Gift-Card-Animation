@@ -8,6 +8,48 @@ import { existsSync } from 'fs'
 export const runtime = 'nodejs'
 export const maxDuration = 30
 
+// URL to the Chromium binary package hosted in /public
+// In production, use the Vercel URL; otherwise use a fallback
+const CHROMIUM_PACK_URL = process.env.VERCEL_PROJECT_PRODUCTION_URL
+  ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}/chromium-pack.tar`
+  : process.env.VERCEL_URL
+  ? `https://${process.env.VERCEL_URL}/chromium-pack.tar`
+  : 'http://localhost:3004/chromium-pack.tar'
+
+// Cache the Chromium executable path to avoid re-downloading on subsequent requests
+let cachedExecutablePath = null
+let downloadPromise = null
+
+/**
+ * Downloads and caches the Chromium executable path.
+ * Uses a download promise to prevent concurrent downloads.
+ */
+async function getChromiumPath() {
+  // Return cached path if available
+  if (cachedExecutablePath) {
+    console.log('[DEBUG] Using cached Chromium path:', cachedExecutablePath)
+    return cachedExecutablePath
+  }
+
+  // Prevent concurrent downloads by reusing the same promise
+  if (!downloadPromise) {
+    downloadPromise = chromium
+      .executablePath(CHROMIUM_PACK_URL)
+      .then((path) => {
+        cachedExecutablePath = path
+        console.log('[DEBUG] Chromium path resolved:', path)
+        return path
+      })
+      .catch((error) => {
+        console.error('[ERROR] Failed to get Chromium path:', error)
+        downloadPromise = null // Reset on error to allow retry
+        throw error
+      })
+  }
+
+  return downloadPromise
+}
+
 // Configure Chromium for Vercel (if method is available)
 if (typeof chromium.setGraphicsMode === 'function') {
   chromium.setGraphicsMode(false)
@@ -67,48 +109,12 @@ export async function POST(request) {
     // Launch Puppeteer browser with Vercel-optimized configuration
     let launchOptions
     if (isVercel) {
-      // Vercel: use chromium-min
+      // Vercel: use chromium-min with URL-based extraction
       console.log('[DEBUG] Using Vercel configuration with chromium-min')
+      console.log('[DEBUG] Chromium pack URL:', CHROMIUM_PACK_URL)
       
-      // In serverless environments, chromium-min needs to extract to /tmp
-      // Set the extraction path explicitly if the package supports it
-      if (process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.VERCEL) {
-        // Force extraction to /tmp in serverless environments
-        process.env.CHROMIUM_PATH = '/tmp/chromium'
-      }
-      
-      // Get executable path with error handling
-      let executablePath
-      try {
-        executablePath = await chromium.executablePath()
-        console.log('[DEBUG] Chromium executable path:', executablePath)
-        
-        // If the path doesn't exist, try /tmp/chromium directly
-        if (!existsSync(executablePath)) {
-          console.log('[DEBUG] Executable path does not exist, trying /tmp/chromium')
-          const tmpPath = '/tmp/chromium'
-          if (existsSync(tmpPath)) {
-            executablePath = tmpPath
-            console.log('[DEBUG] Using /tmp/chromium as executable path')
-          }
-        }
-      } catch (execPathError) {
-        console.error('[ERROR] Failed to get chromium executable path:', execPathError.message)
-        console.error('[ERROR] Error stack:', execPathError.stack)
-        
-        // Try /tmp/chromium as fallback
-        const tmpPath = '/tmp/chromium'
-        if (existsSync(tmpPath)) {
-          console.log('[DEBUG] Using /tmp/chromium as fallback executable path')
-          executablePath = tmpPath
-        } else {
-          throw new Error(
-            `Chromium executable path error: ${execPathError.message}. ` +
-            `This usually means the Chromium binary wasn't extracted correctly. ` +
-            `Check that @sparticuz/chromium-min is properly installed.`
-          )
-        }
-      }
+      // Get executable path using URL-based approach (downloads and extracts to /tmp)
+      const executablePath = await getChromiumPath()
       
       console.log('[DEBUG] Chromium args count:', chromium.args?.length || 0)
       console.log('[DEBUG] Chromium headless:', chromium.headless)
