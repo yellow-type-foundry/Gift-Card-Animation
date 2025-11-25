@@ -323,8 +323,8 @@ export async function POST(request) {
           await new Promise(resolve => setTimeout(resolve, 200))
         } else if (currentFrame < 180) {
           // If we're not at frame 180 yet, wait a bit more
-          console.log('[DEBUG] Not at frame 180 yet, waiting additional 1000ms...')
-          await new Promise(resolve => setTimeout(resolve, 1000))
+          console.log('[DEBUG] Not at frame 180 yet, waiting additional 500ms...')
+          await new Promise(resolve => setTimeout(resolve, 500))
         } else {
           // We're at or past frame 180, proceed with capture
           console.log('[DEBUG] Proceeding with capture at frame', currentFrame)
@@ -332,8 +332,8 @@ export async function POST(request) {
       }
     } catch (e) {
       console.warn('[WARN] Canvas not found, using fallback timing')
-      // Fallback: wait 3000ms if canvas detection fails (frame 180 at 60fps)
-      await new Promise(resolve => setTimeout(resolve, 3000))
+      // Fallback: wait 1800ms if canvas detection fails (frame 180 at 60fps = ~3 seconds, but we wait less for speed)
+      await new Promise(resolve => setTimeout(resolve, 1800))
     }
     
     // Take screenshot of the entire page - 4:3 ratio

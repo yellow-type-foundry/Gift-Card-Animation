@@ -151,6 +151,8 @@ const SentCard1 = ({
   const effectiveHovered = forceHovered || isHovered
   
   // When forceHovered is true, automatically trigger hover state immediately
+  // CRITICAL: Only do this if this card is actually in a modal context (not the original card)
+  // The original card should NOT have forceHovered=true, only the modal card should
   useEffect(() => {
     if (forceHovered) {
       console.log('[SentCard1] forceHovered is true - triggering hover state')
@@ -159,8 +161,14 @@ const SentCard1 = ({
         console.log('[SentCard1] Calling handleHoverEnter()')
         handleHoverEnter()
       }, 0)
-      return () => clearTimeout(timeout)
+      return () => {
+        clearTimeout(timeout)
+      }
     }
+    // Note: We don't call handleHoverLeave() here because:
+    // 1. When modal closes, the modal's SentCard1 is unmounted (so this effect cleanup runs)
+    // 2. The original card's hover state is reset in the modal's onClose handler
+    // 3. The confetti hook will detect the change in effectiveHovered and stop the animation
   }, [forceHovered, handleHoverEnter])
   
   // Share modal state
@@ -1809,6 +1817,9 @@ const SentCard1 = ({
           setIsShareModalOpen(false)
           setCardPropsForShare(null)
           setShouldPauseConfetti(false)
+          // CRITICAL: Reset hover state when modal closes to stop confetti animation
+          // This ensures confetti only plays in the modal, not after it closes
+          handleHoverLeave()
         }}
         onOpen={() => {
           // Reset pause state when modal opens to ensure animation can start

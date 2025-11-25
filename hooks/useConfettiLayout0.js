@@ -56,13 +56,54 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
         animIdRef.current = null
       }
     }
+    // CRITICAL: Detect if forceHovered changed from true to false (modal closed)
+    // This ensures confetti stops when the modal closes
+    if (prevForceHoveredRef.current && !forceHovered) {
+      console.log('[Confetti Layout0] Modal closed - stopping animation')
+      hasInitializedRef.current = false
+      isFadingOutRef.current = false
+      fadeOutStartTimeRef.current = null
+      if (animIdRef.current) {
+        cancelAnimationFrame(animIdRef.current)
+        animIdRef.current = null
+      }
+      // Clear canvases immediately
+      const canvas = confettiCanvasRef.current
+      const canvasFront = confettiCanvasFrontRef?.current
+      const canvasMirrored = confettiCanvasMirroredRef?.current
+      const blurCanvases = blurCanvasRefs?.map(ref => ref?.current).filter(Boolean) || []
+      if (canvas) {
+        const ctx = canvas.getContext('2d')
+        if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height)
+      }
+      if (canvasFront) {
+        const ctxFront = canvasFront.getContext('2d')
+        if (ctxFront) ctxFront.clearRect(0, 0, canvasFront.width, canvasFront.height)
+      }
+      if (canvasMirrored) {
+        const ctxMirrored = canvasMirrored.getContext('2d')
+        if (ctxMirrored) ctxMirrored.clearRect(0, 0, canvasMirrored.width, canvasMirrored.height)
+      }
+      blurCanvases.forEach(c => {
+        if (c) {
+          const blurCtx = c.getContext('2d')
+          if (blurCtx) blurCtx.clearRect(0, 0, c.width, c.height)
+        }
+      })
+    }
     prevForceHoveredRef.current = forceHovered
     
     // Detect if hover ended (isHovered changed from true to false)
     if (prevIsHoveredRef.current && !isHovered && !forceHovered) {
-      console.log('[Confetti Layout0] Hover ended - starting fade-out')
+      console.log('[Confetti Layout0] Hover ended - starting fade-out and resetting animation time')
       isFadingOutRef.current = true
       fadeOutStartTimeRef.current = performance.now()
+      // CRITICAL: Reset animationStartTime when hover ends to prevent slow motion from persisting
+      // This ensures slow motion only applies during active hover, not after hover exits
+      if (animIdRef.current) {
+        // Animation is still running, we'll reset animationStartTime in the draw loop
+        // Set a flag to reset it on next frame
+      }
     }
     // Reset fade-out if hover starts again
     if (!prevIsHoveredRef.current && isHovered) {
@@ -88,9 +129,62 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
       timestamp: Date.now()
     })
     
-    // CRITICAL: If animation is already initialized, don't restart
+    // CRITICAL: Check if animation should stop (was running but conditions no longer met)
+    // This handles the case where modal closes or hover ends
+    if (hasInitializedRef.current && !canStart) {
+      console.log('[Confetti Layout0] ⚠️ Animation should stop - conditions no longer met', {
+        forceHovered,
+        isHovered,
+        canStart,
+        animIdExists: animIdRef.current !== null,
+        prevForceHovered: prevForceHoveredRef.current,
+        prevIsHovered: prevIsHoveredRef.current
+      })
+      // CRITICAL: Stop the animation immediately and force cleanup
+      if (animIdRef.current) {
+        cancelAnimationFrame(animIdRef.current)
+        animIdRef.current = null
+      }
+      hasInitializedRef.current = false
+      isFadingOutRef.current = false
+      fadeOutStartTimeRef.current = null
+      // Clear canvases immediately
+      const canvas = confettiCanvasRef.current
+      const canvasFront = confettiCanvasFrontRef?.current
+      const canvasMirrored = confettiCanvasMirroredRef?.current
+      const blurCanvases = blurCanvasRefs?.map(ref => ref?.current).filter(Boolean) || []
+      if (canvas) {
+        const ctx = canvas.getContext('2d')
+        if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height)
+      }
+      if (canvasFront) {
+        const ctxFront = canvasFront.getContext('2d')
+        if (ctxFront) ctxFront.clearRect(0, 0, canvasFront.width, canvasFront.height)
+      }
+      if (canvasMirrored) {
+        const ctxMirrored = canvasMirrored.getContext('2d')
+        if (ctxMirrored) ctxMirrored.clearRect(0, 0, canvasMirrored.width, canvasMirrored.height)
+      }
+      blurCanvases.forEach(c => {
+        if (c) {
+          const blurCtx = c.getContext('2d')
+          if (blurCtx) blurCtx.clearRect(0, 0, c.width, c.height)
+        }
+      })
+      // CRITICAL: Return a cleanup function that ensures animation is stopped
+      return () => {
+        // Force stop any remaining animation frames
+        if (animIdRef.current) {
+          cancelAnimationFrame(animIdRef.current)
+          animIdRef.current = null
+        }
+        hasInitializedRef.current = false
+      }
+    }
+    
+    // CRITICAL: If animation is already initialized and conditions are still met, don't restart
     // This prevents infinite loops when effect re-runs due to dependency changes
-    if (hasInitializedRef.current) {
+    if (hasInitializedRef.current && canStart) {
       console.log('[Confetti Layout0] Animation already initialized - skipping restart', { 
         animIdExists: animIdRef.current !== null,
         forceHovered,
@@ -939,10 +1033,22 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
         window.__confettiPaused = pauseRef.current
       }
       
+      // CRITICAL: Reset animationStartTime if hover ended (fade-out started)
+      // This prevents slow motion from persisting after hover exits
+      if (isFadingOutRef.current && animationStartTime !== null) {
+        // Reset animation start time to prevent slow motion during fade-out
+        // Slow motion should only apply during active hover, not during fade-out
+        animationStartTime = null
+      }
+      
       // Calculate elapsed time in milliseconds and check if slow motion should be active
       // DISABLE slow motion for capture mode (pauseAtFrame is set)
-      const elapsedTime = performance.now() - animationStartTime
-      const isSlowMotion = targetFrame === null && elapsedTime >= slowMotionStartTime
+      // CRITICAL: Only apply slow motion if animation is still actively running (not fading out)
+      const elapsedTime = animationStartTime !== null ? performance.now() - animationStartTime : 0
+      const isSlowMotion = targetFrame === null && 
+                          !isFadingOutRef.current && 
+                          animationStartTime !== null && 
+                          elapsedTime >= slowMotionStartTime
       
       // Debug log every 30 frames
       if (frameCount % 30 === 0) {
@@ -1276,21 +1382,32 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
     }
     
     return () => {
-      // CRITICAL: Only cleanup if this is a real unmount/condition change
-      // Don't cleanup on every re-render - that causes infinite loops
-      // Also, don't cleanup immediately if fading out - let fade-out complete
-      const shouldCleanup = !forceHovered && !isHovered && !isFadingOutRef.current
+      // CRITICAL: Always cleanup animation frames to prevent infinite loops
+      // Even if conditions are still valid, we need to cancel the animation frame
+      // The effect will restart if conditions are still met
+      console.log('[Confetti Layout0] Cleanup - canceling animation frames', {
+        forceHovered,
+        isHovered,
+        hasInitialized: hasInitializedRef.current,
+        animIdExists: animIdRef.current !== null
+      })
       
-      if (shouldCleanup) {
-        console.log('[Confetti Layout0] Cleanup - conditions changed, full cleanup')
-        if (animIdRef.current) {
-          cancelAnimationFrame(animIdRef.current)
-          animIdRef.current = null
-        }
-        if (animId) {
-          cancelAnimationFrame(animId)
-          animId = null
-        }
+      // ALWAYS cancel animation frames to prevent infinite loops
+      if (animIdRef.current) {
+        cancelAnimationFrame(animIdRef.current)
+        animIdRef.current = null
+      }
+      if (animId) {
+        cancelAnimationFrame(animId)
+        animId = null
+      }
+      
+      // Only clear canvases and reset state if conditions are no longer met
+      // This prevents clearing during fade-out or when conditions are still valid
+      const shouldFullCleanup = !forceHovered && !isHovered && !isFadingOutRef.current
+      
+      if (shouldFullCleanup) {
+        console.log('[Confetti Layout0] Full cleanup - clearing canvases and resetting state')
         ctx && ctx.clearRect(0, 0, canvas.width, canvas.height)
         if (ctxFront) ctxFront.clearRect(0, 0, canvasFront.width, canvasFront.height)
         if (ctxMirrored) ctxMirrored.clearRect(0, 0, canvasMirrored.width, canvasMirrored.height)
@@ -1308,8 +1425,16 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
           orientationListenerAdded = false
         }
       } else {
-        // Conditions still valid or fading out - don't cleanup, animation should continue
-        console.log('[Confetti Layout0] Cleanup - conditions still valid or fading out, skipping cleanup', { forceHovered, isHovered, isFadingOut: isFadingOutRef.current, hasInitialized: hasInitializedRef.current })
+        // Conditions still valid or fading out - don't clear canvases, but animation frames are canceled
+        // The effect will restart if conditions are still met
+        console.log('[Confetti Layout0] Partial cleanup - frames canceled, but keeping state', {
+          forceHovered,
+          isHovered,
+          isFadingOut: isFadingOutRef.current,
+          hasInitialized: hasInitializedRef.current
+        })
+        // Reset initialization flag so effect can restart if needed
+        hasInitializedRef.current = false
       }
     }
   }, [isHovered, allAccepted, confettiCanvasRef, cardRef, confettiCanvasFrontRef, confettiCanvasMirroredRef, blurCanvasRefs, forceHovered])

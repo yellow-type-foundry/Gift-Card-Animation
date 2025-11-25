@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 
 /**
  * Custom hook for animating progress bar and count
@@ -7,15 +7,20 @@ import { useState, useEffect, useRef } from 'react'
  */
 export default function useProgressAnimation(progress) {
   // Ensure current never exceeds total, and total never exceeds 40
-  const validatedProgress = {
+  // Use useMemo to prevent recreation on every render (could cause infinite loops)
+  const validatedProgress = useMemo(() => ({
     current: Math.min(progress.current, progress.total),
     total: Math.min(40, progress.total)
-  }
+  }), [progress.current, progress.total])
   
   // Calculate target progress percentage precisely
-  const targetProgressPercentage = validatedProgress.total > 0 
-    ? (validatedProgress.current / validatedProgress.total) * 100 
-    : 0
+  // Use useMemo to prevent recalculation on every render
+  const targetProgressPercentage = useMemo(() => 
+    validatedProgress.total > 0 
+      ? (validatedProgress.current / validatedProgress.total) * 100 
+      : 0,
+    [validatedProgress.current, validatedProgress.total]
+  )
   
   // Animated progress percentage (starts at 0, animates to target after content loads)
   const [animatedProgress, setAnimatedProgress] = useState(0)
