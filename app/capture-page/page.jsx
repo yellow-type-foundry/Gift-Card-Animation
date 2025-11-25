@@ -66,6 +66,26 @@ export default function CapturePage() {
           pauseConfetti={false} // Let it animate, Puppeteer will wait for peak
           forceHovered={true} // Force hover to start confetti
         />
+        <style jsx global>{`
+          /* Hide progress bar and center gift info in capture */
+          [data-name="InfoBarContent"] {
+            gap: 0 !important;
+          }
+          /* Hide progress bar container */
+          [data-name="ProgressSlot"] {
+            display: none !important;
+          }
+          /* Center gift info block */
+          [data-name="Gift Message"] {
+            align-items: center !important;
+            text-align: center !important;
+            margin: 0 auto !important;
+          }
+          /* Reduce footer bottom padding to remove extra space */
+          [data-node-id="1467:49205"] {
+            padding-bottom: 8px !important;
+          }
+        `}</style>
       </div>
       {isReady && (
         <div id="capture-ready" style={{ display: 'none' }}>Ready</div>
