@@ -211,16 +211,10 @@ export async function POST(request) {
     })
     console.log('[DEBUG] Page loaded in', Date.now() - navigationStart, 'ms')
     
-    // Wait for React to hydrate and the ready indicator to appear
-    // The element is always in the JSX, so it should be in the DOM after React hydrates
-    console.log('[DEBUG] Waiting for #capture-ready selector...')
-    const readyStart = Date.now()
-    await page.waitForSelector('#capture-ready', { timeout: 10000 })
-    console.log('[DEBUG] #capture-ready found in', Date.now() - readyStart, 'ms')
-    
-    // Wait additional time for confetti animation to reach peak (1400ms + buffer)
-    console.log('[DEBUG] Waiting for confetti animation (2000ms)...')
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    // Simple fixed delay - no selector waiting (matches working example pattern)
+    // Wait for React hydration + confetti animation to reach peak
+    console.log('[DEBUG] Waiting for page to stabilize (4000ms)...')
+    await new Promise(resolve => setTimeout(resolve, 4000))
     
     // Take screenshot of the entire page - 4:3 ratio
     console.log('[DEBUG] Taking screenshot...')
