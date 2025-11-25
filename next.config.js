@@ -14,11 +14,17 @@ const nextConfig = {
   webpack: (config, { isServer }) => {
     if (isServer) {
       // Mark these packages as external for server-side bundles
+      // Use array format to ensure proper externalization
       config.externals = config.externals || []
-      config.externals.push({
-        '@sparticuz/chromium-min': 'commonjs @sparticuz/chromium-min',
-        'puppeteer-core': 'commonjs puppeteer-core',
-      })
+      
+      // Add as strings to ensure they're treated as external modules
+      if (Array.isArray(config.externals)) {
+        config.externals.push('@sparticuz/chromium-min', 'puppeteer-core')
+      } else {
+        // If externals is an object, add to it
+        config.externals['@sparticuz/chromium-min'] = '@sparticuz/chromium-min'
+        config.externals['puppeteer-core'] = 'puppeteer-core'
+      }
     }
     return config
   },

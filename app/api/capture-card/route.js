@@ -70,21 +70,44 @@ export async function POST(request) {
       // Vercel: use chromium-min
       console.log('[DEBUG] Using Vercel configuration with chromium-min')
       
+      // In serverless environments, chromium-min needs to extract to /tmp
+      // Set the extraction path explicitly if the package supports it
+      if (process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.VERCEL) {
+        // Force extraction to /tmp in serverless environments
+        process.env.CHROMIUM_PATH = '/tmp/chromium'
+      }
+      
       // Get executable path with error handling
       let executablePath
       try {
         executablePath = await chromium.executablePath()
         console.log('[DEBUG] Chromium executable path:', executablePath)
+        
+        // If the path doesn't exist, try /tmp/chromium directly
+        if (!existsSync(executablePath)) {
+          console.log('[DEBUG] Executable path does not exist, trying /tmp/chromium')
+          const tmpPath = '/tmp/chromium'
+          if (existsSync(tmpPath)) {
+            executablePath = tmpPath
+            console.log('[DEBUG] Using /tmp/chromium as executable path')
+          }
+        }
       } catch (execPathError) {
         console.error('[ERROR] Failed to get chromium executable path:', execPathError.message)
         console.error('[ERROR] Error stack:', execPathError.stack)
-        // Try to use the default path that chromium-min expects
-        // The binary should be in /tmp/chromium or similar
-        throw new Error(
-          `Chromium executable path error: ${execPathError.message}. ` +
-          `This usually means the Chromium binary wasn't extracted correctly. ` +
-          `Check that @sparticuz/chromium-min is properly installed.`
-        )
+        
+        // Try /tmp/chromium as fallback
+        const tmpPath = '/tmp/chromium'
+        if (existsSync(tmpPath)) {
+          console.log('[DEBUG] Using /tmp/chromium as fallback executable path')
+          executablePath = tmpPath
+        } else {
+          throw new Error(
+            `Chromium executable path error: ${execPathError.message}. ` +
+            `This usually means the Chromium binary wasn't extracted correctly. ` +
+            `Check that @sparticuz/chromium-min is properly installed.`
+          )
+        }
       }
       
       console.log('[DEBUG] Chromium args count:', chromium.args?.length || 0)
