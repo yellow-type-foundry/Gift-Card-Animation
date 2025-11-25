@@ -190,9 +190,29 @@ export async function POST(request) {
       console.log('[DEBUG] Chromium args count:', chromium.args?.length || 0)
       
       // Match working example's launch options (simpler, no defaultViewport/headless from chromium)
+      // Add performance-focused args to speed up browser launch and rendering
       launchOptions = {
         headless: true,
-        args: chromium.args,
+        args: [
+          ...chromium.args,
+          '--disable-background-networking',
+          '--disable-background-timer-throttling',
+          '--disable-renderer-backgrounding',
+          '--disable-backgrounding-occluded-windows',
+          '--disable-breakpad',
+          '--disable-component-extensions-with-background-page',
+          '--disable-features=TranslateUI',
+          '--disable-ipc-flooding-protection',
+          '--disable-sync',
+          '--disable-default-apps',
+          '--no-first-run',
+          '--no-default-browser-check',
+          '--disable-extensions',
+          '--disable-plugins',
+          '--disable-dev-shm-usage',
+          '--disable-gpu',
+          '--disable-software-rasterizer',
+        ],
         executablePath: executablePath,
       }
     } else {
@@ -239,13 +259,37 @@ export async function POST(request) {
     
     const page = await browser.newPage()
     
+    // Block unnecessary resources to speed up page load
+    // Keep essential resources: HTML, CSS, JS, and images (card might have images)
+    await page.setRequestInterception(true)
+    page.on('request', (request) => {
+      const resourceType = request.resourceType()
+      const url = request.url()
+      
+      // Block non-essential resources that slow down page load
+      if (['font', 'media', 'websocket', 'manifest'].includes(resourceType)) {
+        // Block fonts (use system fonts), media, websockets, manifests
+        request.abort()
+      } else if (url.includes('fonts.googleapis.com') || url.includes('fonts.gstatic.com')) {
+        // Block Google Fonts (use system fonts instead)
+        request.abort()
+      } else if (url.includes('analytics') || url.includes('gtag') || url.includes('google-analytics')) {
+        // Block analytics scripts
+        request.abort()
+      } else {
+        // Allow: document, stylesheet, script, xhr, fetch, image (for card images)
+        request.continue()
+      }
+    })
+    
     // Set viewport size - 4:3 aspect ratio
+    // Reduced deviceScaleFactor from 2 to 1 for faster rendering (still good quality at 720p)
     const captureWidth = 720
     const captureHeight = 540 // 4:3 ratio (720 * 3/4 = 540)
     await page.setViewport({
       width: captureWidth,
       height: captureHeight,
-      deviceScaleFactor: 2, // Higher DPI for better quality (720 * 2 = 1440px)
+      deviceScaleFactor: 1, // Reduced from 2 to 1 for faster rendering
     })
     
     // Navigate to the capture page with card props
@@ -269,7 +313,7 @@ export async function POST(request) {
     const navigationStart = Date.now()
     await page.goto(targetUrl, {
       waitUntil: 'domcontentloaded', // Faster than networkidle2 - page structure is ready
-      timeout: 15000, // Reduced timeout
+      timeout: 10000, // Reduced timeout from 15s to 10s
     })
     timings.pageLoad = Date.now() - navigationStart
     console.log('[TIMING] Page loaded:', timings.pageLoad, 'ms')
@@ -295,11 +339,12 @@ export async function POST(request) {
         timings.canvasWait = Date.now() - staticWaitStart
         console.log('[TIMING] Page ready in static mode:', timings.canvasWait, 'ms')
         console.log('[TIMING] Time since request start:', Date.now() - requestStartTime, 'ms')
-        // Small delay to ensure render is complete
-        await new Promise(resolve => setTimeout(resolve, 100))
+        // Minimal delay to ensure render is complete (reduced from 100ms to 50ms)
+        await new Promise(resolve => setTimeout(resolve, 50))
       } catch (e) {
         console.warn('[WARN] Capture-ready indicator not found, using fallback timing')
-        await new Promise(resolve => setTimeout(resolve, 500))
+        // Reduced fallback wait from 500ms to 200ms
+        await new Promise(resolve => setTimeout(resolve, 200))
       }
     } else {
       // Animation mode: wait for confetti canvas and animation to reach frame 180
@@ -410,10 +455,11 @@ export async function POST(request) {
     }
     
     // Take screenshot of the entire page - 4:3 ratio
+    // Using PNG for quality, but could switch to JPEG with quality: 0.9 for faster encoding
     console.log('[TIMING] Taking screenshot...')
     const screenshotStart = Date.now()
     const screenshot = await page.screenshot({
-      type: 'png',
+      type: 'png', // PNG for quality, JPEG would be faster but lower quality
       fullPage: false,
       clip: {
         x: 0,
@@ -421,6 +467,8 @@ export async function POST(request) {
         width: captureWidth,
         height: captureHeight,
       },
+      // Optimize screenshot encoding
+      omitBackground: false,
     })
     timings.screenshot = Date.now() - screenshotStart
     console.log('[TIMING] Screenshot taken:', timings.screenshot, 'ms')
