@@ -934,8 +934,9 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
       }
       
       // Calculate elapsed time in milliseconds and check if slow motion should be active
+      // DISABLE slow motion for capture mode (pauseAtFrame is set)
       const elapsedTime = performance.now() - animationStartTime
-      const isSlowMotion = elapsedTime >= slowMotionStartTime
+      const isSlowMotion = pauseAtFrame === null && elapsedTime >= slowMotionStartTime
       
       // Debug log every 30 frames
       if (frameCount % 30 === 0) {
@@ -1048,8 +1049,9 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
         }
         
         // Apply slow-motion effect after 1400ms - particles float in space
+        // DISABLE slow motion for capture mode (pauseAtFrame is set)
         let currentSlowMotionFactor = 1.0
-        if (isSlowMotion) {
+        if (isSlowMotion && pauseAtFrame === null) {
           currentSlowMotionFactor = slowMotionFactor
         }
         
