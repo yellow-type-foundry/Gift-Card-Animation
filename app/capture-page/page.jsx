@@ -38,12 +38,14 @@ export default function CapturePage() {
   if (!cardProps) {
     return (
       <div style={{ 
-        width: '640px', 
-        height: '480px', 
+        width: '720px', 
+        height: '540px', 
         display: 'flex', 
         alignItems: 'center', 
         justifyContent: 'center',
-        background: 'white'
+        background: 'white',
+        margin: 0,
+        padding: 0
       }}>
         Loading...
       </div>
@@ -52,30 +54,103 @@ export default function CapturePage() {
 
   return (
     <div style={{
-      width: '640px',
-      height: '480px',
+      width: '720px',
+      height: '540px',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       background: 'white',
-      padding: '24px'
+      margin: 0,
+      padding: '24px',
+      boxSizing: 'border-box'
     }}>
       <div style={{
         width: '100%',
         height: '100%',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        margin: 0,
+        padding: 0,
+        position: 'relative'
       }}>
-        <SentCard1
-          {...cardProps}
-          boxScale={1.3}
-          showFooterReminder={false}
-          showFooterProgress={false}
-          pauseConfetti={isStatic} // Disable confetti in static mode
-          forceHovered={!isStatic} // Only force hover if not static
-        />
+        <div style={{
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          maxWidth: '100%',
+          maxHeight: '100%'
+        }}>
+          <div style={{
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <SentCard1
+              {...cardProps}
+              boxScale={1.3}
+              showFooterReminder={false}
+              showFooterProgress={false}
+              pauseConfetti={isStatic} // Disable confetti in static mode
+              forceHovered={!isStatic} // Only force hover if not static
+            />
+          </div>
+        </div>
         <style jsx global>{`
+          /* Remove all default margins and padding */
+          * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+          }
+          html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 720px;
+            height: 540px;
+            overflow: hidden;
+          }
+          /* Make card responsive and proportionally scaled to fit padded area */
+          /* Available space after 24px padding: 672px wide x 492px tall */
+          /* Card should scale to fit BOTH width and height to ensure 24px padding all sides */
+          [data-name="Gift Card"] {
+            margin: 0 !important;
+            display: block !important;
+            /* Scale to fit container - use both width and height constraints */
+            width: 100% !important;
+            min-width: 0 !important;
+            max-width: 100% !important;
+            height: 100% !important;
+            min-height: 0 !important;
+            max-height: 100% !important;
+            /* Maintain aspect ratio while fitting container */
+            object-fit: contain;
+          }
+          /* Override ALL Tailwind responsive width classes */
+          @media (min-width: 768px) {
+            [data-name="Gift Card"].md\\:w-\\[300px\\] {
+              width: 100% !important;
+              height: 100% !important;
+              min-width: 0 !important;
+              max-width: 100% !important;
+              min-height: 0 !important;
+              max-height: 100% !important;
+            }
+          }
+          /* Override w-full as well */
+          [data-name="Gift Card"].w-full {
+            width: 100% !important;
+            height: 100% !important;
+          }
+          /* Ensure card content scales proportionally to fill container */
+          [data-name="Gift Card"] > div {
+            width: 100% !important;
+            height: 100% !important;
+          }
           /* Hide progress bar and center gift info in capture */
           [data-name="InfoBarContent"] {
             gap: 0 !important;

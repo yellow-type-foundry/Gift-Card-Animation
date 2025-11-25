@@ -324,20 +324,39 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
         >
           {capturedImage ? (
             <>
-            <img
-              src={capturedImage}
-              alt="Captured card"
-              style={{
-                  position: 'relative',
-                width: '100%',
-                  maxHeight: 'calc(100% - 100px)',
-                objectFit: 'contain',
-                  borderRadius: '16px',
-                  flexShrink: 1
-              }}
-            />
+            <div style={{
+              flex: 1,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '100%',
+              minHeight: 0,
+              overflow: 'hidden'
+            }}>
+              <img
+                src={capturedImage}
+                alt="Captured card"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  maxWidth: '100%',
+                  maxHeight: '100%',
+                  objectFit: 'contain',
+                  display: 'block',
+                  margin: 0,
+                  padding: 0
+                }}
+              />
+            </div>
               {/* Action buttons - only show when image is captured */}
-              <div className="relative flex items-center gap-3 mx-auto flex-shrink-0">
+              <div 
+                className="flex items-center gap-3 flex-shrink-0"
+                style={{
+                  marginTop: 'auto',
+                  paddingTop: '16px',
+                  paddingBottom: '16px'
+                }}
+              >
                 {/* Recapture button */}
                 <button
                   onClick={handleRecapture}
