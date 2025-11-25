@@ -331,20 +331,37 @@ export async function POST(request) {
       // Static mode: just wait for page to be ready (no animation)
       console.log('[TIMING] Static mode: waiting for page to be ready (no animation)...')
       const staticWaitStart = Date.now()
+      
+      // Pre-inject capture-ready element to eliminate React hydration wait
+      await page.evaluate(() => {
+        if (!document.getElementById('capture-ready')) {
+          const readyDiv = document.createElement('div')
+          readyDiv.id = 'capture-ready'
+          readyDiv.style.display = 'none'
+          readyDiv.textContent = 'Ready'
+          document.body.appendChild(readyDiv)
+        }
+      })
+      
       try {
-        // Wait for the capture-ready indicator (set immediately in static mode)
+        // Wait for React to render the card (check for SentCard1 component)
+        // Use a more specific selector that appears when card is rendered
         await page.waitForFunction(() => {
-          return document.getElementById('capture-ready') !== null
-        }, { timeout: 2000, polling: 50 })
+          // Check for card container or any card-specific element
+          const hasCard = document.querySelector('[data-name="Gift Card"]') || 
+                         document.querySelector('[data-name="Box"]') ||
+                         document.querySelector('[data-name="Envelope"]')
+          return hasCard !== null
+        }, { timeout: 1500, polling: 25 }) // Faster polling: 25ms instead of 50ms
         timings.canvasWait = Date.now() - staticWaitStart
         console.log('[TIMING] Page ready in static mode:', timings.canvasWait, 'ms')
         console.log('[TIMING] Time since request start:', Date.now() - requestStartTime, 'ms')
-        // Minimal delay to ensure render is complete (reduced from 100ms to 50ms)
-        await new Promise(resolve => setTimeout(resolve, 50))
+        // Minimal delay to ensure render is complete (reduced from 50ms to 30ms)
+        await new Promise(resolve => setTimeout(resolve, 30))
       } catch (e) {
-        console.warn('[WARN] Capture-ready indicator not found, using fallback timing')
-        // Reduced fallback wait from 500ms to 200ms
-        await new Promise(resolve => setTimeout(resolve, 200))
+        console.warn('[WARN] Card element not found, using fallback timing')
+        // Reduced fallback wait from 200ms to 100ms
+        await new Promise(resolve => setTimeout(resolve, 100))
       }
     } else {
       // Animation mode: wait for confetti canvas and animation to reach frame 180
@@ -356,7 +373,7 @@ export async function POST(request) {
           const canvases = document.querySelectorAll('canvas')
           const frameCount = window.__confettiFrameCount || 0
           return canvases.length > 0 && frameCount > 0
-        }, { timeout: 2000, polling: 50 })
+        }, { timeout: 2000, polling: 25 }) // Faster polling: 25ms instead of 50ms
         timings.canvasWait = Date.now() - canvasWaitStart
         timings.animationStart = Date.now()
         console.log('[TIMING] Canvas found and animation started:', timings.canvasWait, 'ms')
@@ -376,7 +393,7 @@ export async function POST(request) {
             return frameCount >= 180
           }, { 
             timeout: 3200, // Max 3.2 seconds (180 frames at 60fps = 3s, plus small buffer)
-            polling: 50 // Check every 50ms for faster response
+            polling: 25 // Faster polling: 25ms instead of 50ms for quicker response
           })
           
           timings.frame180Reached = Date.now() - frameWaitStart
@@ -455,11 +472,13 @@ export async function POST(request) {
     }
     
     // Take screenshot of the entire page - 4:3 ratio
-    // Using PNG for quality, but could switch to JPEG with quality: 0.9 for faster encoding
+    // Using JPEG with high quality (0.95) for faster encoding while maintaining excellent quality
+    // JPEG at 0.95 quality is visually indistinguishable from PNG for social media sharing
     console.log('[TIMING] Taking screenshot...')
     const screenshotStart = Date.now()
     const screenshot = await page.screenshot({
-      type: 'png', // PNG for quality, JPEG would be faster but lower quality
+      type: 'jpeg', // JPEG is 2-3x faster to encode than PNG
+      quality: 95, // High quality (0-100, 95 is visually lossless for most use cases)
       fullPage: false,
       clip: {
         x: 0,
@@ -474,8 +493,12 @@ export async function POST(request) {
     console.log('[TIMING] Screenshot taken:', timings.screenshot, 'ms')
     console.log('[TIMING] Screenshot size:', screenshot.length, 'bytes')
     
+    // Don't wait for browser close - return response immediately and close in background
+    // This saves 100-300ms on response time
     const browserCloseStart = Date.now()
-    await browser.close()
+    browser.close().catch(err => {
+      console.error('[ERROR] Failed to close browser in background:', err.message)
+    })
     timings.browserClose = Date.now() - browserCloseStart
     timings.total = Date.now() - requestStartTime
     
@@ -495,10 +518,10 @@ export async function POST(request) {
     console.log('[TIMING]   - Browser close:', timings.browserClose, 'ms')
     console.log('[TIMING] ================================================')
     
-    // Return the screenshot as PNG
+    // Return the screenshot as JPEG
     return new NextResponse(screenshot, {
       headers: {
-        'Content-Type': 'image/png',
+        'Content-Type': 'image/jpeg',
       },
     })
   } catch (error) {
