@@ -30,8 +30,8 @@ export default function CapturePage() {
   if (!cardProps) {
     return (
       <div style={{ 
-        width: '640px', 
-        height: '480px', 
+        width: '720px', 
+        height: '540px', 
         display: 'flex', 
         alignItems: 'center', 
         justifyContent: 'center',
@@ -44,8 +44,8 @@ export default function CapturePage() {
 
   return (
     <div style={{
-      width: '640px',
-      height: '480px',
+      width: '720px',
+      height: '540px',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',

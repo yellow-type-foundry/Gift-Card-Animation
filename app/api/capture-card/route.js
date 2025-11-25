@@ -23,12 +23,12 @@ export async function POST(request) {
     const page = await browser.newPage()
     
     // Set viewport size - 4:3 aspect ratio
-    const captureWidth = 640
-    const captureHeight = 480 // 4:3 ratio (640 * 3/4 = 480)
+    const captureWidth = 720
+    const captureHeight = 540 // 4:3 ratio (720 * 3/4 = 540)
     await page.setViewport({
       width: captureWidth,
       height: captureHeight,
-      deviceScaleFactor: 2 // Higher DPI for better quality
+      deviceScaleFactor: 2 // Higher DPI for better quality (720 * 2 = 1440px)
     })
     
     // Navigate to the capture page with card props
