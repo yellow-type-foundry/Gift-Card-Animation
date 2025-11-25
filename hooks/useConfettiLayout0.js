@@ -542,6 +542,12 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
     const slowMotionFactor = 0.095 // Slow down to 15% of normal speed (very slow, floating effect)
     let animationStartTime = null // Track when animation started
     
+    // Expose frameCount and pause state for Puppeteer to check (capture mode)
+    if (typeof window !== 'undefined' && pauseAtFrame !== null) {
+      window.__confettiFrameCount = 0
+      window.__confettiPaused = false
+    }
+    
     // Spawn rate starts slow and accelerates - creates eruption effect
     const initialSpawnRate = 0.25 // 12% chance per frame initially (faster start for eruption)
     const maxSpawnRate = 0.95 // 50% chance per frame when fully active
@@ -899,6 +905,12 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
       
       frameCount++
       
+      // Expose frameCount for Puppeteer (capture mode)
+      if (typeof window !== 'undefined' && pauseAtFrame !== null) {
+        window.__confettiFrameCount = frameCount
+        window.__confettiPaused = pauseRef.current
+      }
+      
       // Check if we should pause at a specific frame (for capture)
       // Pause when we reach the target frame (allows a small range for flexibility)
       if (pauseAtFrame !== null && frameCount >= pauseAtFrame && frameCount <= pauseAtFrame + 3) {
@@ -909,6 +921,10 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
           if (animId) {
             cancelAnimationFrame(animId)
             animId = null
+          }
+          // Update exposed state
+          if (typeof window !== 'undefined') {
+            window.__confettiPaused = true
           }
         }
       }

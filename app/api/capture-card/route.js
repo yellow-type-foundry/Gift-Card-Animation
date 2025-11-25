@@ -269,21 +269,47 @@ export async function POST(request) {
       canvasWaitTime = Date.now() - canvasWaitStart
       console.log('[DEBUG] Canvas found in', canvasWaitTime, 'ms')
       
-      // Wait for animation to reach frame 180 - at 60fps, frame 180 = ~3000ms
-      // Animation will auto-pause at frame 180, so we just need to wait for it to reach that frame
-      // Reduce wait time: give it 2800ms total from canvas appearance (saves ~250ms)
-      const remainingTime = Math.max(0, 1800 - canvasWaitTime)
-      if (remainingTime > 0) {
-        console.log('[DEBUG] Waiting for animation to reach pause frame (', remainingTime, 'ms remaining)...')
-        await new Promise(resolve => setTimeout(resolve, remainingTime))
+      // Wait for animation to reach frame 180 by checking the exposed frameCount
+      // This ensures we capture at the correct frame regardless of when animation started
+      console.log('[DEBUG] Waiting for animation to reach frame 180...')
+      const frameWaitStart = Date.now()
+      try {
+        await page.waitForFunction(() => {
+          // Check if frameCount is exposed and has reached 180, or if paused at 180
+          const frameCount = window.__confettiFrameCount || 0
+          const isPaused = window.__confettiPaused || false
+          // Wait until we reach frame 180 and are paused (or close to it)
+          return (frameCount >= 180 && isPaused) || frameCount >= 183
+        }, { 
+          timeout: 5000, // Max 5 seconds to reach frame 180
+          polling: 100 // Check every 100ms
+        })
+        const frameWaitTime = Date.now() - frameWaitStart
+        const finalFrameCount = await page.evaluate(() => window.__confettiFrameCount || 0)
+        const isPaused = await page.evaluate(() => window.__confettiPaused || false)
+        console.log('[DEBUG] Animation reached target frame in', frameWaitTime, 'ms')
+        console.log('[DEBUG] Final frame count:', finalFrameCount, 'Paused:', isPaused)
+        
+        // Give a small buffer to ensure pause is fully applied
+        await new Promise(resolve => setTimeout(resolve, 50))
+      } catch (frameWaitError) {
+        console.warn('[WARN] Frame wait timeout, checking current state...')
+        const currentFrame = await page.evaluate(() => window.__confettiFrameCount || 0)
+        const isPaused = await page.evaluate(() => window.__confettiPaused || false)
+        console.warn('[WARN] Current frame:', currentFrame, 'Paused:', isPaused)
+        // If we're past frame 180, proceed anyway
+        if (currentFrame >= 180) {
+          console.log('[DEBUG] Already past frame 180, proceeding with capture')
+        } else {
+          // Fallback: wait a bit more
+          console.log('[DEBUG] Waiting additional 500ms as fallback...')
+          await new Promise(resolve => setTimeout(resolve, 500))
+        }
       }
-      // Give a small buffer to ensure pause has been applied
-      await new Promise(resolve => setTimeout(resolve, 100))
-      console.log('[DEBUG] Animation should be paused at frame 180')
     } catch (e) {
-      console.warn('[WARN] Canvas not found, using fallback timing (2800ms)')
-      // Fallback: wait 2800ms if canvas detection fails (frame 180 at 60fps)
-      await new Promise(resolve => setTimeout(resolve, 1800))
+      console.warn('[WARN] Canvas not found, using fallback timing')
+      // Fallback: wait 3000ms if canvas detection fails (frame 180 at 60fps)
+      await new Promise(resolve => setTimeout(resolve, 3000))
     }
     
     // Take screenshot of the entire page - 4:3 ratio
