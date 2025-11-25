@@ -38,8 +38,8 @@ export default function CapturePage() {
   if (!cardProps) {
     return (
       <div style={{ 
-        width: '540px', 
-        height: '720px', 
+        width: '720px', 
+        height: '540px', 
         display: 'flex', 
         alignItems: 'center', 
         justifyContent: 'center',
@@ -54,8 +54,8 @@ export default function CapturePage() {
 
   return (
     <div style={{
-      width: '540px',
-      height: '720px',
+      width: '720px',
+      height: '540px',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -65,13 +65,15 @@ export default function CapturePage() {
       overflow: 'hidden'
     }}>
       <div style={{
-        width: '100%',
-        height: '100%',
+        width: '720px',
+        height: '540px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         margin: 0,
-        padding: 0
+        padding: 0,
+        position: 'relative',
+        overflow: 'hidden'
       }}>
         <SentCard1
           {...cardProps}
@@ -91,9 +93,23 @@ export default function CapturePage() {
           html, body {
             margin: 0 !important;
             padding: 0 !important;
-            width: 540px;
-            height: 720px;
+            width: 720px;
+            height: 540px;
             overflow: hidden;
+          }
+          /* Make SentCard1 fill the entire capture area - override default 300px width */
+          /* Scale card from 300px to 720px = 2.4x scale */
+          [data-name="Gift Card"] {
+            width: 300px !important;
+            height: auto !important;
+            transform: scale(2.4) !important;
+            transform-origin: center center !important;
+            margin: 0 !important;
+          }
+          /* Ensure the scaled card fits within 720x540 */
+          [data-name="Gift Card"] > div {
+            width: 100% !important;
+            height: 100% !important;
           }
           /* Hide progress bar and center gift info in capture */
           [data-name="InfoBarContent"] {

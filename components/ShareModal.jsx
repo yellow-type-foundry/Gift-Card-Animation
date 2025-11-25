@@ -274,8 +274,8 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
       <div
         className="relative bg-white rounded-[24px] shadow-2xl"
         style={{
-          width: '540px',
-          height: '720px',
+          width: '720px',
+          height: '540px',
           padding: capturedImage ? '0' : '24px',
           margin: 0,
           display: 'flex',
