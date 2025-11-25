@@ -196,6 +196,9 @@ const SentCard1 = ({
   
   // Handle card capture for sharing - pass card props to modal instead of capturing
   const handleCaptureCard = useCallback(() => {
+    // CRITICAL: Exit hover state BEFORE opening modal to stop background animations
+    handleHoverLeave()
+    
     // Collect all card props to pass to the modal
     const cardPropsToShare = {
       from,
@@ -264,6 +267,7 @@ const SentCard1 = ({
     setCardPropsForShare(cardPropsToShare)
     setIsShareModalOpen(true)
   }, [
+    handleHoverLeave, // Add handleHoverLeave to dependencies
     from, title, boxImage, giftTitle, giftSubtitle, progress, sentDate,
     headerBgOverride, hideUnion, footerPadEqual, envelopeScale, envelopeOffsetY,
     confettiWhiteOverlay, envelopeHighZ, overlayProgressOnEnvelope, progressOutsideEnvelope,

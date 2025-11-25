@@ -23,30 +23,115 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
       // Add class to body to pause all animations
       document.body.classList.add('share-modal-open')
       
+      // CRITICAL: Force exit hover state and stop all animations
+      // Use requestAnimationFrame to ensure DOM is ready
+      requestAnimationFrame(() => {
+        // Find all card containers
+        const allCards = document.querySelectorAll('[data-name="Gift Card"]')
+        allCards.forEach(card => {
+          // Method 1: Dispatch mouseleave event
+          const mouseLeaveEvent = new MouseEvent('mouseleave', {
+            bubbles: true,
+            cancelable: true,
+            view: window,
+            relatedTarget: document.body
+          })
+          card.dispatchEvent(mouseLeaveEvent)
+          
+          // Method 2: Directly remove animation classes and reset styles
+          const animatedElements = card.querySelectorAll('.grid-cell-base, .grid-cell-overlay, .breathing-box-1, .breathing-box-2, .breathing-envelope-1, .breathing-envelope-2, .metal-shine-gradient, .metal-shine-trail, .progress-shimmer')
+          animatedElements.forEach(el => {
+            el.style.animation = 'none'
+            el.style.animationName = 'none'
+            el.style.animationDuration = '0s'
+            el.style.animationPlayState = 'paused'
+          })
+          
+          // Method 3: Reset card transform
+          if (card.style) {
+            card.style.transform = 'translateY(0)'
+            card.style.boxShadow = 'none'
+          }
+        })
+        
+        // Also find and stop animations on Envelope and Box elements
+        const envelopes = document.querySelectorAll('[data-name="Envelope"]')
+        envelopes.forEach(env => {
+          const mouseLeaveEvent = new MouseEvent('mouseleave', {
+            bubbles: true,
+            cancelable: true,
+            view: window,
+            relatedTarget: document.body
+          })
+          env.dispatchEvent(mouseLeaveEvent)
+        })
+        
+        const boxes = document.querySelectorAll('[data-name="Box"]')
+        boxes.forEach(box => {
+          const mouseLeaveEvent = new MouseEvent('mouseleave', {
+            bubbles: true,
+            cancelable: true,
+            view: window,
+            relatedTarget: document.body
+          })
+          box.dispatchEvent(mouseLeaveEvent)
+        })
+      })
+      
       // Pause ALL CSS animations and transitions in the background
       // Create a style element to inject global CSS
       const style = document.createElement('style')
       style.id = 'share-modal-pause-animations'
       style.textContent = `
-        /* Pause all animations and transitions when ShareModal is open */
-        /* Target everything, then exclude the modal and its children */
+        /* CRITICAL: Completely stop all animations when ShareModal is open */
+        /* Disable pointer events on background to prevent hover states */
+        body.share-modal-open > *:not([data-share-modal]) {
+          pointer-events: none !important;
+        }
+        /* Remove ALL animations and transitions - most aggressive approach */
         body.share-modal-open *,
         body.share-modal-open *::before,
         body.share-modal-open *::after {
-          animation-play-state: paused !important;
+          animation: none !important;
+          animation-name: none !important;
           animation-duration: 0s !important;
+          animation-delay: 0s !important;
+          animation-iteration-count: 0 !important;
+          animation-play-state: paused !important;
+          transition: none !important;
+          transition-property: none !important;
           transition-duration: 0s !important;
           transition-delay: 0s !important;
+          will-change: auto !important;
         }
-        /* Exception: Allow animations in the modal */
+        /* Force reset all transforms and effects on cards */
+        body.share-modal-open [data-name="Gift Card"],
+        body.share-modal-open [data-name="Gift Card"] * {
+          transform: translateY(0) !important;
+          box-shadow: none !important;
+        }
+        /* Override ALL hover states - even if element is hovered */
+        body.share-modal-open [data-name="Gift Card"]:hover,
+        body.share-modal-open [data-name="Gift Card"]:hover *,
+        body.share-modal-open [data-name="Envelope"]:hover,
+        body.share-modal-open [data-name="Envelope"]:hover *,
+        body.share-modal-open [data-name="Box"]:hover,
+        body.share-modal-open [data-name="Box"]:hover *,
+        body.share-modal-open [data-name="Box Container"]:hover,
+        body.share-modal-open [data-name="Box Container"]:hover * {
+          animation: none !important;
+          transition: none !important;
+          transform: translateY(0) !important;
+          box-shadow: none !important;
+        }
+        /* Exception: Allow animations ONLY in the modal */
         body.share-modal-open [data-share-modal],
         body.share-modal-open [data-share-modal] *,
         body.share-modal-open [data-share-modal] *::before,
         body.share-modal-open [data-share-modal] *::after {
-          animation-play-state: running !important;
-          animation-duration: unset !important;
-          transition-duration: unset !important;
-          transition-delay: unset !important;
+          pointer-events: auto !important;
+          animation: unset !important;
+          transition: unset !important;
         }
       `
       document.head.appendChild(style)

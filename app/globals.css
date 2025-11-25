@@ -506,3 +506,37 @@
     filter: brightness(1.1);
   }
 }
+
+/* CRITICAL: Pause all animations when ShareModal is open */
+/* This must be in globals.css to have proper specificity and override hover-based animations */
+body.share-modal-open [data-name="Gift Card"]:hover .grid-cell-base,
+body.share-modal-open [data-name="Gift Card"]:hover .grid-cell-overlay,
+body.share-modal-open [data-name="Envelope"]:hover .grid-cell-base,
+body.share-modal-open [data-name="Envelope"]:hover .grid-cell-overlay,
+body.share-modal-open [data-name="Box Container/Batch 2"]:hover .grid-cell-base,
+body.share-modal-open [data-name="Box Container/Batch 2"]:hover .grid-cell-overlay,
+body.share-modal-open [data-name="Gift Card"]:hover .breathing-box-1,
+body.share-modal-open [data-name="Gift Card"]:hover .breathing-box-2,
+body.share-modal-open [data-name="Gift Card"]:hover .breathing-envelope-1,
+body.share-modal-open [data-name="Gift Card"]:hover .breathing-envelope-2,
+body.share-modal-open [data-name="Box"]:hover .metal-shine-gradient,
+body.share-modal-open [data-name="Box"]:hover .metal-shine-trail,
+body.share-modal-open [data-name="Gift Card"]:hover .progress-shimmer,
+body.share-modal-open [data-name="Gift Card"]:hover .all-accepted-text,
+body.share-modal-open [data-name="Gift Card"]:hover .done-progress-bar {
+  animation: none !important;
+}
+
+/* Also pause all animations on all elements when modal is open */
+body.share-modal-open *:not([data-share-modal]):not([data-share-modal] *),
+body.share-modal-open *:not([data-share-modal]):not([data-share-modal] *)::before,
+body.share-modal-open *:not([data-share-modal]):not([data-share-modal] *)::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* Reset transforms on cards */
+body.share-modal-open [data-name="Gift Card"]:not([data-share-modal]) {
+  transform: translateY(0) !important;
+  box-shadow: none !important;
+}
