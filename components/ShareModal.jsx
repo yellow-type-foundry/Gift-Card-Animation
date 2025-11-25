@@ -50,66 +50,51 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
       onOpen()
     }
     
-    // Pause confetti during peak eruption (around frame 50-60, ~1000ms at 60fps)
-    // Peak eruption happens during the eruption boost phase (0-63 frames, ~1.05 seconds)
-    // We want to pause at the middle/peak of this phase
-    const pauseTimeout = setTimeout(() => {
-      console.log('[ShareModal] 1400ms elapsed - setting pauseConfetti to true')
-      setPauseConfetti(true)
-      if (onPauseConfetti) {
-        onPauseConfetti()
-      }
-      
-      // Capture the card using server-side Puppeteer after a delay
-      // Only capture once - check if we've already captured
-      if (!hasCapturedRef.current) {
-        const captureTimeout = setTimeout(async () => {
-          // Double-check we haven't captured yet (race condition protection)
-          if (hasCapturedRef.current) {
-            console.log('[ShareModal] Already captured, skipping')
-            return
-          }
-          
-          hasCapturedRef.current = true // Mark as capturing
-          setIsCapturing(true)
-          
-          try {
-            console.log('[ShareModal] Starting capture...')
-              const response = await fetch('/api/capture-card', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(cardPropsRef.current),
-              })
-            
-            if (response.ok) {
-              const blob = await response.blob()
-              const imageUrl = URL.createObjectURL(blob)
-              setCapturedImage(imageUrl)
-              console.log('[ShareModal] Card captured successfully')
-            } else {
-              console.error('[ShareModal] Failed to capture card:', await response.text())
-              hasCapturedRef.current = false // Reset on error so user can try again
-            }
-          } catch (error) {
-            console.error('[ShareModal] Error capturing card:', error)
-            hasCapturedRef.current = false // Reset on error so user can try again
-          } finally {
-            setIsCapturing(false)
-          }
-        }, 500) // Wait 500ms after pause to ensure card is fully rendered
-        
-        return () => {
-          clearTimeout(captureTimeout)
+    // Start capture immediately - server handles all timing
+    // Only capture once - check if we've already captured
+    if (!hasCapturedRef.current) {
+      const captureTimeout = setTimeout(async () => {
+        // Double-check we haven't captured yet (race condition protection)
+        if (hasCapturedRef.current) {
+          console.log('[ShareModal] Already captured, skipping')
+          return
         }
-      } else {
-        console.log('[ShareModal] Capture already initiated, skipping duplicate')
+        
+        hasCapturedRef.current = true // Mark as capturing
+        setIsCapturing(true)
+        
+        try {
+          console.log('[ShareModal] Starting capture...')
+          const response = await fetch('/api/capture-card', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(cardPropsRef.current),
+          })
+          
+          if (response.ok) {
+            const blob = await response.blob()
+            const imageUrl = URL.createObjectURL(blob)
+            setCapturedImage(imageUrl)
+            console.log('[ShareModal] Card captured successfully')
+          } else {
+            console.error('[ShareModal] Failed to capture card:', await response.text())
+            hasCapturedRef.current = false // Reset on error so user can try again
+          }
+        } catch (error) {
+          console.error('[ShareModal] Error capturing card:', error)
+          hasCapturedRef.current = false // Reset on error so user can try again
+        } finally {
+          setIsCapturing(false)
+        }
+      }, 0) // Start capture immediately - server handles timing
+      
+      return () => {
+        clearTimeout(captureTimeout)
       }
-    }, 1400) // ~1400ms = peak eruption
-    
-    return () => {
-      clearTimeout(pauseTimeout)
+    } else {
+      console.log('[ShareModal] Capture already initiated, skipping duplicate')
     }
   }, [isOpen, onPauseConfetti, onOpen]) // Removed cardProps from dependencies to prevent re-runs
 

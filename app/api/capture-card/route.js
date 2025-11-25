@@ -233,9 +233,11 @@ export async function POST(request) {
     
     const navigationStart = Date.now()
     await page.goto(targetUrl, {
-      waitUntil: 'networkidle2', // More lenient than networkidle0, matches working example
-      timeout: 30000,
+      waitUntil: 'domcontentloaded', // Faster than networkidle2 - page structure is ready
+      timeout: 15000, // Reduced timeout
     })
+    // Wait a bit for initial render
+    await new Promise(resolve => setTimeout(resolve, 500))
     console.log('[DEBUG] Page loaded in', Date.now() - navigationStart, 'ms')
     
     // Verify we're on the correct page (not redirected to login)
@@ -245,10 +247,10 @@ export async function POST(request) {
       throw new Error(`Page redirected to login page. Target was: ${targetUrl}, but ended up at: ${finalUrl}`)
     }
     
-    // Simple fixed delay - no selector waiting (matches working example pattern)
     // Wait for React hydration + confetti animation to reach peak
-    console.log('[DEBUG] Waiting for page to stabilize (4000ms)...')
-    await new Promise(resolve => setTimeout(resolve, 4000))
+    // Confetti peaks at ~1400ms, so 1600ms gives enough buffer
+    console.log('[DEBUG] Waiting for page to stabilize (1600ms)...')
+    await new Promise(resolve => setTimeout(resolve, 1600))
     
     // Take screenshot of the entire page - 4:3 ratio
     console.log('[DEBUG] Taking screenshot...')
