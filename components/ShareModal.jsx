@@ -124,6 +124,18 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
     onClose()
   }
 
+  const handleDownload = () => {
+    if (!capturedImage) return
+    
+    // Create a temporary anchor element to trigger download
+    const link = document.createElement('a')
+    link.href = capturedImage
+    link.download = 'gift-card.png' // Default filename
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
   return createPortal(
     <div
       className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm"
@@ -137,8 +149,10 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
         style={{
           width: '640px',
           height: '480px',
-          padding: '24px',
+          padding: '12px',
           display: 'flex',
+          overflow: 'auto',
+          flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
           animation: 'scaleIn 0.2s ease-out'
@@ -148,59 +162,97 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
         {/* Close button */}
         <button
           onClick={handleClose}
-          className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-white/90 hover:bg-white shadow-lg transition-colors z-10"
+          className="absolute top-6 right-6 w-10 h-10 flex items-center justify-center rounded-full bg-white/90 hover:bg-white shadow-lg transition-colors z-10"
           aria-label="Close"
         >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 16 16"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M12 4L4 12M4 4L12 12"
-              stroke="#525F7A"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 16 16"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M12 4L4 12M4 4L12 12"
+                stroke="#525F7A"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
         </button>
 
         {/* Render actual card component or captured image */}
         <div
-          className="relative"
           style={{
+            position: 'relative',
             width: '100%',
             height: '100%',
             display: 'flex',
+            flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '0',
             overflow: 'hidden'
           }}
         >
           {capturedImage ? (
-            <img
-              src={capturedImage}
-              alt="Captured card"
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'contain',
-                borderRadius: '12px'
-              }}
-            />
+            <>
+              <img
+                src={capturedImage}
+                alt="Captured card"
+                style={{
+                  position: 'relative',
+                  width: '100%',
+                  maxHeight: 'calc(100% - 80px)',
+                  objectFit: 'contain',
+                  borderRadius: '16px',
+                  flexShrink: 1
+                }}
+              />
+              {/* Download button - only show when image is captured */}
+              <button
+                onClick={handleDownload}
+                className="relative mx-auto px-8 py-3.5 bg-[#7F53FD] hover:bg-[#6935FD] text-white rounded-[12px] shadow-lg transition-all hover: z-10 flex items-center gap-2.5 font-medium text-[15px] flex-shrink-0"
+                aria-label="Download image"
+              >
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M10 13.3333V3.33333M10 13.3333L6.66667 10M10 13.3333L13.3333 10M3.33333 16.6667H16.6667"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                Download
+              </button>
+            </>
           ) : (
             <>
-              <SentCard1
-                {...cardProps}
-                showFooterReminder={false}
-                showFooterProgress={false}
-                pauseConfetti={pauseConfetti}
-                forceHovered={true}
-              />
+              <div 
+                style={{ 
+                  position: 'relative',
+                  width: '100%', 
+                  height: '100%', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center' 
+                }}
+              >
+                <SentCard1
+                  {...cardProps}
+                  showFooterReminder={false}
+                  showFooterProgress={false}
+                  pauseConfetti={pauseConfetti}
+                  forceHovered={true}
+                />
+              </div>
               {isCapturing && (
                 <div
                   style={{
@@ -208,12 +260,15 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
                     top: '50%',
                     left: '50%',
                     transform: 'translate(-50%, -50%)',
-                    background: 'rgba(0, 0, 0, 0.7)',
+                    background: 'rgba(0, 0, 0, 0.75)',
                     color: 'white',
-                    padding: '12px 24px',
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    zIndex: 1000
+                    padding: '16px 28px',
+                    borderRadius: '12px',
+                    fontSize: '15px',
+                    fontWeight: 500,
+                    zIndex: 1000,
+                    backdropFilter: 'blur(8px)',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
                   }}
                 >
                   Capturing...

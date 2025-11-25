@@ -61,6 +61,7 @@ export default function CapturePage() {
       }}>
         <SentCard1
           {...cardProps}
+          boxScale={1.3}
           showFooterReminder={false}
           showFooterProgress={false}
           pauseConfetti={false} // Let it animate, Puppeteer will wait for peak
@@ -70,10 +71,19 @@ export default function CapturePage() {
           /* Hide progress bar and center gift info in capture */
           [data-name="InfoBarContent"] {
             gap: 0 !important;
+            padding-bottom: 16px !important;
           }
           /* Hide progress bar container */
           [data-name="ProgressSlot"] {
             display: none !important;
+          }
+          /* Hide reminder bar container */
+          [data-name="ReminderBar"] {
+            display: none !important;
+          }
+          /* Remove minHeight from progress/reminder slot container when both are hidden */
+          [data-name="InfoBarContent"] > div.relative {
+            min-height: 0 !important;
           }
           /* Center gift info block */
           [data-name="Gift Message"] {
@@ -83,7 +93,19 @@ export default function CapturePage() {
           }
           /* Reduce footer bottom padding to remove extra space */
           [data-node-id="1467:49205"] {
-            padding-bottom: 8px !important;
+            padding-bottom: 0 !important;
+          }
+          /* Ensure box/envelope container stays behind union shape (z-index 25) */
+          [data-name="Envelope"],
+          [data-name="Gift Container"] {
+            z-index: 20 !important;
+          }
+          /* Ensure gift box container stays behind union shape */
+          [data-name="Gift Container/Goody"] {
+            z-index: 20 !important;
+          }
+          [data-name="Box"] {
+            z-index: 1 !important;
           }
         `}</style>
       </div>
