@@ -136,6 +136,14 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
     document.body.removeChild(link)
   }
 
+  const handleRecapture = () => {
+    // Reset capture state to trigger a new capture
+    setCapturedImage(null)
+    hasCapturedRef.current = false
+    setPauseConfetti(false)
+    setIsCapturing(false)
+  }
+
   return createPortal(
     <div
       className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm"
@@ -147,8 +155,8 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
       <div
         className="relative bg-white rounded-[24px] shadow-2xl"
         style={{
-          width: '640px',
-          height: '480px',
+          width: '720px',
+          height: '540px',
           padding: '12px',
           display: 'flex',
           overflow: 'auto',
@@ -203,35 +211,61 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
                 style={{
                   position: 'relative',
                   width: '100%',
-                  maxHeight: 'calc(100% - 80px)',
+                  maxHeight: 'calc(100% - 100px)',
                   objectFit: 'contain',
                   borderRadius: '16px',
                   flexShrink: 1
                 }}
               />
-              {/* Download button - only show when image is captured */}
-              <button
-                onClick={handleDownload}
-                className="relative mx-auto px-8 py-3.5 bg-[#7F53FD] hover:bg-[#6935FD] text-white rounded-[12px] shadow-lg transition-all hover: z-10 flex items-center gap-2.5 font-medium text-[15px] flex-shrink-0"
-                aria-label="Download image"
-              >
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 20 20"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
+              {/* Action buttons - only show when image is captured */}
+              <div className="relative flex items-center gap-3 mx-auto flex-shrink-0">
+                {/* Recapture button */}
+                <button
+                  onClick={handleRecapture}
+                  className="relative px-8 py-3.5 bg-white border border-[#DDE2E9] hover:bg-[#F0F1F5] text-[#525F7A] rounded-[12px] transition-all z-10 flex items-center gap-2.5 font-medium text-[15px]"
+                  aria-label="Recapture image"
                 >
-                  <path
-                    d="M10 13.3333V3.33333M10 13.3333L6.66667 10M10 13.3333L13.3333 10M3.33333 16.6667H16.6667"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                Download
-              </button>
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M3.33333 10C3.33333 6.3181 6.3181 3.33333 10 3.33333C13.6819 3.33333 16.6667 6.3181 16.6667 10C16.6667 13.6819 13.6819 16.6667 10 16.6667M10 6.66667V10L12.5 12.5"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  Recapture
+                </button>
+                {/* Download button */}
+                <button
+                  onClick={handleDownload}
+                  className="relative px-8 py-3.5 bg-[#7F53FD] hover:bg-[#6935FD] text-white rounded-[12px] transition-all z-10 flex items-center gap-2.5 font-medium text-[15px]"
+                  aria-label="Download image"
+                >
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M10 13.3333V3.33333M10 13.3333L6.66667 10M10 13.3333L13.3333 10M3.33333 16.6667H16.6667"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  Download
+                </button>
+              </div>
             </>
           ) : (
             <>
