@@ -1,6 +1,4 @@
 import { NextResponse } from 'next/server'
-import puppeteer from 'puppeteer-core'
-import chromium from '@sparticuz/chromium-min'
 import { execSync } from 'child_process'
 import { existsSync } from 'fs'
 
@@ -8,10 +6,7 @@ import { existsSync } from 'fs'
 export const runtime = 'nodejs'
 export const maxDuration = 30
 
-// Configure Chromium for Vercel (if method is available)
-if (typeof chromium.setGraphicsMode === 'function') {
-  chromium.setGraphicsMode(false)
-}
+// Note: chromium and puppeteer are imported dynamically to avoid bundling issues
 
 // Helper function to find Chrome/Chromium executable on local system
 function findChromeExecutable() {
@@ -64,15 +59,42 @@ export async function POST(request) {
     const isVercel = process.env.VERCEL === '1' || process.env.AWS_LAMBDA_FUNCTION_NAME
     console.log('[DEBUG] isVercel:', isVercel)
     
+    // Dynamically import packages to avoid bundling issues
+    console.log('[DEBUG] Dynamically importing puppeteer-core and chromium-min...')
+    const puppeteer = (await import('puppeteer-core')).default
+    const chromium = (await import('@sparticuz/chromium-min')).default
+    
+    // Configure Chromium for Vercel (if method is available)
+    if (typeof chromium.setGraphicsMode === 'function') {
+      chromium.setGraphicsMode(false)
+    }
+    
     // Launch Puppeteer browser with Vercel-optimized configuration
     let launchOptions
     if (isVercel) {
       // Vercel: use chromium-min
       console.log('[DEBUG] Using Vercel configuration with chromium-min')
-      const executablePath = await chromium.executablePath()
-      console.log('[DEBUG] Chromium executable path:', executablePath)
+      
+      // Get executable path with error handling
+      let executablePath
+      try {
+        executablePath = await chromium.executablePath()
+        console.log('[DEBUG] Chromium executable path:', executablePath)
+      } catch (execPathError) {
+        console.error('[ERROR] Failed to get chromium executable path:', execPathError.message)
+        console.error('[ERROR] Error stack:', execPathError.stack)
+        // Try to use the default path that chromium-min expects
+        // The binary should be in /tmp/chromium or similar
+        throw new Error(
+          `Chromium executable path error: ${execPathError.message}. ` +
+          `This usually means the Chromium binary wasn't extracted correctly. ` +
+          `Check that @sparticuz/chromium-min is properly installed.`
+        )
+      }
+      
       console.log('[DEBUG] Chromium args count:', chromium.args?.length || 0)
       console.log('[DEBUG] Chromium headless:', chromium.headless)
+      console.log('[DEBUG] Chromium defaultViewport:', chromium.defaultViewport)
       
       launchOptions = {
         args: chromium.args,
