@@ -222,10 +222,29 @@ export async function POST(request) {
       throw new Error(`Page redirected to login page. Target was: ${targetUrl}, but ended up at: ${finalUrl}`)
     }
     
-    // Simple fixed delay - no selector waiting (matches working example pattern)
-    // Wait for React hydration + confetti animation to reach peak
-    console.log('[DEBUG] Waiting for page to stabilize (4000ms)...')
-    await new Promise(resolve => setTimeout(resolve, 4000))
+    // Wait for React hydration first
+    console.log('[DEBUG] Waiting for React hydration (1000ms)...')
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    
+    // Wait for confetti particles to appear (they use canvas elements)
+    console.log('[DEBUG] Waiting for confetti particles to appear...')
+    try {
+      // Wait for canvas elements to exist (confetti uses canvas)
+      await page.waitForFunction(() => {
+        const canvases = document.querySelectorAll('canvas')
+        return canvases.length > 0
+      }, { timeout: 5000 })
+      console.log('[DEBUG] Confetti canvas found')
+    } catch (e) {
+      console.warn('[WARN] Confetti canvas not found, continuing anyway')
+    }
+    
+    // Wait for confetti to reach peak (slow motion starts at 1300ms)
+    // Peak should be around 1400-1600ms when most particles are visible
+    console.log('[DEBUG] Waiting for confetti animation to reach peak (1600ms)...')
+    await new Promise(resolve => setTimeout(resolve, 1600))
+    
+    // Total wait: ~2600ms (1000ms hydration + 1600ms to peak)
     
     // Take screenshot of the entire page - 4:3 ratio
     console.log('[DEBUG] Taking screenshot...')
