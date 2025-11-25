@@ -24,7 +24,8 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
       hasCapturedRef.current = false
       setPauseConfetti(false)
       setCapturedImage(null)
-      setIsCapturing(false)
+      // Set capturing to true immediately to hide the card animation
+      setIsCapturing(true)
     } else {
       document.body.style.overflow = ''
       setPauseConfetti(false)
@@ -269,43 +270,53 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
             </>
           ) : (
             <>
-              <div 
-                style={{ 
-                  position: 'relative',
-                  width: '100%', 
-                  height: '100%', 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center' 
-                }}
-              >
-                <SentCard1
-                  {...cardProps}
-                  showFooterReminder={false}
-                  showFooterProgress={false}
-                  pauseConfetti={pauseConfetti}
-                  forceHovered={true}
-                />
-              </div>
+              {/* Only show card component when not capturing */}
+              {!isCapturing && (
+                <div 
+                  style={{ 
+                    position: 'relative',
+                    width: '100%', 
+                    height: '100%', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center' 
+                  }}
+                >
+                  <SentCard1
+                    {...cardProps}
+                    showFooterReminder={false}
+                    showFooterProgress={false}
+                    pauseConfetti={pauseConfetti}
+                    forceHovered={true}
+                  />
+                </div>
+              )}
+              {/* Show capturing badge when capturing */}
               {isCapturing && (
                 <div
                   style={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    background: 'rgba(0, 0, 0, 0.75)',
-                    color: 'white',
-                    padding: '16px 28px',
-                    borderRadius: '12px',
-                    fontSize: '15px',
-                    fontWeight: 500,
-                    zIndex: 1000,
-                    backdropFilter: 'blur(8px)',
-                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
+                    position: 'relative',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '100%',
+                    height: '100%'
                   }}
                 >
-                  Capturing...
+                  <div
+                    style={{
+                      background: 'rgba(0, 0, 0, 0.75)',
+                      color: 'white',
+                      padding: '16px 28px',
+                      borderRadius: '12px',
+                      fontSize: '15px',
+                      fontWeight: 500,
+                      backdropFilter: 'blur(8px)',
+                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
+                    }}
+                  >
+                    Capturing...
+                  </div>
                 </div>
               )}
             </>
