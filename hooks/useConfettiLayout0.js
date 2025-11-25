@@ -823,6 +823,20 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
     const TWO_PI = Math.PI * 2
     
     const draw = () => {
+      // CRITICAL: If we're past the target frame, pause immediately (for capture)
+      // This prevents the animation from running indefinitely
+      if (pauseAtFrame !== null && frameCount >= pauseAtFrame && !pauseRef.current) {
+        console.log('[Confetti Layout0] CRITICAL: Past target frame', pauseAtFrame, 'at frame', frameCount, '- pausing immediately!')
+        pauseRef.current = true
+        if (animId) {
+          cancelAnimationFrame(animId)
+          animId = null
+        }
+        if (typeof window !== 'undefined') {
+          window.__confettiPaused = true
+        }
+      }
+      
       // If paused, draw particles in current state but don't update or continue animation
       // Use ref to check pause state without causing effect re-run
       if (pauseRef.current) {
@@ -912,21 +926,22 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
       }
       
       // Check if we should pause at a specific frame (for capture)
-      // Pause when we reach the target frame (allows a small range for flexibility)
-      if (pauseAtFrame !== null && frameCount >= pauseAtFrame && frameCount <= pauseAtFrame + 3) {
-        if (!pauseRef.current) {
-          console.log('[Confetti Layout0] Pausing at frame', frameCount, 'for capture (target:', pauseAtFrame, ')')
-          pauseRef.current = true
-          // Stop the animation loop
-          if (animId) {
-            cancelAnimationFrame(animId)
-            animId = null
-          }
-          // Update exposed state
-          if (typeof window !== 'undefined') {
-            window.__confettiPaused = true
-          }
+      // Pause immediately when we reach the target frame (no upper limit - if we're past, we already paused above)
+      if (pauseAtFrame !== null && frameCount === pauseAtFrame && !pauseRef.current) {
+        console.log('[Confetti Layout0] Pausing at frame', frameCount, 'for capture (target:', pauseAtFrame, ')')
+        pauseRef.current = true
+        // Stop the animation loop immediately
+        if (animId) {
+          cancelAnimationFrame(animId)
+          animId = null
         }
+        // Update exposed state
+        if (typeof window !== 'undefined') {
+          window.__confettiPaused = true
+        }
+        // Draw final frame and return (don't continue)
+        // The pause check at the start of draw() will handle subsequent calls
+        return
       }
       
       // Calculate elapsed time in milliseconds and check if slow motion should be active
