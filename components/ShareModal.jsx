@@ -20,6 +20,25 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden'
+      // Pause ALL CSS animations and transitions in the background
+      // Create a style element to inject global CSS
+      const style = document.createElement('style')
+      style.id = 'share-modal-pause-animations'
+      style.textContent = `
+        /* Pause all animations and transitions when ShareModal is open */
+        /* Exclude the modal itself and its children */
+        body > *:not([data-share-modal]),
+        body > *:not([data-share-modal]) *,
+        body > *:not([data-share-modal]) *::before,
+        body > *:not([data-share-modal]) *::after {
+          animation-play-state: paused !important;
+          animation-duration: 0s !important;
+          transition-duration: 0s !important;
+          transition-delay: 0s !important;
+        }
+      `
+      document.head.appendChild(style)
+      
       // Reset capture flag and state when modal opens
       hasCapturedRef.current = false
       setPauseConfetti(false)
@@ -28,6 +47,11 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
       setIsCapturing(true)
     } else {
       document.body.style.overflow = ''
+      // Remove the style element to restore animations
+      const style = document.getElementById('share-modal-pause-animations')
+      if (style) {
+        style.remove()
+      }
       setPauseConfetti(false)
       setCapturedImage(null)
       setIsCapturing(false)
@@ -36,6 +60,11 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
     
     return () => {
       document.body.style.overflow = ''
+      // Cleanup: remove style element if modal is closed
+      const style = document.getElementById('share-modal-pause-animations')
+      if (style) {
+        style.remove()
+      }
     }
   }, [isOpen])
 
@@ -132,6 +161,7 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
 
   return createPortal(
     <div
+      data-share-modal="true"
       className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm"
       onClick={handleBackdropClick}
       style={{
