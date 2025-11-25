@@ -189,6 +189,32 @@ export default function CapturePage() {
           }
           [data-name="Box"] {
             z-index: 1 !important;
+            /* Center the box illustration at the very center of the card */
+            position: absolute !important;
+            top: 42.5% !important;
+            left: 50% !important;
+            /* Control box scale: scale(1) = 100%, scale(1.5) = 150%, scale(0.8) = 80%, etc. */
+            transform: translate(-50%, -50%) scale(1.25) !important;
+            margin: 0 !important;
+          }
+          /* Also center Gift Container if it exists */
+          [data-name="Gift Container"],
+          [data-name="Gift Container/Goody"] {
+            position: absolute !important;
+            top: 50% !important;
+            left: 50% !important;
+            /* Control container scale: scale(1) = 100%, scale(1.5) = 150%, scale(0.8) = 80%, etc. */
+            transform: translate(-50%, -50%) scale(1) !important;
+            margin: 0 !important;
+          }
+          /* Also center Gift Container if it exists */
+          [data-name="Gift Container"],
+          [data-name="Gift Container/Goody"] {
+            position: absolute !important;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            margin: 0 !important;
           }
         `}</style>
       </div>
