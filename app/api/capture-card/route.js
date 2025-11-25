@@ -126,9 +126,25 @@ function findChromeExecutable() {
 export async function POST(request) {
   let browser = null
   const requestStartTime = Date.now()
-  
+  const timings = {
+    requestStart: requestStartTime,
+    chromiumImport: null,
+    chromiumPath: null,
+    browserLaunch: null,
+    pageLoad: null,
+    canvasWait: null,
+    animationStart: null,
+    frame180Reached: null,
+    pauseApplied: null,
+    screenshot: null,
+    browserClose: null,
+    total: null
+  }
+
   try {
     const cardProps = await request.json()
+    console.log('[TIMING] ========== CAPTURE REQUEST STARTED ==========')
+    console.log('[TIMING] Request started at:', new Date(requestStartTime).toISOString())
     
     // Debug: Log environment detection
     console.log('[DEBUG] Environment check:')
@@ -156,13 +172,15 @@ export async function POST(request) {
       const chromiumImportStart = Date.now()
       const chromium = (await import('@sparticuz/chromium-min')).default
       puppeteer = await import('puppeteer-core')
-      console.log('[DEBUG] Chromium imports took', Date.now() - chromiumImportStart, 'ms')
+      timings.chromiumImport = Date.now() - chromiumImportStart
+      console.log('[TIMING] Chromium imports:', timings.chromiumImport, 'ms')
       
       // Get executable path using URL-based approach (downloads and extracts to /tmp)
       const chromiumPathStart = Date.now()
       const executablePath = await getChromiumPath()
-      chromiumPathTime = Date.now() - chromiumPathStart
-      console.log('[DEBUG] Chromium path resolution took', chromiumPathTime, 'ms')
+      timings.chromiumPath = Date.now() - chromiumPathStart
+      console.log('[TIMING] Chromium path resolution:', timings.chromiumPath, 'ms')
+      console.log('[TIMING] Time since request start:', Date.now() - requestStartTime, 'ms')
       
       console.log('[DEBUG] Chromium args count:', chromium.args?.length || 0)
       
@@ -210,8 +228,9 @@ export async function POST(request) {
     })
     const browserLaunchStart = Date.now()
     browser = await puppeteer.launch(launchOptions)
-    const browserLaunchTime = Date.now() - browserLaunchStart
-    console.log('[DEBUG] Browser launched in', browserLaunchTime, 'ms')
+    timings.browserLaunch = Date.now() - browserLaunchStart
+    console.log('[TIMING] Browser launched:', timings.browserLaunch, 'ms')
+    console.log('[TIMING] Time since request start:', Date.now() - requestStartTime, 'ms')
     
     const page = await browser.newPage()
     
@@ -246,8 +265,9 @@ export async function POST(request) {
       waitUntil: 'domcontentloaded', // Faster than networkidle2 - page structure is ready
       timeout: 15000, // Reduced timeout
     })
-    const pageLoadTime = Date.now() - navigationStart
-    console.log('[DEBUG] Page loaded in', pageLoadTime, 'ms')
+    timings.pageLoad = Date.now() - navigationStart
+    console.log('[TIMING] Page loaded:', timings.pageLoad, 'ms')
+    console.log('[TIMING] Time since request start:', Date.now() - requestStartTime, 'ms')
     
     // Verify we're on the correct page (not redirected to login)
     const finalUrl = page.url()
@@ -258,35 +278,46 @@ export async function POST(request) {
     
     // Wait for React to hydrate and confetti canvas to appear
     // Animation will auto-pause at frame 180 (peak), so we just need to wait for it to reach that frame
-    console.log('[DEBUG] Waiting for confetti canvas...')
+    console.log('[TIMING] Waiting for confetti canvas and animation to start...')
     const canvasWaitStart = Date.now()
-    let canvasWaitTime = null
     try {
+      // Wait for canvas AND animation to start in one check (faster)
       await page.waitForFunction(() => {
         const canvases = document.querySelectorAll('canvas')
-        return canvases.length > 0
-      }, { timeout: 2000 })
-      canvasWaitTime = Date.now() - canvasWaitStart
-      console.log('[DEBUG] Canvas found in', canvasWaitTime, 'ms')
+        const frameCount = window.__confettiFrameCount || 0
+        return canvases.length > 0 && frameCount > 0
+      }, { timeout: 2000, polling: 50 })
+      timings.canvasWait = Date.now() - canvasWaitStart
+      timings.animationStart = Date.now()
+      console.log('[TIMING] Canvas found and animation started:', timings.canvasWait, 'ms')
+      console.log('[TIMING] Time since request start:', Date.now() - requestStartTime, 'ms')
       
-      // Wait for animation to reach frame 180 and pause
-      // CRITICAL: The animation will pause automatically at frame 180, we just need to wait for it
-      // At 60fps, frame 180 = ~3 seconds, so we wait ~3.5 seconds max
-      console.log('[DEBUG] Waiting for animation to reach frame 180 and pause...')
+      // Get initial frame count for debugging
+      const initialFrame = await page.evaluate(() => window.__confettiFrameCount || 0)
+      console.log('[TIMING] Initial frame count when animation detected:', initialFrame)
+      
+      // Now wait for frame 180 to be reached (animation should pause automatically)
+      // At 60fps, 180 frames = 3 seconds from when animation starts
+      console.log('[TIMING] Waiting for animation to reach frame 180...')
       const frameWaitStart = Date.now()
       try {
-        // First, wait for frame 180 to be reached (animation should pause automatically)
-        // Use shorter timeout since we know it should happen in ~3 seconds at 60fps
         await page.waitForFunction(() => {
           const frameCount = window.__confettiFrameCount || 0
           return frameCount >= 180
         }, { 
-          timeout: 4000, // Max 4 seconds (should be ~3 seconds at 60fps)
-          polling: 100 // Check every 100ms (balance between responsiveness and overhead)
+          timeout: 3200, // Max 3.2 seconds (180 frames at 60fps = 3s, plus small buffer)
+          polling: 50 // Check every 50ms for faster response
         })
         
+        timings.frame180Reached = Date.now() - frameWaitStart
+        const timeFromAnimationStart = Date.now() - timings.animationStart
+        console.log('[TIMING] Frame 180 reached in:', timings.frame180Reached, 'ms')
+        console.log('[TIMING] Time from animation start to frame 180:', timeFromAnimationStart, 'ms')
+        console.log('[TIMING] Effective FPS:', (180 / (timeFromAnimationStart / 1000)).toFixed(1))
+        
         // Once frame 180 is reached, wait a tiny bit for pause to be applied
-        await new Promise(resolve => setTimeout(resolve, 50))
+        const pauseWaitStart = Date.now()
+        await new Promise(resolve => setTimeout(resolve, 30))
         
         // Verify pause state
         const { frameCount: finalFrameCount, isPaused } = await page.evaluate(() => ({
@@ -294,26 +325,28 @@ export async function POST(request) {
           isPaused: window.__confettiPaused || false
         }))
         
-        const frameWaitTime = Date.now() - frameWaitStart
-        console.log('[DEBUG] ✅ Animation reached frame 180 in', frameWaitTime, 'ms')
-        console.log('[DEBUG] ✅ Final frame count:', finalFrameCount, 'Paused:', isPaused)
+        timings.pauseApplied = Date.now() - pauseWaitStart
+        console.log('[TIMING] Pause applied in:', timings.pauseApplied, 'ms')
+        console.log('[TIMING] Final frame count:', finalFrameCount, 'Paused:', isPaused)
         
         // If not paused, force pause
         if (!isPaused && finalFrameCount >= 180) {
-          console.log('[DEBUG] Animation not paused, forcing pause...')
+          console.log('[TIMING] Animation not paused, forcing pause...')
+          const forcePauseStart = Date.now()
           await page.evaluate(() => {
             if (window.__confettiPaused !== undefined) {
               window.__confettiPaused = true
             }
           })
-          await new Promise(resolve => setTimeout(resolve, 50))
+          await new Promise(resolve => setTimeout(resolve, 30))
+          console.log('[TIMING] Force pause took:', Date.now() - forcePauseStart, 'ms')
         }
         
         // Verify we're at the correct frame (should be 180, but allow 180-183 for flexibility)
         if (finalFrameCount < 180 || finalFrameCount > 183) {
           console.warn('[WARN] ⚠️ Frame count is', finalFrameCount, 'but expected 180-183')
         } else {
-          console.log('[DEBUG] ✅ Frame count is correct (180-183)')
+          console.log('[TIMING] ✅ Frame count is correct (180-183)')
         }
       } catch (frameWaitError) {
         console.error('[ERROR] Frame wait timeout!', frameWaitError.message)
@@ -334,24 +367,24 @@ export async function POST(request) {
                 window.__confettiPaused = true
               }
             })
-            await new Promise(resolve => setTimeout(resolve, 50))
+            await new Promise(resolve => setTimeout(resolve, 30))
           }
         } else {
           // If we're not at frame 180 yet, wait a bit more (but not too long)
           const remainingFrames = 180 - currentFrame
-          const estimatedWait = Math.min((remainingFrames / 60) * 1000, 2000) // Max 2 seconds
+          const estimatedWait = Math.min((remainingFrames / 60) * 1000, 1500) // Max 1.5 seconds
           console.log('[DEBUG] Not at frame 180 yet (at', currentFrame, '), waiting', estimatedWait.toFixed(0), 'ms...')
           await new Promise(resolve => setTimeout(resolve, estimatedWait))
         }
       }
     } catch (e) {
       console.warn('[WARN] Canvas not found, using fallback timing')
-      // Fallback: wait 1800ms if canvas detection fails (frame 180 at 60fps = ~3 seconds, but we wait less for speed)
-      await new Promise(resolve => setTimeout(resolve, 1800))
+      // Fallback: wait 3000ms if canvas detection fails (frame 180 at 60fps = 3 seconds)
+      await new Promise(resolve => setTimeout(resolve, 3000))
     }
     
     // Take screenshot of the entire page - 4:3 ratio
-    console.log('[DEBUG] Taking screenshot...')
+    console.log('[TIMING] Taking screenshot...')
     const screenshotStart = Date.now()
     const screenshot = await page.screenshot({
       type: 'png',
@@ -363,21 +396,30 @@ export async function POST(request) {
         height: captureHeight,
       },
     })
-    const screenshotTime = Date.now() - screenshotStart
-    console.log('[DEBUG] Screenshot taken in', screenshotTime, 'ms')
-    console.log('[DEBUG] Screenshot size:', screenshot.length, 'bytes')
+    timings.screenshot = Date.now() - screenshotStart
+    console.log('[TIMING] Screenshot taken:', timings.screenshot, 'ms')
+    console.log('[TIMING] Screenshot size:', screenshot.length, 'bytes')
     
+    const browserCloseStart = Date.now()
     await browser.close()
-    const totalTime = Date.now() - requestStartTime
-    console.log('[DEBUG] Browser closed. Total request time:', totalTime, 'ms')
-    console.log('[DEBUG] Time breakdown:')
+    timings.browserClose = Date.now() - browserCloseStart
+    timings.total = Date.now() - requestStartTime
+    
+    console.log('[TIMING] ========== COMPLETE TIMING BREAKDOWN ==========')
+    console.log('[TIMING] Total request time:', timings.total, 'ms', `(${(timings.total / 1000).toFixed(2)}s)`)
+    console.log('[TIMING] Breakdown:')
     if (isVercel) {
-      console.log('  - Chromium path:', chromiumPathTime || 'N/A', 'ms')
+      console.log('[TIMING]   - Chromium imports:', timings.chromiumImport || 'N/A', 'ms')
+      console.log('[TIMING]   - Chromium path:', timings.chromiumPath || 'N/A', 'ms')
     }
-    console.log('  - Browser launch:', browserLaunchTime, 'ms')
-    console.log('  - Page load:', pageLoadTime, 'ms')
-    console.log('  - Canvas wait:', canvasWaitTime || 'N/A', 'ms')
-    console.log('  - Screenshot:', screenshotTime, 'ms')
+    console.log('[TIMING]   - Browser launch:', timings.browserLaunch, 'ms')
+    console.log('[TIMING]   - Page load:', timings.pageLoad, 'ms')
+    console.log('[TIMING]   - Canvas wait:', timings.canvasWait || 'N/A', 'ms')
+    console.log('[TIMING]   - Frame 180 wait:', timings.frame180Reached || 'N/A', 'ms')
+    console.log('[TIMING]   - Pause applied:', timings.pauseApplied || 'N/A', 'ms')
+    console.log('[TIMING]   - Screenshot:', timings.screenshot, 'ms')
+    console.log('[TIMING]   - Browser close:', timings.browserClose, 'ms')
+    console.log('[TIMING] ================================================')
     
     // Return the screenshot as PNG
     return new NextResponse(screenshot, {
