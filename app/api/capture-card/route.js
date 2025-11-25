@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server'
+import puppeteer from 'puppeteer-core'
+import chromium from '@sparticuz/chromium-min'
 import { execSync } from 'child_process'
 import { existsSync } from 'fs'
 
@@ -6,7 +8,10 @@ import { existsSync } from 'fs'
 export const runtime = 'nodejs'
 export const maxDuration = 30
 
-// Note: chromium and puppeteer are imported dynamically to avoid bundling issues
+// Configure Chromium for Vercel (if method is available)
+if (typeof chromium.setGraphicsMode === 'function') {
+  chromium.setGraphicsMode(false)
+}
 
 // Helper function to find Chrome/Chromium executable on local system
 function findChromeExecutable() {
@@ -58,16 +63,6 @@ export async function POST(request) {
     // Detect if we're running on Vercel
     const isVercel = process.env.VERCEL === '1' || process.env.AWS_LAMBDA_FUNCTION_NAME
     console.log('[DEBUG] isVercel:', isVercel)
-    
-    // Dynamically import packages to avoid bundling issues
-    console.log('[DEBUG] Dynamically importing puppeteer-core and chromium-min...')
-    const puppeteer = (await import('puppeteer-core')).default
-    const chromium = (await import('@sparticuz/chromium-min')).default
-    
-    // Configure Chromium for Vercel (if method is available)
-    if (typeof chromium.setGraphicsMode === 'function') {
-      chromium.setGraphicsMode(false)
-    }
     
     // Launch Puppeteer browser with Vercel-optimized configuration
     let launchOptions
