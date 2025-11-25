@@ -271,24 +271,43 @@ export async function POST(request) {
       
       // Wait for animation to reach frame 180 and pause
       // CRITICAL: The animation will pause automatically at frame 180, we just need to wait for it
+      // At 60fps, frame 180 = ~3 seconds, so we wait ~3.5 seconds max
       console.log('[DEBUG] Waiting for animation to reach frame 180 and pause...')
       const frameWaitStart = Date.now()
       try {
+        // First, wait for frame 180 to be reached (animation should pause automatically)
+        // Use shorter timeout since we know it should happen in ~3 seconds at 60fps
         await page.waitForFunction(() => {
           const frameCount = window.__confettiFrameCount || 0
-          const isPaused = window.__confettiPaused || false
-          // Wait until we reach frame 180 AND are paused
-          // The animation will auto-pause at frame 180, so we wait for both conditions
-          return frameCount >= 180 && isPaused
+          return frameCount >= 180
         }, { 
-          timeout: 10000, // Max 10 seconds (should be much faster, but allow for slow networks)
-          polling: 50 // Check every 50ms for faster response
+          timeout: 4000, // Max 4 seconds (should be ~3 seconds at 60fps)
+          polling: 100 // Check every 100ms (balance between responsiveness and overhead)
         })
+        
+        // Once frame 180 is reached, wait a tiny bit for pause to be applied
+        await new Promise(resolve => setTimeout(resolve, 50))
+        
+        // Verify pause state
+        const { frameCount: finalFrameCount, isPaused } = await page.evaluate(() => ({
+          frameCount: window.__confettiFrameCount || 0,
+          isPaused: window.__confettiPaused || false
+        }))
+        
         const frameWaitTime = Date.now() - frameWaitStart
-        const finalFrameCount = await page.evaluate(() => window.__confettiFrameCount || 0)
-        const isPaused = await page.evaluate(() => window.__confettiPaused || false)
-        console.log('[DEBUG] ✅ Animation reached frame 180 and paused in', frameWaitTime, 'ms')
+        console.log('[DEBUG] ✅ Animation reached frame 180 in', frameWaitTime, 'ms')
         console.log('[DEBUG] ✅ Final frame count:', finalFrameCount, 'Paused:', isPaused)
+        
+        // If not paused, force pause
+        if (!isPaused && finalFrameCount >= 180) {
+          console.log('[DEBUG] Animation not paused, forcing pause...')
+          await page.evaluate(() => {
+            if (window.__confettiPaused !== undefined) {
+              window.__confettiPaused = true
+            }
+          })
+          await new Promise(resolve => setTimeout(resolve, 50))
+        }
         
         // Verify we're at the correct frame (should be 180, but allow 180-183 for flexibility)
         if (finalFrameCount < 180 || finalFrameCount > 183) {
@@ -296,38 +315,33 @@ export async function POST(request) {
         } else {
           console.log('[DEBUG] ✅ Frame count is correct (180-183)')
         }
-        
-        if (!isPaused) {
-          console.error('[ERROR] ❌ Animation is NOT paused! This is a problem!')
-        } else {
-          console.log('[DEBUG] ✅ Animation is correctly paused')
-        }
-        
-        // Small buffer to ensure pause is fully applied and rendering is complete
-        await new Promise(resolve => setTimeout(resolve, 100))
       } catch (frameWaitError) {
         console.error('[ERROR] Frame wait timeout!', frameWaitError.message)
-        const currentFrame = await page.evaluate(() => window.__confettiFrameCount || 0)
-        const isPaused = await page.evaluate(() => window.__confettiPaused || false)
+        // Batch evaluations to reduce round-trips
+        const { frameCount: currentFrame, isPaused } = await page.evaluate(() => ({
+          frameCount: window.__confettiFrameCount || 0,
+          isPaused: window.__confettiPaused || false
+        }))
         console.error('[ERROR] Current frame:', currentFrame, 'Paused:', isPaused)
         
-        // If we're past frame 180 but not paused, force pause via JavaScript
-        if (currentFrame >= 180 && !isPaused) {
-          console.log('[DEBUG] Forcing pause at frame', currentFrame)
-          await page.evaluate(() => {
-            // Try to find and stop the animation
-            if (window.__confettiPaused !== undefined) {
-              window.__confettiPaused = true
-            }
-          })
-          await new Promise(resolve => setTimeout(resolve, 200))
-        } else if (currentFrame < 180) {
-          // If we're not at frame 180 yet, wait a bit more
-          console.log('[DEBUG] Not at frame 180 yet, waiting additional 500ms...')
-          await new Promise(resolve => setTimeout(resolve, 500))
+        // If we're at or past frame 180, proceed immediately (don't wait more)
+        if (currentFrame >= 180) {
+          console.log('[DEBUG] Already at frame 180+, proceeding with capture')
+          if (!isPaused) {
+            console.log('[DEBUG] Forcing pause at frame', currentFrame)
+            await page.evaluate(() => {
+              if (window.__confettiPaused !== undefined) {
+                window.__confettiPaused = true
+              }
+            })
+            await new Promise(resolve => setTimeout(resolve, 50))
+          }
         } else {
-          // We're at or past frame 180, proceed with capture
-          console.log('[DEBUG] Proceeding with capture at frame', currentFrame)
+          // If we're not at frame 180 yet, wait a bit more (but not too long)
+          const remainingFrames = 180 - currentFrame
+          const estimatedWait = Math.min((remainingFrames / 60) * 1000, 2000) // Max 2 seconds
+          console.log('[DEBUG] Not at frame 180 yet (at', currentFrame, '), waiting', estimatedWait.toFixed(0), 'ms...')
+          await new Promise(resolve => setTimeout(resolve, estimatedWait))
         }
       }
     } catch (e) {

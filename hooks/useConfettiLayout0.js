@@ -59,7 +59,6 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
     // CRITICAL: Detect if forceHovered changed from true to false (modal closed)
     // This ensures confetti stops when the modal closes
     if (prevForceHoveredRef.current && !forceHovered) {
-      console.log('[Confetti Layout0] Modal closed - stopping animation')
       hasInitializedRef.current = false
       isFadingOutRef.current = false
       fadeOutStartTimeRef.current = null
@@ -67,28 +66,30 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
         cancelAnimationFrame(animIdRef.current)
         animIdRef.current = null
       }
-      // Clear canvases immediately
-      const canvas = confettiCanvasRef.current
-      const canvasFront = confettiCanvasFrontRef?.current
-      const canvasMirrored = confettiCanvasMirroredRef?.current
-      const blurCanvases = blurCanvasRefs?.map(ref => ref?.current).filter(Boolean) || []
-      if (canvas) {
-        const ctx = canvas.getContext('2d')
-        if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height)
-      }
-      if (canvasFront) {
-        const ctxFront = canvasFront.getContext('2d')
-        if (ctxFront) ctxFront.clearRect(0, 0, canvasFront.width, canvasFront.height)
-      }
-      if (canvasMirrored) {
-        const ctxMirrored = canvasMirrored.getContext('2d')
-        if (ctxMirrored) ctxMirrored.clearRect(0, 0, canvasMirrored.width, canvasMirrored.height)
-      }
-      blurCanvases.forEach(c => {
-        if (c) {
-          const blurCtx = c.getContext('2d')
-          if (blurCtx) blurCtx.clearRect(0, 0, c.width, c.height)
+      // Defer canvas clearing to avoid blocking render
+      requestAnimationFrame(() => {
+        const canvas = confettiCanvasRef.current
+        const canvasFront = confettiCanvasFrontRef?.current
+        const canvasMirrored = confettiCanvasMirroredRef?.current
+        const blurCanvases = blurCanvasRefs?.map(ref => ref?.current).filter(Boolean) || []
+        if (canvas) {
+          const ctx = canvas.getContext('2d')
+          if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height)
         }
+        if (canvasFront) {
+          const ctxFront = canvasFront.getContext('2d')
+          if (ctxFront) ctxFront.clearRect(0, 0, canvasFront.width, canvasFront.height)
+        }
+        if (canvasMirrored) {
+          const ctxMirrored = canvasMirrored.getContext('2d')
+          if (ctxMirrored) ctxMirrored.clearRect(0, 0, canvasMirrored.width, canvasMirrored.height)
+        }
+        blurCanvases.forEach(c => {
+          if (c) {
+            const blurCtx = c.getContext('2d')
+            if (blurCtx) blurCtx.clearRect(0, 0, c.width, c.height)
+          }
+        })
       })
     }
     prevForceHoveredRef.current = forceHovered
@@ -1385,12 +1386,6 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
       // CRITICAL: Always cleanup animation frames to prevent infinite loops
       // Even if conditions are still valid, we need to cancel the animation frame
       // The effect will restart if conditions are still met
-      console.log('[Confetti Layout0] Cleanup - canceling animation frames', {
-        forceHovered,
-        isHovered,
-        hasInitialized: hasInitializedRef.current,
-        animIdExists: animIdRef.current !== null
-      })
       
       // ALWAYS cancel animation frames to prevent infinite loops
       if (animIdRef.current) {
@@ -1407,14 +1402,16 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
       const shouldFullCleanup = !forceHovered && !isHovered && !isFadingOutRef.current
       
       if (shouldFullCleanup) {
-        console.log('[Confetti Layout0] Full cleanup - clearing canvases and resetting state')
-        ctx && ctx.clearRect(0, 0, canvas.width, canvas.height)
-        if (ctxFront) ctxFront.clearRect(0, 0, canvasFront.width, canvasFront.height)
-        if (ctxMirrored) ctxMirrored.clearRect(0, 0, canvasMirrored.width, canvasMirrored.height)
-        blurContexts.forEach(blurCtx => {
-          if (blurCtx && blurCtx.canvas) {
-            blurCtx.clearRect(0, 0, blurCtx.canvas.width, blurCtx.canvas.height)
-          }
+        // Defer canvas clearing to avoid blocking
+        requestAnimationFrame(() => {
+          ctx && ctx.clearRect(0, 0, canvas.width, canvas.height)
+          if (ctxFront) ctxFront.clearRect(0, 0, canvasFront.width, canvasFront.height)
+          if (ctxMirrored) ctxMirrored.clearRect(0, 0, canvasMirrored.width, canvasMirrored.height)
+          blurContexts.forEach(blurCtx => {
+            if (blurCtx && blurCtx.canvas) {
+              blurCtx.clearRect(0, 0, blurCtx.canvas.width, blurCtx.canvas.height)
+            }
+          })
         })
         hasInitializedRef.current = false
         isFadingOutRef.current = false
@@ -1427,12 +1424,6 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
       } else {
         // Conditions still valid or fading out - don't clear canvases, but animation frames are canceled
         // The effect will restart if conditions are still met
-        console.log('[Confetti Layout0] Partial cleanup - frames canceled, but keeping state', {
-          forceHovered,
-          isHovered,
-          isFadingOut: isFadingOutRef.current,
-          hasInitialized: hasInitializedRef.current
-        })
         // Reset initialization flag so effect can restart if needed
         hasInitializedRef.current = false
       }

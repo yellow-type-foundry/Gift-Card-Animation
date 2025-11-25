@@ -147,8 +147,12 @@ const SentCard1 = ({
   const confettiCanvasBlur4Ref = useRef(null) // 6-8px blur
   const { isHovered, handleHoverEnter, handleHoverLeave } = useHover()
   
+  // Share modal state - MUST be declared before effectiveHovered
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false)
+  
   // Use forceHovered if provided (for modal), otherwise use actual hover state
-  const effectiveHovered = forceHovered || isHovered
+  // CRITICAL: If ShareModal is open, don't allow confetti on original card (only in modal)
+  const effectiveHovered = forceHovered || (isHovered && !isShareModalOpen)
   
   // When forceHovered is true, automatically trigger hover state immediately
   // CRITICAL: Only do this if this card is actually in a modal context (not the original card)
@@ -170,9 +174,6 @@ const SentCard1 = ({
     // 2. The original card's hover state is reset in the modal's onClose handler
     // 3. The confetti hook will detect the change in effectiveHovered and stop the animation
   }, [forceHovered, handleHoverEnter])
-  
-  // Share modal state
-  const [isShareModalOpen, setIsShareModalOpen] = useState(false)
   const [cardPropsForShare, setCardPropsForShare] = useState(null)
   const [shouldPauseConfetti, setShouldPauseConfetti] = useState(false)
   
@@ -205,6 +206,8 @@ const SentCard1 = ({
   // Handle card capture for sharing - pass card props to modal instead of capturing
   const handleCaptureCard = useCallback(() => {
     // CRITICAL: Exit hover state BEFORE opening modal to stop background animations
+    // Also set modal state immediately to prevent confetti from continuing
+    setIsShareModalOpen(true) // Set this FIRST to stop confetti immediately
     handleHoverLeave()
     
     // Collect all card props to pass to the modal
@@ -273,7 +276,7 @@ const SentCard1 = ({
     }
     
     setCardPropsForShare(cardPropsToShare)
-    setIsShareModalOpen(true)
+    // Note: setIsShareModalOpen(true) was already called above to stop confetti immediately
   }, [
     handleHoverLeave, // Add handleHoverLeave to dependencies
     from, title, boxImage, giftTitle, giftSubtitle, progress, sentDate,
@@ -1814,12 +1817,12 @@ const SentCard1 = ({
       <ShareModal
         isOpen={isShareModalOpen}
         onClose={() => {
+          // CRITICAL: Reset hover state FIRST, then close modal
+          // This ensures confetti stops before modal state changes
+          handleHoverLeave()
           setIsShareModalOpen(false)
           setCardPropsForShare(null)
           setShouldPauseConfetti(false)
-          // CRITICAL: Reset hover state when modal closes to stop confetti animation
-          // This ensures confetti only plays in the modal, not after it closes
-          handleHoverLeave()
         }}
         onOpen={() => {
           // Reset pause state when modal opens to ensure animation can start
