@@ -823,20 +823,6 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
     const TWO_PI = Math.PI * 2
     
     const draw = () => {
-      // CRITICAL: If we're past the target frame, pause immediately (for capture)
-      // This prevents the animation from running indefinitely
-      if (pauseAtFrame !== null && frameCount >= pauseAtFrame && !pauseRef.current) {
-        console.log('[Confetti Layout0] CRITICAL: Past target frame', pauseAtFrame, 'at frame', frameCount, '- pausing immediately!')
-        pauseRef.current = true
-        if (animId) {
-          cancelAnimationFrame(animId)
-          animId = null
-        }
-        if (typeof window !== 'undefined') {
-          window.__confettiPaused = true
-        }
-      }
-      
       // If paused, draw particles in current state but don't update or continue animation
       // Use ref to check pause state without causing effect re-run
       if (pauseRef.current) {
@@ -919,29 +905,32 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
       
       frameCount++
       
-      // Expose frameCount for Puppeteer (capture mode)
-      if (typeof window !== 'undefined' && pauseAtFrame !== null) {
-        window.__confettiFrameCount = frameCount
-        window.__confettiPaused = pauseRef.current
-      }
-      
-      // Check if we should pause at a specific frame (for capture)
-      // Pause immediately when we reach the target frame (no upper limit - if we're past, we already paused above)
-      if (pauseAtFrame !== null && frameCount === pauseAtFrame && !pauseRef.current) {
-        console.log('[Confetti Layout0] Pausing at frame', frameCount, 'for capture (target:', pauseAtFrame, ')')
+      // CRITICAL: Check if we should pause at a specific frame (for capture)
+      // This MUST happen immediately after incrementing frameCount
+      if (pauseAtFrame !== null && frameCount >= pauseAtFrame && !pauseRef.current) {
+        console.log('[Confetti Layout0] CRITICAL: Reached/past target frame', pauseAtFrame, 'at frame', frameCount, '- pausing immediately!')
         pauseRef.current = true
         // Stop the animation loop immediately
         if (animId) {
           cancelAnimationFrame(animId)
           animId = null
         }
+        if (animIdRef.current) {
+          cancelAnimationFrame(animIdRef.current)
+          animIdRef.current = null
+        }
         // Update exposed state
         if (typeof window !== 'undefined') {
           window.__confettiPaused = true
         }
-        // Draw final frame and return (don't continue)
-        // The pause check at the start of draw() will handle subsequent calls
-        return
+        // Draw final frame and return (don't continue - this stops the loop)
+        // We'll draw the particles below, then return
+      }
+      
+      // Expose frameCount for Puppeteer (capture mode)
+      if (typeof window !== 'undefined' && pauseAtFrame !== null) {
+        window.__confettiFrameCount = frameCount
+        window.__confettiPaused = pauseRef.current
       }
       
       // Calculate elapsed time in milliseconds and check if slow motion should be active
@@ -1187,8 +1176,8 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
         }
       }
       
-      // Check if we should pause before continuing the loop
-      // Use ref to check pause state without causing effect re-run
+      // CRITICAL: Check if we should pause before continuing the loop
+      // This prevents the animation from continuing past the target frame
       if (pauseRef.current) {
         console.log('[Confetti Layout0] Pause detected in draw loop at frame', frameCount, '- stopping animation')
         // Cancel any pending animation frame
@@ -1196,9 +1185,31 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
           cancelAnimationFrame(animId)
           animId = null
         }
+        if (animIdRef.current) {
+          cancelAnimationFrame(animIdRef.current)
+          animIdRef.current = null
+        }
         // Draw particles frozen in their current state one more time
         // (they were already drawn above, but this ensures final state is shown)
-        return // Stop the animation loop
+        return // Stop the animation loop - DO NOT call requestAnimationFrame
+      }
+      
+      // CRITICAL: Double-check pause state before continuing (safety check)
+      if (pauseAtFrame !== null && frameCount >= pauseAtFrame) {
+        console.log('[Confetti Layout0] SAFETY CHECK: Past target frame', pauseAtFrame, 'at frame', frameCount, '- forcing pause!')
+        pauseRef.current = true
+        if (animId) {
+          cancelAnimationFrame(animId)
+          animId = null
+        }
+        if (animIdRef.current) {
+          cancelAnimationFrame(animIdRef.current)
+          animIdRef.current = null
+        }
+        if (typeof window !== 'undefined') {
+          window.__confettiPaused = true
+        }
+        return // Stop the animation loop - DO NOT call requestAnimationFrame
       }
       
       // Check if fade-out is complete and all particles are gone
@@ -1227,9 +1238,13 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
         }
       }
       
-      // Continue animation loop
-      animId = requestAnimationFrame(draw)
-      animIdRef.current = animId // Store in ref
+      // Continue animation loop ONLY if not paused
+      if (!pauseRef.current) {
+        animId = requestAnimationFrame(draw)
+        animIdRef.current = animId // Store in ref
+      } else {
+        console.log('[Confetti Layout0] Skipping requestAnimationFrame - paused at frame', frameCount)
+      }
     }
     
     // Start animation loop
