@@ -1,6 +1,4 @@
 import { NextResponse } from 'next/server'
-import puppeteer from 'puppeteer-core'
-import chromium from '@sparticuz/chromium-min'
 import { execSync } from 'child_process'
 import { existsSync } from 'fs'
 
@@ -48,6 +46,9 @@ async function getChromiumPath() {
   if (!downloadPromise) {
     console.log('[DEBUG] Starting Chromium download from:', CHROMIUM_PACK_URL)
     
+    // Dynamically import chromium-min (matches working example)
+    const chromium = (await import('@sparticuz/chromium-min')).default
+    
     // Try custom tar file first
     downloadPromise = chromium
       .executablePath(CHROMIUM_PACK_URL)
@@ -84,10 +85,7 @@ async function getChromiumPath() {
   return downloadPromise
 }
 
-// Configure Chromium for Vercel (if method is available)
-if (typeof chromium.setGraphicsMode === 'function') {
-  chromium.setGraphicsMode(false)
-}
+// Note: chromium and puppeteer are imported dynamically to match working example
 
 // Helper function to find Chrome/Chromium executable on local system
 function findChromeExecutable() {
@@ -136,53 +134,41 @@ export async function POST(request) {
     console.log('  NODE_ENV:', process.env.NODE_ENV)
     console.log('  VERCEL_URL:', process.env.VERCEL_URL)
     
-    // Detect if we're running on Vercel
-    const isVercel = process.env.VERCEL === '1' || process.env.AWS_LAMBDA_FUNCTION_NAME
+    // Detect if we're running on Vercel (match working example's detection)
+    const isVercel = !!process.env.VERCEL_ENV || process.env.VERCEL === '1' || process.env.AWS_LAMBDA_FUNCTION_NAME
     console.log('[DEBUG] isVercel:', isVercel)
+    console.log('[DEBUG] VERCEL_ENV:', process.env.VERCEL_ENV)
     
     // Launch Puppeteer browser with Vercel-optimized configuration
-    let launchOptions
+    // Use dynamic imports like working example
+    let puppeteer, launchOptions
+    
     if (isVercel) {
       // Vercel: use chromium-min with URL-based extraction
       console.log('[DEBUG] Using Vercel configuration with chromium-min')
       console.log('[DEBUG] Chromium pack URL:', CHROMIUM_PACK_URL)
       
+      // Dynamically import (matches working example)
+      const chromium = (await import('@sparticuz/chromium-min')).default
+      puppeteer = await import('puppeteer-core')
+      
       // Get executable path using URL-based approach (downloads and extracts to /tmp)
       const executablePath = await getChromiumPath()
       
       console.log('[DEBUG] Chromium args count:', chromium.args?.length || 0)
-      console.log('[DEBUG] Chromium headless:', chromium.headless)
-      console.log('[DEBUG] Chromium defaultViewport:', chromium.defaultViewport)
       
+      // Match working example's launch options (simpler, no defaultViewport/headless from chromium)
       launchOptions = {
+        headless: true,
         args: chromium.args,
-        defaultViewport: chromium.defaultViewport,
         executablePath: executablePath,
-        headless: chromium.headless,
       }
     } else {
-      // Local development: find and use system Chrome/Chromium
+      // Local development: use regular puppeteer with bundled Chromium (matches working example)
       console.log('[DEBUG] Using local development configuration')
-      const chromePath = findChromeExecutable()
-      if (!chromePath) {
-        throw new Error(
-          'Chrome/Chromium not found. Please install Google Chrome or set CHROME_EXECUTABLE_PATH environment variable.'
-        )
-      }
-      console.log('[DEBUG] Found Chrome at:', chromePath)
-      
+      puppeteer = await import('puppeteer')
       launchOptions = {
-        executablePath: chromePath,
         headless: true,
-        args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-accelerated-2d-canvas',
-          '--no-first-run',
-          '--no-zygote',
-          '--disable-gpu',
-        ],
       }
     }
     
@@ -220,16 +206,17 @@ export async function POST(request) {
     
     const navigationStart = Date.now()
     await page.goto(targetUrl, {
-      waitUntil: 'networkidle0',
+      waitUntil: 'networkidle2', // More lenient than networkidle0, matches working example
       timeout: 30000,
     })
     console.log('[DEBUG] Page loaded in', Date.now() - navigationStart, 'ms')
     
-    // Wait for the capture-ready indicator
+    // Wait for React to hydrate and the ready indicator to appear
+    // The element is always in the JSX, so it should be in the DOM after React hydrates
     console.log('[DEBUG] Waiting for #capture-ready selector...')
-    const selectorStart = Date.now()
+    const readyStart = Date.now()
     await page.waitForSelector('#capture-ready', { timeout: 10000 })
-    console.log('[DEBUG] Selector found in', Date.now() - selectorStart, 'ms')
+    console.log('[DEBUG] #capture-ready found in', Date.now() - readyStart, 'ms')
     
     // Wait additional time for confetti animation to reach peak (1400ms + buffer)
     console.log('[DEBUG] Waiting for confetti animation (2000ms)...')
