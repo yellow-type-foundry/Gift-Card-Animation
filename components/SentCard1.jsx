@@ -2,6 +2,7 @@
 
 import React, { useRef, useMemo, useState, useCallback, useEffect } from 'react'
 import Image from 'next/image'
+import dynamic from 'next/dynamic'
 import { TOKENS } from '@/constants/tokens'
 import useDominantColor from '@/hooks/useDominantColor'
 import useCardTheme from '@/hooks/useCardTheme'
@@ -16,8 +17,12 @@ import EnvelopeBase from '@/components/sent-card/EnvelopeBase'
 import CardShape from '@/components/sent-card/CardShape'
 import GiftBoxContainer from '@/components/sent-card/GiftBoxContainer'
 import EnvelopeBoxContainer from '@/components/sent-card/EnvelopeBoxContainer'
-import ShareModal from '@/components/ShareModal'
 import { PROGRESS_PILL_RADIUS, HEADER_OVERLAY_BG, PROGRESS_GLOW_BOX_SHADOW, ENVELOPE_DIMENSIONS, FOOTER_CONFIG } from '@/constants/sentCardConstants'
+
+const ShareModal = dynamic(() => import('@/components/ShareModal'), {
+  ssr: false,
+  loading: () => null,
+})
 
 // Gift container images (brand names)
 const GIFT_CONTAINER_IMAGES = [
@@ -1814,23 +1819,25 @@ const SentCard1 = ({
       </div>
       
       {/* Share Modal */}
-      <ShareModal
-        isOpen={isShareModalOpen}
-        onClose={() => {
-          // CRITICAL: Reset hover state FIRST, then close modal
-          // This ensures confetti stops before modal state changes
-          handleHoverLeave()
-          setIsShareModalOpen(false)
-          setCardPropsForShare(null)
-          setShouldPauseConfetti(false)
-        }}
-        onOpen={() => {
-          // Reset pause state when modal opens to ensure animation can start
-          setShouldPauseConfetti(false)
-        }}
-        cardProps={cardPropsForShare}
-        onPauseConfetti={() => setShouldPauseConfetti(true)}
-      />
+      {isShareModalOpen && cardPropsForShare && (
+        <ShareModal
+          isOpen={isShareModalOpen}
+          onClose={() => {
+            // CRITICAL: Reset hover state FIRST, then close modal
+            // This ensures confetti stops before modal state changes
+            handleHoverLeave()
+            setIsShareModalOpen(false)
+            setCardPropsForShare(null)
+            setShouldPauseConfetti(false)
+          }}
+          onOpen={() => {
+            // Reset pause state when modal opens to ensure animation can start
+            setShouldPauseConfetti(false)
+          }}
+          cardProps={cardPropsForShare}
+          onPauseConfetti={() => setShouldPauseConfetti(true)}
+        />
+      )}
     </div>
   )
 }

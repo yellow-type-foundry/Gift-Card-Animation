@@ -1,5 +1,24 @@
 import { useState, useEffect } from 'react'
 
+const memoryColorCache = new Map()
+const inflightColorCache = new Map()
+
+const scheduleIdleCallback = (cb) => {
+  if (typeof window !== 'undefined' && typeof window.requestIdleCallback === 'function') {
+    return window.requestIdleCallback(cb, { timeout: 1000 })
+  }
+  return setTimeout(cb, 0)
+}
+
+const cancelIdleCallback = (handle) => {
+  if (handle == null) return
+  if (typeof window !== 'undefined' && typeof window.cancelIdleCallback === 'function') {
+    window.cancelIdleCallback(handle)
+    return
+  }
+  clearTimeout(handle)
+}
+
 /**
  * Extracts the dominant color from an image using downscaled sampling +
  * simple K-Means clustering (k=5). Filters out near-white/near-black/grayscale
@@ -155,45 +174,92 @@ const useDominantColor = (imageSrc, fallbackColor = '#47caeb') => {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    if (!imageSrc) {
-      setDominantColor(fallbackColor)
+    let isMounted = true
+    let idleHandle = null
+
+    const finish = (color) => {
+      if (!isMounted) return
+      setDominantColor(color)
       setIsLoading(false)
-      return
     }
 
-    // Check cache first (only in browser)
-    const cacheKey = `color-${imageSrc}`
-    if (typeof window !== 'undefined') {
-      const cached = localStorage.getItem(cacheKey)
-      
-      if (cached) {
-        setDominantColor(cached)
-        setIsLoading(false)
-        return
+    if (!imageSrc) {
+      finish(fallbackColor)
+      return () => {
+        isMounted = false
+        cancelIdleCallback(idleHandle)
       }
     }
 
-    // Extract color from image
-    setIsLoading(true)
-    extractDominantColor(imageSrc)
-      .then((color) => {
-        setDominantColor(color)
-        // Cache the result (only in browser)
-        if (typeof window !== 'undefined') {
-          try {
-            localStorage.setItem(cacheKey, color)
-          } catch (error) {
-            // localStorage might be full or unavailable
-            console.warn('Failed to cache color:', error)
+    const cacheKey = `color-${imageSrc}`
+
+    const memoHit = memoryColorCache.get(imageSrc)
+    if (memoHit) {
+      finish(memoHit)
+      return () => {
+        isMounted = false
+        cancelIdleCallback(idleHandle)
+      }
+    }
+
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = window.localStorage?.getItem(cacheKey)
+        if (cached) {
+          memoryColorCache.set(imageSrc, cached)
+          finish(cached)
+          return () => {
+            isMounted = false
+            cancelIdleCallback(idleHandle)
           }
         }
-        setIsLoading(false)
+      } catch (error) {
+        console.warn('Failed to read cached color:', error)
+      }
+    }
+
+    const resolveFromPromise = (promise) => {
+      promise
+        .then((color) => {
+          if (!color) {
+            throw new Error('No color extracted')
+          }
+          memoryColorCache.set(imageSrc, color)
+          if (typeof window !== 'undefined') {
+            try {
+              window.localStorage?.setItem(cacheKey, color)
+            } catch (error) {
+              console.warn('Failed to cache color:', error)
+            }
+          }
+          finish(color)
+        })
+        .catch((error) => {
+          console.warn('Failed to extract color from image:', error)
+          finish(fallbackColor)
+        })
+        .finally(() => {
+          inflightColorCache.delete(imageSrc)
+        })
+    }
+
+    const inflight = inflightColorCache.get(imageSrc)
+    if (inflight) {
+      setIsLoading(true)
+      resolveFromPromise(inflight)
+    } else {
+      setIsLoading(true)
+      idleHandle = scheduleIdleCallback(() => {
+        const promise = extractDominantColor(imageSrc)
+        inflightColorCache.set(imageSrc, promise)
+        resolveFromPromise(promise)
       })
-      .catch((error) => {
-        console.warn('Failed to extract color from image:', error)
-        setDominantColor(fallbackColor)
-        setIsLoading(false)
-      })
+    }
+
+    return () => {
+      isMounted = false
+      cancelIdleCallback(idleHandle)
+    }
   }, [imageSrc, fallbackColor])
 
   return { dominantColor, isLoading }
