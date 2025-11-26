@@ -61,7 +61,8 @@ export default function CapturePage() {
       justifyContent: 'center',
       background: 'white',
       margin: 0,
-      padding: 0,
+      padding: '24px',
+      boxSizing: 'border-box',
       overflow: 'hidden'
     }}>
       <div style={{
@@ -75,14 +76,32 @@ export default function CapturePage() {
         position: 'relative',
         overflow: 'hidden'
       }}>
-        <SentCard1
-          {...cardProps}
-          boxScale={1.3}
-          showFooterReminder={false}
-          showFooterProgress={false}
-          pauseConfetti={isStatic} // Disable confetti in static mode
-          forceHovered={!isStatic} // Only force hover if not static
-        />
+        <div style={{
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          maxWidth: '100%',
+          maxHeight: '100%'
+        }}>
+          <div style={{
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <SentCard1
+              {...cardProps}
+              boxScale={1.3}
+              showFooterReminder={false}
+              showFooterProgress={false}
+              pauseConfetti={isStatic} // Disable confetti in static mode
+              forceHovered={!isStatic} // Only force hover if not static
+            />
+          </div>
+        </div>
         <style jsx global>{`
           /* Remove all default margins and padding */
           * {
@@ -97,8 +116,12 @@ export default function CapturePage() {
             height: 540px;
             overflow: hidden;
           }
-          /* Make SentCard1 fill the entire capture area - override default 300px width */
+<<<<<<< HEAD
+          /* Make card responsive and proportionally scaled to fit padded area */
+          /* Available space after 24px padding: 672px wide x 492px tall */
+          /* Card should scale to fit BOTH width and height to ensure 24px padding all sides */
           [data-name="Gift Card"] {
+<<<<<<< HEAD
             width: 90% !important;
             max-width: 720px !important;
             height: 90% !important;
@@ -111,7 +134,23 @@ export default function CapturePage() {
             width: auto !important;
             max-width: 90% !important;
           }
-          /* Ensure card content fills container */
+          /* Override ALL Tailwind responsive width classes */
+          @media (min-width: 768px) {
+            [data-name="Gift Card"].md\\:w-\\[300px\\] {
+              width: 100% !important;
+              height: 100% !important;
+              min-width: 0 !important;
+              max-width: 100% !important;
+              min-height: 0 !important;
+              max-height: 100% !important;
+            }
+          }
+          /* Override w-full as well */
+          [data-name="Gift Card"].w-full {
+            width: 100% !important;
+            height: 100% !important;
+          }
+          /* Ensure card content scales proportionally to fill container */
           [data-name="Gift Card"] > div {
             width: 100% !important;
             height: 100% !important;
@@ -154,7 +193,23 @@ export default function CapturePage() {
           }
           [data-name="Box"] {
             z-index: 1 !important;
-            top: -8% !important;
+            /* Center the box illustration at the very center of the card */
+            position: absolute !important;
+            top: 42.5% !important;
+            left: 50% !important;
+            /* Control box scale: scale(1) = 100%, scale(1.5) = 150%, scale(0.8) = 80%, etc. */
+            transform: translate(-50%, -50%) scale(1.25) !important;
+            margin: 0 !important;
+          }
+          /* Also center Gift Container if it exists */
+          [data-name="Gift Container"],
+          [data-name="Gift Container/Goody"] {
+            position: absolute !important;
+            top: 50% !important;
+            left: 50% !important;
+            /* Control container scale: scale(1) = 100%, scale(1.5) = 150%, scale(0.8) = 80%, etc. */
+            transform: translate(-50%, -50%) scale(1) !important;
+            margin: 0 !important;
           }
         `}</style>
       </div>
