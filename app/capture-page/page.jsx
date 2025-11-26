@@ -96,7 +96,7 @@ export default function CapturePage() {
           }}>
             <SentCard1
               {...cardProps}
-              boxScale={1}
+              boxScale={1.25}
               envelopeOffsetY={-20}  // Adjust vertical position: negative = up, positive = down
               sentDate=""  // Hide date stamp, show only sender name
               showFooterReminder={false}
@@ -121,9 +121,34 @@ export default function CapturePage() {
             height: 540px;
             overflow: hidden;
           }
-          /* Card sizing - do not change card render, just let it fit naturally */
+          /* Card sizing - stretch to fill container with flex */
           [data-name="Gift Card"] {
             margin: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            display: flex !important;
+            flex-direction: column !important;
+          }
+          /* Make card inner content stretch */
+          [data-name="Gift Card"] > div {
+            flex: 1 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            height: 100% !important;
+          }
+          /* Distribute header, middle (box), and footer evenly */
+          [data-name="Gift Card"] [data-name="Header"] {
+            flex-shrink: 0 !important;
+          }
+          [data-name="Gift Card"] [data-name="Envelope"],
+          [data-name="Gift Card"] [data-name="Gift Container"] {
+            flex: 1 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+          }
+          [data-name="Gift Card"] [data-name="Footer"] {
+            flex-shrink: 0 !important;
           }
           /* Hide progress bar and center gift info in capture */
           [data-name="InfoBarContent"] {
@@ -163,6 +188,18 @@ export default function CapturePage() {
           }
           /* Box scaling is now controlled by boxScale prop on SentCard1 */
           /* Gift Container positioning left as default */
+          
+          /* Dots background - adjust position, size, opacity */
+          [data-name="Gift Container"] > div[aria-hidden="true"],
+          [data-name="Envelope"] > div[aria-hidden="true"] {
+            /* Adjust position: top: 50% is center, increase for lower */
+            top: 50% !important;
+            /* Adjust size */
+            width: 420px !important;
+            height: 420px !important;
+            /* Adjust opacity: 0 = hidden, 1 = fully visible */
+            opacity: 1 !important;
+          }
         `}</style>
       </div>
       {isReady && (

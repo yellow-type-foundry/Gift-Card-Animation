@@ -283,13 +283,13 @@ export async function POST(request) {
     })
     
     // Set viewport size - 4:3 aspect ratio (landscape)
-    // Reduced deviceScaleFactor from 2 to 1 for faster rendering (still good quality)
+    // deviceScaleFactor 2 = 1440x1080 output (2x resolution for high quality)
     const captureWidth = 720
     const captureHeight = 540 // 4:3 ratio (720 * 3/4 = 540)
     await page.setViewport({
       width: captureWidth,
       height: captureHeight,
-      deviceScaleFactor: 1, // Reduced from 2 to 1 for faster rendering
+      deviceScaleFactor: 2, // 2x resolution = 1440x1080 output
     })
     
     // Navigate to the capture page with card props
