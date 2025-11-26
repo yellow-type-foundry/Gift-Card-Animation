@@ -994,13 +994,13 @@ const SentCard1 = ({
               <canvas
                 ref={confettiCanvasRef}
                 className="absolute inset-0"
-                style={confettiCanvasStyle}
+                style={{ zIndex: 1, pointerEvents: 'none', filter: CONFETTI_BACK_BLUR }}
               />
               {/* Confetti canvas (front layer - in front of envelope) */}
               <canvas
                 ref={confettiCanvasFrontRef}
                 className="absolute inset-0"
-                style={{ ...confettiCanvasStyle, zIndex: 4 }}
+                style={{ zIndex: 4, pointerEvents: 'none', filter: CONFETTI_BLUR }}
               />
               {/* Mirrored layer - vertically mirrored confetti */}
               <canvas

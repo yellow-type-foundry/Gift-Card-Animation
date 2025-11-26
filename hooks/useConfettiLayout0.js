@@ -42,7 +42,7 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
   const prevIsHoveredRef = useRef(isHovered)
   const isFadingOutRef = useRef(false) // Track if particles are fading out
   const fadeOutStartTimeRef = useRef(null) // Track when fade-out started
-  const fadeOutDuration = 800 // Fade-out duration in milliseconds
+  const fadeOutDuration = 300 // Fade-out duration in milliseconds (quick fade on hover exit)
   
   // IMMEDIATE FRAME MODE: Render confetti at a specific frame without animation
   // This runs synchronously and is MUCH faster than waiting for animation to reach the frame
