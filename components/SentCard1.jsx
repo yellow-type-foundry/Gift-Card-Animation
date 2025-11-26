@@ -699,8 +699,10 @@ const SentCard1 = ({
   }), [])
 
   const envelopeContainerStyle = useMemo(() => {
-    // Only apply Batch 2 padding/margin when it's Batch 2 (EnvelopeBoxContainer), not Single 2 (GiftBoxContainer)
-    const isBatch2 = hideEnvelope && !showGiftBoxWhenHidden
+    // Batch 0 and Single 0: Use same container with relative positioning
+    // The inner element (envelope/box) will be absolutely positioned for scale/offset control
+    const isBatch0OrSingle0 = hideEnvelope && (showGiftBoxWhenHidden || !showGiftBoxWhenHidden)
+    const isBatch2Style = hideEnvelope && !showGiftBoxWhenHidden
     
     return {
       display: 'flex',
@@ -714,22 +716,6 @@ const SentCard1 = ({
             flex: 1,
             minHeight: 0,
             overflow: 'visible',
-            // Apply marginTop for offsetY when showGiftBoxWhenHidden is true (Single 1A/Single 2)
-            // Use marginTop instead of translateY because container is position: relative in flex layout
-            ...(showGiftBoxWhenHidden && envelopeOffsetY !== undefined ? {
-              marginTop: `${envelopeOffsetY}px`
-            } : {}),
-            ...(isBatch2 ? {
-              paddingTop: `${BATCH2_ENVELOPE_PADDING.top}px`,
-              paddingRight: `${BATCH2_ENVELOPE_PADDING.right}px`,
-              paddingBottom: `${BATCH2_ENVELOPE_PADDING.bottom}px`,
-              paddingLeft: `${BATCH2_ENVELOPE_PADDING.left}px`,
-              marginTop: `${BATCH2_ENVELOPE_MARGIN.top}px`,
-              marginRight: `${BATCH2_ENVELOPE_MARGIN.right}px`,
-              marginBottom: `${BATCH2_ENVELOPE_MARGIN.bottom}px`,
-              marginLeft: `${BATCH2_ENVELOPE_MARGIN.left}px`,
-              boxSizing: 'border-box'
-            } : {})
           }
       : useGiftContainer && giftContainerTop !== undefined
       ? {
@@ -759,17 +745,21 @@ const SentCard1 = ({
           bottom: '0px'
         }),
     zIndex: envelopeHighZ ? 50 : (overlayProgressOnEnvelope ? 2 : 2),
+    // Don't apply transform to container when hideEnvelope - it will be applied to inner wrapper
     transform: hideEnvelope 
-      ? (isLayout0
-          ? `translateY(12px) scale(${envelopeScale})` // LAYOUT 0: Combine translateY and scale
-          : (showGiftBoxWhenHidden && envelopeOffsetY !== undefined && envelopeOffsetY !== 0
-          ? `scale(${envelopeScale})` 
-          : showGiftBoxWhenHidden && envelopeScale !== undefined && envelopeScale !== 1
-          ? `scale(${envelopeScale})`
-          : 'none'))
+      ? 'none'
       : `scale(${useGiftContainer && giftContainerScale !== undefined ? giftContainerScale : (progressOutsideEnvelope && envelopeScale2 !== undefined ? envelopeScale2 : envelopeScale)})`,
     transformOrigin: hideEnvelope ? 'center center' : (useGiftContainer && giftContainerTransformOrigin !== undefined ? giftContainerTransformOrigin : (progressOutsideEnvelope && transformOrigin2 !== undefined ? transformOrigin2 : 'center top'))
-  }}, [hideEnvelope, showGiftBoxWhenHidden, useGiftContainer, giftContainerTop, giftContainerOffsetY, giftContainerLeft, giftContainerRight, giftContainerBottom, progressOutsideEnvelope, envelopeTopBase2, envelopeOffsetY2, envelopeOffsetY, envelopeLeft2, envelopeRight2, envelopeHighZ, overlayProgressOnEnvelope, giftContainerScale, envelopeScale2, envelopeScale, giftContainerTransformOrigin, transformOrigin2, BATCH2_ENVELOPE_PADDING, BATCH2_ENVELOPE_MARGIN, isLayout0])
+  }}, [hideEnvelope, showGiftBoxWhenHidden, useGiftContainer, giftContainerTop, giftContainerOffsetY, giftContainerLeft, giftContainerRight, giftContainerBottom, progressOutsideEnvelope, envelopeTopBase2, envelopeOffsetY2, envelopeOffsetY, envelopeLeft2, envelopeRight2, envelopeHighZ, overlayProgressOnEnvelope, giftContainerScale, envelopeScale2, envelopeScale, giftContainerTransformOrigin, transformOrigin2])
+  
+  // Inner wrapper style for Batch 0/Single 0 - absolutely positioned, handles scale and offsetY
+  const envelopeInnerWrapperStyle = useMemo(() => ({
+    position: 'absolute',
+    left: '50%',
+    top: '50%',
+    transform: `translate(-50%, -50%) translateY(${envelopeOffsetY || 0}px) scale(${envelopeScale || 1})`,
+    transformOrigin: 'center center',
+  }), [envelopeOffsetY, envelopeScale])
 
   const giftContainerWrapperStyle = useMemo(() => ({
     position: 'relative',
@@ -1151,53 +1141,59 @@ const SentCard1 = ({
             ) : null}
             {hideEnvelope && showGiftBoxWhenHidden ? (
               // Gift Box Container (for Single 2 and Single 0)
-              <GiftBoxContainer
-                progress={validatedProgress}
-                boxColor={themedBoxColor}
-                progressBarSourceColor={progressBarSourceColor}
-                progressBarLuminance={PROGRESS_BAR_LUMINANCE}
-                progressBarSaturation={PROGRESS_BAR_SATURATION}
-                isHovered={isHovered}
-                logoPath={svgLogoPath}
-                logoBrandColor={logoBrandColor}
-                animationType={animationType}
-                enable3D={enable3D}
-                parallaxX={parallaxX}
-                parallaxY={parallaxY}
-                tiltX={tiltX}
-                tiltY={tiltY}
-                hideProgressBar={hideProgressBarInBox}
-                centerLogo={centerLogoInBox}
-                // Layout 0 specific box controls (overrides GIFT_BOX_TOKENS when provided)
-                boxWidth={boxWidth}
-                boxHeight={boxHeight}
-                boxBorderRadius={boxBorderRadius}
-                boxScale={boxScale}
-              />
+              // Wrapped in inner div for absolute positioning with scale/offsetY
+              <div style={envelopeInnerWrapperStyle}>
+                <GiftBoxContainer
+                  progress={validatedProgress}
+                  boxColor={themedBoxColor}
+                  progressBarSourceColor={progressBarSourceColor}
+                  progressBarLuminance={PROGRESS_BAR_LUMINANCE}
+                  progressBarSaturation={PROGRESS_BAR_SATURATION}
+                  isHovered={isHovered}
+                  logoPath={svgLogoPath}
+                  logoBrandColor={logoBrandColor}
+                  animationType={animationType}
+                  enable3D={enable3D}
+                  parallaxX={parallaxX}
+                  parallaxY={parallaxY}
+                  tiltX={tiltX}
+                  tiltY={tiltY}
+                  hideProgressBar={hideProgressBarInBox}
+                  centerLogo={centerLogoInBox}
+                  // Layout 0 specific box controls (overrides GIFT_BOX_TOKENS when provided)
+                  boxWidth={boxWidth}
+                  boxHeight={boxHeight}
+                  boxBorderRadius={boxBorderRadius}
+                  boxScale={boxScale}
+                />
+              </div>
             ) : hideEnvelope ? (
-              // Envelope Box Container (for Batch 2)
-              // Always use themed color for envelope (not conditional on toggle)
-              <EnvelopeBoxContainer
-                progress={validatedProgress}
-                boxImage={boxImage}
-                boxColor={envelopeBoxColor}
-                flapColor={envelopeFlapColor}
-                boxOpacity={BATCH2_ENVELOPE_OPACITY}
-                flapOpacity={BATCH2_FLAP_OPACITY}
-                progressIndicatorShadowColor={progressIndicatorShadowColor}
-                progressBarSourceColor={progressBarSourceColor}
-                progressBarLuminance={PROGRESS_BAR_LUMINANCE}
-                progressBarSaturation={PROGRESS_BAR_SATURATION}
-                containerPadding={BATCH2_ENVELOPE_PADDING}
-                containerMargin={BATCH2_ENVELOPE_MARGIN}
-                isHovered={isHovered}
-                parallaxX={parallaxX}
-                parallaxY={parallaxY}
-                tiltX={tiltX}
-                tiltY={tiltY}
-                animationType={animationType}
-                enable3D={enable3D}
-              />
+              // Envelope Box Container (for Batch 0 and Batch 2)
+              // Wrapped in inner div for absolute positioning with scale/offsetY
+              <div style={envelopeInnerWrapperStyle}>
+                <EnvelopeBoxContainer
+                  progress={validatedProgress}
+                  boxImage={boxImage}
+                  boxColor={envelopeBoxColor}
+                  flapColor={envelopeFlapColor}
+                  boxOpacity={BATCH2_ENVELOPE_OPACITY}
+                  flapOpacity={BATCH2_FLAP_OPACITY}
+                  progressIndicatorShadowColor={progressIndicatorShadowColor}
+                  progressBarSourceColor={progressBarSourceColor}
+                  progressBarLuminance={PROGRESS_BAR_LUMINANCE}
+                  progressBarSaturation={PROGRESS_BAR_SATURATION}
+                  containerPadding={BATCH2_ENVELOPE_PADDING}
+                  containerMargin={BATCH2_ENVELOPE_MARGIN}
+                  isHovered={isHovered}
+                  parallaxX={parallaxX}
+                  parallaxY={parallaxY}
+                  tiltX={tiltX}
+                  tiltY={tiltY}
+                  animationType={animationType}
+                  enable3D={enable3D}
+                  hideProgressBar={hideProgressBarInBox}
+                />
+              </div>
             ) : useGiftContainer ? (
               // Gift Container Image (replaces envelope)
               <div style={giftContainerWrapperStyle}>

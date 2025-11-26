@@ -33,7 +33,8 @@ const EnvelopeBoxContainer = ({
   tiltX = 0, // Tilt X angle for 3D effect
   tiltY = 0, // Tilt Y angle for 3D effect
   animationType = 'none', // Animation type: 'highlight', 'breathing', or 'none'
-  enable3D = false // Standalone 3D toggle that works with highlight or breathing
+  enable3D = false, // Standalone 3D toggle that works with highlight or breathing
+  hideProgressBar = false // Hide progress bar (for Batch 0)
 }) => {
   const { isHovered: internalIsHovered, handleHoverEnter, handleHoverLeave } = useHover()
   // Use external hover state if provided, otherwise use internal
@@ -680,17 +681,19 @@ const EnvelopeBoxContainer = ({
             {/* Logo Container (empty for now, flex-grow) */}
             <div className="basis-0 grow min-h-px min-w-px shrink-0 w-full" data-name="Logo Container" />
 
-            {/* Progress Bar (bottom, fixed) */}
-            <ProgressBar
-              progress={progress}
-              boxColor={boxColor}
-              indicatorColor={indicatorColor}
-              progressBarWidth={progressBarWidth}
-              animatedCurrent={animatedCurrent}
-              validatedProgress={validatedProgress}
-              isDone={isDone}
-              themedShadowColor={themedShadowColor}
-            />
+            {/* Progress Bar (bottom, fixed) - hidden when hideProgressBar is true */}
+            {!hideProgressBar && (
+              <ProgressBar
+                progress={progress}
+                boxColor={boxColor}
+                indicatorColor={indicatorColor}
+                progressBarWidth={progressBarWidth}
+                animatedCurrent={animatedCurrent}
+                validatedProgress={validatedProgress}
+                isDone={isDone}
+                themedShadowColor={themedShadowColor}
+              />
+            )}
 
             {/* Specular Highlight */}
             <div 

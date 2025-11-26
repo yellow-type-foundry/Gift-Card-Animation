@@ -170,8 +170,8 @@ export const LAYOUT_CONFIG = {
     },
     // Envelope settings
     envelope: {
-      scale: 1,
-      offsetY: 0,
+      scale: 1.125,
+      offsetY: 24,
       left: undefined, // Uses default positioning
       right: undefined,
       top: undefined,
@@ -183,6 +183,9 @@ export const LAYOUT_CONFIG = {
     envelopeHighZ: false,
     overlayProgressOnEnvelope: false,
     progressOutsideEnvelope: false,
+    hideEnvelope: true, // Use EnvelopeBoxContainer instead of default envelope
+    showGiftBoxWhenHidden: false, // Use EnvelopeBoxContainer (like Batch 2), not GiftBoxContainer
+    hideProgressBarInBox: true, // Hide progress bar in envelope for Batch 0
   },
   
   // Default layout (Batch - Layout 1)
@@ -288,8 +291,8 @@ export const LAYOUT_CONFIG = {
     envelopeHighZ: false,
     overlayProgressOnEnvelope: false,
     progressOutsideEnvelope: false,
-    hideEnvelope: true, // Hide envelope and show gift box instead (like Single 2)
-    showGiftBoxWhenHidden: true, // Show GiftBoxContainer when envelope is hidden (true for Single 0, false for Batch 2)
+    hideEnvelope: true, // Hide envelope container
+    showGiftBoxWhenHidden: false, // Use EnvelopeBoxContainer (like Batch 2) instead of GiftBoxContainer
     hideProgressBarInBox: true, // Hide progress bar inside the box
     centerLogoInBox: true, // Center logo at the very center of the box
     enableConfetti: true, // Enable confetti for Single 0
