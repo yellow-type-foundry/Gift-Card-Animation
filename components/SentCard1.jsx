@@ -1048,7 +1048,7 @@ const SentCard1 = ({
               style={sentDateTextStyle}
               data-node-id="1467:49185"
             >
-              {sentDate} • {from}
+              {sentDate ? `${sentDate} • ${from}` : from}
             </p>
             <p
               className="[white-space-collapse:collapse] font-['HW_Cigars:Regular',sans-serif] leading-[1.2] min-w-full overflow-ellipsis overflow-hidden relative shrink-0 text-[24px] tracking-[-0.36px] w-[min-content]"
