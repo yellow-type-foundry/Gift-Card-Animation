@@ -528,9 +528,9 @@ const SentCard1 = ({
   
   const allAccepted = isDone
   
-  // LAYOUT 0 DETECTION: Check if this is Layout 0 (has Box element and specific props)
+  // LAYOUT 0 DETECTION: Check if this is Layout 0 (Single 0 or Batch 0 with confetti enabled)
   // Must be defined before cardContainerStyle useMemo
-  const isLayout0 = hideEnvelope && showGiftBoxWhenHidden && hideProgressBarInBox
+  const isLayout0 = hideEnvelope && hideProgressBarInBox && enableConfetti
   
   // Confetti animation - disabled for Batch 2 and Single 2, but can be enabled via prop (for Single 0)
   const shouldShowConfetti = enableConfetti || !hideEnvelope
@@ -814,8 +814,8 @@ const SentCard1 = ({
           aria-label="Debug: Envelope top edge (Batch 1) - Third Floor"
         />
       )}
-      {/* Full card confetti canvas for Single 0 (enableConfetti) - at card level to avoid overflow clipping */}
-      {enableConfetti && hideEnvelope && showGiftBoxWhenHidden && (
+      {/* Full card confetti canvas for Layout 0 (Single 0 and Batch 0 with enableConfetti) - at card level to avoid overflow clipping */}
+      {enableConfetti && hideEnvelope && (
         <>
           {/* LAYOUT 0: Multiple blur layers for varied blur (1px to 24px) - replaces old front/back system */}
           {isLayout0 && CONFETTI_BLUR_1 ? (

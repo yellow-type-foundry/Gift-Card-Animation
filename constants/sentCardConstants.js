@@ -186,6 +186,7 @@ export const LAYOUT_CONFIG = {
     hideEnvelope: true, // Use EnvelopeBoxContainer instead of default envelope
     showGiftBoxWhenHidden: false, // Use EnvelopeBoxContainer (like Batch 2), not GiftBoxContainer
     hideProgressBarInBox: true, // Hide progress bar in envelope for Batch 0
+    enableConfetti: true, // Enable confetti for Batch 0 (same as Single 0)
   },
   
   // Default layout (Batch - Layout 1)
