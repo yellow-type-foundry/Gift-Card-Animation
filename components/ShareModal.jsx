@@ -276,7 +276,7 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
         style={{
           width: '720px',
           height: '540px',
-          padding: capturedImage ? '4px' : '24px',
+          padding: capturedImage ? '4px' : '4px',
           margin: 0,
           display: 'flex',
           overflow: 'hidden',
@@ -356,11 +356,11 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
             </div>
               {/* Action buttons - only show when image is captured */}
               <div 
-                className="flex items-center gap-3 flex-shrink-0"
+                className="flex items-center gap-4 flex-shrink-0"
                 style={{
                   marginTop: 'auto',
-                  paddingTop: '16px',
-                  paddingBottom: '0px'
+                  paddingTop: '0px',
+                  paddingBottom: '12px'
                 }}
               >
                 {/* Recapture button */}

@@ -267,11 +267,9 @@ export async function POST(request) {
       const url = request.url()
       
       // Block non-essential resources that slow down page load
-      if (['font', 'media', 'websocket', 'manifest'].includes(resourceType)) {
-        // Block fonts (use system fonts), media, websockets, manifests
-        request.abort()
-      } else if (url.includes('fonts.googleapis.com') || url.includes('fonts.gstatic.com')) {
-        // Block Google Fonts (use system fonts instead)
+      // IMPORTANT: Allow fonts to load for correct text rendering
+      if (['media', 'websocket', 'manifest'].includes(resourceType)) {
+        // Block media, websockets, manifests (but NOT fonts)
         request.abort()
       } else if (url.includes('analytics') || url.includes('gtag') || url.includes('google-analytics')) {
         // Block analytics scripts
@@ -469,6 +467,16 @@ export async function POST(request) {
         // Fallback: wait 3000ms if canvas detection fails (frame 180 at 60fps = 3 seconds)
         await new Promise(resolve => setTimeout(resolve, 3000))
       }
+    }
+    
+    // Wait for fonts to be loaded before taking screenshot
+    console.log('[TIMING] Waiting for fonts to load...')
+    const fontWaitStart = Date.now()
+    try {
+      await page.evaluate(() => document.fonts.ready)
+      console.log('[TIMING] Fonts loaded in:', Date.now() - fontWaitStart, 'ms')
+    } catch (e) {
+      console.warn('[WARN] Font loading check failed:', e.message)
     }
     
     // Take screenshot of the entire page - 4:3 ratio (landscape)
