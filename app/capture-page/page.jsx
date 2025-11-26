@@ -117,6 +117,7 @@ export default function CapturePage() {
               sentDate=""  // Hide date stamp, show only sender name
               showFooterReminder={false}
               showFooterProgress={false}
+              footerTransparent={true}  // Remove white background from info bar
               hideUnion={true}
               enableConfetti={true}  // Enable confetti for capture
               hideEnvelope={true}  // Required for Layout 0 confetti

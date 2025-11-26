@@ -192,7 +192,7 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
       const eruptionBoost = maxEruptionBoost - (maxEruptionBoost - minEruptionBoost) * eruptionProgress
       const speedVariation = 0.5 + Math.random() * 1.5
       const particleSpeed = (speed.min + Math.random() * speed.max) * speedVariation * eruptionBoost
-      const particleSize = (size.min + Math.random() * size.max) * dpr * 1.2 // 1.2x bigger for captured image
+      const particleSize = (size.min + Math.random() * size.max) * dpr * 1.5 // 1.2x bigger for captured image
       const halfSize = particleSize / 2
       
       const spawnX = cardBounds.minX + halfSize + Math.random() * (cardBounds.maxX - cardBounds.minX - halfSize * 2)
