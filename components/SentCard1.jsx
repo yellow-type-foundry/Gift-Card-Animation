@@ -823,22 +823,22 @@ const SentCard1 = ({
               <canvas
                 ref={confettiCanvasBlur1Ref}
                 className="absolute inset-0 pointer-events-none"
-                style={{ zIndex: 3, filter: CONFETTI_BLUR_1, position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+                style={{ zIndex: 5, filter: CONFETTI_BLUR_1, position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
               />
               <canvas
                 ref={confettiCanvasBlur2Ref}
                 className="absolute inset-0 pointer-events-none"
-                style={{ zIndex: 3, filter: CONFETTI_BLUR_2, position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+                style={{ zIndex: 4, filter: CONFETTI_BLUR_2, position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
               />
               <canvas
                 ref={confettiCanvasBlur3Ref}
                 className="absolute inset-0 pointer-events-none"
-                style={{ zIndex: 3, filter: CONFETTI_BLUR_3, position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+                style={{ zIndex: 2, filter: CONFETTI_BLUR_3, position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
               />
               <canvas
                 ref={confettiCanvasBlur4Ref}
                 className="absolute inset-0 pointer-events-none"
-                style={{ zIndex: 3, filter: CONFETTI_BLUR_4, position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+                style={{ zIndex: 1, filter: CONFETTI_BLUR_4, position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
               />
               {/* Mirrored layer - vertically mirrored confetti */}
               <canvas
