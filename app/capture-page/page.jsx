@@ -77,7 +77,7 @@ export default function CapturePage() {
       justifyContent: 'center',
       background: 'white',
       margin: 0,
-      padding: '24px',
+      padding: 0,  // No padding - card fills entire image
       boxSizing: 'border-box',
       overflow: 'hidden'
     }}>
@@ -143,13 +143,18 @@ export default function CapturePage() {
             height: 540px;
             overflow: hidden;
           }
-          /* Card sizing - stretch to fill container with flex */
+          /* Card sizing - stretch to fill container with flex, no rounded corners on card only */
           [data-name="Gift Card"] {
             margin: 0 !important;
             width: 100% !important;
             height: 100% !important;
             display: flex !important;
             flex-direction: column !important;
+            border-radius: 0 !important;
+          }
+          /* Remove rounded corners from card wrapper, but keep box rounded */
+          [data-name="Gift Card"] > div {
+            border-radius: 0 !important;
           }
           /* Make card inner content stretch */
           [data-name="Gift Card"] > div {
