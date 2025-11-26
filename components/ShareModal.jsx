@@ -276,7 +276,7 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
         style={{
           width: '720px',
           height: '540px',
-          padding: capturedImage ? '0' : '24px',
+          padding: capturedImage ? '4px' : '24px',
           margin: 0,
           display: 'flex',
           overflow: 'hidden',
@@ -317,14 +317,14 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
             position: 'relative',
             width: '100%',
             height: '100%',
-            display: capturedImage ? 'block' : 'flex',
-            flexDirection: capturedImage ? 'unset' : 'column',
-            alignItems: capturedImage ? 'unset' : 'center',
-            justifyContent: capturedImage ? 'unset' : 'center',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
             overflow: 'hidden',
-            gap: capturedImage ? '0' : '20px',
+            gap: capturedImage ? '0' : '0px',
             margin: 0,
-            padding: 0
+            padding: 24
           }}
         >
           {capturedImage ? (
@@ -336,7 +336,8 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
               justifyContent: 'center',
               width: '100%',
               minHeight: 0,
-              overflow: 'hidden'
+              overflow: 'hidden',
+              maxHeight: 'calc(100% - 80px)'
             }}>
               <img
                 src={capturedImage}
@@ -359,7 +360,7 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
                 style={{
                   marginTop: 'auto',
                   paddingTop: '16px',
-                  paddingBottom: '16px'
+                  paddingBottom: '0px'
                 }}
               >
                 {/* Recapture button */}
