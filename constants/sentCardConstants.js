@@ -232,6 +232,7 @@ export const LAYOUT_CONFIG = {
     overlayProgressOnEnvelope: true,
     progressOutsideEnvelope: false,
     hideEnvelope: true, // Empty the envelope container
+    showGiftBoxWhenHidden: false, // IMPORTANT: Keep EnvelopeBoxContainer for Batch 2, DO NOT change to GiftBoxContainer
   },
   
   // Altered Layout 2 (Batch - Layout 3)
@@ -288,6 +289,7 @@ export const LAYOUT_CONFIG = {
     overlayProgressOnEnvelope: false,
     progressOutsideEnvelope: false,
     hideEnvelope: true, // Hide envelope and show gift box instead (like Single 2)
+    showGiftBoxWhenHidden: true, // Show GiftBoxContainer when envelope is hidden (true for Single 0, false for Batch 2)
     hideProgressBarInBox: true, // Hide progress bar inside the box
     centerLogoInBox: true, // Center logo at the very center of the box
     enableConfetti: true, // Enable confetti for Single 0
