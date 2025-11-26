@@ -274,9 +274,9 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
       <div
         className="relative bg-white rounded-[24px] shadow-2xl"
         style={{
-          width: '720px',
-          height: '540px',
-          padding: capturedImage ? '4px' : '4px',
+          maxWidth: '90vw',
+          maxHeight: '90vh',
+          padding: '24px',
           margin: 0,
           display: 'flex',
           overflow: 'hidden',
@@ -315,42 +315,35 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
         <div
           style={{
             position: 'relative',
-            width: '100%',
-            height: '100%',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
             overflow: 'hidden',
-            gap: capturedImage ? '0' : '0px',
+            gap: '16px',
             margin: 0,
-            padding: 24
+            padding: 0
           }}
         >
           {capturedImage ? (
             <>
             <div style={{
-              flex: 1,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              width: '100%',
-              minHeight: 0,
-              overflow: 'hidden',
-              maxHeight: 'calc(100% - 80px)'
+              overflow: 'hidden'
             }}>
               <img
                 src={capturedImage}
                 alt="Captured card"
                 style={{
-                  width: '100%',
-                  height: '100%',
-                  maxWidth: '100%',
-                  maxHeight: '100%',
+                  maxWidth: 'calc(50vw - 48px)',
+                  maxHeight: 'calc(50vh - 140px)',
                   objectFit: 'contain',
                   display: 'block',
                   margin: 0,
-                  padding: 0
+                  padding: 0,
+                  borderRadius: '12px'
                 }}
               />
             </div>
@@ -418,8 +411,6 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
                 <div 
                   style={{ 
                     position: 'relative',
-                    width: '100%', 
-                    height: '100%', 
                     display: 'flex', 
                     alignItems: 'center', 
                     justifyContent: 'center' 
@@ -438,12 +429,10 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
               {isCapturing && (
                 <div
                   style={{
-                    position: 'relative',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    width: '100%',
-                    height: '100%'
+                    padding: '80px 120px'
                   }}
                 >
                   <div

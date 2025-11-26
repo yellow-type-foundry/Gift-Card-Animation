@@ -120,27 +120,6 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
       canvasMirrored.style.height = canvas.style.height
     }
     
-    // Get Union shape bounds
-    const unionEl = cardEl.querySelector('[data-name="Union"]')
-    let unionTop = null
-    let unionCutout = null
-    if (unionEl) {
-      const unionRect = unionEl.getBoundingClientRect()
-      unionTop = (unionRect.top - canvasRect.top) * dpr
-      const cutoutWidth = 84 * dpr
-      const cutoutDepth = 21 * dpr
-      const cutoutLeftCard = (cardWidth - cutoutWidth) / 2
-      const cutoutRightCard = cutoutLeftCard + cutoutWidth
-      unionCutout = {
-        left: cutoutLeftCard - cardOffsetX,
-        right: cutoutRightCard - cardOffsetX,
-        top: unionTop,
-        bottom: unionTop + cutoutDepth,
-        width: cutoutWidth,
-        depth: cutoutDepth
-      }
-    }
-    
     // Get gift box bounds
     const giftBoxEl = cardEl.querySelector('[data-name="Box"]')
     let giftBoxBounds = null
@@ -165,20 +144,14 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
       maxX: cardWidth - cardOffsetX,
       minY: -cardOffsetY,
       maxY: cardHeight - cardOffsetY,
-      envelope: null,
-      giftBox: giftBoxBounds,
-      unionTop: unionTop,
-      unionCutout: unionCutout,
-      secondFloorY: null,
-      secondFloorLeft: null,
-      secondFloorRight: null
+      giftBox: giftBoxBounds
     }
     
-    const getMirrorY = () => cardBounds.unionTop !== null ? cardBounds.unionTop : cardBounds.maxY
+    const getMirrorY = () => cardBounds.maxY
     
     // Use config
     const { colors, speed, horizontalDrift, gravity, size, rotation } = CONFETTI_CONFIG
-    const targetParticleCount = 270
+    const targetParticleCount = 200 // 25% more particles for captured image (was 270)
     const eruptionBoostFrames = 63
     const maxEruptionBoost = 4.5
     const minEruptionBoost = 1.0
@@ -192,11 +165,11 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
       const eruptionBoost = maxEruptionBoost - (maxEruptionBoost - minEruptionBoost) * eruptionProgress
       const speedVariation = 0.5 + Math.random() * 1.5
       const particleSpeed = (speed.min + Math.random() * speed.max) * speedVariation * eruptionBoost
-      const particleSize = (size.min + Math.random() * size.max) * dpr * 1.5 // 1.2x bigger for captured image
+      const particleSize = (size.min + Math.random() * size.max) * dpr * 1.65 // 1.2x bigger for captured image
       const halfSize = particleSize / 2
       
       const spawnX = cardBounds.minX + halfSize + Math.random() * (cardBounds.maxX - cardBounds.minX - halfSize * 2)
-      let spawnY = cardBounds.unionTop !== null ? cardBounds.unionTop - halfSize : cardBounds.maxY - halfSize - 5 * dpr
+      const spawnY = cardBounds.maxY - halfSize - 5 * dpr
       
       const horizontalSpreadMultiplier = eruptionBoost > 1.5 ? 1.5 : 1.0
       const horizontalSpread = horizontalDrift * (0.5 + Math.random() * 1.5) * horizontalSpreadMultiplier
@@ -265,17 +238,7 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
       const minX = cardBounds.minX + halfSize
       const maxX = cardBounds.maxX - halfSize
       const minY = cardBounds.minY + halfSize
-      
-      const isInCutout = cardBounds.unionCutout && 
-        p.x >= cardBounds.unionCutout.left - halfSize * 2 && 
-        p.x <= cardBounds.unionCutout.right + halfSize * 2
-      
-      let maxY
-      if (cardBounds.unionTop !== null) {
-        maxY = isInCutout ? cardBounds.unionCutout.bottom - halfSize : cardBounds.unionTop - halfSize
-      } else {
-        maxY = cardBounds.maxY - halfSize
-      }
+      const maxY = cardBounds.maxY - halfSize
       
       if (p.x <= minX) { p.x = minX; p.vx = Math.abs(p.vx) * p.bounceEnergy }
       else if (p.x >= maxX) { p.x = maxX; p.vx = -Math.abs(p.vx) * p.bounceEnergy }
