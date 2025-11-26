@@ -18,7 +18,7 @@ import { CONFETTI_CONFIG, CONFETTI_CONFIG_LAYOUT_0 } from '@/constants/sentCardC
  * @param {Array} blurCanvasRefs - Array of refs to blur canvas layers (Layout 0 only)
  * @param {boolean} shouldPause - Whether to pause the animation (freeze particles)
  */
-export default function useConfettiLayout0(isHovered, allAccepted, confettiCanvasRef, cardRef, confettiCanvasFrontRef = null, confettiCanvasMirroredRef = null, blurCanvasRefs = null, shouldPause = false, forceHovered = false, pauseAtFrame = null) {
+export default function useConfettiLayout0(isHovered, allAccepted, confettiCanvasRef, cardRef, confettiCanvasFrontRef = null, confettiCanvasMirroredRef = null, blurCanvasRefs = null, shouldPause = false, forceHovered = false, pauseAtFrame = null, immediateFrame = null) {
   // Use a ref to track pause state without causing effect re-runs
   // Initialize as false to ensure animation starts, then update from prop
   const pauseRef = useRef(false)
@@ -44,7 +44,369 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
   const fadeOutStartTimeRef = useRef(null) // Track when fade-out started
   const fadeOutDuration = 800 // Fade-out duration in milliseconds
   
+  // IMMEDIATE FRAME MODE: Render confetti at a specific frame without animation
+  // This runs synchronously and is MUCH faster than waiting for animation to reach the frame
   useEffect(() => {
+    console.log('[Confetti Layout0] IMMEDIATE MODE EFFECT: immediateFrame =', immediateFrame)
+    if (immediateFrame === null) return // Only run in immediate mode
+    console.log('[Confetti Layout0] IMMEDIATE MODE: Starting...')
+    
+    // Use requestAnimationFrame to ensure DOM is ready and painted
+    // This fixes timing issues where canvas refs aren't available on first render
+    const runImmediateMode = () => {
+      // For Layout 0, use blur canvases (confettiCanvasRef is not rendered for Layout 0)
+      const blurCanvases = blurCanvasRefs?.map(ref => ref?.current).filter(Boolean) || []
+      // Use first blur canvas as main canvas for Layout 0, fallback to confettiCanvasRef
+      const canvas = blurCanvases[0] || confettiCanvasRef.current
+      const canvasFront = confettiCanvasFrontRef?.current
+      const canvasMirrored = confettiCanvasMirroredRef?.current
+      const cardEl = cardRef.current
+      
+      console.log('[Confetti Layout0] IMMEDIATE MODE: Checking refs...', {
+        hasBlurCanvases: blurCanvases.length,
+        hasCanvas: !!canvas,
+        hasCardEl: !!cardEl
+      })
+      
+      if (!canvas || !cardEl) {
+        console.log('[Confetti Layout0] IMMEDIATE MODE: Canvas or card not ready, retrying...')
+        // Retry after a short delay if refs aren't ready
+        requestAnimationFrame(runImmediateMode)
+        return
+      }
+      
+      console.log('[Confetti Layout0] IMMEDIATE MODE: Calculating frame', immediateFrame, 'synchronously')
+    const startTime = performance.now()
+    
+    const ctx = canvas.getContext('2d')
+    const ctxFront = canvasFront?.getContext('2d')
+    const ctxMirrored = canvasMirrored?.getContext('2d')
+    const blurContexts = blurCanvases.map(c => c?.getContext('2d')).filter(Boolean)
+    const dpr = window.devicePixelRatio || 1
+    
+    // Setup canvas sizes
+    const cardRect = cardEl.getBoundingClientRect()
+    const canvasRect = canvas.getBoundingClientRect()
+    const cardWidth = cardRect.width * dpr
+    const cardHeight = cardRect.height * dpr
+    const cardOffsetX = (cardRect.left - canvasRect.left) * dpr
+    const cardOffsetY = (cardRect.top - canvasRect.top) * dpr
+    
+    canvas.width = Math.max(1, Math.floor(cardWidth))
+    canvas.height = Math.max(1, Math.floor(cardHeight))
+    canvas.style.width = `${cardRect.width}px`
+    canvas.style.height = `${cardRect.height}px`
+    
+    if (canvasFront) {
+      canvasFront.width = canvas.width
+      canvasFront.height = canvas.height
+      canvasFront.style.width = canvas.style.width
+      canvasFront.style.height = canvas.style.height
+    }
+    
+    blurCanvases.forEach(c => {
+      if (c) {
+        c.width = canvas.width
+        c.height = canvas.height
+        c.style.width = canvas.style.width
+        c.style.height = canvas.style.height
+      }
+    })
+    
+    if (canvasMirrored) {
+      canvasMirrored.width = canvas.width
+      canvasMirrored.height = canvas.height
+      canvasMirrored.style.width = canvas.style.width
+      canvasMirrored.style.height = canvas.style.height
+    }
+    
+    // Get Union shape bounds
+    const unionEl = cardEl.querySelector('[data-name="Union"]')
+    let unionTop = null
+    let unionCutout = null
+    if (unionEl) {
+      const unionRect = unionEl.getBoundingClientRect()
+      unionTop = (unionRect.top - canvasRect.top) * dpr
+      const cutoutWidth = 84 * dpr
+      const cutoutDepth = 21 * dpr
+      const cutoutLeftCard = (cardWidth - cutoutWidth) / 2
+      const cutoutRightCard = cutoutLeftCard + cutoutWidth
+      unionCutout = {
+        left: cutoutLeftCard - cardOffsetX,
+        right: cutoutRightCard - cardOffsetX,
+        top: unionTop,
+        bottom: unionTop + cutoutDepth,
+        width: cutoutWidth,
+        depth: cutoutDepth
+      }
+    }
+    
+    // Get gift box bounds
+    const giftBoxEl = cardEl.querySelector('[data-name="Box"]')
+    let giftBoxBounds = null
+    if (giftBoxEl) {
+      const giftBoxRect = giftBoxEl.getBoundingClientRect()
+      giftBoxBounds = {
+        left: (giftBoxRect.left - canvasRect.left) * dpr,
+        top: (giftBoxRect.top - canvasRect.top) * dpr,
+        right: (giftBoxRect.left - canvasRect.left) * dpr + giftBoxRect.width * dpr,
+        bottom: (giftBoxRect.top - canvasRect.top) * dpr + giftBoxRect.height * dpr,
+        width: giftBoxRect.width * dpr,
+        height: giftBoxRect.height * dpr
+      }
+    }
+    
+    const cardBounds = {
+      width: cardWidth,
+      height: cardHeight,
+      offsetX: cardOffsetX,
+      offsetY: cardOffsetY,
+      minX: -cardOffsetX,
+      maxX: cardWidth - cardOffsetX,
+      minY: -cardOffsetY,
+      maxY: cardHeight - cardOffsetY,
+      envelope: null,
+      giftBox: giftBoxBounds,
+      unionTop: unionTop,
+      unionCutout: unionCutout,
+      secondFloorY: null,
+      secondFloorLeft: null,
+      secondFloorRight: null
+    }
+    
+    const getMirrorY = () => cardBounds.unionTop !== null ? cardBounds.unionTop : cardBounds.maxY
+    
+    // Use config
+    const { colors, speed, horizontalDrift, gravity, size, rotation } = CONFETTI_CONFIG
+    const targetParticleCount = 270
+    const eruptionBoostFrames = 63
+    const maxEruptionBoost = 4.5
+    const minEruptionBoost = 1.0
+    const initialSpawnRate = 0.25
+    const maxSpawnRate = 0.95
+    const accelerationFrames = 30
+    
+    // Create particle function (simplified for immediate mode)
+    const createParticle = (frameCountAtSpawn) => {
+      const eruptionProgress = Math.min(1, frameCountAtSpawn / eruptionBoostFrames)
+      const eruptionBoost = maxEruptionBoost - (maxEruptionBoost - minEruptionBoost) * eruptionProgress
+      const speedVariation = 0.5 + Math.random() * 1.5
+      const particleSpeed = (speed.min + Math.random() * speed.max) * speedVariation * eruptionBoost
+      const particleSize = (size.min + Math.random() * size.max) * dpr * 1.2 // 1.2x bigger for captured image
+      const halfSize = particleSize / 2
+      
+      const spawnX = cardBounds.minX + halfSize + Math.random() * (cardBounds.maxX - cardBounds.minX - halfSize * 2)
+      let spawnY = cardBounds.unionTop !== null ? cardBounds.unionTop - halfSize : cardBounds.maxY - halfSize - 5 * dpr
+      
+      const horizontalSpreadMultiplier = eruptionBoost > 1.5 ? 1.5 : 1.0
+      const horizontalSpread = horizontalDrift * (0.5 + Math.random() * 1.5) * horizontalSpreadMultiplier
+      const angleVariation = (Math.random() - 0.5) * (eruptionBoost > 1.5 ? 0.5 : 0.3)
+      const rotationSpeed = rotation.velocity.min + Math.random() * (rotation.velocity.max - rotation.velocity.min)
+      
+      return {
+        x: spawnX,
+        y: spawnY,
+        vx: (Math.random() * 2 - 1) * horizontalSpread * dpr + Math.sin(angleVariation) * particleSpeed * dpr * 0.3,
+        vy: -particleSpeed * dpr * Math.cos(angleVariation) * CONFETTI_CONFIG_LAYOUT_0.velocity.boostMultiplier,
+        airResistance: 0.985 + Math.random() * 0.01,
+        ay: gravity * dpr * 0.7,
+        rot: Math.random() * rotation.initial,
+        vr: rotationSpeed * (0.5 + Math.random() * 1.5),
+        size: particleSize,
+        color: colors[(Math.random() * colors.length) | 0],
+        layer: canvasFront ? (Math.random() < 0.5 ? 'front' : 'back') : 'back',
+        blurLevel: blurContexts.length > 0 ? Math.floor(Math.random() * blurContexts.length) : null,
+        opacity: 1, // Full opacity in immediate mode
+        bounceEnergy: (0.1 + Math.random() * 0.1) * 1.125,
+        isLandedOnSecondFloor: false,
+        landingVelocityThreshold: 0.3 * dpr,
+        hasPassedFloor2: false,
+        isLandedOnGiftBox: false,
+        spawnFrame: frameCountAtSpawn
+      }
+    }
+    
+    // Simplified physics update
+    const updateParticle = (p) => {
+      const halfSize = p.size / 2
+      
+      // Air resistance
+      p.vx *= p.airResistance
+      p.vy *= p.airResistance
+      
+      // Gravity
+      p.vy += p.ay
+      
+      // Update position
+      p.x += p.vx
+      p.y += p.vy
+      
+      // Update rotation
+      p.rot += p.vr
+      
+      // Gift box collision
+      if (giftBoxBounds) {
+        const boxTop = giftBoxBounds.top
+        const isNearTop = p.y >= boxTop - halfSize && p.y <= boxTop + halfSize * 2
+        if (isNearTop && p.vy > 0) {
+          const landingWidth = giftBoxBounds.width * 0.7
+          const landingLeft = giftBoxBounds.left + (giftBoxBounds.width - landingWidth) / 2
+          const landingRight = landingLeft + landingWidth
+          if (p.x >= landingLeft && p.x <= landingRight) {
+            p.y = boxTop
+            p.vy = Math.min(0, p.vy * 0.3)
+            p.vx *= 0.8
+            p.isLandedOnGiftBox = true
+          }
+        }
+      }
+      
+      // Boundary constraints
+      const minX = cardBounds.minX + halfSize
+      const maxX = cardBounds.maxX - halfSize
+      const minY = cardBounds.minY + halfSize
+      
+      const isInCutout = cardBounds.unionCutout && 
+        p.x >= cardBounds.unionCutout.left - halfSize * 2 && 
+        p.x <= cardBounds.unionCutout.right + halfSize * 2
+      
+      let maxY
+      if (cardBounds.unionTop !== null) {
+        maxY = isInCutout ? cardBounds.unionCutout.bottom - halfSize : cardBounds.unionTop - halfSize
+      } else {
+        maxY = cardBounds.maxY - halfSize
+      }
+      
+      if (p.x <= minX) { p.x = minX; p.vx = Math.abs(p.vx) * p.bounceEnergy }
+      else if (p.x >= maxX) { p.x = maxX; p.vx = -Math.abs(p.vx) * p.bounceEnergy }
+      if (p.y <= minY) { p.y = minY; p.vy = Math.abs(p.vy) * p.bounceEnergy }
+      else if (p.y >= maxY) { p.y = maxY; p.vy = -Math.abs(p.vy) * p.bounceEnergy }
+    }
+    
+    // Create particles array
+    const particles = []
+    let activeCount = 0
+    
+    // Run simulation synchronously for immediateFrame frames
+    for (let frame = 0; frame < immediateFrame; frame++) {
+      // Spawn particles based on spawn rate
+      if (activeCount < targetParticleCount) {
+        const progress = Math.min(1, frame / accelerationFrames)
+        const easeOutProgress = 1 - (1 - progress) * (1 - progress)
+        const currentSpawnRate = initialSpawnRate + (maxSpawnRate - initialSpawnRate) * easeOutProgress
+        
+        if (Math.random() < currentSpawnRate) {
+          particles.push(createParticle(frame))
+          activeCount++
+        }
+      }
+      
+      // Update all particles
+      for (let i = 0; i < particles.length; i++) {
+        updateParticle(particles[i])
+      }
+    }
+    
+    const simTime = performance.now() - startTime
+    console.log('[Confetti Layout0] IMMEDIATE MODE: Simulation complete in', simTime.toFixed(1), 'ms, particles:', particles.length)
+    
+    // Debug: Log particle positions
+    if (particles.length > 0) {
+      const sampleParticle = particles[0]
+      console.log('[Confetti Layout0] IMMEDIATE MODE: Sample particle:', {
+        x: sampleParticle.x.toFixed(1),
+        y: sampleParticle.y.toFixed(1),
+        opacity: sampleParticle.opacity,
+        color: sampleParticle.color,
+        blurLevel: sampleParticle.blurLevel
+      })
+      console.log('[Confetti Layout0] IMMEDIATE MODE: Canvas size:', {
+        width: canvas.width,
+        height: canvas.height
+      })
+    }
+    
+    // Clear canvases
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    if (ctxFront) ctxFront.clearRect(0, 0, canvasFront.width, canvasFront.height)
+    if (ctxMirrored) ctxMirrored.clearRect(0, 0, canvasMirrored.width, canvasMirrored.height)
+    blurContexts.forEach(bCtx => bCtx && bCtx.clearRect(0, 0, bCtx.canvas.width, bCtx.canvas.height))
+    
+    // Render all particles to canvas
+    const TWO_PI = Math.PI * 2
+    const mirrorY = getMirrorY()
+    
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i]
+      const halfSize = p.size / 2
+      
+      // Skip off-screen particles
+      if (p.x + halfSize < 0 || p.x - halfSize > canvas.width || 
+          p.y + halfSize < 0 || p.y - halfSize > canvas.height) continue
+      
+      // Determine which context to use
+      let drawCtx = null
+      if (p.blurLevel !== null && blurContexts[p.blurLevel]) {
+        drawCtx = blurContexts[p.blurLevel]
+      } else {
+        drawCtx = (p.layer === 'front' && ctxFront) ? ctxFront : ctx
+      }
+      
+      if (drawCtx) {
+        drawCtx.save()
+        drawCtx.translate(p.x, p.y)
+        drawCtx.rotate(p.rot)
+        drawCtx.globalAlpha = p.opacity
+        drawCtx.fillStyle = p.color
+        drawCtx.beginPath()
+        drawCtx.arc(0, 0, halfSize, 0, TWO_PI)
+        drawCtx.closePath()
+        drawCtx.fill()
+        drawCtx.restore()
+      }
+      
+      // Draw mirrored version
+      if (ctxMirrored) {
+        const mirroredY = mirrorY + (mirrorY - p.y)
+        ctxMirrored.save()
+        ctxMirrored.translate(p.x, mirroredY)
+        ctxMirrored.rotate(-p.rot)
+        ctxMirrored.globalAlpha = p.opacity
+        ctxMirrored.fillStyle = p.color
+        ctxMirrored.beginPath()
+        ctxMirrored.arc(0, 0, halfSize * 1.5, 0, TWO_PI)
+        ctxMirrored.closePath()
+        ctxMirrored.fill()
+        ctxMirrored.restore()
+      }
+    }
+    
+      const totalTime = performance.now() - startTime
+      console.log('[Confetti Layout0] IMMEDIATE MODE: Total render time', totalTime.toFixed(1), 'ms')
+      
+      // Mark as ready for capture
+      if (typeof window !== 'undefined') {
+        window.__confettiFrameCount = immediateFrame
+        window.__confettiPaused = true
+        window.__confettiReady = true
+      }
+      
+      // Prevent normal animation from running
+      hasInitializedRef.current = true
+    }
+    
+    // Start the immediate mode rendering
+    requestAnimationFrame(runImmediateMode)
+    
+  }, [immediateFrame, confettiCanvasRef, cardRef, confettiCanvasFrontRef, confettiCanvasMirroredRef, blurCanvasRefs])
+  
+  useEffect(() => {
+    // Skip normal animation if in immediate mode
+    if (immediateFrame !== null) {
+      console.log('[Confetti Layout0] Immediate mode active - skipping normal animation')
+      return
+    }
+    
     // Detect if forceHovered changed from false to true (modal opened)
     if (!prevForceHoveredRef.current && forceHovered) {
       console.log('[Confetti Layout0] Modal opened - resetting initialization flag')
@@ -1428,6 +1790,6 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
         hasInitializedRef.current = false
       }
     }
-  }, [isHovered, allAccepted, confettiCanvasRef, cardRef, confettiCanvasFrontRef, confettiCanvasMirroredRef, blurCanvasRefs, forceHovered])
+  }, [isHovered, allAccepted, confettiCanvasRef, cardRef, confettiCanvasFrontRef, confettiCanvasMirroredRef, blurCanvasRefs, forceHovered, immediateFrame])
 }
 

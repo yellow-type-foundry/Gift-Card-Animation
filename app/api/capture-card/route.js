@@ -259,6 +259,17 @@ export async function POST(request) {
     
     const page = await browser.newPage()
     
+    // Capture console logs from the page for debugging
+    page.on('console', msg => {
+      const text = msg.text()
+      console.log('[PAGE LOG]', msg.type(), text.substring(0, 200))
+    })
+    
+    // Capture page errors
+    page.on('pageerror', err => {
+      console.error('[PAGE ERROR]', err.message)
+    })
+    
     // Block unnecessary resources to speed up page load
     // Keep essential resources: HTML, CSS, JS, and images (card might have images)
     await page.setRequestInterception(true)
@@ -362,16 +373,36 @@ export async function POST(request) {
         await new Promise(resolve => setTimeout(resolve, 100))
       }
     } else {
-      // Animation mode: wait for confetti canvas and animation to reach frame 180
-      console.log('[TIMING] Waiting for confetti canvas and animation to start...')
-      const canvasWaitStart = Date.now()
+      // Animation mode: check for immediate frame rendering first (FAST)
+      // immediateFrame renders confetti synchronously, so it should be ready almost instantly
+      console.log('[TIMING] Checking for immediate mode confetti rendering...')
+      const immediateCheckStart = Date.now()
+      
       try {
-        // Wait for canvas AND animation to start in one check (faster)
+        // First, try waiting for __confettiReady (set by immediateFrame mode)
+        // This is MUCH faster than waiting for animation frames
         await page.waitForFunction(() => {
-          const canvases = document.querySelectorAll('canvas')
-          const frameCount = window.__confettiFrameCount || 0
-          return canvases.length > 0 && frameCount > 0
-        }, { timeout: 2000, polling: 25 }) // Faster polling: 25ms instead of 50ms
+          return window.__confettiReady === true
+        }, { timeout: 500, polling: 10 }) // Very short timeout - immediate mode should be ready in ~50ms
+        
+        const immediateTime = Date.now() - immediateCheckStart
+        console.log('[TIMING] ✅ IMMEDIATE MODE: Confetti ready in', immediateTime, 'ms (no animation wait!)')
+        timings.canvasWait = immediateTime
+        timings.frame180Reached = 0
+        timings.pauseApplied = 0
+        
+      } catch (immediateError) {
+        // Immediate mode not available, fall back to animation mode
+        console.log('[TIMING] Immediate mode not ready, falling back to animation mode...')
+        
+        const canvasWaitStart = Date.now()
+        try {
+          // Wait for canvas AND animation to start in one check (faster)
+          await page.waitForFunction(() => {
+            const canvases = document.querySelectorAll('canvas')
+            const frameCount = window.__confettiFrameCount || 0
+            return canvases.length > 0 && frameCount > 0
+          }, { timeout: 2000, polling: 25 }) // Faster polling: 25ms instead of 50ms
         timings.canvasWait = Date.now() - canvasWaitStart
         timings.animationStart = Date.now()
         console.log('[TIMING] Canvas found and animation started:', timings.canvasWait, 'ms')
@@ -462,11 +493,12 @@ export async function POST(request) {
             await new Promise(resolve => setTimeout(resolve, estimatedWait))
           }
         }
-      } catch (e) {
-        console.warn('[WARN] Canvas not found, using fallback timing')
-        // Fallback: wait 3000ms if canvas detection fails (frame 180 at 60fps = 3 seconds)
-        await new Promise(resolve => setTimeout(resolve, 3000))
-      }
+        } catch (e) {
+          console.warn('[WARN] Canvas not found, using fallback timing')
+          // Fallback: wait 3000ms if canvas detection fails (frame 180 at 60fps = 3 seconds)
+          await new Promise(resolve => setTimeout(resolve, 3000))
+        }
+      } // End of animation mode fallback catch block
     }
     
     // Wait for fonts to be loaded before taking screenshot

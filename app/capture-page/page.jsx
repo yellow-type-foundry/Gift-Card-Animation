@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import SentCard1 from '@/components/SentCard1'
 
 export default function CapturePage() {
+  console.log('[CapturePage] Component rendering')
   const [cardProps, setCardProps] = useState(null)
   const [isReady, setIsReady] = useState(false)
   const [isStatic, setIsStatic] = useState(false)
@@ -20,6 +21,16 @@ export default function CapturePage() {
         const props = JSON.parse(decodeURIComponent(propsParam))
         setCardProps(props)
         
+        console.log('[CapturePage] Props loaded:', {
+          staticMode,
+          immediateFrame: staticMode ? null : 75,
+          forceHovered: !staticMode,
+          enableConfetti: true,
+          hideEnvelope: true,
+          showGiftBoxWhenHidden: true,
+          hideProgressBarInBox: true
+        })
+        
         if (staticMode) {
           // Static mode: mark ready immediately (no animation wait)
           setIsReady(true)
@@ -35,7 +46,10 @@ export default function CapturePage() {
     }
   }, [])
 
+  console.log('[CapturePage] State:', { cardProps: !!cardProps, isStatic, isReady })
+  
   if (!cardProps) {
+    console.log('[CapturePage] No cardProps yet, showing loading...')
     return (
       <div style={{ 
         width: '720px', 
@@ -51,6 +65,8 @@ export default function CapturePage() {
       </div>
     )
   }
+  
+  console.log('[CapturePage] Rendering SentCard1 with immediateFrame:', isStatic ? null : 75)
 
   return (
     <div style={{
@@ -102,8 +118,13 @@ export default function CapturePage() {
               showFooterReminder={false}
               showFooterProgress={false}
               hideUnion={true}
+              enableConfetti={true}  // Enable confetti for capture
+              hideEnvelope={true}  // Required for Layout 0 confetti
+              showGiftBoxWhenHidden={true}  // Required for Layout 0 confetti
+              hideProgressBarInBox={true}  // Required for Layout 0 detection
               pauseConfetti={isStatic} // Disable confetti in static mode
               forceHovered={!isStatic} // Only force hover if not static
+              immediateFrame={isStatic ? null : 75} // Render confetti at frame 70 (peak eruption)
             />
           </div>
         </div>

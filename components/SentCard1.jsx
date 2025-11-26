@@ -132,7 +132,8 @@ const SentCard1 = ({
   // Modal/sharing mode props
   forceHovered = false,
   pauseConfetti = false,
-  pauseAtFrame = null // Pause animation at specific frame for capture (e.g., 84 for peak)
+  pauseAtFrame = null, // Pause animation at specific frame for capture (e.g., 84 for peak)
+  immediateFrame = null // Render confetti at this frame instantly (no animation, for fast capture)
 }) => {
   // Hooks
   const cardRef = useRef(null)
@@ -549,7 +550,9 @@ const SentCard1 = ({
       finalPauseState,
       forceHovered,
       isLayout0,
-      shouldShowConfetti
+      shouldShowConfetti,
+      immediateFrame,
+      pauseAtFrame
     })
   }
   useConfettiLayout0(
@@ -562,7 +565,8 @@ const SentCard1 = ({
     blurCanvasRefs,
     finalPauseState,
     forceHovered, // Pass forceHovered directly to hook
-    pauseAtFrame // Pass pauseAtFrame for frame-based capture
+    pauseAtFrame, // Pass pauseAtFrame for frame-based capture
+    immediateFrame // Render at specific frame instantly (no animation)
   )
   // Layout 1: Uses original, untouched hook (no Layout 0 features)
   useConfettiLayout1(

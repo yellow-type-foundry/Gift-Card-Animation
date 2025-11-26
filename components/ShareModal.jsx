@@ -195,7 +195,7 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
             console.log('[ShareModal] Starting capture...')
             // TESTING: Enable static mode by adding ?static=true to skip animation wait
             // Change to false to test with animation
-            const USE_STATIC_MODE = true
+            const USE_STATIC_MODE = false // Set to false to enable confetti animation
             const apiUrl = USE_STATIC_MODE ? '/api/capture-card?static=true' : '/api/capture-card'
             const response = await fetch(apiUrl, {
                 method: 'POST',

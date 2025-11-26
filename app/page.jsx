@@ -354,6 +354,8 @@ export default function Home() {
       overlayProgressOnEnvelope: layoutConfig.overlayProgressOnEnvelope,
       progressOutsideEnvelope: layoutConfig.progressOutsideEnvelope,
       hideEnvelope: layoutConfig.hideEnvelope || false,
+      // Show gift box when envelope is hidden (for Single 0 / Layout 0)
+      showGiftBoxWhenHidden: layoutConfig.hideEnvelope ? true : false,
       // Box progress bar setting
       hideProgressBarInBox: layoutConfig.hideProgressBarInBox || false,
       // Box logo centering setting
