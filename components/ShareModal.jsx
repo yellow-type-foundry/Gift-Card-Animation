@@ -422,7 +422,7 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
               />
                 </div>
               )}
-              {/* Show capturing badge when capturing */}
+              {/* Show dot loading animation when capturing */}
               {isCapturing && (
                 <div
                   style={{
@@ -436,17 +436,33 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
                 >
                   <div
                     style={{
-                      background: 'rgba(0, 0, 0, 0.75)',
-                    color: 'white',
-                      padding: '16px 28px',
-                      borderRadius: '12px',
-                      fontSize: '15px',
-                      fontWeight: 500,
-                      backdropFilter: 'blur(8px)',
-                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
-                  }}
-                >
-                  Capturing...
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px'
+                    }}
+                  >
+                    <div className="dot-loader" style={{
+                      width: '8px',
+                      height: '8px',
+                      borderRadius: '50%',
+                      backgroundColor: '#7F53FD',
+                      animation: 'dotPulse 1s ease-in-out infinite'
+                    }} />
+                    <div className="dot-loader" style={{
+                      width: '8px',
+                      height: '8px',
+                      borderRadius: '50%',
+                      backgroundColor: '#7F53FD',
+                      animation: 'dotPulse 1s ease-in-out infinite 0.2s'
+                    }} />
+                    <div className="dot-loader" style={{
+                      width: '8px',
+                      height: '8px',
+                      borderRadius: '50%',
+                      backgroundColor: '#7F53FD',
+                      animation: 'dotPulse 1s ease-in-out infinite 0.4s'
+                    }} />
                   </div>
                 </div>
               )}
@@ -472,6 +488,16 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
           to {
             opacity: 1;
             transform: scale(1);
+          }
+        }
+        @keyframes dotPulse {
+          0%, 60%, 100% {
+            transform: scale(1);
+            opacity: 1;
+          }
+          30% {
+            transform: scale(1.3);
+            opacity: 0.7;
           }
         }
       `}</style>

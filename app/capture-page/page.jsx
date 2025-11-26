@@ -99,17 +99,17 @@ export default function CapturePage() {
           }
           /* Make SentCard1 fill the entire capture area - override default 300px width */
           [data-name="Gift Card"] {
-            width: 100% !important;
+            width: 90% !important;
             max-width: 720px !important;
-            height: 100% !important;
+            height: 90% !important;
             max-height: 540px !important;
             margin: 0 !important;
             transform: none !important;
           }
-          /* Override Tailwind responsive width constraint */
+          /* Override Tailwind responsive width constraint - remove 300px limit */
           [data-name="Gift Card"].md\\:w-\\[300px\\] {
-            width: 100% !important;
-            max-width: 720px !important;
+            width: auto !important;
+            max-width: 90% !important;
           }
           /* Ensure card content fills container */
           [data-name="Gift Card"] > div {
@@ -154,6 +154,7 @@ export default function CapturePage() {
           }
           [data-name="Box"] {
             z-index: 1 !important;
+            top: -8% !important;
           }
         `}</style>
       </div>
