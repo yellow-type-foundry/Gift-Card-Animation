@@ -58,6 +58,13 @@ function Footer({
           <div
             className="content-stretch flex flex-col gap-[4px] items-start leading-[1.4] not-italic relative shrink-0 text-center w-full"
             data-name="Gift Message"
+            style={{
+              opacity: (hideInfoOnHover && isHovered) ? 0 : 1,
+              transform: (hideInfoOnHover && isHovered) ? 'translateY(4px)' : 'translateY(0)',
+              transition: 'opacity 200ms ease-out, transform 200ms ease-out',
+              pointerEvents: (hideInfoOnHover && isHovered) ? 'none' : 'auto',
+              visibility: (hideInfoOnHover && isHovered) ? 'hidden' : 'visible'
+            }}
           >
             <p
               className="[white-space-collapse:collapse] font-['Goody_Sans:Medium',sans-serif] h-[22px] overflow-ellipsis overflow-hidden relative shrink-0 text-[16px] text-nowrap w-[268px]"
@@ -93,10 +100,11 @@ function Footer({
             <div
               className="absolute inset-0 flex items-center justify-center"
               style={{
-                opacity: (hideInfoOnHover && isHovered && !isDone) ? 0 : 1,
-                transform: (hideInfoOnHover && isHovered && !isDone) ? 'translateY(4px)' : 'translateY(0)',
-                transition: 'opacity 200ms ease-out, transform 200ms ease-out',
-                pointerEvents: (hideInfoOnHover && isHovered && !isDone) ? 'none' : 'auto'
+                opacity: (hideInfoOnHover && isHovered) ? 0 : 1,
+                transform: (hideInfoOnHover && isHovered) ? 'translateY(4px)' : 'translateY(0)',
+                transition: 'opacity 200ms ease-out, transform 200ms ease-out, visibility 200ms ease-out',
+                pointerEvents: (hideInfoOnHover && isHovered) ? 'none' : 'auto',
+                visibility: (hideInfoOnHover && isHovered) ? 'hidden' : 'visible'
               }}
               data-name="InfoSlot"
             >

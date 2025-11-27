@@ -268,6 +268,9 @@ export default function Home() {
       headerUseFlex: layoutConfig.header.useFlex,
       // Union setting from layout config
       hideUnion: layoutConfig.hideUnion,
+      // Envelope settings from layout config (for Single 2/3 - controls gift container positioning)
+      envelopeScale: layoutConfig.envelope?.scale,
+      envelopeOffsetY: layoutConfig.envelope?.offsetY,
     }
   }, [])
   
@@ -302,6 +305,7 @@ export default function Home() {
       footerBottomPadding: footerConfig.bottomPadding,
       showFooterProgress: footerConfig.showProgress,
       showFooterReminder: footerConfig.showReminder,
+      hideInfoOnHover: footerConfig.hideInfoOnHover,
       // Gift container exclusive controls (Single 1 only)
       useGiftContainer: true,
       giftContainerOffsetY: layoutConfig.giftContainer.offsetY,
@@ -403,6 +407,7 @@ export default function Home() {
       footerTransparent: footerConfig.transparent,
       showFooterProgress: footerConfig.showProgress,
       showFooterReminder: footerConfig.showReminder,
+      hideInfoOnHover: footerConfig.hideInfoOnHover,
       // Altered Layout 2 specific footer controls
       footerTopPadding2: useAlteredLayout2 ? FOOTER_CONFIG.altered2.topPadding : undefined,
       footerBottomPadding2: useAlteredLayout2 ? FOOTER_CONFIG.altered2.bottomPadding : undefined,

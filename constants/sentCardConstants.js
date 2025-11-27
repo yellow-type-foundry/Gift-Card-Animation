@@ -90,7 +90,7 @@ export const FOOTER_CONFIG = {
     showProgress: true,
     showReminder: true,
     infoInSlot: false,
-    hideInfoOnHover: true,
+    hideInfoOnHover: false, // Gift info stays visible, only progress bar hides
   },
   
   // Default layout (Batch - Layout 1)
@@ -102,7 +102,7 @@ export const FOOTER_CONFIG = {
     showProgress: true,
     showReminder: true,
     infoInSlot: false,
-    hideInfoOnHover: true,
+    hideInfoOnHover: false, // Gift info stays visible, only progress bar hides
   },
   
   // Altered Layout 1 (Batch - Layout 2)

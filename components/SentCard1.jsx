@@ -74,6 +74,7 @@ const SentCard1 = ({
   footerBottomPadding = 16,
   footerTopPadding,
   footerTransparent = false,
+  hideInfoOnHover = true,
   // Header controls (for all layouts)
   headerHeight, // Default layout header height
   headerUseFlex, // Default layout header useFlex
@@ -403,12 +404,10 @@ const SentCard1 = ({
     return nameWithoutExt
   }, [svgLogoPath, giftContainerImage, hideEnvelope, showGiftBoxWhenHidden, validatedProgress.current, validatedProgress.total])
 
-  // Unified Saturation and Luminance Controls for Single 2 and Batch 2
-  // These values control the saturation and luminance for both Single 2 boxes and Batch 2 envelopes
+  // Single 2 Box Color Controls (GiftBoxContainer)
+  // Batch 0/Batch 2 envelope colors are now controlled via props from LAYOUT_CONFIG
   const SINGLE2_LUMINANCE = 62  // Luminance for Single 2 brand colors (0-100)
   const SINGLE2_SATURATION = 40  // Saturation for Single 2 brand colors (0-100)
-  const BATCH2_ENVELOPE_LUMINANCE = 88  // Luminance for Batch 2 envelope box (0-100)
-  const BATCH2_ENVELOPE_SATURATION = 40 // Saturation for Batch 2 envelope box (0-100)
   
   // Progress Bar Saturation and Luminance (unified for both Single 2 and Batch 2)
   const PROGRESS_BAR_LUMINANCE = 60  // Luminance for progress bar indicator (0-100)
@@ -747,17 +746,17 @@ const SentCard1 = ({
           bottom: 'auto'
         }
       : {
-          top: `${4 + envelopeOffsetY}px`,
+          top: '0px',
           left: '0px',
           right: '0px',
           bottom: '0px'
         }),
     zIndex: envelopeHighZ ? 50 : (overlayProgressOnEnvelope ? 2 : 2),
     // LAYOUT 0 ONLY: no transform on container (inner wrapper handles it)
-    // All other layouts: apply transform directly to container
+    // All other layouts: apply transform directly to container (scale + translateY for offsetY)
     transform: isLayout0Container 
       ? 'none'
-      : `scale(${useGiftContainer && giftContainerScale !== undefined ? giftContainerScale : (progressOutsideEnvelope && envelopeScale2 !== undefined ? envelopeScale2 : envelopeScale)})`,
+      : `translateY(${envelopeOffsetY || 0}px) scale(${useGiftContainer && giftContainerScale !== undefined ? giftContainerScale : (progressOutsideEnvelope && envelopeScale2 !== undefined ? envelopeScale2 : envelopeScale)})`,
     transformOrigin: isLayout0Container ? 'center center' : (useGiftContainer && giftContainerTransformOrigin !== undefined ? giftContainerTransformOrigin : (progressOutsideEnvelope && transformOrigin2 !== undefined ? transformOrigin2 : 'center top'))
   }}, [hideEnvelope, hideProgressBarInBox, useGiftContainer, giftContainerTop, giftContainerOffsetY, giftContainerLeft, giftContainerRight, giftContainerBottom, progressOutsideEnvelope, envelopeTopBase2, envelopeOffsetY2, envelopeOffsetY, envelopeLeft2, envelopeRight2, envelopeHighZ, overlayProgressOnEnvelope, giftContainerScale, envelopeScale2, envelopeScale, giftContainerTransformOrigin, transformOrigin2])
   
@@ -1699,7 +1698,7 @@ const SentCard1 = ({
               ? footerTransparent
               : FOOTER_CONFIG.default.transparent
           }
-          hideInfoOnHover={!progressOutsideEnvelope}
+          hideInfoOnHover={hideInfoOnHover}
           onShareClick={handleCaptureCard}
         />
 
