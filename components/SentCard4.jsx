@@ -34,8 +34,15 @@ const SentCard4 = ({
   showFooterProgress = false,
   showFooterReminder = true,
   footerBottomPadding = 20,
-  footerTopPadding = 0
+  footerTopPadding = 0,
+  // Envelope/gift container positioning (for Single 2)
+  envelopeScale = 1,
+  envelopeOffsetY = 0
 }) => {
+  // Debug: Log props to verify they're being passed
+  if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+    console.log('[SentCard4] Props:', { envelopeScale, envelopeOffsetY })
+  }
   // Hooks
   const cardRef = useRef(null)
   const { isHovered, handleHoverEnter, handleHoverLeave } = useHover()
@@ -181,10 +188,12 @@ const SentCard4 = ({
               width: '100%',
               flex: 1,
               pointerEvents: 'none',
-              marginTop: '0px',
-              marginBottom: '-20px',
+              marginTop: 0,
+              marginBottom: 0,
               position: 'relative',
-              minHeight: '100px'
+              minHeight: '100px',
+              transform: `translateY(${envelopeOffsetY || 0}px) scale(${envelopeScale || 1})`,
+              transformOrigin: 'center center'
             }}
             data-name="Gift Container"
           >

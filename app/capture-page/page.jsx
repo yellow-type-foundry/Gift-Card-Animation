@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import SentCard1 from '@/components/SentCard1'
+import SentCard from '@/components/SentCard'
 
 export default function CapturePage() {
   console.log('[CapturePage] Component rendering')
@@ -66,7 +66,7 @@ export default function CapturePage() {
     )
   }
   
-  console.log('[CapturePage] Rendering SentCard1 with immediateFrame:', isStatic ? null : 75)
+  console.log('[CapturePage] Rendering SentCard with immediateFrame:', isStatic ? null : 75)
 
   return (
     <div style={{
@@ -110,7 +110,7 @@ export default function CapturePage() {
             transform: 'scale(1)',
             transformOrigin: 'center center'
           }}>
-            <SentCard1
+            <SentCard
               {...cardProps}
               boxScale={1.25}
               envelopeOffsetY={-20}  // Adjust vertical position: negative = up, positive = down
@@ -213,7 +213,7 @@ export default function CapturePage() {
           [data-name="Gift Container/Goody"] {
             z-index: 20 !important;
           }
-          /* Box scaling is now controlled by boxScale prop on SentCard1 */
+          /* Box scaling is now controlled by boxScale prop on SentCard */
           /* Gift Container positioning left as default */
           
           /* Dots background - adjust position, size, opacity */

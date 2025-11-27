@@ -52,7 +52,7 @@ const LOGO_BRAND_COLORS = {
   '/assets/GiftSent/SVG Logo/Tiffany & Co.svg': '#81D8D0',
 }
 
-const SentCard1 = ({
+const SentCard = ({
   from = 'Alex Torres',
   title = 'Marketing Strategy Update',
   boxImage = '/assets/covers/Onboarding 03.png',
@@ -170,10 +170,10 @@ const SentCard1 = ({
   // The original card should NOT have forceHovered=true, only the modal card should
   useEffect(() => {
     if (forceHovered) {
-      console.log('[SentCard1] forceHovered is true - triggering hover state')
+      console.log('[SentCard] forceHovered is true - triggering hover state')
       // Use a small timeout to ensure the component is fully mounted
       const timeout = setTimeout(() => {
-        console.log('[SentCard1] Calling handleHoverEnter()')
+        console.log('[SentCard] Calling handleHoverEnter()')
         handleHoverEnter()
       }, 0)
       return () => {
@@ -181,7 +181,7 @@ const SentCard1 = ({
     }
     }
     // Note: We don't call handleHoverLeave() here because:
-    // 1. When modal closes, the modal's SentCard1 is unmounted (so this effect cleanup runs)
+    // 1. When modal closes, the modal's SentCard is unmounted (so this effect cleanup runs)
     // 2. The original card's hover state is reset in the modal's onClose handler
     // 3. The confetti hook will detect the change in effectiveHovered and stop the animation
   }, [forceHovered, handleHoverEnter])
@@ -551,7 +551,7 @@ const SentCard1 = ({
   // Layout 0: Uses separate hook with all Layout 0 features (gift box collision, blur layers, etc.)
   const finalPauseState = pauseConfetti || shouldPauseConfetti
   if (isLayout0 && shouldShowConfetti) {
-    console.log('[SentCard1] Calling useConfettiLayout0 with:', {
+    console.log('[SentCard] Calling useConfettiLayout0 with:', {
       effectiveHovered,
       allAccepted,
       finalPauseState,
@@ -740,7 +740,7 @@ const SentCard1 = ({
         }
       : progressOutsideEnvelope && envelopeTopBase2 !== undefined 
       ? {
-          top: `${envelopeTopBase2 + (envelopeOffsetY2 !== undefined ? envelopeOffsetY2 : envelopeOffsetY)}px`,
+          top: `${envelopeTopBase2}px`, // Use only top base, offsetY is applied in transform
           left: envelopeLeft2 !== undefined ? `${envelopeLeft2}px` : '0px',
           right: envelopeRight2 !== undefined ? `${envelopeRight2}px` : '0px',
           bottom: 'auto'
@@ -756,7 +756,7 @@ const SentCard1 = ({
     // All other layouts: apply transform directly to container (scale + translateY for offsetY)
     transform: isLayout0Container 
       ? 'none'
-      : `translateY(${envelopeOffsetY || 0}px) scale(${useGiftContainer && giftContainerScale !== undefined ? giftContainerScale : (progressOutsideEnvelope && envelopeScale2 !== undefined ? envelopeScale2 : envelopeScale)})`,
+      : `translateY(${progressOutsideEnvelope && envelopeOffsetY2 !== undefined ? envelopeOffsetY2 : (envelopeOffsetY || 0)}px) scale(${useGiftContainer && giftContainerScale !== undefined ? giftContainerScale : (progressOutsideEnvelope && envelopeScale2 !== undefined ? envelopeScale2 : envelopeScale)})`,
     transformOrigin: isLayout0Container ? 'center center' : (useGiftContainer && giftContainerTransformOrigin !== undefined ? giftContainerTransformOrigin : (progressOutsideEnvelope && transformOrigin2 !== undefined ? transformOrigin2 : 'center top'))
   }}, [hideEnvelope, hideProgressBarInBox, useGiftContainer, giftContainerTop, giftContainerOffsetY, giftContainerLeft, giftContainerRight, giftContainerBottom, progressOutsideEnvelope, envelopeTopBase2, envelopeOffsetY2, envelopeOffsetY, envelopeLeft2, envelopeRight2, envelopeHighZ, overlayProgressOnEnvelope, giftContainerScale, envelopeScale2, envelopeScale, giftContainerTransformOrigin, transformOrigin2])
   
@@ -1867,4 +1867,4 @@ const SentCard1 = ({
   )
 }
 
-export default React.memo(SentCard1)
+export default React.memo(SentCard)

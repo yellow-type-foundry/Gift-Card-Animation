@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useRef } from 'react'
 import { createPortal } from 'react-dom'
-import SentCard1 from '@/components/SentCard1'
+import SentCard from '@/components/SentCard'
 
 function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
   const [pauseConfetti, setPauseConfetti] = useState(false)
@@ -416,7 +416,7 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
                     justifyContent: 'center' 
                   }}
                 >
-              <SentCard1
+              <SentCard
                 {...cardProps}
                 showFooterReminder={false}
                 showFooterProgress={false}

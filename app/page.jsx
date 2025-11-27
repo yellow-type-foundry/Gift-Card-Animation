@@ -320,8 +320,8 @@ export default function Home() {
     }
   }, [])
   
-  // Helper function to get SentCard1 props based on layout number
-  const getSentCard1Props = useCallback((card, layoutNum, useColoredBackground, animationType, enable3D, useSingleConfig = false) => {
+  // Helper function to get SentCard props based on layout number
+  const getSentCardProps = useCallback((card, layoutNum, useColoredBackground, animationType, enable3D, useSingleConfig = false) => {
     // Map layout number to config key
     let layoutKey
     if (useSingleConfig) {
@@ -517,7 +517,7 @@ export default function Home() {
           enable3D={enable3D}
           sentCards={sentCards}
           mixedCardTypes={mixedCardTypes}
-          getSentCard1Props={getSentCard1Props}
+          getSentCardProps={getSentCardProps}
           getSingle1Props={getSingle1Props}
           getSentCard4Props={getSentCard4Props}
         />

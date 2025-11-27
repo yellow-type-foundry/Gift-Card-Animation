@@ -353,7 +353,7 @@ export async function POST(request) {
       })
       
       try {
-        // Wait for React to render the card (check for SentCard1 component)
+        // Wait for React to render the card (check for SentCard component)
         // Use a more specific selector that appears when card is rendered
         await page.waitForFunction(() => {
           // Check for card container or any card-specific element

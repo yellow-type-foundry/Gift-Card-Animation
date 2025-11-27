@@ -120,8 +120,8 @@ export const FOOTER_CONFIG = {
   // Altered Layout 2 (Batch - Layout 3)
   altered2: {
     equalPadding: true,
-    topPadding: 28,
-    bottomPadding: 16,
+    topPadding: 20,
+    bottomPadding: 20,
     transparent: true,
     showProgress: false, // Progress is shown outside footer
     showReminder: true, // Reminder is shown outside footer (prop must be true for outside button to render)
@@ -136,7 +136,7 @@ export const FOOTER_CONFIG = {
   // Single card layout (SentCard4)
   single: {
     equalPadding: true,
-    topPadding: 0,
+    topPadding: 20,
     bottomPadding: 20,
     transparent: true,
     // Note: showProgress is controlled by overlayProgressOnEnvelope prop (true) in SentCard4
@@ -292,7 +292,7 @@ export const LAYOUT_CONFIG = {
     progressOutsideEnvelope: true,
   },
   
-  // Single card layout 0 (SentCard1)
+  // Single card layout 0 (SentCard)
   single0: {
     // Header settings
     header: {

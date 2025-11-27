@@ -2,7 +2,7 @@
 
 import React from 'react'
 import GiftCard from '@/components/GiftCard'
-import SentCard1 from '@/components/SentCard1'
+import SentCard from '@/components/SentCard'
 import SentCard4 from '@/components/SentCard4'
 import { LAYOUT_CONFIG } from '@/constants/sentCardConstants'
 
@@ -21,7 +21,7 @@ const CardGrid = ({
   enable3D,
   sentCards,
   mixedCardTypes,
-  getSentCard1Props,
+  getSentCardProps,
   getSingle1Props,
   getSentCard4Props
 }) => {
@@ -143,38 +143,38 @@ const CardGrid = ({
                 
                 if (isBatch) {
                   return (
-                    <SentCard1
+                    <SentCard
                       key={index}
-                      {...getSentCard1Props(card, layoutNumber, useColoredBackground, animationType, enable3D)}
+                      {...getSentCardProps(card, layoutNumber, useColoredBackground, animationType, enable3D)}
                     />
                   )
                 } else {
-                  // Single 0 uses SentCard1 with envelope hidden (shows gift box, like Single 2)
+                  // Single 0 uses SentCard with envelope hidden (shows gift box, like Single 2)
                   if (layoutNumber === '0') {
                     return (
-                      <SentCard1
+                      <SentCard
                         key={index}
-                        {...getSentCard1Props(card, layoutNumber, useColoredBackground, animationType, enable3D, true)}
+                        {...getSentCardProps(card, layoutNumber, useColoredBackground, animationType, enable3D, true)}
                         hideEnvelope={true}
                         showGiftBoxWhenHidden={true}
                       />
                     )
                   }
-                  // Single 1 uses SentCard1 (with gift container replacing envelope)
+                  // Single 1 uses SentCard (with gift container replacing envelope)
                   if (layoutNumber === '1') {
                     return (
-                      <SentCard1
+                      <SentCard
                         key={index}
                         {...getSingle1Props(card, useColoredBackground, layoutNumber)}
                       />
                     )
                   }
-                  // Single 2 uses SentCard1 with envelope hidden (shows gift box)
+                  // Single 2 uses SentCard with envelope hidden (shows gift box)
                   if (layoutNumber === '2') {
                     return (
-                      <SentCard1
+                      <SentCard
                         key={index}
-                        {...getSentCard1Props(card, layoutNumber, useColoredBackground, animationType, enable3D, true)}
+                        {...getSentCardProps(card, layoutNumber, useColoredBackground, animationType, enable3D, true)}
                         hideEnvelope={true}
                         showGiftBoxWhenHidden={true}
                       />
@@ -195,12 +195,12 @@ const CardGrid = ({
           ) : viewType === 'single' ? (
             // Single view: show only single cards
             (() => {
-              // Single 2 (Layout 2) uses SentCard1 with single2 config (shows gift box)
+              // Single 2 (Layout 2) uses SentCard with single2 config (shows gift box)
               if (layoutNumber === '2') {
                 return sentCards.map((card, index) => (
-                  <SentCard1
+                  <SentCard
                     key={index}
-                    {...getSentCard1Props(card, layoutNumber, useColoredBackground, animationType, enable3D, true)}
+                    {...getSentCardProps(card, layoutNumber, useColoredBackground, animationType, enable3D, true)}
                     hideEnvelope={true}
                     showGiftBoxWhenHidden={true}
                   />
@@ -215,43 +215,43 @@ const CardGrid = ({
                   </div>
                 )
               }
-              // Single 0 uses SentCard1 with envelope hidden (shows gift box, like Single 2)
+              // Single 0 uses SentCard with envelope hidden (shows gift box, like Single 2)
               if (layoutNumber === '0') {
                 return sentCards.map((card, index) => (
-                  <SentCard1
+                  <SentCard
                     key={index}
-                    {...getSentCard1Props(card, layoutNumber, useColoredBackground, animationType, enable3D, true)}
+                    {...getSentCardProps(card, layoutNumber, useColoredBackground, animationType, enable3D, true)}
                     hideEnvelope={true}
                     showGiftBoxWhenHidden={true}
                   />
                 ))
               }
-              // Single 1 uses SentCard1 (with gift container replacing envelope)
+              // Single 1 uses SentCard (with gift container replacing envelope)
               if (layoutNumber === '1') {
                 return sentCards.map((card, index) => (
-                  <SentCard1
+                  <SentCard
                     key={index}
                     {...getSingle1Props(card, useColoredBackground, layoutNumber)}
                   />
                 ))
               }
-              // Single 2 uses SentCard1 with envelope hidden (shows gift box)
+              // Single 2 uses SentCard with envelope hidden (shows gift box)
               if (layoutNumber === '2') {
                 return sentCards.map((card, index) => (
-                  <SentCard1
+                  <SentCard
                     key={index}
-                    {...getSentCard1Props(card, layoutNumber, useColoredBackground, animationType, enable3D, true)}
+                    {...getSentCardProps(card, layoutNumber, useColoredBackground, animationType, enable3D, true)}
                     hideEnvelope={true}
                     showGiftBoxWhenHidden={true}
                   />
                 ))
               }
-              // Single 3 (Layout 3) uses SentCard1 with Batch 3 props
+              // Single 3 (Layout 3) uses SentCard with Batch 3 props
               if (layoutNumber === '3') {
                 return sentCards.map((card, index) => (
-                  <SentCard1
+                  <SentCard
                     key={index}
-                    {...getSentCard1Props(card, layoutNumber, useColoredBackground, animationType, enable3D)}
+                    {...getSentCardProps(card, layoutNumber, useColoredBackground, animationType, enable3D)}
                     hideEnvelope={true}
                     showGiftBoxWhenHidden={true}
                   />
@@ -271,9 +271,9 @@ const CardGrid = ({
           ) : (
             // Batch view: show only batch cards
             sentCards.map((card, index) => (
-              <SentCard1
+              <SentCard
                 key={index}
-                {...getSentCard1Props(card, layoutNumber, useColoredBackground, animationType)}
+                {...getSentCardProps(card, layoutNumber, useColoredBackground, animationType)}
               />
             ))
           )}
