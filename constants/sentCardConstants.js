@@ -187,6 +187,17 @@ export const LAYOUT_CONFIG = {
     showGiftBoxWhenHidden: false, // Use EnvelopeBoxContainer (like Batch 2), not GiftBoxContainer
     hideProgressBarInBox: true, // Hide progress bar in envelope for Batch 0
     enableConfetti: true, // Enable confetti for Batch 0 (same as Single 0)
+    // Envelope container settings (BATCH 0 SPECIFIC - separate from Batch 2)
+    envelopeContainer: {
+      padding: { top: 21, right: 76, bottom: 21, left: 76 },
+      margin: { top: 0, right: 0, bottom: 30, left: 0 },
+      boxOpacity: 1.0,
+      flapOpacity: 1.0,
+      flapLuminance: 100,
+      flapSaturation: 100,
+      boxLuminance: 88,
+      boxSaturation: 40,
+    },
   },
   
   // Default layout (Batch - Layout 1)
@@ -237,6 +248,17 @@ export const LAYOUT_CONFIG = {
     progressOutsideEnvelope: false,
     hideEnvelope: true, // Empty the envelope container
     showGiftBoxWhenHidden: false, // IMPORTANT: Keep EnvelopeBoxContainer for Batch 2, DO NOT change to GiftBoxContainer
+    // Envelope container settings (BATCH 2 SPECIFIC - separate from Batch 0)
+    envelopeContainer: {
+      padding: { top: 21, right: 76, bottom: 21, left: 76 },
+      margin: { top: 0, right: 0, bottom: 30, left: 0 },
+      boxOpacity: 1.0,
+      flapOpacity: 1.0,
+      flapLuminance: 100,
+      flapSaturation: 100,
+      boxLuminance: 88,
+      boxSaturation: 40,
+    },
   },
   
   // Altered Layout 2 (Batch - Layout 3)

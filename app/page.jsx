@@ -372,6 +372,15 @@ export default function Home() {
       // Envelope settings
       envelopeScale: layoutConfig.envelope.scale,
       envelopeOffsetY: layoutConfig.envelope.offsetY,
+      // Envelope container settings (for Batch 0 and Batch 2 - EnvelopeBoxContainer)
+      envelopeContainerPadding: layoutConfig.envelopeContainer?.padding,
+      envelopeContainerMargin: layoutConfig.envelopeContainer?.margin,
+      envelopeBoxOpacity: layoutConfig.envelopeContainer?.boxOpacity,
+      envelopeFlapOpacity: layoutConfig.envelopeContainer?.flapOpacity,
+      envelopeFlapLuminance: layoutConfig.envelopeContainer?.flapLuminance,
+      envelopeFlapSaturation: layoutConfig.envelopeContainer?.flapSaturation,
+      envelopeBoxLuminance: layoutConfig.envelopeContainer?.boxLuminance,
+      envelopeBoxSaturation: layoutConfig.envelopeContainer?.boxSaturation,
       // Header settings (for all layouts)
       headerHeight: layoutConfig.header.height,
       headerUseFlex: layoutConfig.header.useFlex,
