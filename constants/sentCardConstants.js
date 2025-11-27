@@ -187,16 +187,18 @@ export const LAYOUT_CONFIG = {
     showGiftBoxWhenHidden: false, // Use EnvelopeBoxContainer (like Batch 2), not GiftBoxContainer
     hideProgressBarInBox: true, // Hide progress bar in envelope for Batch 0
     enableConfetti: true, // Enable confetti for Batch 0 (same as Single 0)
-    // Envelope container settings (BATCH 0 SPECIFIC - separate from Batch 2)
+    // Envelope container settings (BATCH 0 SPECIFIC - independent control block)
     envelopeContainer: {
       padding: { top: 21, right: 76, bottom: 21, left: 76 },
       margin: { top: 0, right: 0, bottom: 30, left: 0 },
+      // Box styling (envelope base) - optimized for batch view with confetti
       boxOpacity: 1.0,
+      boxLuminance: 88,
+      boxSaturation: 40,
+      // Flap styling (envelope flap) - full brightness for batch visibility
       flapOpacity: 1.0,
       flapLuminance: 100,
       flapSaturation: 100,
-      boxLuminance: 88,
-      boxSaturation: 40,
     },
   },
   
@@ -233,8 +235,8 @@ export const LAYOUT_CONFIG = {
     },
     // Envelope settings
     envelope: {
-      scale: 0.95,
-      offsetY: 16,
+      scale: 1,
+      offsetY: -8,
       left: undefined,
       right: undefined,
       top: undefined,
@@ -248,16 +250,21 @@ export const LAYOUT_CONFIG = {
     progressOutsideEnvelope: false,
     hideEnvelope: true, // Empty the envelope container
     showGiftBoxWhenHidden: false, // IMPORTANT: Keep EnvelopeBoxContainer for Batch 2, DO NOT change to GiftBoxContainer
-    // Envelope container settings (BATCH 2 SPECIFIC - separate from Batch 0)
+    // Envelope container settings (BATCH 2 SPECIFIC - independent control block)
+    // NOTE: The paper/card is an essential part of the envelope and is always rendered
+    // The padding.top value controls the vertical position of the paper relative to the envelope
+    // Paper appears to emerge from inside the envelope box (positioned above the box, below the flap)
     envelopeContainer: {
-      padding: { top: 21, right: 76, bottom: 21, left: 76 },
-      margin: { top: 0, right: 0, bottom: 30, left: 0 },
-      boxOpacity: 1.0,
+      padding: { top: 46.5, right: 76, bottom: 0, left: 76 }, // Paper position: top padding positions paper to appear inside envelope
+      margin: { top: 0, right: 0, bottom: 0, left: 0 },
+      // Box styling (envelope base) - optimized for confetti white overlay
+      boxOpacity: 1,
+      boxLuminance: 90, // Slightly brighter to compensate for white overlay
+      boxSaturation: 42, // Slightly more saturated for overlay contrast
+      // Flap styling (envelope flap) - enhanced for overlay visibility
       flapOpacity: 1.0,
       flapLuminance: 100,
       flapSaturation: 100,
-      boxLuminance: 88,
-      boxSaturation: 40,
     },
   },
   
@@ -320,6 +327,19 @@ export const LAYOUT_CONFIG = {
     centerLogoInBox: true, // Center logo at the very center of the box
     enableConfetti: true, // Enable confetti for Single 0
     showRedline: false, // Hide redline for Single 0
+    // Envelope container settings (SINGLE 0 SPECIFIC - independent control block)
+    envelopeContainer: {
+      padding: { top: 21, right: 76, bottom: 21, left: 76 },
+      margin: { top: 0, right: 0, bottom: 30, left: 0 },
+      // Box styling (envelope base) - optimized for single view with centered logo
+      boxOpacity: 1.0,
+      boxLuminance: 87, // Slightly dimmer for single view focus
+      boxSaturation: 38, // Slightly less saturated for logo prominence
+      // Flap styling (envelope flap) - balanced for single view
+      flapOpacity: 1.0,
+      flapLuminance: 100,
+      flapSaturation: 100,
+    },
   },
   
   // Single card layout 1 (SentCard4) - Exact duplicate of Batch 1 (default)
@@ -391,8 +411,8 @@ export const LAYOUT_CONFIG = {
     },
     // Envelope settings (exactly like Batch 2)
     envelope: {
-      scale: 0.95,
-      offsetY: 16,
+      scale: 1,
+      offsetY: 2.5,
       left: undefined,
       right: undefined,
       top: undefined,
@@ -404,6 +424,21 @@ export const LAYOUT_CONFIG = {
     envelopeHighZ: true,
     overlayProgressOnEnvelope: true,
     progressOutsideEnvelope: false,
+    hideEnvelope: true, // Use EnvelopeBoxContainer instead of default envelope
+    showGiftBoxWhenHidden: false, // Use EnvelopeBoxContainer (like Batch 2), not GiftBoxContainer
+    // Envelope container settings (SINGLE 2 SPECIFIC - independent control block)
+    envelopeContainer: {
+      padding: { top: 21, right: 76, bottom: 21, left: 76 },
+      margin: { top: 0, right: 0, bottom: 30, left: 0 },
+      // Box styling (envelope base) - optimized for animations (highlight/breathing)
+      boxOpacity: 1.0,
+      boxLuminance: 89, // Slightly brighter for animation visibility
+      boxSaturation: 41, // Balanced saturation for animation effects
+      // Flap styling (envelope flap) - enhanced for animation contrast
+      flapOpacity: 1.0,
+      flapLuminance: 100,
+      flapSaturation: 100,
+    },
   },
 }
 
