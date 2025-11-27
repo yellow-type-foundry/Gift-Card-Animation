@@ -138,7 +138,10 @@ export default function Home() {
   const [useColoredBackground, setUseColoredBackground] = useState(false) // Toggle for theming
   const [animationType, setAnimationType] = useState('highlight') // Animation type: 'highlight', 'breathing', or 'none'
   const [enable3D, setEnable3D] = useState(false) // Standalone 3D toggle that works with highlight or breathing
-  const [layoutNumber, setLayoutNumber] = useState('0') // '0' | '1' | '2' | '3' - which layout pair to use
+  const [layoutNumber, setLayoutNumber] = useState('1') // '1' | '2' | '3' - which layout pair to use (Layout 0 merged into Layout 1)
+  const [illustration, setIllustration] = useState('1') // '1' | '2' - for Layout 1 only
+  // Illustration 1 = Box 1 (single) + Envelope 1 (batch)
+  // Illustration 2 = Box 2 (single) + Envelope 2 (batch)
   const [viewType, setViewType] = useState('mixed') // 'mixed' | 'batch' | 'single' - what to display
   const [mixSeed, setMixSeed] = useState(0) // Seed to regenerate mix when toggled
   const [showSettingsMenu, setShowSettingsMenu] = useState(false) // Mobile settings menu visibility
@@ -275,11 +278,18 @@ export default function Home() {
   }, [])
   
   // Helper function to get Single 1 specific props (with gift container controls)
-  const getSingle1Props = useCallback((card, useColoredBackground, layoutNum = '1') => {
-    // Map layout number to single config key
-    const singleConfigKey = `single${layoutNum}`
+  const getSingle1Props = useCallback((card, useColoredBackground, layoutNum = '1', animationType = 'highlight', enable3D = false) => {
+    // Illustration switching for single cards:
+    // Illustration 1 → Box1 (single1 config with Box1)
+    // Illustration 2 → Box 2 (single2 config)
+    const singleConfigKey = illustration === '1' ? 'single1' : 'single2'
     const layoutConfig = LAYOUT_CONFIG[singleConfigKey] || LAYOUT_CONFIG.single1 // Fallback to single1
-    const footerConfig = (layoutNum === '0' || layoutNum === '1') ? (layoutNum === '0' ? FOOTER_CONFIG.default0 : FOOTER_CONFIG.default) : FOOTER_CONFIG.single // Single 0/1 uses default footer config (same as Batch 0/1)
+    const footerConfig = illustration === '1' ? FOOTER_CONFIG.default : FOOTER_CONFIG.single // Illustration 1 uses default, Illustration 2 uses single
+    
+    // Debug: Log the config being used for Illustration 2 single cards
+    if (illustration === '2' && layoutConfig.envelopeContainer) {
+      console.log('[getSingle1Props] Illustration 2 - envelopeContainer padding:', layoutConfig.envelopeContainer.padding)
+    }
     
     return {
       from: card.from,
@@ -290,12 +300,13 @@ export default function Home() {
       progress: card.progress,
       sentDate: card.sentDate,
       headerBgOverride: useColoredBackground ? null : "#E3E7ED",
-      // Layout config values
+      // Layout config values (for Box 2 - single2)
       hideUnion: layoutConfig.hideUnion,
       confettiWhiteOverlay: layoutConfig.confettiWhiteOverlay,
       envelopeHighZ: layoutConfig.envelopeHighZ,
       overlayProgressOnEnvelope: layoutConfig.overlayProgressOnEnvelope,
       progressOutsideEnvelope: layoutConfig.progressOutsideEnvelope,
+      showRedline: layoutConfig.showRedline || false,
       // Header settings
       headerHeight: layoutConfig.header.height,
       headerUseFlex: layoutConfig.header.useFlex,
@@ -306,22 +317,56 @@ export default function Home() {
       showFooterProgress: footerConfig.showProgress,
       showFooterReminder: footerConfig.showReminder,
       hideInfoOnHover: footerConfig.hideInfoOnHover,
-      // Gift container exclusive controls (Single 1 only)
-      useGiftContainer: true,
-      giftContainerOffsetY: layoutConfig.giftContainer.offsetY,
-      giftContainerScale: layoutConfig.giftContainer.scale,
-      giftContainerWidth: layoutConfig.giftContainer.width,
-      giftContainerHeight: layoutConfig.giftContainer.height,
-      giftContainerTop: layoutConfig.giftContainer.top,
-      giftContainerLeft: layoutConfig.giftContainer.left,
-      giftContainerRight: layoutConfig.giftContainer.right,
-      giftContainerBottom: layoutConfig.giftContainer.bottom,
-      giftContainerTransformOrigin: layoutConfig.giftContainer.transformOrigin,
+      // Hide envelope setting - Box 2 (single2) needs hideEnvelope: true to show Envelope2
+      hideEnvelope: layoutConfig.hideEnvelope || false,
+      showGiftBoxWhenHidden: layoutConfig.showGiftBoxWhenHidden || false,
+      // Box1 exclusive controls (Single 1 only - Box1)
+      // Single 2 (Box 2) doesn't use box1, it uses envelope settings
+      useBox1: !!layoutConfig.box1,
+      box1OffsetY: layoutConfig.box1?.offsetY,
+      box1Scale: layoutConfig.box1?.scale,
+      box1Width: layoutConfig.box1?.width,
+      box1Height: layoutConfig.box1?.height,
+      box1Top: layoutConfig.box1?.top,
+      box1Left: layoutConfig.box1?.left,
+      box1Right: layoutConfig.box1?.right,
+      box1Bottom: layoutConfig.box1?.bottom,
+      box1TransformOrigin: layoutConfig.box1?.transformOrigin,
+      // Envelope settings (for Box 2 - single2)
+      envelopeScale: layoutConfig.envelope?.scale,
+      envelopeOffsetY: layoutConfig.envelope?.offsetY,
+      // Envelope container settings (for Box 2 - single2)
+      // IMPORTANT: For Illustration 2 single cards, this should be from single2 config (padding.top: 21, no paper)
+      envelopeContainerPadding: layoutConfig.envelopeContainer?.padding || { top: 21, right: 76, bottom: 21, left: 76 },
+      envelopeContainerMargin: layoutConfig.envelopeContainer?.margin || { top: 0, right: 0, bottom: 30, left: 0 },
+      envelopeBoxOpacity: layoutConfig.envelopeContainer?.boxOpacity,
+      envelopeFlapOpacity: layoutConfig.envelopeContainer?.flapOpacity,
+      envelopeFlapLuminance: layoutConfig.envelopeContainer?.flapLuminance,
+      envelopeFlapSaturation: layoutConfig.envelopeContainer?.flapSaturation,
+      envelopeBoxLuminance: layoutConfig.envelopeContainer?.boxLuminance,
+      envelopeBoxSaturation: layoutConfig.envelopeContainer?.boxSaturation,
+      // Other layout flags
+      hideProgressBarInBox: layoutConfig.hideProgressBarInBox || false,
+      centerLogoInBox: layoutConfig.centerLogoInBox || false,
+      enableConfetti: layoutConfig.enableConfetti || false,
+      // Box 2 (single cards) should hide the paper component in Envelope2
+      hidePaper: illustration === '2', // Hide paper for Illustration 2 single cards (Box 2)
+      // Debug: Log hidePaper value
+      ...(illustration === '2' && (() => { console.log('[getSingle1Props] Illustration 2 - hidePaper:', true); return {}; })()),
+      // Animation settings
+      animationType: animationType,
+      enable3D: enable3D || false,
     }
-  }, [])
+  }, [illustration, animationType, enable3D])
   
   // Helper function to get SentCard props based on layout number
   const getSentCardProps = useCallback((card, layoutNum, useColoredBackground, animationType, enable3D, useSingleConfig = false) => {
+    // Validate layoutNum
+    if (!layoutNum || layoutNum === '0') {
+      // Layout 0 is merged into Layout 1, so default to '1'
+      layoutNum = '1'
+    }
+    
     // Map layout number to config key
     let layoutKey
     if (useSingleConfig) {
@@ -329,18 +374,92 @@ export default function Home() {
       layoutKey = `single${layoutNum}`
     } else {
       // For batch views, use batch config
-      if (layoutNum === '0') layoutKey = 'default0'
-      else if (layoutNum === '1') layoutKey = 'default'
+      // Layout 1 uses 'default' config
+      if (layoutNum === '1') layoutKey = 'default'
       else if (layoutNum === '2') layoutKey = 'altered1'
       else if (layoutNum === '3') layoutKey = 'altered2'
+      else {
+        // Fallback: if layoutNum is invalid, use 'default' (Layout 1)
+        console.warn(`Invalid layoutNum: ${layoutNum}, defaulting to 'default' config`)
+        layoutKey = 'default'
+      }
+    }
+    
+    if (!layoutKey) {
+      console.error(`Layout key is undefined for layoutNum: ${layoutNum}, useSingleConfig: ${useSingleConfig}`)
+      return {}
     }
     
     const layoutConfig = LAYOUT_CONFIG[layoutKey]
-    const footerConfig = layoutNum === '0' ? FOOTER_CONFIG.default0 : (layoutNum === '1' ? FOOTER_CONFIG.default : (layoutNum === '2' ? FOOTER_CONFIG.altered1 : FOOTER_CONFIG.altered2))
+    if (!layoutConfig) {
+      console.error(`Layout config not found for key: ${layoutKey}`)
+      return {}
+    }
+    
+    // Layout 1 uses FOOTER_CONFIG.default
+    const footerConfig = layoutNum === '1' ? FOOTER_CONFIG.default : (layoutNum === '2' ? FOOTER_CONFIG.altered1 : FOOTER_CONFIG.altered2)
     
     const useAlteredLayout1 = layoutNum === '2'
     const useAlteredLayout2 = layoutNum === '3'
-    const useAlteredLayout = layoutNum !== '0' && layoutNum !== '1'
+    const useAlteredLayout = layoutNum !== '1'
+    
+    // ============================================================================
+    // LAYOUT-SPECIFIC GUARDS - Always check layoutNum explicitly to prevent cross-layout contamination
+    // ============================================================================
+    const isLayout1 = !useSingleConfig && layoutNum === '1'
+    const isLayout2 = !useSingleConfig && layoutNum === '2'
+    const isLayout3 = !useSingleConfig && layoutNum === '3'
+    
+    // ============================================================================
+    // ILLUSTRATION LOGIC - Switch between Set 1 and Set 2
+    // ============================================================================
+    // Set 1 (Illustration 1):
+    //   - Single card: Box1 (Box1 with PNG image)
+    //   - Batch card: Envelope 1 (envelope with 8 breathing grid cells)
+    // Set 2 (Illustration 2):
+    //   - Single card: Box 2 (Layout 2's box)
+    //   - Batch card: Envelope 2 (Layout 2's envelope with paper component)
+    // IMPORTANT: Only change the illustration (box/envelope visual), keep all other layout properties intact
+    // For Layout 2, 3, and other layouts, use their own config values
+    
+    // For Layout 1, switch configs based on illustration
+    let effectiveLayoutConfig = layoutConfig
+    if (isLayout1) {
+      if (illustration === '2') {
+        // Illustration 2: Use Layout 2's config
+        if (useSingleConfig) {
+          // Single card: Box 2 (Layout 2's single config)
+          effectiveLayoutConfig = LAYOUT_CONFIG.single2
+        } else {
+          // Batch card: Envelope 2 (Layout 2's batch config with paper)
+          effectiveLayoutConfig = LAYOUT_CONFIG.altered1
+        }
+      }
+      // Illustration 1: Use Layout 1's config (already set as layoutConfig)
+    }
+    
+    // Determine if using box style (for batch cards only)
+    // Illustration 1 batch: Envelope 1 (Envelope1 with 8 breathing grid cells) - NOT box style
+    // Illustration 1 single: Box1 (Box1) - handled separately
+    // Illustration 2: Always uses Layout 2's style
+      const useBoxStyle = false // Illustration 1 batch should show Envelope 1, not Box1
+    
+    // Get envelopeContainer settings based on illustration
+    // Only Envelope 2 (batch, Illustration 2) has the paper component (padding.top: 46.5)
+    let effectiveEnvelopeContainer = effectiveLayoutConfig.envelopeContainer
+    if (isLayout1 && !useSingleConfig && illustration === '2') {
+      // Envelope 2: Use Layout 2's envelopeContainer (has paper component)
+      effectiveEnvelopeContainer = LAYOUT_CONFIG.altered1.envelopeContainer
+    }
+    
+    // ============================================================================
+    // ENVELOPE SETTINGS - Layout-specific overrides
+    // ============================================================================
+    // Illustration 1 batch: Envelope 1 uses Layout 1's default envelope settings (scale: 1, offsetY: 0)
+    // Illustration 2: uses effective layout config's envelope settings
+    // Single cards (Box1/Box 2): use effective layout config's envelope settings
+    const effectiveEnvelopeScale = effectiveLayoutConfig?.envelope?.scale || 1
+    const effectiveEnvelopeOffsetY = effectiveLayoutConfig?.envelope?.offsetY || 0
     
     return {
       from: card.from,
@@ -351,43 +470,69 @@ export default function Home() {
       progress: card.progress,
       sentDate: card.sentDate,
       headerBgOverride: useColoredBackground ? null : "#E3E7ED",
-      // Layout config values
+      // Layout config values - ALWAYS use Layout 1's config (don't change layout properties)
       hideUnion: layoutConfig.hideUnion,
       confettiWhiteOverlay: layoutConfig.confettiWhiteOverlay,
       envelopeHighZ: layoutConfig.envelopeHighZ,
       overlayProgressOnEnvelope: layoutConfig.overlayProgressOnEnvelope,
       progressOutsideEnvelope: layoutConfig.progressOutsideEnvelope,
-      hideEnvelope: layoutConfig.hideEnvelope || false,
+      
+      // ============================================================================
+      // LAYOUT 1 SPECIFIC: hideEnvelope based on illustration
+      // ============================================================================
+      // Single cards: Always use useBox1 (Box1 or Box 2), hideEnvelope = false
+      // Batch cards: 
+      //   - Illustration 1: hideEnvelope = false (Envelope 1 - Envelope1 with 8 breathing grid cells)
+      //   - Illustration 2: hideEnvelope = true (Envelope 2 - Envelope2 with paper)
+      // For Layout 2, 3, and single configs, use their own config value
+      hideEnvelope: isLayout1 
+        ? (useSingleConfig ? false : (illustration === '2' ? (effectiveLayoutConfig.hideEnvelope || false) : false))
+        : (layoutConfig.hideEnvelope || false),
+      
       // Show gift box when envelope is hidden (only for Single 0 / Layout 0, not Batch 2)
-      // Batch 2 uses hideEnvelope=true but should show EnvelopeBoxContainer, not GiftBoxContainer
-      showGiftBoxWhenHidden: layoutConfig.showGiftBoxWhenHidden || false,
-      // Box progress bar setting
-      hideProgressBarInBox: layoutConfig.hideProgressBarInBox || false,
+      // Batch 2 uses hideEnvelope=true but should show Envelope2, not Box2
+      showGiftBoxWhenHidden: effectiveLayoutConfig.showGiftBoxWhenHidden || false,
+      
+      // ============================================================================
+      // LAYOUT 1 SPECIFIC: hideProgressBarInBox based on illustration
+      // ============================================================================
+      // Box progress bar setting (false for Illustration 1 batch - Envelope 1, otherwise use config)
+      hideProgressBarInBox: effectiveLayoutConfig.hideProgressBarInBox || false,
+      
       // Box logo centering setting
-      centerLogoInBox: layoutConfig.centerLogoInBox || false,
+      centerLogoInBox: effectiveLayoutConfig.centerLogoInBox || false,
       // Box settings (Layout 0 specific)
-      boxWidth: layoutConfig.box?.width,
-      boxHeight: layoutConfig.box?.height,
-      boxBorderRadius: layoutConfig.box?.borderRadius,
-      boxScale: layoutConfig.box?.scale,
-      // Confetti and redline settings
-      enableConfetti: layoutConfig.enableConfetti || false,
-      showRedline: layoutConfig.showRedline || false,
-      // Envelope settings
-      envelopeScale: layoutConfig.envelope.scale,
-      envelopeOffsetY: layoutConfig.envelope.offsetY,
-      // Envelope container settings (for Batch 0 and Batch 2 - EnvelopeBoxContainer)
-      envelopeContainerPadding: layoutConfig.envelopeContainer?.padding,
-      envelopeContainerMargin: layoutConfig.envelopeContainer?.margin,
-      envelopeBoxOpacity: layoutConfig.envelopeContainer?.boxOpacity,
-      envelopeFlapOpacity: layoutConfig.envelopeContainer?.flapOpacity,
-      envelopeFlapLuminance: layoutConfig.envelopeContainer?.flapLuminance,
-      envelopeFlapSaturation: layoutConfig.envelopeContainer?.flapSaturation,
-      envelopeBoxLuminance: layoutConfig.envelopeContainer?.boxLuminance,
-      envelopeBoxSaturation: layoutConfig.envelopeContainer?.boxSaturation,
-      // Header settings (for all layouts)
-      headerHeight: layoutConfig.header.height,
-      headerUseFlex: layoutConfig.header.useFlex,
+      boxWidth: effectiveLayoutConfig.box?.width,
+      boxHeight: effectiveLayoutConfig.box?.height,
+      boxBorderRadius: effectiveLayoutConfig.box?.borderRadius,
+      boxScale: effectiveLayoutConfig.box?.scale,
+      
+      // ============================================================================
+      // LAYOUT 1 SPECIFIC: enableConfetti based on illustration
+      // ============================================================================
+      // Confetti and redline settings (false for Illustration 1 batch - Envelope 1, otherwise use config)
+      enableConfetti: effectiveLayoutConfig.enableConfetti || false,
+      showRedline: effectiveLayoutConfig.showRedline || false,
+      
+      // Envelope settings (overridden for box style in Layout 1 only)
+      envelopeScale: effectiveEnvelopeScale,
+      envelopeOffsetY: effectiveEnvelopeOffsetY,
+      // ============================================================================
+      // ENVELOPE CONTAINER SETTINGS - Only change these for illustration switching
+      // ============================================================================
+      // Illustration 2 + Envelope 2: Use Layout 2's envelopeContainer (has paper - padding.top: 46.5)
+      // All other cases: Use Layout 1's default envelopeContainer (no paper - padding.top: 21)
+      envelopeContainerPadding: effectiveEnvelopeContainer?.padding,
+      envelopeContainerMargin: effectiveEnvelopeContainer?.margin,
+      envelopeBoxOpacity: effectiveEnvelopeContainer?.boxOpacity,
+      envelopeFlapOpacity: effectiveEnvelopeContainer?.flapOpacity,
+      envelopeFlapLuminance: effectiveEnvelopeContainer?.flapLuminance,
+      envelopeFlapSaturation: effectiveEnvelopeContainer?.flapSaturation,
+      envelopeBoxLuminance: effectiveEnvelopeContainer?.boxLuminance,
+      envelopeBoxSaturation: effectiveEnvelopeContainer?.boxSaturation,
+      // Header settings (for all layouts) - Use effective layout config
+      headerHeight: effectiveLayoutConfig.header.height,
+      headerUseFlex: effectiveLayoutConfig.header.useFlex,
       // Altered Layout 1 specific header settings
       headerHeight1: useAlteredLayout1 ? layoutConfig.header.height : undefined,
       headerUseFlex1: useAlteredLayout1 ? layoutConfig.header.useFlex : undefined,
@@ -400,7 +545,7 @@ export default function Home() {
       headerHeight2: useAlteredLayout2 ? layoutConfig.header.height : undefined,
       headerUseFlex2: useAlteredLayout2 ? layoutConfig.header.useFlex : undefined,
       transformOrigin2: useAlteredLayout2 ? layoutConfig.envelope.transformOrigin : undefined,
-      // Footer settings
+      // Footer settings - ALWAYS use Layout 1's footer config
       footerPadEqual: footerConfig.equalPadding,
       footerTopPadding: footerConfig.topPadding,
       footerBottomPadding: footerConfig.bottomPadding,
@@ -417,7 +562,7 @@ export default function Home() {
       animationType: animationType,
       enable3D: enable3D || false,
     }
-  }, [animationType, enable3D])
+  }, [animationType, enable3D, illustration])
   
   const handleOpenGift = useCallback((cardId) => {
     setCardStates(prev => ({
@@ -502,6 +647,8 @@ export default function Home() {
           isSingleView={isSingleView}
           showSettingsMenu={showSettingsMenu}
           onSettingsMenuToggle={setShowSettingsMenu}
+          illustration={illustration}
+          onIllustrationChange={setIllustration}
         />
         {/* Content */}
         <CardGrid

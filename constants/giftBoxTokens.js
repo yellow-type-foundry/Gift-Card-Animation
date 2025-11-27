@@ -1,4 +1,4 @@
-// Design Tokens for GiftBoxContainer (Single 2)
+// Design Tokens for Box2 (Single 2)
 // All styling values are centralized here for easy maintenance and reuse
 
 export const GIFT_BOX_TOKENS = {

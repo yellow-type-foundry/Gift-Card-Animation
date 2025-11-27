@@ -81,19 +81,8 @@ export const CONFETTI_CONFIG = {
 // Footer configuration for Gift Sent cards
 // All footer settings are unified here for easy management
 export const FOOTER_CONFIG = {
-  // Default layout (Batch - Layout 0)
-  default0: {
-    equalPadding: false,
-    topPadding: undefined, // Uses default from Footer component
-    bottomPadding: 16,
-    transparent: false,
-    showProgress: true,
-    showReminder: true,
-    infoInSlot: false,
-    hideInfoOnHover: false, // Gift info stays visible, only progress bar hides
-  },
-  
-  // Default layout (Batch - Layout 1)
+  // Unified default layout (Batch - Layout 0 & 1 merged into Layout 1)
+  // Use cardStyle: 'box' for box style (Envelope2) or 'envelope' for envelope style (Envelope1)
   default: {
     equalPadding: false,
     topPadding: undefined, // Uses default from Footer component
@@ -161,33 +150,38 @@ export const FOOTER_CONFIG = {
 //
 // Footer settings are in FOOTER_CONFIG above
 export const LAYOUT_CONFIG = {
-  // Default layout (Batch - Layout 0)
-  default0: {
+  // Unified default layout (Batch - Layout 0 & 1 merged into Layout 1)
+  // Use cardStyle: 'box' for box style (Envelope2) or 'envelope' for envelope style (Envelope1)
+  // Layout 0 uses this config with cardStyle: 'box', Layout 1 uses this config with cardStyle: 'envelope'
+  default: {
     // Header settings
     header: {
       height: 280, // minHeight when useFlex is true
       useFlex: true, // Whether to use flex: 1 for fill height
     },
-    // Envelope settings
+    // Envelope settings (will be overridden based on cardStyle)
     envelope: {
-      scale: 1.125,
-      offsetY: 24,
+      scale: 1, // Default for envelope style; box style uses 1.125
+      offsetY: 0, // Default for envelope style; box style uses 24
       left: undefined, // Uses default positioning
       right: undefined,
       top: undefined,
       transformOrigin: undefined,
     },
+    // Card style: 'box' = Envelope2, 'envelope' = Envelope1
+    // Set dynamically: 'box' for Layout 0, 'envelope' for Layout 1
+    cardStyle: 'envelope', // 'box' | 'envelope' - default is 'envelope' (Layout 1)
     // Layout flags
     hideUnion: false,
     confettiWhiteOverlay: false,
     envelopeHighZ: false,
     overlayProgressOnEnvelope: false,
     progressOutsideEnvelope: false,
-    hideEnvelope: true, // Use EnvelopeBoxContainer instead of default envelope
-    showGiftBoxWhenHidden: false, // Use EnvelopeBoxContainer (like Batch 2), not GiftBoxContainer
-    hideProgressBarInBox: true, // Hide progress bar in envelope for Batch 0
-    enableConfetti: true, // Enable confetti for Batch 0 (same as Single 0)
-    // Envelope container settings (BATCH 0 SPECIFIC - independent control block)
+    hideEnvelope: false, // Set dynamically based on cardStyle
+    showGiftBoxWhenHidden: false,
+    hideProgressBarInBox: false, // Set dynamically based on cardStyle
+    enableConfetti: false, // Set dynamically based on cardStyle
+    // Envelope container settings (only used when cardStyle: 'box')
     envelopeContainer: {
       padding: { top: 21, right: 76, bottom: 21, left: 76 },
       margin: { top: 0, right: 0, bottom: 30, left: 0 },
@@ -200,30 +194,6 @@ export const LAYOUT_CONFIG = {
       flapLuminance: 100,
       flapSaturation: 100,
     },
-  },
-  
-  // Default layout (Batch - Layout 1)
-  default: {
-    // Header settings
-    header: {
-      height: 280, // minHeight when useFlex is true
-      useFlex: true, // Whether to use flex: 1 for fill height
-    },
-    // Envelope settings
-    envelope: {
-      scale: 1,
-      offsetY: 0,
-      left: undefined, // Uses default positioning
-      right: undefined,
-      top: undefined,
-      transformOrigin: undefined,
-    },
-    // Layout flags
-    hideUnion: false,
-    confettiWhiteOverlay: false,
-    envelopeHighZ: false,
-    overlayProgressOnEnvelope: false,
-    progressOutsideEnvelope: false,
   },
   
   // Altered Layout 1 (Batch - Layout 2)
@@ -249,7 +219,7 @@ export const LAYOUT_CONFIG = {
     overlayProgressOnEnvelope: true,
     progressOutsideEnvelope: false,
     hideEnvelope: true, // Empty the envelope container
-    showGiftBoxWhenHidden: false, // IMPORTANT: Keep EnvelopeBoxContainer for Batch 2, DO NOT change to GiftBoxContainer
+    showGiftBoxWhenHidden: false, // IMPORTANT: Keep Envelope2 for Batch 2, DO NOT change to Box2
     // Envelope container settings (BATCH 2 SPECIFIC - independent control block)
     // NOTE: The paper/card is an essential part of the envelope and is always rendered
     // The padding.top value controls the vertical position of the paper relative to the envelope
@@ -322,7 +292,7 @@ export const LAYOUT_CONFIG = {
     overlayProgressOnEnvelope: false,
     progressOutsideEnvelope: false,
     hideEnvelope: true, // Hide envelope container
-    showGiftBoxWhenHidden: false, // Use EnvelopeBoxContainer (like Batch 2) instead of GiftBoxContainer
+    showGiftBoxWhenHidden: false, // Use Envelope2 (like Batch 2) instead of Box2
     hideProgressBarInBox: true, // Hide progress bar inside the box
     centerLogoInBox: true, // Center logo at the very center of the box
     enableConfetti: true, // Enable confetti for Single 0
@@ -349,7 +319,7 @@ export const LAYOUT_CONFIG = {
       height: 280, // minHeight when useFlex is true
       useFlex: true, // Whether to use flex: 1 for fill height
     },
-    // Envelope settings (not used when useGiftContainer is true)
+    // Envelope settings (not used when useBox1 is true)
     envelope: {
       scale: 1,
       offsetY: 0,
@@ -358,8 +328,8 @@ export const LAYOUT_CONFIG = {
       top: undefined,
       transformOrigin: undefined,
     },
-    // Gift container settings (exclusive to Single 1)
-    giftContainer: {
+    // Box1 settings (exclusive to Single 1)
+    box1: {
       scale: 1,
       offsetY: 0,
       width: 360,
@@ -424,8 +394,8 @@ export const LAYOUT_CONFIG = {
     envelopeHighZ: true,
     overlayProgressOnEnvelope: true,
     progressOutsideEnvelope: false,
-    hideEnvelope: true, // Use EnvelopeBoxContainer instead of default envelope
-    showGiftBoxWhenHidden: false, // Use EnvelopeBoxContainer (like Batch 2), not GiftBoxContainer
+    hideEnvelope: true, // Use Envelope2 instead of default envelope
+    showGiftBoxWhenHidden: false, // Use Envelope2 (like Batch 2), not Box2
     // Envelope container settings (SINGLE 2 SPECIFIC - independent control block)
     envelopeContainer: {
       padding: { top: 21, right: 76, bottom: 21, left: 76 },

@@ -14,7 +14,7 @@ const imgSpecularHighlight = '/assets/a97f045e889f6250003707fa595a0ca65cc55325.s
 const imgShadowColor = '/assets/a03cbeacdf722aee39283024dde0fe6b4e0bcf5a.svg'
 const imgFlap3 = '/assets/6a0ea89f9adb3b9a92f1d9b3c70789e3892b1830.svg'
 
-const EnvelopeBoxContainer = ({
+const Envelope2 = ({
   progress = { current: 4, total: 5 },
   boxImage = '/assets/covers/Onboarding 03.png',
   boxColor = '#94d8f9',
@@ -34,7 +34,8 @@ const EnvelopeBoxContainer = ({
   tiltY = 0, // Tilt Y angle for 3D effect
   animationType = 'none', // Animation type: 'highlight', 'breathing', or 'none'
   enable3D = false, // Standalone 3D toggle that works with highlight or breathing
-  hideProgressBar = false // Hide progress bar (for Batch 0)
+  hideProgressBar = false, // Hide progress bar (for Batch 0)
+  hidePaper = false // Hide paper component (for Box 2 - single cards)
 }) => {
   const { isHovered: internalIsHovered, handleHoverEnter, handleHoverLeave } = useHover()
   // Use external hover state if provided, otherwise use internal
@@ -296,7 +297,9 @@ const EnvelopeBoxContainer = ({
 
       {/* Paper/Card Container - highest z-index, absolutely positioned above envelope */}
       {/* Paper is an essential part of the envelope and moves with it */}
-      <div 
+      {/* Hide paper for Box 2 (single cards) - only render if hidePaper is false */}
+      {console.log('[Envelope2] hidePaper prop received:', hidePaper, 'Will render paper:', !hidePaper) || null}
+      {!hidePaper && <div 
         className="absolute left-1/2"
         data-name="Paper"
         style={{ 
@@ -430,7 +433,7 @@ const EnvelopeBoxContainer = ({
             </div>
           )}
         </div>
-      </div>
+      </div>}
 
       {/* Breathing animation: Two duplicate envelopes behind original (only when animationType is 'breathing' and card is done) */}
       {animationType === 'breathing' && isDone && (
@@ -777,5 +780,5 @@ const EnvelopeBoxContainer = ({
   )
 }
 
-export default React.memo(EnvelopeBoxContainer)
+export default React.memo(Envelope2)
 

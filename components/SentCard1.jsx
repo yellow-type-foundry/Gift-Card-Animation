@@ -125,8 +125,6 @@ const SentCard = ({
   enableConfetti = false,
   // Show redline (for Single 0)
   showRedline = false,
-  // Hide paper component in Envelope2 (for Box 2 - single cards)
-  hidePaper = false,
   // Animation type for Single 2 cards: 'highlight', 'breathing', or 'none'
   animationType = 'highlight',
   // Standalone 3D toggle that works with highlight or breathing
@@ -1178,7 +1176,7 @@ const SentCard = ({
                 />
               </div>
             ) : hideEnvelope && !showGiftBoxWhenHidden && hideProgressBarInBox ? (
-              // LAYOUT 0 ONLY: Envelope2 (for Batch 0)
+              // LAYOUT 0 ONLY: Envelope Box Container (for Batch 0)
               // Wrapped in inner div for absolute positioning with scale/offsetY
               <div style={envelopeInnerWrapperStyle}>
                 <Envelope2
@@ -1202,39 +1200,32 @@ const SentCard = ({
                   animationType={animationType}
                   enable3D={enable3D}
                   hideProgressBar={hideProgressBarInBox}
-                  hidePaper={hidePaper}
                 />
               </div>
             ) : hideEnvelope && !showGiftBoxWhenHidden ? (
-              // LAYOUT 2 (Batch 2) or Box 2 (Single 2): Envelope2 - NO inner wrapper, container handles positioning
-              // For Box 2 (single cards), hide the paper component (hidePaper: true)
-              // For Envelope 2 (batch cards), show the paper component (hidePaper: false)
-              <>
-                {console.log('[SentCard] hideEnvelope:', hideEnvelope, 'showGiftBoxWhenHidden:', showGiftBoxWhenHidden, 'hidePaper prop:', hidePaper) || null}
-                <Envelope2
-                  progress={validatedProgress}
-                  boxImage={boxImage}
-                  boxColor={envelopeBoxColor}
-                  flapColor={envelopeFlapColor}
-                  boxOpacity={EFFECTIVE_BOX_OPACITY}
-                  flapOpacity={EFFECTIVE_FLAP_OPACITY}
-                  progressIndicatorShadowColor={progressIndicatorShadowColor}
-                  progressBarSourceColor={progressBarSourceColor}
-                  progressBarLuminance={PROGRESS_BAR_LUMINANCE}
-                  progressBarSaturation={PROGRESS_BAR_SATURATION}
-                  containerPadding={EFFECTIVE_ENVELOPE_PADDING}
-                  containerMargin={EFFECTIVE_ENVELOPE_MARGIN}
-                  isHovered={isHovered}
-                  parallaxX={parallaxX}
-                  parallaxY={parallaxY}
-                  tiltX={tiltX}
-                  tiltY={tiltY}
-                  animationType={animationType}
-                  enable3D={enable3D}
-                  hideProgressBar={hideProgressBarInBox}
-                  hidePaper={hidePaper}
-                />
-              </>
+              // LAYOUT 2 (Batch 2): Envelope2 - NO inner wrapper, container handles positioning
+              <Envelope2
+                progress={validatedProgress}
+                boxImage={boxImage}
+                boxColor={envelopeBoxColor}
+                flapColor={envelopeFlapColor}
+                boxOpacity={EFFECTIVE_BOX_OPACITY}
+                flapOpacity={EFFECTIVE_FLAP_OPACITY}
+                progressIndicatorShadowColor={progressIndicatorShadowColor}
+                progressBarSourceColor={progressBarSourceColor}
+                progressBarLuminance={PROGRESS_BAR_LUMINANCE}
+                progressBarSaturation={PROGRESS_BAR_SATURATION}
+                containerPadding={EFFECTIVE_ENVELOPE_PADDING}
+                containerMargin={EFFECTIVE_ENVELOPE_MARGIN}
+                isHovered={isHovered}
+                parallaxX={parallaxX}
+                parallaxY={parallaxY}
+                tiltX={tiltX}
+                tiltY={tiltY}
+                animationType={animationType}
+                enable3D={enable3D}
+                hideProgressBar={hideProgressBarInBox}
+              />
             ) : useBox1 ? (
               // Box1 Image (replaces envelope)
               <div style={box1WrapperStyle}>

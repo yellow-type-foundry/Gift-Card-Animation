@@ -11,7 +11,7 @@ import Footer from '@/components/sent-card/Footer'
 import { HEADER_OVERLAY_BG, FOOTER_CONFIG } from '@/constants/sentCardConstants'
 
 // Gift container images (brand names)
-const GIFT_CONTAINER_IMAGES = [
+const BOX1_IMAGES = [
   '/assets/GiftSent/Gift Container/Apple.png',
   '/assets/GiftSent/Gift Container/Chipotle.png',
   '/assets/GiftSent/Gift Container/Columbia.png',
@@ -55,9 +55,9 @@ const SentCard4 = ({
     isDone
   } = useProgressAnimation(progress)
   
-  // Select gift container image randomly but consistently per card
+  // Select Box1 image randomly but consistently per card
   // Use a hash of the card's unique identifier (title + from) as seed
-  const giftContainerImage = useMemo(() => {
+  const box1Image = useMemo(() => {
     // Use title and from as a seed for consistent random selection per card
     const seed = `${title}${from}`
     let hash = 0
@@ -65,20 +65,20 @@ const SentCard4 = ({
       hash = ((hash << 5) - hash) + seed.charCodeAt(i)
       hash = hash & hash // Convert to 32-bit integer
     }
-    const index = Math.abs(hash) % GIFT_CONTAINER_IMAGES.length
-    return GIFT_CONTAINER_IMAGES[index]
+    const index = Math.abs(hash) % BOX1_IMAGES.length
+    return BOX1_IMAGES[index]
   }, [title, from])
   
   // Extract brand name from image path
   const brandName = useMemo(() => {
-    const imagePath = giftContainerImage
+    const imagePath = box1Image
     const fileName = imagePath.split('/').pop() || ''
     // Remove .png extension and return brand name
     return fileName.replace('.png', '')
-  }, [giftContainerImage])
+  }, [box1Image])
   
   // Extract dominant color from gift container image for theming
-  const { dominantColor } = useDominantColor(giftContainerImage, '#f4c6fa')
+  const { dominantColor } = useDominantColor(box1Image, '#f4c6fa')
   const theme = useCardTheme(dominantColor, headerBgOverride)
   const {
     headerBgFinal,
@@ -243,7 +243,7 @@ const SentCard4 = ({
               data-name="Gift Container Image"
             >
               <Image
-                src={giftContainerImage}
+                src={box1Image}
                 alt="Gift Container"
                 fill
                 sizes="200px"

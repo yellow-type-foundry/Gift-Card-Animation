@@ -149,12 +149,14 @@ const CardGrid = ({
                     />
                   )
                 } else {
-                  // Single 0 uses SentCard with envelope hidden (shows gift box, like Single 2)
+                  // Single 0 (now uses Layout 1 with box style) uses SentCard with envelope hidden (shows gift box, like Single 2)
+                  // Note: Single 0 is now handled by Layout 1 with cardStyle: 'box' in single view
+                  // This case is kept for backward compatibility but should not be reached
                   if (layoutNumber === '0') {
                     return (
                       <SentCard
                         key={index}
-                        {...getSentCardProps(card, layoutNumber, useColoredBackground, animationType, enable3D, true)}
+                        {...getSentCardProps(card, '1', useColoredBackground, animationType, enable3D, true)}
                         hideEnvelope={true}
                         showGiftBoxWhenHidden={true}
                       />
@@ -165,7 +167,7 @@ const CardGrid = ({
                     return (
                       <SentCard
                         key={index}
-                        {...getSingle1Props(card, useColoredBackground, layoutNumber)}
+                        {...getSingle1Props(card, useColoredBackground, layoutNumber, animationType, enable3D)}
                       />
                     )
                   }
@@ -215,12 +217,14 @@ const CardGrid = ({
                   </div>
                 )
               }
-              // Single 0 uses SentCard with envelope hidden (shows gift box, like Single 2)
+              // Single 0 (now uses Layout 1 with box style) uses SentCard with envelope hidden (shows gift box, like Single 2)
+              // Note: Single 0 is now handled by Layout 1 with cardStyle: 'box' in single view
+              // This case is kept for backward compatibility but should not be reached
               if (layoutNumber === '0') {
                 return sentCards.map((card, index) => (
                   <SentCard
                     key={index}
-                    {...getSentCardProps(card, layoutNumber, useColoredBackground, animationType, enable3D, true)}
+                    {...getSentCardProps(card, '1', useColoredBackground, animationType, enable3D, true)}
                     hideEnvelope={true}
                     showGiftBoxWhenHidden={true}
                   />

@@ -8,7 +8,7 @@ import { GIFT_BOX_TOKENS, calculateProgressBarMaxWidth, calculateProgressBarWidt
 import ProgressBar from '@/components/sent-card/ProgressBar'
 import { hexToHsl, hslToHex } from '@/utils/colors'
 
-const GiftBoxContainer = ({
+const Box2 = ({
   progress = { current: 4, total: 5 },
   boxColor = '#1987C7', // Columbia blue as default (replaces old placeholder blue)
   progressBarSourceColor, // Original color (before S/L) for hue extraction
@@ -725,5 +725,5 @@ const GiftBoxContainer = ({
   )
 }
 
-export default React.memo(GiftBoxContainer)
+export default React.memo(Box2)
 
