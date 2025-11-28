@@ -26,8 +26,6 @@ const ControlBar = ({
   style,
   onStyleChange
 }) => {
-  const handleGiftTab = () => onTabChange('gift')
-  const handleSentTab = () => onTabChange('sent')
 
   const handleViewChange = (e) => {
     const value = e.target.value
@@ -114,18 +112,31 @@ const ControlBar = ({
       className="w-full grid grid-cols-2 md:grid-cols-3 items-center gap-4 mb-6 overflow-x-auto md:overflow-visible whitespace-nowrap px-5 md:px-0"
       style={controlBarStyle}
     >
-      {/* Tabs - Left side */}
+      {/* Toggle - Left side */}
       <div className="flex items-center gap-2 shrink-0">
-        <TabButton
-          label="Gift Received"
-          isActive={activeTab === 'gift'}
-          onClick={handleGiftTab}
-        />
-        <TabButton
-          label="Gift Sent"
-          isActive={activeTab === 'sent'}
-          onClick={handleSentTab}
-        />
+        <div className="flex items-center gap-2">
+          <span className={`text-sm transition-colors ${activeTab === 'gift' ? 'text-[#525F7A] font-medium' : 'text-[#94a3b8]'}`}>
+            Received
+          </span>
+          <button
+            onClick={() => onTabChange(activeTab === 'gift' ? 'sent' : 'gift')}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
+              activeTab === 'sent' ? 'bg-[#5a3dff]' : 'bg-gray-300'
+            } cursor-pointer`}
+            role="switch"
+            aria-checked={activeTab === 'sent'}
+            aria-label="Toggle between Received and Sent"
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                activeTab === 'sent' ? 'translate-x-6' : 'translate-x-1'
+              }`}
+            />
+          </button>
+          <span className={`text-sm transition-colors ${activeTab === 'sent' ? 'text-[#525F7A] font-medium' : 'text-[#94a3b8]'}`}>
+            Sent
+          </span>
+        </div>
       </div>
       
       {/* Layout Tabs - Center (only show for Gift Sent tab, hidden on mobile) */}
@@ -302,9 +313,9 @@ const ControlBar = ({
                 className="py-2 pl-3 pr-8 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0 appearance-none cursor-pointer"
                 style={viewSelectStyle}
               >
-                <option value="mixed">Mixed</option>
-                <option value="batch">Batch</option>
-                <option value="single">Single</option>
+                <option value="mixed">View: Mixed</option>
+                <option value="batch">View: Batch</option>
+                <option value="single">View: Single</option>
               </select>
               <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
                 <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
