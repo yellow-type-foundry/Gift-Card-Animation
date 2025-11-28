@@ -416,6 +416,58 @@ export const LAYOUT_CONFIG = {
     progressOutsideEnvelope: false,
   },
   
+  // Layout 1 Single Style B (Box2 with separate controls from Layout 2)
+  // This is a separate control block that does NOT affect Layout 2 single cards (single2)
+  layout1SingleStyleB: {
+    // Header settings
+    header: {
+      height: 280, // minHeight when useFlex is true
+      useFlex: true, // Fill available height
+    },
+    // Envelope settings (used for Box2 positioning/scale) - MUST match layout1StyleB batch exactly
+    envelope: {
+      scale: 1.25,
+      offsetY: 40,
+      left: undefined,
+      right: undefined,
+      top: undefined,
+      transformOrigin: undefined,
+    },
+    // Box2 settings (LAYOUT 1 SINGLE STYLE B SPECIFIC - independent control block)
+    // NOTE: These control the Box2 component dimensions and scale
+    // If not provided, Box2 uses default values from GIFT_BOX_TOKENS
+    box: {
+      width: undefined,      // Box width (e.g., '176px') - undefined = use GIFT_BOX_TOKENS default
+      height: undefined,     // Box height (e.g., '176px') - undefined = use GIFT_BOX_TOKENS default
+      borderRadius: undefined, // Box border radius (e.g., '32px') - undefined = use GIFT_BOX_TOKENS default
+      scale: undefined,      // Box scale factor (e.g., 1.25) - undefined = use envelope.scale
+    },
+    // Layout flags - MUST match what batch card actually shows (batch uses default config's hideUnion: false)
+    hideUnion: false, // Batch card shows union shape, so single must match
+    confettiWhiteOverlay: true,
+    envelopeHighZ: true,
+    overlayProgressOnEnvelope: true,
+    progressOutsideEnvelope: false,
+    hideEnvelope: true, // Use Box2
+    showGiftBoxWhenHidden: true, // Use Box2, not Envelope2
+    hideProgressBarInBox: true, // Hide progress bar in Box2
+    centerLogoInBox: false,
+    enableConfetti: false,
+    // Envelope container settings (not used for Box2, but MUST match layout1StyleB batch for consistency)
+    envelopeContainer: {
+      padding: { top: 21, right: 76, bottom: 0, left: 76 }, // MUST match layout1StyleB
+      margin: { top: 0, right: 0, bottom: 0, left: 0 }, // MUST match layout1StyleB
+      // Box styling (envelope base) - MUST match layout1StyleB batch
+      boxOpacity: 1,
+      boxLuminance: 100, // MUST match layout1StyleB
+      boxSaturation: 85, // MUST match layout1StyleB
+      // Flap styling (envelope flap) - MUST match layout1StyleB batch
+      flapOpacity: 1.0,
+      flapLuminance: 100,
+      flapSaturation: 100,
+    },
+  },
+  
   // Single card layout 2 (SentCard4) - Duplicate of Batch 2 (altered1)
   single2: {
     // Header settings

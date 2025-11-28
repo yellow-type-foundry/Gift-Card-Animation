@@ -279,10 +279,25 @@ export default function Home() {
   const getSingle1Props = useCallback((card, useColoredBackground, layoutNum = '1', animationType = 'highlight', enable3D = false) => {
     // Layout 1 single cards: Switch between Box1 (Style A) and Box2 (Style B)
     // Style A: single1 config (Box1)
-    // Style B: single2 config (Box2)
-    const singleConfigKey = style === 'A' ? 'single1' : 'single2'
+    // Style B: Use EXACT same config logic as batch card - reads from 'default' for layout flags, 'layout1StyleB' for envelope/container
+    const singleConfigKey = style === 'A' ? 'single1' : 'default' // Batch uses 'default' as base layoutConfig
     const layoutConfig = LAYOUT_CONFIG[singleConfigKey] || LAYOUT_CONFIG.single1 // Fallback to single1
-    const footerConfig = style === 'A' ? FOOTER_CONFIG.default : FOOTER_CONFIG.single // Style A uses default, Style B uses single
+    
+    // For Style B, use EXACT same config logic as batch card
+    let effectiveLayoutConfig = layoutConfig
+    let effectiveEnvelopeContainer = effectiveLayoutConfig.envelopeContainer
+    
+    if (style === 'B') {
+      // Batch card uses layout1StyleB for envelope/container settings, but 'default' for layout flags
+      effectiveLayoutConfig = LAYOUT_CONFIG.layout1StyleB
+      effectiveEnvelopeContainer = LAYOUT_CONFIG.layout1StyleB.envelopeContainer
+    }
+    
+    const effectiveEnvelopeScale = effectiveLayoutConfig?.envelope?.scale || 1
+    const effectiveEnvelopeOffsetY = effectiveLayoutConfig?.envelope?.offsetY || 0
+    
+    // Footer config - EXACT same as batch card
+    const footerConfig = FOOTER_CONFIG.default
     
     return {
       from: card.from,
@@ -293,29 +308,17 @@ export default function Home() {
       progress: card.progress,
       sentDate: card.sentDate,
       headerBgOverride: useColoredBackground ? null : "#E3E7ED",
-      // Layout config values (for Box 2 - single2)
+      // Layout config values - EXACT same as batch card (batch reads from layoutConfig, not effectiveLayoutConfig)
       hideUnion: layoutConfig.hideUnion,
       confettiWhiteOverlay: layoutConfig.confettiWhiteOverlay,
       envelopeHighZ: layoutConfig.envelopeHighZ,
       overlayProgressOnEnvelope: layoutConfig.overlayProgressOnEnvelope,
       progressOutsideEnvelope: layoutConfig.progressOutsideEnvelope,
-      showRedline: layoutConfig.showRedline || false,
-      // Header settings
-      headerHeight: layoutConfig.header.height,
-      headerUseFlex: layoutConfig.header.useFlex,
-      // Footer settings
-      footerPadEqual: footerConfig.equalPadding,
-      footerTopPadding: footerConfig.topPadding,
-      footerBottomPadding: footerConfig.bottomPadding,
-      showFooterProgress: footerConfig.showProgress,
-      showFooterReminder: footerConfig.showReminder,
-      hideInfoOnHover: footerConfig.hideInfoOnHover,
-      // Hide envelope setting - Style B (Box2) needs hideEnvelope: true, showGiftBoxWhenHidden: true
-      // Style A (Box1) uses useBox1, hideEnvelope: false
+      showRedline: effectiveLayoutConfig.showRedline || false,
+      // Hide envelope setting - ONLY difference: single uses Box2 (showGiftBoxWhenHidden: true)
       hideEnvelope: style === 'B' ? true : (layoutConfig.hideEnvelope || false),
-      showGiftBoxWhenHidden: style === 'B' ? true : (layoutConfig.showGiftBoxWhenHidden || false),
+      showGiftBoxWhenHidden: style === 'B' ? true : false, // ONLY difference: true for Box2, false for Envelope2
       // Box1 exclusive controls (Style A only - Box1)
-      // Style B (Box2) doesn't use box1, it uses envelope settings
       useBox1: style === 'A' ? !!layoutConfig.box1 : false,
       box1OffsetY: layoutConfig.box1?.offsetY,
       box1Scale: layoutConfig.box1?.scale,
@@ -326,27 +329,39 @@ export default function Home() {
       box1Right: layoutConfig.box1?.right,
       box1Bottom: layoutConfig.box1?.bottom,
       box1TransformOrigin: layoutConfig.box1?.transformOrigin,
-      // Envelope settings (for Box 2 - single2)
-      envelopeScale: layoutConfig.envelope?.scale,
-      envelopeOffsetY: layoutConfig.envelope?.offsetY,
-      // Envelope container settings (for Box 2 - single2)
-      // Envelope container settings (not used for Box1, but kept for consistency)
-      envelopeContainerPadding: layoutConfig.envelopeContainer?.padding || { top: 21, right: 76, bottom: 21, left: 76 },
-      envelopeContainerMargin: layoutConfig.envelopeContainer?.margin || { top: 0, right: 0, bottom: 30, left: 0 },
-      envelopeBoxOpacity: layoutConfig.envelopeContainer?.boxOpacity,
-      envelopeFlapOpacity: layoutConfig.envelopeContainer?.flapOpacity,
-      envelopeFlapLuminance: layoutConfig.envelopeContainer?.flapLuminance,
-      envelopeFlapSaturation: layoutConfig.envelopeContainer?.flapSaturation,
-      envelopeBoxLuminance: layoutConfig.envelopeContainer?.boxLuminance,
-      envelopeBoxSaturation: layoutConfig.envelopeContainer?.boxSaturation,
-      // Other layout flags
-      // Layout 1 style B: Hide progress bar in box/envelope
-      hideProgressBarInBox: style === 'B' ? true : (layoutConfig.hideProgressBarInBox || false),
-      centerLogoInBox: layoutConfig.centerLogoInBox || false,
-      enableConfetti: layoutConfig.enableConfetti || false,
-      // Style B (Box2) doesn't use Envelope2, so hidePaper is not relevant
-      // Style A (Box1) doesn't use paper
-      hidePaper: style === 'B' ? true : true, // Style B (Box2) doesn't use Envelope2, Style A (Box1) doesn't use paper
+      // Envelope settings - EXACT same as batch card
+      envelopeScale: effectiveEnvelopeScale,
+      envelopeOffsetY: effectiveEnvelopeOffsetY,
+      // Box2 settings (not used for batch, but kept for single)
+      boxWidth: effectiveLayoutConfig.box?.width,
+      boxHeight: effectiveLayoutConfig.box?.height,
+      boxBorderRadius: effectiveLayoutConfig.box?.borderRadius,
+      boxScale: effectiveLayoutConfig.box?.scale,
+      // Envelope container settings - EXACT same as batch card
+      envelopeContainerPadding: effectiveEnvelopeContainer?.padding,
+      envelopeContainerMargin: effectiveEnvelopeContainer?.margin,
+      envelopeBoxOpacity: effectiveEnvelopeContainer?.boxOpacity,
+      envelopeFlapOpacity: effectiveEnvelopeContainer?.flapOpacity,
+      envelopeFlapLuminance: effectiveEnvelopeContainer?.flapLuminance,
+      envelopeFlapSaturation: effectiveEnvelopeContainer?.flapSaturation,
+      envelopeBoxLuminance: effectiveEnvelopeContainer?.boxLuminance,
+      envelopeBoxSaturation: effectiveEnvelopeContainer?.boxSaturation,
+      hidePaper: effectiveLayoutConfig.hidePaper !== undefined ? effectiveLayoutConfig.hidePaper : false,
+      // Layout flags - EXACT same as batch card
+      hideProgressBarInBox: (style === 'B') ? true : (effectiveLayoutConfig.hideProgressBarInBox || false),
+      centerLogoInBox: effectiveLayoutConfig.centerLogoInBox || false,
+      enableConfetti: effectiveLayoutConfig.enableConfetti || false,
+      // Header settings - EXACT same as batch card
+      headerHeight: effectiveLayoutConfig.header.height,
+      headerUseFlex: effectiveLayoutConfig.header.useFlex,
+      // Footer settings - EXACT same as batch card
+      footerPadEqual: footerConfig.equalPadding,
+      footerTopPadding: footerConfig.topPadding,
+      footerBottomPadding: footerConfig.bottomPadding,
+      footerTransparent: footerConfig.transparent,
+      showFooterProgress: footerConfig.showProgress,
+      showFooterReminder: footerConfig.showReminder,
+      hideInfoOnHover: footerConfig.hideInfoOnHover,
       // Animation settings
       animationType: animationType,
       enable3D: enable3D || false,
