@@ -231,11 +231,11 @@ export const LAYOUT_CONFIG = {
     envelopeContainer: {
       padding: { top: 21, right: 76, bottom: 0, left: 76 }, // Paper position: top padding positions paper to appear inside envelope
       margin: { top: 0, right: 0, bottom: 0, left: 0 },
-      // Box styling (envelope base) - separate controls for Layout 1 style B
-      boxOpacity: 1,
-      boxLuminance: 100, // Slightly brighter to compensate for white overlay
-      boxSaturation: 85, // Slightly more saturated for overlay contrast
-      // Flap styling (envelope flap) - separate controls for Layout 1 style B
+      // Box styling (envelope base) - optimized for animations (highlight/breathing) - same as Layout 2
+      boxOpacity: 1.0,
+      boxLuminance: 89, // Slightly brighter for animation visibility (from Layout 2)
+      boxSaturation: 41, // Balanced saturation for animation effects (from Layout 2)
+      // Flap styling (envelope flap) - enhanced for animation contrast
       flapOpacity: 1.0,
       flapLuminance: 100,
       flapSaturation: 100,
