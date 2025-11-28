@@ -14,11 +14,17 @@ export default function useCardTheme(dominantColor, headerBgOverride = null) {
   )
   
   const headerBgColor = useMemo(
-    () => capSaturation(adjustToLuminance(dominantColor, 99), 25),
+    () => {
+      // Fallback to a default color if dominantColor is invalid
+      if (!dominantColor || dominantColor === '#f4c6fa' || dominantColor === '#000000' || dominantColor === '#ffffff') {
+        return '#E3E7ED' // Default gray background
+      }
+      return capSaturation(adjustToLuminance(dominantColor, 99), 25)
+    },
     [dominantColor]
   )
   
-  const headerBgFinal = headerBgOverride || headerBgColor
+  const headerBgFinal = headerBgOverride || headerBgColor || '#E3E7ED' // Fallback to gray if both are falsy
   const isMonochromeVariant = Boolean(headerBgOverride)
   const headerTextClass = headerBgOverride ? 'text-black' : 'text-white'
   

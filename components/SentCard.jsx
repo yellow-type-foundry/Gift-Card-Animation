@@ -1045,6 +1045,26 @@ const SentCard = ({
               />
             </div>
           )}
+          {/* Header background for Box1 (Style A) - when overlayProgressOnEnvelope is false */}
+          {!overlayProgressOnEnvelope && useBox1 && (
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 pointer-events-none"
+              style={backgroundBorderRadiusStyle}
+            >
+              {/* Base color - dynamic from dominant color */}
+              <div
+                className="absolute inset-0"
+                data-name="HeaderBGBase"
+                style={headerBgBaseStyle}
+              />
+              {/* Gradient overlay with blend mode */}
+              <div
+                className="absolute inset-0"
+                style={gradientOverlayStyle}
+              />
+            </div>
+          )}
 
           {/* Dots pattern removed */}
 
@@ -1727,7 +1747,7 @@ const SentCard = ({
               display: 'block',
               marginTop: '0px',
               paddingTop: '0px',
-              paddingBottom: progressBottomPadding2 !== undefined ? `${progressBottomPadding2}px` : `${FOOTER_CONFIG.altered2.progressOutside.bottomPadding}px`,
+              paddingBottom: progressBottomPadding2 !== undefined ? `${progressBottomPadding2}px` : `18px`,
               zIndex: 0,
               minHeight: '36px',
               flexShrink: 0

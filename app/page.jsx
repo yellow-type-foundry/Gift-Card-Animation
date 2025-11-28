@@ -138,7 +138,7 @@ export default function Home() {
   const [useColoredBackground, setUseColoredBackground] = useState(false) // Toggle for theming
   const [animationType, setAnimationType] = useState('highlight') // Animation type: 'highlight', 'breathing', or 'none'
   const [enable3D, setEnable3D] = useState(false) // Standalone 3D toggle that works with highlight or breathing
-  const [layoutNumber, setLayoutNumber] = useState('1') // '1' | '2' | '3' - which layout pair to use (Layout 0 merged into Layout 1)
+  const [layoutNumber, setLayoutNumber] = useState('1') // '1' | '2' - which layout pair to use (Layout 0 merged into Layout 1)
   const [style, setStyle] = useState('A') // 'A' | 'B' - for Layout 1 only: Style A = Box1/Envelope1, Style B = Box2/Envelope2
   const [viewType, setViewType] = useState('mixed') // 'mixed' | 'batch' | 'single' - what to display
   const [mixSeed, setMixSeed] = useState(0) // Seed to regenerate mix when toggled
@@ -229,7 +229,6 @@ export default function Home() {
       if (layoutNum === '0') return 'default0'
       if (layoutNum === '1') return 'default'
       if (layoutNum === '2') return 'altered1'
-      if (layoutNum === '3') return 'altered2'
     }
     return null // mixed view
   }
@@ -269,7 +268,7 @@ export default function Home() {
       headerUseFlex: layoutConfig.header.useFlex,
       // Union setting from layout config
       hideUnion: layoutConfig.hideUnion,
-      // Envelope settings from layout config (for Single 2/3 - controls gift container positioning)
+      // Envelope settings from layout config (for Single 2 - controls gift container positioning)
       envelopeScale: layoutConfig.envelope?.scale,
       envelopeOffsetY: layoutConfig.envelope?.offsetY,
     }
@@ -387,7 +386,6 @@ export default function Home() {
       // Layout 1 uses 'default' config
       if (layoutNum === '1') layoutKey = 'default'
       else if (layoutNum === '2') layoutKey = 'altered1'
-      else if (layoutNum === '3') layoutKey = 'altered2'
       else {
         // Fallback: if layoutNum is invalid, use 'default' (Layout 1)
         console.warn(`Invalid layoutNum: ${layoutNum}, defaulting to 'default' config`)
@@ -407,10 +405,9 @@ export default function Home() {
     }
     
     // Layout 1 uses FOOTER_CONFIG.default
-    const footerConfig = layoutNum === '1' ? FOOTER_CONFIG.default : (layoutNum === '2' ? FOOTER_CONFIG.altered1 : FOOTER_CONFIG.altered2)
+    const footerConfig = layoutNum === '1' ? FOOTER_CONFIG.default : FOOTER_CONFIG.altered1
     
     const useAlteredLayout1 = layoutNum === '2'
-    const useAlteredLayout2 = layoutNum === '3'
     const useAlteredLayout = layoutNum !== '1'
     
     // ============================================================================
@@ -418,7 +415,6 @@ export default function Home() {
     // ============================================================================
     const isLayout1 = !useSingleConfig && layoutNum === '1'
     const isLayout2 = !useSingleConfig && layoutNum === '2'
-    const isLayout3 = !useSingleConfig && layoutNum === '3'
     
     // ============================================================================
     // LAYOUT 1: Style switching between Style A and Style B
@@ -429,7 +425,7 @@ export default function Home() {
     // Style B:
     //   - Single card: Box2 (Box2 component)
     //   - Batch card: Envelope2 (Envelope2 with paper component)
-    // For Layout 2, 3, and other layouts, use their own config values
+    // For Layout 2 and other layouts, use their own config values
     
     // For Layout 1, switch configs based on style (only for batch cards)
     // Single cards are handled in getSingle1Props
@@ -476,7 +472,7 @@ export default function Home() {
       // Batch cards:
       //   - Style A: hideEnvelope=false (Envelope1)
       //   - Style B: hideEnvelope=true, showGiftBoxWhenHidden=false (Envelope2)
-      // For Layout 2, 3, and single configs, use their own config value
+      // For Layout 2 and single configs, use their own config value
       hideEnvelope: isLayout1 
         ? (useSingleConfig ? (style === 'B' ? true : false) : (style === 'B' ? true : false))
         : (layoutConfig.hideEnvelope || false),
@@ -519,7 +515,7 @@ export default function Home() {
       // ============================================================================
       // Style B batch: Uses Layout 2's envelopeContainer (has paper - padding.top: 46.5)
       // Style A batch: Uses Layout 1's default envelopeContainer (no paper - padding.top: 21)
-      // Layout 2, 3: Use their own envelopeContainer settings
+      // Layout 2: Use their own envelopeContainer settings
       envelopeContainerPadding: effectiveEnvelopeContainer?.padding,
       envelopeContainerMargin: effectiveEnvelopeContainer?.margin,
       envelopeBoxOpacity: effectiveEnvelopeContainer?.boxOpacity,
@@ -538,15 +534,6 @@ export default function Home() {
       // Altered Layout 1 specific header settings
       headerHeight1: useAlteredLayout1 ? layoutConfig.header.height : undefined,
       headerUseFlex1: useAlteredLayout1 ? layoutConfig.header.useFlex : undefined,
-      // Altered Layout 2 specific envelope controls
-      envelopeScale2: useAlteredLayout2 ? layoutConfig.envelope.scale : undefined,
-      envelopeOffsetY2: useAlteredLayout2 ? layoutConfig.envelope.offsetY : undefined,
-      envelopeLeft2: useAlteredLayout2 ? layoutConfig.envelope.left : undefined,
-      envelopeRight2: useAlteredLayout2 ? layoutConfig.envelope.right : undefined,
-      envelopeTopBase2: useAlteredLayout2 ? layoutConfig.envelope.top : undefined,
-      headerHeight2: useAlteredLayout2 ? layoutConfig.header.height : undefined,
-      headerUseFlex2: useAlteredLayout2 ? layoutConfig.header.useFlex : undefined,
-      transformOrigin2: useAlteredLayout2 ? layoutConfig.envelope.transformOrigin : undefined,
       // Footer settings - ALWAYS use Layout 1's footer config
       footerPadEqual: footerConfig.equalPadding,
       footerTopPadding: footerConfig.topPadding,
@@ -555,12 +542,6 @@ export default function Home() {
       showFooterProgress: footerConfig.showProgress,
       showFooterReminder: footerConfig.showReminder,
       hideInfoOnHover: footerConfig.hideInfoOnHover,
-      // Altered Layout 2 specific footer controls
-      footerTopPadding2: useAlteredLayout2 ? FOOTER_CONFIG.altered2.topPadding : undefined,
-      footerBottomPadding2: useAlteredLayout2 ? FOOTER_CONFIG.altered2.bottomPadding : undefined,
-      footerPadEqual2: useAlteredLayout2 ? FOOTER_CONFIG.altered2.equalPadding : undefined,
-      footerTransparent2: useAlteredLayout2 ? FOOTER_CONFIG.altered2.transparent : undefined,
-      progressBottomPadding2: useAlteredLayout2 ? FOOTER_CONFIG.altered2.progressOutside.bottomPadding : undefined,
       animationType: animationType,
       enable3D: enable3D || false,
     }

@@ -106,22 +106,6 @@ export const FOOTER_CONFIG = {
     hideInfoOnHover: true,
   },
   
-  // Altered Layout 2 (Batch - Layout 3)
-  altered2: {
-    equalPadding: true,
-    topPadding: 20,
-    bottomPadding: 20,
-    transparent: true,
-    showProgress: false, // Progress is shown outside footer
-    showReminder: true, // Reminder is shown outside footer (prop must be true for outside button to render)
-    infoInSlot: true,
-    hideInfoOnHover: false, // Info stays visible on hover
-    // Progress bar outside footer
-    progressOutside: {
-      bottomPadding: 18,
-    },
-  },
-  
   // Single card layout (SentCard4)
   single: {
     equalPadding: true,
@@ -300,30 +284,6 @@ export const LAYOUT_CONFIG = {
     },
   },
   
-  // Altered Layout 2 (Batch - Layout 3)
-  altered2: {
-    // Header settings
-    header: {
-      height: 240, // minHeight when useFlex is true
-      useFlex: true, // Fill available height
-    },
-    // Envelope settings
-    envelope: {
-      scale: 0.77, // Adjusted to achieve 170px max height (220.575px × 0.77 ≈ 170px)
-      offsetY: 24,
-      left: 0,
-      right: 0,
-      top: 0,
-      transformOrigin: 'center top',
-    },
-    // Layout flags
-    hideUnion: true,
-    confettiWhiteOverlay: true,
-    envelopeHighZ: true,
-    overlayProgressOnEnvelope: true,
-    progressOutsideEnvelope: true,
-  },
-  
   // Single card layout 0 (SentCard)
   single0: {
     // Header settings
@@ -408,30 +368,19 @@ export const LAYOUT_CONFIG = {
     envelopeHighZ: false,
     overlayProgressOnEnvelope: false,
     progressOutsideEnvelope: false,
-  },
-  
-  // Single card layout 3 (SentCard4)
-  single3: {
-    // Header settings
-    header: {
-      height: 240, // minHeight when useFlex is true
-      useFlex: true, // Fill available height
+    // Envelope container settings (for theming - boxOpacity, boxLuminance, boxSaturation)
+    envelopeContainer: {
+      padding: { top: 21, right: 76, bottom: 21, left: 76 },
+      margin: { top: 0, right: 0, bottom: 30, left: 0 },
+      // Box styling (envelope base) - for theming support
+      boxOpacity: 1.0,
+      boxLuminance: 88,
+      boxSaturation: 40,
+      // Flap styling (envelope flap)
+      flapOpacity: 1.0,
+      flapLuminance: 100,
+      flapSaturation: 100,
     },
-    // Gift container settings (similar to envelope)
-    envelope: {
-      scale: 1, // Not used for single, but kept for consistency
-      offsetY: 0,
-      left: undefined,
-      right: undefined,
-      top: undefined,
-      transformOrigin: undefined,
-    },
-    // Layout flags
-    hideUnion: false, // Not applicable
-    confettiWhiteOverlay: false,
-    envelopeHighZ: false,
-    overlayProgressOnEnvelope: true,
-    progressOutsideEnvelope: false,
   },
   
   // Layout 1 Single Style B (Box2 with separate controls from Layout 2)

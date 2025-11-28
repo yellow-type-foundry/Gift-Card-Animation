@@ -1711,7 +1711,7 @@ const SentCard = ({
               display: 'block',
               marginTop: '0px',
               paddingTop: '0px',
-              paddingBottom: progressBottomPadding2 !== undefined ? `${progressBottomPadding2}px` : `${FOOTER_CONFIG.altered2.progressOutside.bottomPadding}px`,
+              paddingBottom: progressBottomPadding2 !== undefined ? `${progressBottomPadding2}px` : `18px`,
               zIndex: 0,
               minHeight: '36px',
               flexShrink: 0
