@@ -1280,27 +1280,27 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
                              p.y - halfSize > canvas.height
           if (isOffScreen) continue
           
-          // Draw to appropriate canvas layer
-          let drawCtx = null
-          if (p.blurLevel !== null && blurContexts[p.blurLevel]) {
-            drawCtx = blurContexts[p.blurLevel]
-          } else {
-            const isFrontLayer = p.layer === 'front'
-            drawCtx = (isFrontLayer && ctxFront) ? ctxFront : ctx
+          // LAYOUT 0: ALL particles MUST be drawn to blur canvases based on blurLevel (for depth effect)
+          // For Layout 0, we only use blur canvases - never fall back to main canvas (which has no blur)
+          if (p.blurLevel !== null && blurContexts.length > 0 && blurContexts[p.blurLevel]) {
+            // Draw to blur canvas layer based on blurLevel (all particles get proper blur)
+            const drawCtx = blurContexts[p.blurLevel]
+            if (drawCtx) {
+              drawCtx.save()
+              drawCtx.translate(p.x, p.y)
+              drawCtx.rotate(p.rot)
+              drawCtx.globalAlpha = p.opacity
+              drawCtx.fillStyle = p.color
+              drawCtx.beginPath()
+              drawCtx.arc(0, 0, halfSize, 0, TWO_PI)
+              drawCtx.closePath()
+              drawCtx.fill()
+              drawCtx.restore()
+            }
           }
           
-          if (drawCtx) {
-            drawCtx.save()
-            drawCtx.translate(p.x, p.y)
-            drawCtx.rotate(p.rot)
-            drawCtx.globalAlpha = p.opacity
-            drawCtx.fillStyle = p.color
-            drawCtx.beginPath()
-            drawCtx.arc(0, 0, halfSize, 0, TWO_PI)
-            drawCtx.closePath()
-            drawCtx.fill()
-            drawCtx.restore()
-          }
+          // Front-layer particles: Don't draw to front canvas - let blur canvases show through with proper blur levels
+          // The blur canvases already have proper z-index to be visible above the box
           
           // Draw mirrored version if mirrored canvas exists
           if (ctxMirrored) {
@@ -1572,32 +1572,30 @@ export default function useConfettiLayout0(isHovered, allAccepted, confettiCanva
         
         // Only draw if particle has some opacity and is on-screen
         if (p.opacity > 0 && !isOffScreen) {
-          // LAYOUT 0: Use blur canvas layers for varied blur
-          let drawCtx = null
-          if (p.blurLevel !== null && blurContexts[p.blurLevel]) {
-            // Layout 0: Draw to blur canvas layer based on blurLevel
-            drawCtx = blurContexts[p.blurLevel]
-          } else {
-            // Fallback: Use standard front/back layers
-            const isFrontLayer = p.layer === 'front'
-            drawCtx = (isFrontLayer && ctxFront) ? ctxFront : ctx
+          // LAYOUT 0: ALL particles MUST be drawn to blur canvases based on blurLevel (for depth effect)
+          // For Layout 0, we only use blur canvases - never fall back to main canvas (which has no blur)
+          if (p.blurLevel !== null && blurContexts.length > 0 && blurContexts[p.blurLevel]) {
+            // Draw to blur canvas layer based on blurLevel (all particles get proper blur)
+            const drawCtx = blurContexts[p.blurLevel]
+            if (drawCtx) {
+              drawCtx.save()
+              drawCtx.translate(p.x, p.y)
+              drawCtx.rotate(p.rot)
+              drawCtx.globalAlpha = p.opacity
+              drawCtx.fillStyle = p.color
+              
+              // Draw circular dot (optimized: use cached TWO_PI constant and halfSize)
+              drawCtx.beginPath()
+              drawCtx.arc(0, 0, halfSize, 0, TWO_PI)
+              drawCtx.closePath()
+              drawCtx.fill()
+              
+              drawCtx.restore()
+            }
           }
           
-          if (drawCtx) {
-            drawCtx.save()
-            drawCtx.translate(p.x, p.y)
-            drawCtx.rotate(p.rot)
-            drawCtx.globalAlpha = p.opacity
-            drawCtx.fillStyle = p.color
-            
-            // Draw circular dot (optimized: use cached TWO_PI constant and halfSize)
-            drawCtx.beginPath()
-            drawCtx.arc(0, 0, halfSize, 0, TWO_PI)
-            drawCtx.closePath()
-            drawCtx.fill()
-            
-            drawCtx.restore()
-          }
+          // Front-layer particles: Don't draw to front canvas - let blur canvases show through with proper blur levels
+          // The blur canvases already have proper z-index to be visible above the box
           
           // Draw mirrored version if mirrored canvas exists (optimization: opacity already checked above)
           if (ctxMirrored) {

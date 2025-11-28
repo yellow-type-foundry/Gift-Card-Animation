@@ -846,28 +846,44 @@ const SentCard = ({
       {/* Full card confetti canvas for Layout 0 (Single 0 and Batch 0 with enableConfetti) - at card level to avoid overflow clipping */}
       {enableConfetti && hideEnvelope && (
         <>
-          {/* LAYOUT 0: Multiple blur layers for varied blur (1px to 24px) - replaces old front/back system */}
+          {/* LAYOUT 0: Multiple blur layers for varied blur (1px to 24px) + front canvas for particles in front of box */}
           {isLayout0 && CONFETTI_BLUR_1 ? (
             <>
               <canvas
                 ref={confettiCanvasBlur1Ref}
                 className="absolute inset-0 pointer-events-none"
-                style={{ zIndex: 5, filter: CONFETTI_BLUR_1, position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+                style={{ zIndex: (hideEnvelope && showGiftBoxWhenHidden && !useBox1) ? 21 : 5, filter: CONFETTI_BLUR_1, position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
               />
               <canvas
                 ref={confettiCanvasBlur2Ref}
                 className="absolute inset-0 pointer-events-none"
-                style={{ zIndex: 4, filter: CONFETTI_BLUR_2, position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+                style={{ zIndex: (hideEnvelope && showGiftBoxWhenHidden && !useBox1) ? 21 : 4, filter: CONFETTI_BLUR_2, position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
               />
               <canvas
                 ref={confettiCanvasBlur3Ref}
                 className="absolute inset-0 pointer-events-none"
-                style={{ zIndex: 2, filter: CONFETTI_BLUR_3, position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+                style={{ zIndex: (hideEnvelope && showGiftBoxWhenHidden && !useBox1) ? 21 : 2, filter: CONFETTI_BLUR_3, position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
               />
               <canvas
                 ref={confettiCanvasBlur4Ref}
                 className="absolute inset-0 pointer-events-none"
-                style={{ zIndex: 1, filter: CONFETTI_BLUR_4, position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+                style={{ zIndex: (hideEnvelope && showGiftBoxWhenHidden && !useBox1) ? 21 : 1, filter: CONFETTI_BLUR_4, position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+              />
+              {/* Front canvas for Layout 0 - particles in front of box (for Layout 1 style B single cards) */}
+              {/* For Layout 1 style B single cards (Box2), front particles should be above the box (zIndex: 20) */}
+              {/* Layout 0 uses blur(1.25px) for front canvas (from CONFETTI_CONFIG_LAYOUT_0.layer.frontBlur) */}
+              <canvas
+                ref={confettiCanvasFrontRef}
+                className="absolute inset-0 pointer-events-none"
+                style={{ 
+                  zIndex: (hideEnvelope && showGiftBoxWhenHidden && !useBox1) ? 21 : 6, 
+                  filter: 'blur(1.25px)', 
+                  position: 'absolute', 
+                  top: 0, 
+                  left: 0, 
+                  right: 0, 
+                  bottom: 0 
+                }}
               />
               {/* Mirrored layer - vertically mirrored confetti */}
               <canvas
@@ -885,10 +901,19 @@ const SentCard = ({
                 style={{ zIndex: 1, filter: CONFETTI_BACK_BLUR, position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
               />
               {/* Layout 1: Front layer - in front of envelope/gift container */}
+              {/* For Layout 1 style B single cards (Box2), front particles should be above the box (zIndex: 20) */}
               <canvas
                 ref={confettiCanvasFrontRef}
                 className="absolute inset-0 pointer-events-none"
-                style={{ zIndex: 5, filter: CONFETTI_BLUR, position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+                style={{ 
+                  zIndex: (hideEnvelope && showGiftBoxWhenHidden && !useBox1) ? 21 : 5, 
+                  filter: CONFETTI_BLUR, 
+                  position: 'absolute', 
+                  top: 0, 
+                  left: 0, 
+                  right: 0, 
+                  bottom: 0 
+                }}
               />
               {/* Mirrored layer - vertically mirrored confetti */}
               <canvas
@@ -1026,10 +1051,15 @@ const SentCard = ({
                 style={{ zIndex: 1, pointerEvents: 'none', filter: CONFETTI_BACK_BLUR }}
               />
               {/* Confetti canvas (front layer - in front of envelope) */}
+              {/* For Layout 1 style B single cards (Box2), front particles should be above the box (zIndex: 20) */}
               <canvas
                 ref={confettiCanvasFrontRef}
                 className="absolute inset-0"
-                style={{ zIndex: 4, pointerEvents: 'none', filter: CONFETTI_BLUR }}
+                style={{ 
+                  zIndex: (hideEnvelope && showGiftBoxWhenHidden && !useBox1) ? 21 : 4, 
+                  pointerEvents: 'none', 
+                  filter: CONFETTI_BLUR 
+                }}
               />
               {/* Mirrored layer - vertically mirrored confetti */}
               <canvas
