@@ -196,6 +196,50 @@ export const LAYOUT_CONFIG = {
     },
   },
   
+  // Layout 1 Style B (Batch - Envelope2 with separate controls from Layout 2)
+  // This is a separate control block that does NOT affect Layout 2 (altered1)
+  layout1StyleB: {
+    // Header settings
+    header: {
+      height: 280, // minHeight when useFlex is true
+      useFlex: true, // Fill available height
+    },
+    // Envelope settings (separate from Layout 2)
+    envelope: {
+      scale: 1.25,
+      offsetY: 40,
+      left: undefined,
+      right: undefined,
+      top: undefined,
+      transformOrigin: undefined,
+    },
+    // Layout flags
+    hideUnion: true,
+    confettiWhiteOverlay: true,
+    envelopeHighZ: true,
+    overlayProgressOnEnvelope: true,
+    progressOutsideEnvelope: false,
+    hideEnvelope: true, // Use Envelope2
+    showGiftBoxWhenHidden: false, // Use Envelope2, not Box2
+    hidePaper: false, // Show paper component (true = hide, false = show)
+    // Envelope container settings (LAYOUT 1 STYLE B SPECIFIC - independent control block)
+    // NOTE: This is separate from Layout 2 (altered1) - changes here do NOT affect Layout 2
+    // The paper/card is an essential part of the envelope and is always rendered
+    // The padding.top value controls the vertical position of the paper relative to the envelope
+    envelopeContainer: {
+      padding: { top: 21, right: 76, bottom: 0, left: 76 }, // Paper position: top padding positions paper to appear inside envelope
+      margin: { top: 0, right: 0, bottom: 0, left: 0 },
+      // Box styling (envelope base) - separate controls for Layout 1 style B
+      boxOpacity: 1,
+      boxLuminance: 100, // Slightly brighter to compensate for white overlay
+      boxSaturation: 85, // Slightly more saturated for overlay contrast
+      // Flap styling (envelope flap) - separate controls for Layout 1 style B
+      flapOpacity: 1.0,
+      flapLuminance: 100,
+      flapSaturation: 100,
+    },
+  },
+  
   // Altered Layout 1 (Batch - Layout 2)
   altered1: {
     // Header settings

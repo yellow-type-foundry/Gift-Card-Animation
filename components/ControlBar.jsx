@@ -23,8 +23,8 @@ const ControlBar = ({
   isSingleView,
   showSettingsMenu,
   onSettingsMenuToggle,
-  illustration,
-  onIllustrationChange
+  style,
+  onStyleChange
 }) => {
   const handleGiftTab = () => onTabChange('gift')
   const handleSentTab = () => onTabChange('sent')
@@ -192,30 +192,30 @@ const ControlBar = ({
                   onClick={(e) => e.stopPropagation()}
                 >
                   <div className="space-y-4">
-                    {/* Illustration toggle - only show for layout 1 */}
+                    {/* Style toggle - only show for layout 1 */}
                       {layoutNumber === '1' && (
                         <div className="flex items-center justify-between">
-                          <span className="text-sm text-[#525F7A]">Illustration</span>
+                          <span className="text-sm text-[#525F7A]">Style</span>
                           <div className="flex items-center gap-2">
                             <button
-                              onClick={() => onIllustrationChange('1')}
+                              onClick={() => onStyleChange('A')}
                               className={`px-3 py-1 rounded-[8px] text-xs transition-colors ${
-                                illustration === '1' 
+                                style === 'A' 
                                   ? 'bg-[#5a3dff] text-white' 
                                   : 'bg-gray-100 text-[#525F7A] hover:bg-gray-200'
                               }`}
                             >
-                              1
+                              A
                             </button>
                             <button
-                              onClick={() => onIllustrationChange('2')}
+                              onClick={() => onStyleChange('B')}
                               className={`px-3 py-1 rounded-[8px] text-xs transition-colors ${
-                                illustration === '2' 
+                                style === 'B' 
                                   ? 'bg-[#5a3dff] text-white' 
                                   : 'bg-gray-100 text-[#525F7A] hover:bg-gray-200'
                               }`}
                             >
-                              2
+                              B
                             </button>
                           </div>
                         </div>
@@ -408,30 +408,30 @@ const ControlBar = ({
                       </div>
                     </div>
                   </div>
-                  {/* Illustration toggle - only show for layout 1 */}
+                  {/* Style toggle - only show for layout 1 */}
                   {layoutNumber === '1' && (
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-[#525F7A]">Illustration</span>
+                      <span className="text-sm text-[#525F7A]">Style</span>
                       <div className="flex items-center gap-2">
                         <button
-                          onClick={() => onIllustrationChange('1')}
+                          onClick={() => onStyleChange('A')}
                           className={`px-3 py-1 rounded-[8px] text-xs transition-colors ${
-                            illustration === '1' 
+                            style === 'A' 
                               ? 'bg-[#5a3dff] text-white' 
                               : 'bg-gray-100 text-[#525F7A] hover:bg-gray-200'
                           }`}
                         >
-                          1
+                          A
                         </button>
                         <button
-                          onClick={() => onIllustrationChange('2')}
+                          onClick={() => onStyleChange('B')}
                           className={`px-3 py-1 rounded-[8px] text-xs transition-colors ${
-                            illustration === '2' 
+                            style === 'B' 
                               ? 'bg-[#5a3dff] text-white' 
                               : 'bg-gray-100 text-[#525F7A] hover:bg-gray-200'
                           }`}
                         >
-                          2
+                          B
                         </button>
                       </div>
                     </div>

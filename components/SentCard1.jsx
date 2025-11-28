@@ -361,8 +361,8 @@ const SentCard = ({
         hash = ((hash << 5) - hash) + boxImage.charCodeAt(i)
         hash = hash & hash // Convert to 32-bit integer
       }
-      const index = Math.abs(hash) % GIFT_CONTAINER_IMAGES.length
-      const pngPath = GIFT_CONTAINER_IMAGES[index]
+      const index = Math.abs(hash) % BOX1_IMAGES.length
+      const pngPath = BOX1_IMAGES[index]
       return LOGO_PNG_TO_SVG_MAP[pngPath] || '/assets/GiftSent/SVG Logo/Logo.svg'
     }
     // For Single 1 (useBox1), use mapped logo
@@ -388,8 +388,8 @@ const SentCard = ({
           hash = ((hash << 5) - hash) + boxImage.charCodeAt(i)
           hash = hash & hash // Convert to 32-bit integer
         }
-        const index = Math.abs(hash) % GIFT_CONTAINER_IMAGES.length
-        logoPath = GIFT_CONTAINER_IMAGES[index]
+        const index = Math.abs(hash) % BOX1_IMAGES.length
+        logoPath = BOX1_IMAGES[index]
       }
     }
     
