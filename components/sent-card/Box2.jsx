@@ -25,6 +25,7 @@ const Box2 = ({
   tiltY = 0, // Tilt Y angle for 3D effect
   hideProgressBar = false, // Hide progress bar (for Single 1A)
   centerLogo = false, // Center logo at the very center of the box (for Single 0)
+  logoScale = undefined, // Logo scale when centered (e.g., 0.9) - undefined = use default (1.4 when centered, 1 when not)
   // Layout 0 specific box controls (overrides GIFT_BOX_TOKENS when provided)
   boxWidth, // Custom box width (e.g., '176px')
   boxHeight, // Custom box height (e.g., '176px')
@@ -527,7 +528,7 @@ const Box2 = ({
               style={{ 
                 width: GIFT_BOX_TOKENS.logo.width,
                 height: GIFT_BOX_TOKENS.logo.height,
-                transform: centerLogo ? 'scale(1.4)' : 'none',
+                transform: centerLogo ? `scale(${logoScale !== undefined ? logoScale : 1.4})` : 'none',
                 mixBlendMode: enable3D && (animationType === 'highlight' || animationType === 'breathing') ? 'normal' : GIFT_BOX_TOKENS.blendModes.overlay,
                 paddingTop: '18px',
                 transition: 'mix-blend-mode 0.2s ease-out' // Smooth transition between blend modes

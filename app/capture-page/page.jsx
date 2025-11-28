@@ -123,6 +123,8 @@ export default function CapturePage() {
               hideEnvelope={cardProps.hideEnvelope !== undefined ? cardProps.hideEnvelope : true}  // Use prop value if provided (batch cards use Envelope2, not Box2)
               showGiftBoxWhenHidden={cardProps.showGiftBoxWhenHidden !== undefined ? cardProps.showGiftBoxWhenHidden : true}  // Use prop value if provided (batch cards have false, single cards have true)
               hideProgressBarInBox={cardProps.hideProgressBarInBox !== undefined ? cardProps.hideProgressBarInBox : true}  // Use prop value if provided
+              centerLogoInBox={cardProps.showGiftBoxWhenHidden && cardProps.hideEnvelope ? true : (cardProps.centerLogoInBox !== undefined ? cardProps.centerLogoInBox : false)}  // Center logo for single card, style B, layout 1 (Box2)
+              logoScale={cardProps.showGiftBoxWhenHidden && cardProps.hideEnvelope ? 0.95 : undefined}  // Scale logo to 0.9 for single card, style B, layout 1 (Box2) in captured image
               pauseConfetti={isStatic} // Disable confetti in static mode
               forceHovered={!isStatic} // Only force hover if not static
               immediateFrame={isStatic ? null : 75} // Render confetti at frame 70 (peak eruption)

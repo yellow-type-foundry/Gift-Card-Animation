@@ -107,6 +107,7 @@ const SentCard = ({
   hideProgressBarInBox = false,
   // Center logo at the very center of the box (for Single 0)
   centerLogoInBox = false,
+  logoScale = undefined, // Logo scale when centered (e.g., 0.9) - undefined = use default (1.4 when centered, 1 when not)
   // Box settings (Layout 0 specific - separate from Single 2)
   boxWidth,
   boxHeight,
@@ -1239,6 +1240,7 @@ const SentCard = ({
                   tiltY={tiltY}
                   hideProgressBar={hideProgressBarInBox}
                   centerLogo={centerLogoInBox}
+                  logoScale={logoScale}
                   // Layout 0 specific box controls (overrides GIFT_BOX_TOKENS when provided)
                   boxWidth={boxWidth}
                   boxHeight={boxHeight}
