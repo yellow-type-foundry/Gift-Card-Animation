@@ -206,6 +206,8 @@ export const LAYOUT_CONFIG = {
     hideEnvelope: true, // Use Envelope2
     showGiftBoxWhenHidden: false, // Use Envelope2, not Box2
     hidePaper: false, // Show paper component (true = hide, false = show)
+    hideProgressBarInBox: true, // Hide progress bar in Envelope2 for batch Style B
+    enableConfetti: true, // Enable slow motion confetti for Layout 1 Style B batch cards
     // Box2 settings (SINGLE CARD ONLY - standalone control, does NOT affect batch cards)
     // NOTE: These settings are ONLY used by single cards (Layout 1 Style B single)
     // Batch cards use Envelope2, so these box settings are ignored for batch
@@ -419,7 +421,7 @@ export const LAYOUT_CONFIG = {
     showGiftBoxWhenHidden: true, // Use Box2, not Envelope2
     hideProgressBarInBox: true, // Hide progress bar in Box2
     centerLogoInBox: false,
-    enableConfetti: false,
+    enableConfetti: true, // Enable slow motion confetti for Layout 1 Style B
     // Envelope container settings (not used for Box2, but MUST match layout1StyleB batch for consistency)
     envelopeContainer: {
       padding: { top: 21, right: 76, bottom: 0, left: 76 }, // MUST match layout1StyleB

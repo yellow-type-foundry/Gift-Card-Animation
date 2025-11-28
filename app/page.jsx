@@ -287,9 +287,11 @@ export default function Home() {
     let effectiveEnvelopeContainer = effectiveLayoutConfig.envelopeContainer
     
     if (style === 'B') {
-      // Batch card uses layout1StyleB for envelope/container settings, but 'default' for layout flags
-      effectiveLayoutConfig = LAYOUT_CONFIG.layout1StyleB
-      effectiveEnvelopeContainer = LAYOUT_CONFIG.layout1StyleB.envelopeContainer
+      // For single cards Style B, use layout1SingleStyleB (has enableConfetti)
+      // For batch cards, use layout1StyleB (batch config)
+      // Since this is getSingle1Props, we use layout1SingleStyleB
+      effectiveLayoutConfig = LAYOUT_CONFIG.layout1SingleStyleB || LAYOUT_CONFIG.layout1StyleB
+      effectiveEnvelopeContainer = effectiveLayoutConfig.envelopeContainer || LAYOUT_CONFIG.layout1StyleB.envelopeContainer
     }
     
     const effectiveEnvelopeScale = effectiveLayoutConfig?.envelope?.scale || 1
