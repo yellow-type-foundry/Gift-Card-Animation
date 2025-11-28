@@ -3,7 +3,7 @@ export const PROGRESS_PILL_RADIUS = '100px'
 export const HEADER_OVERLAY_BG = 'linear-gradient(to bottom, rgba(255, 253, 253, 0.82) 00%, rgba(255, 255, 255, 0.98) 99%)'
 export const PROGRESS_GLOW_BOX_SHADOW = '0px 2px 4px -8px rgba(46,10,255,0.1), 0px 2px 2px 0px rgba(90,61,255,0.08), 0px 4px 8px -4px rgba(16,0,112,0.15)'
 
-// Layout 0 specific confetti settings (completely separate from Layout 1)
+// Layout 1 Style B confetti settings (used by Style B cards with box collision)
 export const CONFETTI_CONFIG_LAYOUT_0 = {
   // Gift box collision settings
   giftBox: {
@@ -21,25 +21,25 @@ export const CONFETTI_CONFIG_LAYOUT_0 = {
   },
   // Velocity
   velocity: {
-    boostMultiplier: 1.75, // 75% velocity boost for Layout 0 (increased from 1.5x for more momentum)
+    boostMultiplier: 1.75, // 75% velocity boost for Layout 1 Style B (increased from 1.5x for more momentum)
   },
   // Debug
   debug: {
     showBounds: false, // Show green outline for box bounds (dev only) - hidden
     borderRadius: 32, // Box border radius for debug outline
   },
-  // Layout 0 box styling (separate from Single 2 box)
+  // Layout 1 Style B box styling
   box: {
     width: '176px', // Box width (can be overridden)
     height: '176px', // Box height (can be overridden)
     borderRadius: '32px', // Box border radius (can be overridden)
-    scale: 1.125, // Box scale (matches envelope.scale in single0 config)
+    scale: 1.125, // Box scale
   },
 }
 
 // Confetti animation configuration
 // All confetti animations use these unified settings
-// Layout 1 and other layouts use this config (Layout 0 uses CONFETTI_CONFIG_LAYOUT_0)
+// Layout 1 Style A uses this config (Layout 1 Style B uses CONFETTI_CONFIG_LAYOUT_0)
 export const CONFETTI_CONFIG = {
   // Color palette (multi-hue, soft pastels)
   colors: ['#7C66FF', '#5AD3FF', '#FF7AD9', '#FFD166', '#8CE99A'],
@@ -81,7 +81,7 @@ export const CONFETTI_CONFIG = {
 // Footer configuration for Gift Sent cards
 // All footer settings are unified here for easy management
 export const FOOTER_CONFIG = {
-  // Unified default layout (Batch - Layout 0 & 1 merged into Layout 1)
+  // Unified default layout (Batch - Layout 1)
   // Use cardStyle: 'box' for box style (Envelope2) or 'envelope' for envelope style (Envelope1)
   default: {
     equalPadding: false,
@@ -94,8 +94,8 @@ export const FOOTER_CONFIG = {
     hideInfoOnHover: false, // Gift info stays visible, only progress bar hides
   },
   
-  // Altered Layout 1 (Batch - Layout 2)
-  altered1: {
+  // Layout 2 (Batch - Layout 2)
+  layout2: {
     equalPadding: true,
     topPadding: 28,
     bottomPadding: 24,
@@ -134,9 +134,9 @@ export const FOOTER_CONFIG = {
 //
 // Footer settings are in FOOTER_CONFIG above
 export const LAYOUT_CONFIG = {
-  // Unified default layout (Batch - Layout 0 & 1 merged into Layout 1)
+  // Unified default layout (Batch - Layout 1)
   // Use cardStyle: 'box' for box style (Envelope2) or 'envelope' for envelope style (Envelope1)
-  // Layout 0 uses this config with cardStyle: 'box', Layout 1 uses this config with cardStyle: 'envelope'
+  // Layout 1 uses this config with cardStyle: 'envelope'
   default: {
     // Header settings
     header: {
@@ -153,7 +153,7 @@ export const LAYOUT_CONFIG = {
       transformOrigin: undefined,
     },
     // Card style: 'box' = Envelope2, 'envelope' = Envelope1
-    // Set dynamically: 'box' for Layout 0, 'envelope' for Layout 1
+    // Set dynamically: 'envelope' for Layout 1
     cardStyle: 'envelope', // 'box' | 'envelope' - default is 'envelope' (Layout 1)
     // Layout flags
     hideUnion: false,
@@ -181,7 +181,7 @@ export const LAYOUT_CONFIG = {
   },
   
   // Layout 1 Style B (Batch - Envelope2 with separate controls from Layout 2)
-  // This is a separate control block that does NOT affect Layout 2 (altered1)
+  // This is a separate control block that does NOT affect Layout 2 (layout2)
   layout1StyleB: {
     // Header settings
     header: {
@@ -227,7 +227,7 @@ export const LAYOUT_CONFIG = {
       logoScale: 1.1,         // Logo scale when centered (e.g., 1.4) - undefined = use default (1.4 when centered, 1 when not)
     },
     // Envelope container settings (LAYOUT 1 STYLE B SPECIFIC - independent control block)
-    // NOTE: This is separate from Layout 2 (altered1) - changes here do NOT affect Layout 2
+    // NOTE: This is separate from Layout 2 (layout2) - changes here do NOT affect Layout 2
     // The paper/card is an essential part of the envelope and is always rendered
     // The padding.top value controls the vertical position of the paper relative to the envelope
     envelopeContainer: {
@@ -244,8 +244,8 @@ export const LAYOUT_CONFIG = {
     },
   },
   
-  // Altered Layout 1 (Batch - Layout 2)
-  altered1: {
+  // Layout 2 (Batch - Layout 2)
+  layout2: {
     // Header settings
     header: {
       height: 280, // minHeight when useFlex is true
@@ -280,56 +280,6 @@ export const LAYOUT_CONFIG = {
       boxLuminance: 90, // Slightly brighter to compensate for white overlay
       boxSaturation: 42, // Slightly more saturated for overlay contrast
       // Flap styling (envelope flap) - enhanced for overlay visibility
-      flapOpacity: 1.0,
-      flapLuminance: 100,
-      flapSaturation: 100,
-    },
-  },
-  
-  // Single card layout 0 (SentCard)
-  single0: {
-    // Header settings
-    header: {
-      height: 280, // minHeight when useFlex is true
-      useFlex: true, // Fill available height
-    },
-    // Envelope settings
-    envelope: {
-      scale: 1.125, // Scaled up 1.125x
-      offsetY: 32, //
-      left: undefined, // Uses default positioning
-      right: undefined,
-      top: undefined,
-      transformOrigin: undefined,
-    },
-    // Box settings (Layout 0 specific - separate from Single 2)
-    box: {
-      width: '172px', // Box width (default: 176px, matches GIFT_BOX_TOKENS)
-      height: '172px', // Box height (default: 176px, matches GIFT_BOX_TOKENS)
-      borderRadius: '40px', // Box border radius (default: 32px, matches GIFT_BOX_TOKENS)
-      scale: 1, // Box scale (matches envelope.scale)
-    },
-    // Layout flags
-    hideUnion: false,
-    confettiWhiteOverlay: false,
-    envelopeHighZ: false,
-    overlayProgressOnEnvelope: false,
-    progressOutsideEnvelope: false,
-    hideEnvelope: true, // Hide envelope container
-    showGiftBoxWhenHidden: false, // Use Envelope2 (like Batch 2) instead of Box2
-    hideProgressBarInBox: true, // Hide progress bar inside the box
-    centerLogoInBox: true, // Center logo at the very center of the box
-    enableConfetti: true, // Enable confetti for Single 0
-    showRedline: false, // Hide redline for Single 0
-    // Envelope container settings (SINGLE 0 SPECIFIC - independent control block)
-    envelopeContainer: {
-      padding: { top: 21, right: 76, bottom: 21, left: 76 },
-      margin: { top: 0, right: 0, bottom: 30, left: 0 },
-      // Box styling (envelope base) - optimized for single view with centered logo
-      boxOpacity: 1.0,
-      boxLuminance: 87, // Slightly dimmer for single view focus
-      boxSaturation: 38, // Slightly less saturated for logo prominence
-      // Flap styling (envelope flap) - balanced for single view
       flapOpacity: 1.0,
       flapLuminance: 100,
       flapSaturation: 100,
@@ -437,7 +387,7 @@ export const LAYOUT_CONFIG = {
     },
   },
   
-  // Single card layout 2 (SentCard4) - Duplicate of Batch 2 (altered1)
+  // Single card layout 2 (SentCard4) - Duplicate of Batch 2 (layout2)
   single2: {
     // Header settings
     header: {

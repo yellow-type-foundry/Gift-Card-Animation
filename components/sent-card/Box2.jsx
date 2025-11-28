@@ -24,9 +24,9 @@ const Box2 = ({
   tiltX = 0, // Tilt X angle for 3D effect
   tiltY = 0, // Tilt Y angle for 3D effect
   hideProgressBar = false, // Hide progress bar (for Single 1A)
-  centerLogo = false, // Center logo at the very center of the box (for Single 0)
+  centerLogo = false, // Center logo at the very center of the box
   logoScale = undefined, // Logo scale when centered (e.g., 0.9) - undefined = use default (1.4 when centered, 1 when not)
-  // Layout 0 specific box controls (overrides GIFT_BOX_TOKENS when provided)
+  // Box controls (overrides GIFT_BOX_TOKENS when provided)
   boxWidth, // Custom box width (e.g., '176px')
   boxHeight, // Custom box height (e.g., '176px')
   boxBorderRadius, // Custom box border radius (e.g., '32px')
@@ -36,7 +36,7 @@ const Box2 = ({
   // Use external hover state if provided, otherwise use internal
   const isHovered = externalIsHovered !== undefined ? externalIsHovered : internalIsHovered
 
-  // Layout 0 specific box controls: Use custom props if provided, otherwise fall back to GIFT_BOX_TOKENS
+  // Box controls: Use custom props if provided, otherwise fall back to GIFT_BOX_TOKENS
   const boxTokens = useMemo(() => ({
     width: boxWidth || GIFT_BOX_TOKENS.box.width,
     height: boxHeight || GIFT_BOX_TOKENS.box.height,
@@ -140,18 +140,18 @@ const Box2 = ({
   // Calculate hover and shadow colors using reusable hook
   const { hoverColor: hoverBoxColor, shadowColor: themedShadowColor } = useHoverColor(boxColor, isHovered)
   
-  // Layout 0: Create dark themed color for inner shadow (50% darker)
+  // Create dark themed color for inner shadow (50% darker)
   const darkThemedColor = useMemo(() => {
-    // Detect Layout 0: if custom box props are provided, it's Layout 0
-    const isLayout0 = boxWidth !== undefined || boxHeight !== undefined || boxBorderRadius !== undefined
-    if (!isLayout0) return null
+    // Detect if custom box props are provided
+    const hasCustomBoxProps = boxWidth !== undefined || boxHeight !== undefined || boxBorderRadius !== undefined
+    if (!hasCustomBoxProps) return null
     
     const [h, s, l] = hexToHsl(boxColor)
     const darkerL = Math.max(0, l - 50) // Darken by 50%
     return hslToHex(h, s, darkerL)
   }, [boxColor, boxWidth, boxHeight, boxBorderRadius])
   
-  // Layout 0: Inner shadow style (only for Layout 0)
+  // Inner shadow style (only when custom box props are provided)
   const innerShadowStyle = useMemo(() => {
     if (!darkThemedColor) return {}
     
@@ -176,12 +176,12 @@ const Box2 = ({
   }, [hoverBoxColor])
 
   // Calculate lighter color for breathing duplicate boxes
-  // Layout 0: L + 20, Other layouts: L + 10
+  // L + 20 when custom box props provided, L + 10 otherwise
   const breathingBoxColor = useMemo(() => {
     const [h, s, l] = hexToHsl(hoverBoxColor)
-    // Detect Layout 0: if custom box props are provided, it's Layout 0
-    const isLayout0 = boxWidth !== undefined || boxHeight !== undefined || boxBorderRadius !== undefined
-    const lIncrease = isLayout0 ? 20 : 10 // Layout 0: +20, others: +10
+    // Detect if custom box props are provided
+    const hasCustomBoxProps = boxWidth !== undefined || boxHeight !== undefined || boxBorderRadius !== undefined
+    const lIncrease = hasCustomBoxProps ? 20 : 10 // Custom props: +20, default: +10
     const lighterL = Math.min(100, l + lIncrease)
     return hslToHex(h, s, lighterL)
   }, [hoverBoxColor, boxWidth, boxHeight, boxBorderRadius])
@@ -455,7 +455,7 @@ const Box2 = ({
               borderRadius: boxTokens.borderRadius,
               background: boxGradient,
               transition: `background ${GIFT_BOX_TOKENS.animations.duration.fast} ${GIFT_BOX_TOKENS.animations.easing.easeOut}`,
-              ...innerShadowStyle // Layout 0 inner shadow - applied to background layer with gradient
+              ...innerShadowStyle // Inner shadow - applied to background layer with gradient
             }}
           />
           <div 

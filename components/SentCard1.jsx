@@ -103,16 +103,16 @@ const SentCard = ({
   hideEnvelope = false,
   // Show gift box when envelope is hidden (for Single 2)
   showGiftBoxWhenHidden = false,
-  // Hide progress bar inside the box (for Single 0)
+  // Hide progress bar inside the box
   hideProgressBarInBox = false,
-  // Center logo at the very center of the box (for Single 0)
+  // Center logo at the very center of the box
   centerLogoInBox = false,
-  // Box settings (Layout 0 specific - separate from Single 2)
+  // Box settings
   boxWidth,
   boxHeight,
   boxBorderRadius,
   boxScale,
-  // Envelope container settings (for Batch 0 and Batch 2 - Envelope2)
+  // Envelope container settings (for Batch 2 - Envelope2)
   envelopeContainerPadding,
   envelopeContainerMargin,
   envelopeBoxOpacity,
@@ -121,9 +121,9 @@ const SentCard = ({
   envelopeFlapSaturation,
   envelopeBoxLuminance,
   envelopeBoxSaturation,
-  // Enable confetti (for Single 0)
+  // Enable confetti
   enableConfetti = false,
-  // Show redline (for Single 0)
+  // Show redline
   showRedline = false,
   // Animation type for Single 2 cards: 'highlight', 'breathing', or 'none'
   animationType = 'highlight',
@@ -151,7 +151,7 @@ const SentCard = ({
   const confettiCanvasRef = useRef(null)
   const confettiCanvasFrontRef = useRef(null)
   const confettiCanvasMirroredRef = useRef(null)
-  // LAYOUT 0: Multiple canvas layers for varied blur (0.5px to 8px)
+  // Layout 1 Style B confetti: Multiple canvas layers for varied blur (for Style B)
   const confettiCanvasBlur1Ref = useRef(null) // 0.5-2px blur
   const confettiCanvasBlur2Ref = useRef(null) // 2-4px blur
   const confettiCanvasBlur3Ref = useRef(null) // 4-6px blur
@@ -405,7 +405,7 @@ const SentCard = ({
   }, [svgLogoPath, box1Image, hideEnvelope, showGiftBoxWhenHidden, validatedProgress.current, validatedProgress.total])
 
   // Single 2 Box Color Controls (Box2)
-  // Batch 0/Batch 2 envelope colors are now controlled via props from LAYOUT_CONFIG
+  // Batch 2 envelope colors are now controlled via props from LAYOUT_CONFIG
   const SINGLE2_LUMINANCE = 62  // Luminance for Single 2 brand colors (0-100)
   const SINGLE2_SATURATION = 40  // Saturation for Single 2 brand colors (0-100)
   
@@ -432,7 +432,7 @@ const SentCard = ({
   // Calculate themed box color for Box2
   // For Single 2 cards, use brand color with Single 2 saturation/luminance caps
   // IMPORTANT: For Single 2, ignore dominantColor from cover image - use brand color only
-  // LAYOUT 0: Increase L value by 10 for Single 0 box
+      // Increase L value by 10 for box
   const themedBoxColor = useMemo(() => {
     // For Single 2 cards (hideEnvelope && showGiftBoxWhenHidden), use brand color
     if (hideEnvelope && showGiftBoxWhenHidden) {
@@ -442,7 +442,7 @@ const SentCard = ({
         const colorToUse = '#1987C7'
         const [h, s, l] = hexToHsl(colorToUse)
         let adjustedL = Math.min(100, Math.max(0, SINGLE2_LUMINANCE))
-        // LAYOUT 0: Increase L value by 10 for Single 0 box
+        // Increase L value by 10 for box
         if (hideEnvelope && showGiftBoxWhenHidden && hideProgressBarInBox) {
           adjustedL = Math.min(100, adjustedL + 10)
         }
@@ -460,7 +460,7 @@ const SentCard = ({
       // Do NOT use dominantColor from cover image for Single 2 cards
       const [h, s, l] = hexToHsl(colorToUse)
       let adjustedL = Math.min(100, Math.max(0, SINGLE2_LUMINANCE))
-      // LAYOUT 0: Increase L value by 10 for Single 0 box
+      // Increase L value by 10 for box
       if (hideEnvelope && showGiftBoxWhenHidden && hideProgressBarInBox) {
         adjustedL = Math.min(100, adjustedL + 10)
       }
@@ -535,50 +535,36 @@ const SentCard = ({
   
   const allAccepted = isDone
   
-  // LAYOUT 0 DETECTION: Check if this is Layout 0 (Single 0 or Batch 0 with confetti enabled)
-  // Must be defined before cardContainerStyle useMemo
-  const isLayout0 = hideEnvelope && hideProgressBarInBox && enableConfetti
+  // Layout 1 Style B detection: Uses advanced confetti system (box collision, multiple blur layers)
+  // Style B has: hideEnvelope=true, hideProgressBarInBox=true, enableConfetti=true
+  const isLayout1StyleB = hideEnvelope && hideProgressBarInBox && enableConfetti
   
-  // Confetti animation - disabled for Batch 2 and Single 2, but can be enabled via prop (for Single 0)
+  // Confetti animation - disabled for Batch 2 and Single 2, but can be enabled via prop
   const shouldShowConfetti = enableConfetti || !hideEnvelope
-  // LAYOUT 0: Pass blur canvas refs array for varied blur effect
-  // Memoize to prevent effect re-runs - array is recreated on every render otherwise
+  // Pass blur canvas refs array for Layout 1 Style B (uses advanced confetti system)
   const blurCanvasRefs = useMemo(() => {
-    return isLayout0 ? [confettiCanvasBlur1Ref, confettiCanvasBlur2Ref, confettiCanvasBlur3Ref, confettiCanvasBlur4Ref] : null
-  }, [isLayout0])
+    return isLayout1StyleB ? [confettiCanvasBlur1Ref, confettiCanvasBlur2Ref, confettiCanvasBlur3Ref, confettiCanvasBlur4Ref] : null
+  }, [isLayout1StyleB])
   
-  // COMPLETELY SEPARATE: Layout 0 and Layout 1 use different hooks
-  // Layout 0: Uses separate hook with all Layout 0 features (gift box collision, blur layers, etc.)
+  // Layout 1 Style B: Use advanced confetti hook (has box collision, blur layers, etc.)
   const finalPauseState = pauseConfetti || shouldPauseConfetti
-  if (isLayout0 && shouldShowConfetti) {
-    console.log('[SentCard] Calling useConfettiLayout0 with:', {
-      effectiveHovered,
-      allAccepted,
-      finalPauseState,
-      forceHovered,
-      isLayout0,
-      shouldShowConfetti,
-      immediateFrame,
-      pauseAtFrame
-    })
-  }
   useConfettiLayout0(
-    isLayout0 && shouldShowConfetti && effectiveHovered, 
-    isLayout0 && shouldShowConfetti && allAccepted, 
+    isLayout1StyleB && shouldShowConfetti && effectiveHovered, 
+    isLayout1StyleB && shouldShowConfetti && allAccepted, 
     confettiCanvasRef, 
     cardRef, 
     confettiCanvasFrontRef, 
     confettiCanvasMirroredRef, 
     blurCanvasRefs,
     finalPauseState,
-    forceHovered, // Pass forceHovered directly to hook
-    pauseAtFrame, // Pass pauseAtFrame for frame-based capture
-    immediateFrame // Render at specific frame instantly (no animation)
+    forceHovered,
+    pauseAtFrame,
+    immediateFrame
   )
-  // Layout 1: Uses original, untouched hook (no Layout 0 features)
+  // Layout 1 Style A and other layouts: Use Layout 1 confetti hook
   useConfettiLayout1(
-    !isLayout0 && shouldShowConfetti && effectiveHovered, 
-    !isLayout0 && shouldShowConfetti && allAccepted, 
+    !isLayout1StyleB && shouldShowConfetti && effectiveHovered, 
+    !isLayout1StyleB && shouldShowConfetti && allAccepted, 
     confettiCanvasRef, 
     cardRef, 
     confettiCanvasFrontRef, 
@@ -614,16 +600,15 @@ const SentCard = ({
     zIndex: 0
   }), [])
 
-  // LAYOUT 0: Use Layout 0 specific blur values with variation (completely separate from Layout 1)
-  // LAYOUT 1: Use original blur values
-  // LAYOUT 0: Varied blur layers (1px to 24px) - replaces old front/back system
-  const CONFETTI_BLUR_1 = isLayout0 ? 'blur(1px)' : null // 1px blur
-  const CONFETTI_BLUR_2 = isLayout0 ? 'blur(3px)' : null // 3px blur
-  const CONFETTI_BLUR_3 = isLayout0 ? 'blur(7px)' : null // 8px blur
-  const CONFETTI_BLUR_4 = isLayout0 ? 'blur(10px)' : null // 24px blur
-  // LAYOUT 1: Original front/back blur values (only used for Layout 1)
-  const CONFETTI_BLUR = isLayout0 ? null : 'blur(1.25px)' // Layout 1 only
-  const CONFETTI_BACK_BLUR = isLayout0 ? null : 'blur(4px)' // Layout 1 only
+  // Layout 1 Style B: Use advanced blur values with variation (multiple blur layers)
+  // Layout 1 Style A: Use standard blur values
+  const CONFETTI_BLUR_1 = isLayout1StyleB ? 'blur(1px)' : null // 1px blur
+  const CONFETTI_BLUR_2 = isLayout1StyleB ? 'blur(3px)' : null // 3px blur
+  const CONFETTI_BLUR_3 = isLayout1StyleB ? 'blur(7px)' : null // 7px blur
+  const CONFETTI_BLUR_4 = isLayout1StyleB ? 'blur(10px)' : null // 10px blur
+  // Layout 1 Style A: Standard blur values
+  const CONFETTI_BLUR = isLayout1StyleB ? null : 'blur(1.25px)'
+  const CONFETTI_BACK_BLUR = isLayout1StyleB ? null : 'blur(4px)'
   // Separate blur for mirrored confetti
   const CONFETTI_MIRRORED_BLUR = 'blur(6px)' // Same for both
   
@@ -706,17 +691,15 @@ const SentCard = ({
   }), [])
 
   const envelopeContainerStyle = useMemo(() => {
-    // LAYOUT 0 ONLY (Batch 0/Single 0): Uses hideProgressBarInBox as the key differentiator
-    // Layout 2 (Batch 2) does NOT have hideProgressBarInBox, so it uses standard absolute positioning
-    const isLayout0Container = hideEnvelope && hideProgressBarInBox
+    // Container positioning logic
     
     return {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      ...(isLayout0Container
+      ...(hideEnvelope && hideProgressBarInBox
         ? {
-            // LAYOUT 0 ONLY: relative positioning, inner wrapper handles transform
+            // Relative positioning, inner wrapper handles transform
             position: 'relative',
             width: '100%',
             height: '100%',
@@ -752,15 +735,15 @@ const SentCard = ({
           bottom: '0px'
         }),
     zIndex: envelopeHighZ ? 50 : (overlayProgressOnEnvelope ? 2 : 2),
-    // LAYOUT 0 ONLY: no transform on container (inner wrapper handles it)
+    // No transform on container (inner wrapper handles it)
     // All other layouts: apply transform directly to container (scale + translateY for offsetY)
-    transform: isLayout0Container 
+    transform: hideEnvelope && hideProgressBarInBox 
       ? 'none'
       : `translateY(${progressOutsideEnvelope && envelopeOffsetY2 !== undefined ? envelopeOffsetY2 : (envelopeOffsetY || 0)}px) scale(${useBox1 && box1Scale !== undefined ? box1Scale : (progressOutsideEnvelope && envelopeScale2 !== undefined ? envelopeScale2 : envelopeScale)})`,
-    transformOrigin: isLayout0Container ? 'center center' : (useBox1 && box1TransformOrigin !== undefined ? box1TransformOrigin : (progressOutsideEnvelope && transformOrigin2 !== undefined ? transformOrigin2 : 'center top'))
+      transformOrigin: (hideEnvelope && hideProgressBarInBox) ? 'center center' : (useBox1 && box1TransformOrigin !== undefined ? box1TransformOrigin : (progressOutsideEnvelope && transformOrigin2 !== undefined ? transformOrigin2 : 'center top'))
   }}, [hideEnvelope, hideProgressBarInBox, useBox1, box1Top, box1OffsetY, box1Left, box1Right, box1Bottom, progressOutsideEnvelope, envelopeTopBase2, envelopeOffsetY2, envelopeOffsetY, envelopeLeft2, envelopeRight2, envelopeHighZ, overlayProgressOnEnvelope, box1Scale, envelopeScale2, envelopeScale, box1TransformOrigin, transformOrigin2])
   
-  // Inner wrapper style for Batch 0/Single 0 - absolutely positioned, handles scale and offsetY
+  // Inner wrapper style - absolutely positioned, handles scale and offsetY
   const envelopeInnerWrapperStyle = useMemo(() => ({
     position: 'absolute',
     left: '50%',
@@ -822,11 +805,11 @@ const SentCard = ({
           aria-label="Debug: Envelope top edge (Batch 1) - Third Floor"
         />
       )}
-      {/* Full card confetti canvas for Layout 0 (Single 0 and Batch 0 with enableConfetti) - at card level to avoid overflow clipping */}
+      {/* Full card confetti canvas - at card level to avoid overflow clipping */}
       {enableConfetti && hideEnvelope && (
         <>
-          {/* LAYOUT 0: Multiple blur layers for varied blur (1px to 24px) - replaces old front/back system */}
-          {isLayout0 && CONFETTI_BLUR_1 ? (
+          {/* Layout 1 Style B: Multiple blur layers for varied blur (1px to 10px) */}
+          {isLayout1StyleB && CONFETTI_BLUR_1 ? (
             <>
               <canvas
                 ref={confettiCanvasBlur1Ref}
@@ -1148,7 +1131,7 @@ const SentCard = ({
               </div>
             ) : null}
             {hideEnvelope && showGiftBoxWhenHidden ? (
-              // Gift Box Container (for Single 2 and Single 0)
+              // Gift Box Container (for Single 2)
               // Wrapped in inner div for absolute positioning with scale/offsetY
               <div style={envelopeInnerWrapperStyle}>
                 <Box2
@@ -1168,7 +1151,7 @@ const SentCard = ({
                   tiltY={tiltY}
                   hideProgressBar={hideProgressBarInBox}
                   centerLogo={centerLogoInBox}
-                  // Layout 0 specific box controls (overrides GIFT_BOX_TOKENS when provided)
+                  // Box controls (overrides GIFT_BOX_TOKENS when provided)
                   boxWidth={boxWidth}
                   boxHeight={boxHeight}
                   boxBorderRadius={boxBorderRadius}
@@ -1176,7 +1159,7 @@ const SentCard = ({
                 />
               </div>
             ) : hideEnvelope && !showGiftBoxWhenHidden && hideProgressBarInBox ? (
-              // LAYOUT 0 ONLY: Envelope Box Container (for Batch 0)
+              // Envelope Box Container
               // Wrapped in inner div for absolute positioning with scale/offsetY
               <div style={envelopeInnerWrapperStyle}>
                 <Envelope2
@@ -1661,7 +1644,7 @@ const SentCard = ({
             progressOutsideEnvelope && footerPadEqual2 !== undefined
               ? footerPadEqual2
               : overlayProgressOnEnvelope
-              ? FOOTER_CONFIG.altered1.equalPadding
+              ? FOOTER_CONFIG.layout2.equalPadding
               : footerPadEqual !== undefined
               ? footerPadEqual
               : FOOTER_CONFIG.default.equalPadding
@@ -1673,7 +1656,7 @@ const SentCard = ({
             progressOutsideEnvelope && footerBottomPadding2 !== undefined
               ? footerBottomPadding2
               : overlayProgressOnEnvelope
-              ? FOOTER_CONFIG.altered1.bottomPadding
+              ? FOOTER_CONFIG.layout2.bottomPadding
               : footerBottomPadding !== undefined
               ? footerBottomPadding
               : FOOTER_CONFIG.default.bottomPadding
@@ -1684,7 +1667,7 @@ const SentCard = ({
               : progressOutsideEnvelope && footerTopPadding2 !== undefined
               ? footerTopPadding2
               : overlayProgressOnEnvelope
-              ? FOOTER_CONFIG.altered1.topPadding
+              ? FOOTER_CONFIG.layout2.topPadding
               : footerTopPadding !== undefined
               ? footerTopPadding
               : FOOTER_CONFIG.default.topPadding
@@ -1693,7 +1676,7 @@ const SentCard = ({
             progressOutsideEnvelope && footerTransparent2 !== undefined
               ? footerTransparent2
               : overlayProgressOnEnvelope
-              ? FOOTER_CONFIG.altered1.transparent
+              ? FOOTER_CONFIG.layout2.transparent
               : footerTransparent !== undefined
               ? footerTransparent
               : FOOTER_CONFIG.default.transparent

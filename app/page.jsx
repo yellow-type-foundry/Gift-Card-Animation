@@ -138,7 +138,7 @@ export default function Home() {
   const [useColoredBackground, setUseColoredBackground] = useState(false) // Toggle for theming
   const [animationType, setAnimationType] = useState('highlight') // Animation type: 'highlight', 'breathing', or 'none'
   const [enable3D, setEnable3D] = useState(false) // Standalone 3D toggle that works with highlight or breathing
-  const [layoutNumber, setLayoutNumber] = useState('1') // '1' | '2' - which layout pair to use (Layout 0 merged into Layout 1)
+  const [layoutNumber, setLayoutNumber] = useState('1') // '1' | '2' - which layout pair to use
   const [style, setStyle] = useState('A') // 'A' | 'B' - for Layout 1 only: Style A = Box1/Envelope1, Style B = Box2/Envelope2
   const [viewType, setViewType] = useState('mixed') // 'mixed' | 'batch' | 'single' - what to display
   const [mixSeed, setMixSeed] = useState(0) // Seed to regenerate mix when toggled
@@ -226,9 +226,8 @@ export default function Home() {
     if (viewType === 'single') {
       return `single${layoutNum}`
     } else if (viewType === 'batch') {
-      if (layoutNum === '0') return 'default0'
       if (layoutNum === '1') return 'default'
-      if (layoutNum === '2') return 'altered1'
+      if (layoutNum === '2') return 'layout2'
     }
     return null // mixed view
   }
@@ -373,8 +372,8 @@ export default function Home() {
   // Helper function to get SentCard props based on layout number
   const getSentCardProps = useCallback((card, layoutNum, useColoredBackground, animationType, enable3D, useSingleConfig = false) => {
     // Validate layoutNum
-    if (!layoutNum || layoutNum === '0') {
-      // Layout 0 is merged into Layout 1, so default to '1'
+    if (!layoutNum) {
+      // Default to Layout 1
       layoutNum = '1'
     }
     
@@ -387,7 +386,7 @@ export default function Home() {
       // For batch views, use batch config
       // Layout 1 uses 'default' config
       if (layoutNum === '1') layoutKey = 'default'
-      else if (layoutNum === '2') layoutKey = 'altered1'
+      else if (layoutNum === '2') layoutKey = 'layout2'
       else {
         // Fallback: if layoutNum is invalid, use 'default' (Layout 1)
         console.warn(`Invalid layoutNum: ${layoutNum}, defaulting to 'default' config`)
@@ -407,7 +406,7 @@ export default function Home() {
     }
     
     // Layout 1 uses FOOTER_CONFIG.default
-    const footerConfig = layoutNum === '1' ? FOOTER_CONFIG.default : FOOTER_CONFIG.altered1
+    const footerConfig = layoutNum === '1' ? FOOTER_CONFIG.default : FOOTER_CONFIG.layout2
     
     const useAlteredLayout1 = layoutNum === '2'
     const useAlteredLayout = layoutNum !== '1'
@@ -496,7 +495,7 @@ export default function Home() {
       
       // Box logo centering setting
       centerLogoInBox: effectiveLayoutConfig.centerLogoInBox || false,
-      // Box settings (Layout 0 specific)
+      // Box settings
       boxWidth: effectiveLayoutConfig.box?.width,
       boxHeight: effectiveLayoutConfig.box?.height,
       boxBorderRadius: effectiveLayoutConfig.box?.borderRadius,
