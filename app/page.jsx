@@ -337,6 +337,7 @@ export default function Home() {
       boxHeight: effectiveLayoutConfig.box?.height,
       boxBorderRadius: effectiveLayoutConfig.box?.borderRadius,
       boxScale: effectiveLayoutConfig.box?.scale,
+      boxOffsetY: effectiveLayoutConfig.box?.offsetY, // Box-specific offsetY (overrides envelopeOffsetY for single cards)
       // Envelope container settings - EXACT same as batch card
       envelopeContainerPadding: effectiveEnvelopeContainer?.padding,
       envelopeContainerMargin: effectiveEnvelopeContainer?.margin,
@@ -349,7 +350,7 @@ export default function Home() {
       hidePaper: effectiveLayoutConfig.hidePaper !== undefined ? effectiveLayoutConfig.hidePaper : false,
       // Layout flags - EXACT same as batch card
       hideProgressBarInBox: (style === 'B') ? true : (effectiveLayoutConfig.hideProgressBarInBox || false),
-      centerLogoInBox: effectiveLayoutConfig.centerLogoInBox || false,
+      centerLogoInBox: style === 'B' ? (effectiveLayoutConfig.logoContainer?.centerLogo !== undefined ? effectiveLayoutConfig.logoContainer.centerLogo : false) : (effectiveLayoutConfig.centerLogoInBox || false),
       enableConfetti: effectiveLayoutConfig.enableConfetti || false,
       // Header settings - EXACT same as batch card
       headerHeight: effectiveLayoutConfig.header.height,

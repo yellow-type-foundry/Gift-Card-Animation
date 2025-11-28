@@ -207,7 +207,7 @@ export const LAYOUT_CONFIG = {
     // Envelope settings (separate from Layout 2)
     envelope: {
       scale: 1.25,
-      offsetY: 40,
+      offsetY: 32,
       left: undefined,
       right: undefined,
       top: undefined,
@@ -222,6 +222,24 @@ export const LAYOUT_CONFIG = {
     hideEnvelope: true, // Use Envelope2
     showGiftBoxWhenHidden: false, // Use Envelope2, not Box2
     hidePaper: false, // Show paper component (true = hide, false = show)
+    // Box2 settings (SINGLE CARD ONLY - standalone control, does NOT affect batch cards)
+    // NOTE: These settings are ONLY used by single cards (Layout 1 Style B single)
+    // Batch cards use Envelope2, so these box settings are ignored for batch
+    box: {
+      width: undefined,      // Box width (e.g., '176px') - undefined = use GIFT_BOX_TOKENS default
+      height: undefined,     // Box height (e.g., '176px') - undefined = use GIFT_BOX_TOKENS default
+      borderRadius: undefined, // Box border radius (e.g., '32px') - undefined = use GIFT_BOX_TOKENS default
+      scale: 1,      // Box scale factor (e.g., 1.25) - undefined = use envelope.scale
+      offsetY: 48,
+    },
+    // Logo container settings (SINGLE CARD ONLY - standalone control, does NOT affect batch cards)
+    // NOTE: These settings control the logo container inside Box2 for single cards only
+    logoContainer: {
+      centerLogo: false,           // Center logo at the very center of the box (true) or top (false)
+      paddingHorizontal: 20, // Horizontal padding (e.g., '16px') - undefined = use GIFT_BOX_TOKENS default
+      paddingVertical: 32,   // Vertical padding (e.g., '20px') - undefined = use GIFT_BOX_TOKENS default
+      logoScale: 1.1,         // Logo scale when centered (e.g., 1.4) - undefined = use default (1.4 when centered, 1 when not)
+    },
     // Envelope container settings (LAYOUT 1 STYLE B SPECIFIC - independent control block)
     // NOTE: This is separate from Layout 2 (altered1) - changes here do NOT affect Layout 2
     // The paper/card is an essential part of the envelope and is always rendered

@@ -112,6 +112,7 @@ const SentCard = ({
   boxHeight,
   boxBorderRadius,
   boxScale,
+  boxOffsetY, // Box-specific offsetY (overrides envelopeOffsetY for single cards)
   // Envelope container settings (for Batch 0 and Batch 2 - Envelope2)
   envelopeContainerPadding,
   envelopeContainerMargin,
@@ -767,13 +768,15 @@ const SentCard = ({
   }}, [hideEnvelope, hideProgressBarInBox, useBox1, box1Top, box1OffsetY, box1Left, box1Right, box1Bottom, progressOutsideEnvelope, envelopeTopBase2, envelopeOffsetY2, envelopeOffsetY, envelopeLeft2, envelopeRight2, envelopeHighZ, overlayProgressOnEnvelope, box1Scale, envelopeScale2, envelopeScale, box1TransformOrigin, transformOrigin2])
   
   // Inner wrapper style for Batch 0/Single 0 - absolutely positioned, handles scale and offsetY
+  // For single cards with Box2, use boxOffsetY if provided, otherwise use envelopeOffsetY
+  const effectiveOffsetY = (hideEnvelope && showGiftBoxWhenHidden && !useBox1 && boxOffsetY !== undefined) ? boxOffsetY : envelopeOffsetY
   const envelopeInnerWrapperStyle = useMemo(() => ({
     position: 'absolute',
     left: '50%',
     top: '50%',
-    transform: `translate(-50%, -50%) translateY(${envelopeOffsetY || 0}px) scale(${envelopeScale || 1})`,
+    transform: `translate(-50%, -50%) translateY(${effectiveOffsetY || 0}px) scale(${envelopeScale || 1})`,
     transformOrigin: 'center center',
-  }), [envelopeOffsetY, envelopeScale])
+  }), [effectiveOffsetY, envelopeScale, hideEnvelope, showGiftBoxWhenHidden, useBox1, boxOffsetY, envelopeOffsetY])
 
   const box1WrapperStyle = useMemo(() => ({
     position: 'relative',
