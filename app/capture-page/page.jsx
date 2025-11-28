@@ -119,10 +119,10 @@ export default function CapturePage() {
               showFooterProgress={false}
               footerTransparent={true}  // Remove white background from info bar
               hideUnion={true}
-              enableConfetti={true}  // Enable confetti for capture
-              hideEnvelope={true}  // Required for Layout 0 confetti
-              showGiftBoxWhenHidden={true}  // Required for Layout 0 confetti
-              hideProgressBarInBox={true}  // Required for Layout 0 detection
+              enableConfetti={cardProps.enableConfetti !== undefined ? cardProps.enableConfetti : true}  // Use prop value if provided, else enable for capture
+              hideEnvelope={cardProps.hideEnvelope !== undefined ? cardProps.hideEnvelope : true}  // Use prop value if provided (batch cards use Envelope2, not Box2)
+              showGiftBoxWhenHidden={cardProps.showGiftBoxWhenHidden !== undefined ? cardProps.showGiftBoxWhenHidden : true}  // Use prop value if provided (batch cards have false, single cards have true)
+              hideProgressBarInBox={cardProps.hideProgressBarInBox !== undefined ? cardProps.hideProgressBarInBox : true}  // Use prop value if provided
               pauseConfetti={isStatic} // Disable confetti in static mode
               forceHovered={!isStatic} // Only force hover if not static
               immediateFrame={isStatic ? null : 75} // Render confetti at frame 70 (peak eruption)

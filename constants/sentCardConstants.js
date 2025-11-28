@@ -1,6 +1,6 @@
 // Constants for SentCard components
 export const PROGRESS_PILL_RADIUS = '100px'
-export const HEADER_OVERLAY_BG = 'linear-gradient(to bottom, rgba(255, 253, 253, 0.3) 00%, rgba(255, 255, 255, 0.95) 95%)'
+export const HEADER_OVERLAY_BG = 'linear-gradient(to bottom, rgba(255, 253, 253, 0.82) 00%, rgba(255, 255, 255, 0.98) 99%)'
 export const PROGRESS_GLOW_BOX_SHADOW = '0px 2px 4px -8px rgba(46,10,255,0.1), 0px 2px 2px 0px rgba(90,61,255,0.08), 0px 4px 8px -4px rgba(16,0,112,0.15)'
 
 // Layout 0 specific confetti settings (completely separate from Layout 1)

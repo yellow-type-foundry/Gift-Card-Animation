@@ -19,14 +19,17 @@ export default function useCardTheme(dominantColor, headerBgOverride = null) {
       if (!dominantColor || dominantColor === '#f4c6fa' || dominantColor === '#000000' || dominantColor === '#ffffff') {
         return '#E3E7ED' // Default gray background
       }
-      return capSaturation(adjustToLuminance(dominantColor, 99), 25)
+      // Very pastel: high luminance (100 = maximum lightness) and low saturation (15 = very muted)
+      return capSaturation(adjustToLuminance(dominantColor, 100), 5)
     },
     [dominantColor]
   )
   
   const headerBgFinal = headerBgOverride || headerBgColor || '#E3E7ED' // Fallback to gray if both are falsy
   const isMonochromeVariant = Boolean(headerBgOverride)
-  const headerTextClass = headerBgOverride ? 'text-black' : 'text-white'
+  // When theming is enabled (headerBgOverride is null), use dark text on pastel background
+  // When theming is disabled (headerBgOverride is set), use dark text on gray background
+  const headerTextClass = 'text-black' // Always use dark text for better contrast on pastel/gray backgrounds
   
   const baseTintColor = useMemo(
     () => capSaturation(adjustToLuminance(dominantColor, 85), 70),

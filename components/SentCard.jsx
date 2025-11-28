@@ -690,8 +690,8 @@ const SentCard = ({
     fontWeight: 400,
     lineHeight: 1.4,
     opacity: 0.8,
-    color: headerBgOverride ? TOKENS.colors.text.tertiary : '#ffffff'
-  }), [headerBgOverride])
+    color: TOKENS.colors.text.tertiary // Always use dark text for better contrast on pastel backgrounds
+  }), [])
 
   const titleTextStyle = useMemo(() => ({
     fontFamily: 'var(--font-hw-cigars)',
