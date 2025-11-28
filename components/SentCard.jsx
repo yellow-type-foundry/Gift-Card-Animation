@@ -417,8 +417,20 @@ const SentCard = ({
   const PROGRESS_BAR_SATURATION = 50 // Saturation for progress bar indicator (0-100)
 
   // Extract dominant color from gift container image (for Single 1) or boxImage (for other layouts)
+  // For Style B (Box2), use brand color from logo instead of cover image
   const imageForColorExtraction = useBox1 && box1Image ? box1Image : boxImage
-  const { dominantColor } = useDominantColor(imageForColorExtraction, '#f4c6fa')
+  const { dominantColor: extractedDominantColor } = useDominantColor(imageForColorExtraction, '#f4c6fa')
+  
+  // For Style B (Box2), use brand color from logo for theming instead of cover image
+  const dominantColor = useMemo(() => {
+    if (hideEnvelope && showGiftBoxWhenHidden && !useBox1) {
+      // Style B (Box2): Use brand color from logo for header theming
+      const brandColor = LOGO_BRAND_COLORS[svgLogoPath]
+      return brandColor || extractedDominantColor // Fallback to extracted color if no brand color
+    }
+    return extractedDominantColor
+  }, [hideEnvelope, showGiftBoxWhenHidden, useBox1, svgLogoPath, extractedDominantColor])
+  
   const theme = useCardTheme(dominantColor, headerBgOverride)
   const {
     headerBgFinal,
