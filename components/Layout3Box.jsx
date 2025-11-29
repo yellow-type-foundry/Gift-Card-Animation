@@ -21,12 +21,22 @@ const makeThemedColor = (baseHex, deltaL) => {
   return { hex: newHex, r, g, b, rgba }
 }
 
+// Helper to create a more saturated/vibrant color variant
+const makeVibrantColor = (baseHex, deltaS = 20) => {
+  const [h, s, l] = hexToHsl(baseHex)
+  const newS = Math.max(0, Math.min(100, s + deltaS))
+  const newHex = hslToHex(h, newS, l)
+  return newHex
+}
+
 // Static style objects (never change, can be reused)
 const STATIC_STYLES = {
   container: {
     width: `${BOX_WIDTH}px`,
     height: `${BOX_HEIGHT}px`,
     margin: '0 auto',
+    overflow: 'visible',
+    position: 'relative',
   },
   shadingContainer: {
     position: 'absolute',
@@ -79,16 +89,19 @@ const STATIC_STYLES = {
     justifyContent: 'flex-end',
   },
   logoWrapper: {
-    width: '70.8px',
-    height: '72px',
+    position: 'relative',
+    width: '181.5px',
+    height: '36px',
     mixBlendMode: 'overlay',
     display: 'flex',
+    overflow: 'visible',
     alignItems: 'center',
     justifyContent: 'center',
+    paddingTop: '18px',
   },
   logoImage: {
-    width: '60%',
-    height: '60%',
+    width: '100%',
+    height: '100%',
     objectFit: 'contain',
     display: 'block',
   },
@@ -118,15 +131,25 @@ const STATIC_STYLES = {
   },
 }
 
-const Layout3Box = ({ boxColor = '#1987C7' }) => {
+/**
+ * Layout3Box - A themed box component with gradient effects, shadows, and dynamic theming
+ * @param {string} boxColor - The base color for theming (default: '#1987C7')
+ * @param {string} logoPath - Path to the logo SVG file (default: '/assets/GiftSent/SVG Logo/Apple.svg')
+ * @param {string} className - Additional CSS classes for the root container
+ * @param {object} style - Additional inline styles for the root container
+ */
+const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Logo/Apple.svg', className = '', style = {} }) => {
   const [lightCornerSvg, setLightCornerSvg] = useState(null)
   const [logoSvg, setLogoSvg] = useState(null)
 
-  // Base color is rgba(255, 203, 168, 0.3) - convert to hex first
-  const baseOrangeColor = '#FFCBA8' // RGB(255, 203, 168) from the base color
+  // Base color from prop - used for all themed colors
+  const baseColor = boxColor
   
-  // Lighter shade of base orange for white highlights (themed)
-  const lightRimColor = useMemo(() => makeThemedColor(baseOrangeColor, 10), [])
+  // Lighter shade of base color for white highlights (themed)
+  const lightRimColor = useMemo(() => makeThemedColor(baseColor, 10), [baseColor])
+  
+  // Vibrant color for shadow (more saturated)
+  const vibrantShadowColor = useMemo(() => makeVibrantColor(baseColor, 50), [baseColor])
 
   // Load and parse SVG for Light Corner to enable CSS styling
   useEffect(() => {
@@ -199,9 +222,9 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
       })
   }, [lightRimColor])
 
-  // Load and parse SVG for Apple logo to add white gradient
+  // Load and parse SVG for logo to add white gradient
   useEffect(() => {
-    fetch('/assets/GiftSent/SVG Logo/Apple.svg')
+    fetch(logoPath)
       .then(res => res.text())
       .then(svgText => {
         // Parse SVG and make it styleable
@@ -329,19 +352,19 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
         }
       })
       .catch(err => {
-        console.warn('Apple logo SVG not found:', err)
+        console.warn('Logo SVG not found:', err)
       })
-  }, [])
+  }, [logoPath])
 
   // Darker shade for Dark Rim 2 border
   const darkRim2BorderColor = useMemo(
-    () => makeThemedColor(baseOrangeColor, -35).rgba(0.4),
-    []
+    () => makeThemedColor(baseColor, -35).rgba(0.4),
+    [baseColor]
   )
 
   // Blob colors based on box color with hue shifts
   const blobColors = useMemo(() => {
-    const [h, s, l] = hexToHsl(baseOrangeColor)
+    const [h, s, l] = hexToHsl(baseColor)
     // Top blob: hue +10
     const topBlobHue = (h + 10) % 360
     const topBlobColor = hslToHex(topBlobHue, s, l)
@@ -349,15 +372,15 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
     const bottomBlobHue = (h - 10 + 360) % 360 // Add 360 to handle negative
     const bottomBlobColor = hslToHex(bottomBlobHue, s, l)
     return { top: topBlobColor, bottom: bottomBlobColor }
-  }, [])
+  }, [baseColor])
 
   // Dark rim for gradients/shadows (soft, close to base)
-  const darkRimColor = useMemo(() => makeThemedColor(baseOrangeColor, -1), [])
+  const darkRimColor = useMemo(() => makeThemedColor(baseColor, -1), [baseColor])
 
   // Darker themed color specifically for strong text/drop shadows
   const darkRimShadowColor = useMemo(
-    () => makeThemedColor(baseOrangeColor, -30),
-    []
+    () => makeThemedColor(baseColor, -30),
+    [baseColor]
   )
 
   // Memoize SVG mask string (only changes if dimensions change, which they don't)
@@ -471,14 +494,14 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
     () => ({
       ...STATIC_STYLES.logoImage,
       filter: `
-        drop-shadow(0px 0px 8px ${lightRimColor.rgba(0.8)})
-        drop-shadow(0px 0px 12px ${lightRimColor.rgba(0.95)})
-        drop-shadow(0px 4px 20px rgba(255, 255, 255, 0.35))
-        drop-shadow(0px 4px 2px ${darkRimShadowColor.rgba(0.75)})
+        drop-shadow(0px 0px 4px ${lightRimColor.rgba(0.4)})
+        drop-shadow(0px 0px 6px ${lightRimColor.rgba(0.5)})
+        drop-shadow(0px 2px 10px rgba(255, 255, 255, 0.2))
+        drop-shadow(0px 2px 1px ${darkRimShadowColor.rgba(0.4)})
       `,
       mixBlendMode: 'overlay',
     }),
-    [darkRimShadowColor]
+    [darkRimShadowColor, lightRimColor]
   )
 
   const pullTabIconStyle = useMemo(
@@ -491,8 +514,8 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
 
   return (
     <div 
-      className="relative"
-      style={STATIC_STYLES.container}
+      className={className ? `relative ${className}` : 'relative'}
+      style={{ ...STATIC_STYLES.container, ...style }}
     >
       {/* Main Box Container */}
       <div
@@ -550,35 +573,6 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
           <div style={lightRimStyle} />
         </div>
 
-        {/* Bottom Shadow - Image asset at bottom of box */}
-        {/* Positioned outside shading layers container to avoid clipping */}
-        <div
-          style={{
-            position: 'absolute',
-            left: '50%',
-            bottom: '4.5px',
-            transform: 'translateX(-50%)',
-            height: '10px',
-            width: `${BOTTOM_SHADOW_WIDTH}px`,
-            mixBlendMode: 'multiply',
-            zIndex: 5,
-          }}
-        >
-          {/* Bottom Shadow - Themed: dark color uses darkRimColor instead of black */}
-          <div
-            style={{
-              position: 'absolute',
-              inset: '-200% -25.64%',
-              width: 'auto',
-              height: 'auto',
-              maxWidth: 'none',
-              display: 'block',
-              background: `linear-gradient(to top, ${darkRimColor.rgba(0.3)} 0%, rgba(0, 0, 0, 0) 100%)`,
-              borderRadius: '4px',
-            }}
-          />
-        </div>
-
         {/* Noise Overlay - PNG masked to box shape */}
         <div
           style={{
@@ -631,42 +625,6 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
           </div>
         </div>
 
-        {/* Logo Container - centered within the box (no absolute positioning) */}
-        <div
-          style={{
-            position: 'relative',
-            width: '100%',
-            height: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '20px',
-            zIndex: 8,
-            pointerEvents: 'none',
-          }}
-        >
-          <div style={STATIC_STYLES.logoWrapper}>
-            {/* Apple logo with white gradient and shadow effect */}
-            {logoSvg ? (
-              <div
-                style={{
-                  ...logoImageStyle,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-                dangerouslySetInnerHTML={{ __html: logoSvg }}
-              />
-            ) : (
-              <img
-                src="/assets/GiftSent/SVG Logo/Apple.svg"
-                alt="Apple logo"
-                style={logoImageStyle}
-              />
-            )}
-          </div>
-        </div>
-
         {/* Progress Indicator - Positioned at bottom of box, behind shading layers */}
         <div
           style={{
@@ -692,6 +650,73 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
               1/25
             </span>
           </p>
+        </div>
+      </div>
+
+      {/* Logo Container - positioned outside overflow:hidden container to prevent clipping */}
+      <div
+        style={{
+          position: 'absolute',
+          left: '50%',
+          top: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '20px',
+          zIndex: 8,
+          pointerEvents: 'none',
+          overflow: 'visible',
+        }}
+      >
+        <div style={STATIC_STYLES.logoWrapper}>
+          {/* Logo with inset wrapper matching Layout 2 */}
+          <div
+            style={{
+              position: 'absolute',
+              inset: '-12.66% -1.84% -9.28% -1.84%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              overflow: 'visible',
+            }}
+          >
+            {logoSvg ? (
+              <div
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  overflow: 'visible',
+                  ...logoImageStyle,
+                }}
+                dangerouslySetInnerHTML={{ __html: logoSvg }}
+              />
+            ) : (
+              <img
+                src={logoPath}
+                alt="Logo"
+                style={{
+                  ...logoImageStyle,
+                  width: 'auto',
+                  height: (() => {
+                    if (logoPath.includes('Goody.svg')) return '40px'
+                    if (logoPath.includes('Chipotle.svg')) return '46px'
+                    if (logoPath.includes('Apple.svg')) return '40px'
+                    if (logoPath.includes('Nike.svg')) return '24px'
+                    if (logoPath.includes('Supergoop.svg')) return '40px'
+                    if (logoPath.includes('Tiffany & Co.svg')) return '16px'
+                    if (logoPath.includes('Logo.svg')) return '20px' // Columbia
+                    return 'auto'
+                  })(),
+                }}
+              />
+            )}
+          </div>
         </div>
       </div>
 
@@ -745,18 +770,54 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
         style={{
           position: 'absolute',
           left: '7%',
-          top: '125px',
+          top: '122px',
           transform: 'none',
-            width: `${BOTTOM_SHADOW_WIDTH}px`,
+          width: `${BOTTOM_SHADOW_WIDTH}px`,
           height: 'auto',
-          scale: '1.2',
+          scale: '1.25',
           zIndex: 0,
         }}
       >
+        {/* Shadow image */}
         <img
           src="/assets/shadow3.png"
           alt=""
           style={STATIC_STYLES.shadowImage}
+        />
+        {/* Color layer clipped to shadow shape with color blend mode */}
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            backgroundColor: vibrantShadowColor,
+            mixBlendMode: 'color',
+            WebkitMaskImage: 'url(/assets/shadow3.png)',
+            maskImage: 'url(/assets/shadow3.png)',
+            WebkitMaskSize: '100% 100%',
+            maskSize: '100% 100%',
+            WebkitMaskRepeat: 'no-repeat',  
+            maskRepeat: 'no-repeat',
+            WebkitMaskPosition: 'center',
+            maskPosition: 'center',
+          }}
+        />
+        {/* Additional color layer at 50% opacity for enhanced vibrancy */}
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            backgroundColor: vibrantShadowColor,
+            opacity: 0.95,
+            mixBlendMode: 'color',
+            WebkitMaskImage: 'url(/assets/shadow3.png)',
+            maskImage: 'url(/assets/shadow3.png)',
+            WebkitMaskSize: '100% 100%',
+            maskSize: '100% 100%',
+            WebkitMaskRepeat: 'no-repeat',  
+            maskRepeat: 'no-repeat',
+            WebkitMaskPosition: 'center',
+            maskPosition: 'center',
+          }}
         />
       </div>
     </div>
