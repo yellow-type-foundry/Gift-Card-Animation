@@ -113,11 +113,11 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
   // Calculate blob colors based on box color with hue shifts
   const blobColors = useMemo(() => {
     const [h, s, l] = hexToHsl(baseOrangeColor)
-    // Top blob: hue +20
-    const topBlobHue = (h + 20) % 360
+    // Top blob: hue +10
+    const topBlobHue = (h + 10) % 360
     const topBlobColor = hslToHex(topBlobHue, s, l)
-    // Bottom blob: hue -20
-    const bottomBlobHue = (h - 20 + 360) % 360 // Add 360 to handle negative
+    // Bottom blob: hue -10
+    const bottomBlobHue = (h - 10 + 360) % 360 // Add 360 to handle negative
     const bottomBlobColor = hslToHex(bottomBlobHue, s, l)
     return { top: topBlobColor, bottom: bottomBlobColor }
   }, [])
@@ -126,7 +126,7 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
   const darkRimColor = useMemo(() => {
     const [h, s, l] = hexToHsl(baseOrangeColor)
     // Darken by reducing lightness by 40-50% for rim effect
-    const darkerL = Math.max(0, l - 5)
+    const darkerL = Math.max(0, l - 1)
     const darkerColor = hslToHex(h, s, darkerL)
     // Convert hex to RGB values
     const r = parseInt(darkerColor.slice(1, 3), 16)
@@ -134,6 +134,15 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
     const b = parseInt(darkerColor.slice(5, 7), 16)
     // Helper function to create rgba with custom opacity
     const rgba = (opacity) => `rgba(${r}, ${g}, ${b}, ${opacity})`
+    // Log the color for debugging
+    console.log('Dark Rim Color:', {
+      hex: darkerColor,
+      rgb: `rgb(${r}, ${g}, ${b})`,
+      hsl: `hsl(${h}, ${s}%, ${darkerL}%)`,
+      baseColor: baseOrangeColor,
+      baseL: l,
+      darkerL: darkerL
+    })
     return { hex: darkerColor, r, g, b, rgba }
   }, [])
 
@@ -145,59 +154,8 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
         width: '180px',
         height: '176px',
         margin: '0 auto',
-        zIndex: 0,
       }}
     >
-      {/* Progress Blobs - Behind the box (lower z-index) - 2 CSS ellipses */}
-      <div
-        style={{
-          position: 'absolute',
-          left: '50%',
-          top: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: '172px',
-          height: '172px',
-          zIndex: -1,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'flex-end',
-          gap: '10px',
-        }}
-      >
-        {/* Two ellipses for progress blobs */}
-        <div
-          style={{
-            height: '43.999px',
-            width: '156px',
-            position: 'relative',
-            display: 'flex',
-            gap: '8px',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          {/* Top blob - Hue +20 from box color */}
-          <div
-            style={{
-              width: '60px',
-              height: '20px',
-              borderRadius: '50%',
-              backgroundColor: blobColors.top,
-            }}
-          />
-          {/* Bottom blob - Hue -20 from box color */}
-          <div
-            style={{
-              width: '60px',
-              height: '20px',
-              borderRadius: '50%',
-              backgroundColor: blobColors.bottom,
-            }}
-          />
-        </div>
-      </div>
-
       {/* Main Box Container */}
       <div
         style={{
@@ -207,11 +165,13 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
           borderRadius: '36px',
           overflow: 'hidden',
           zIndex: 1,
-          // Background with translucent peach color
-          backgroundColor: 'rgb(252, 222, 202, .3)',
+          // Background with translucent peach color - very low opacity for backdrop filter visibility
+          backgroundColor: 'rgba(252, 222, 202, 0.05)',
           // Backdrop blur for frosted glass effect
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
+          backdropFilter: 'blur(40px)',
+          WebkitBackdropFilter: 'blur(40px)',
+          // Ensure backdrop filter works
+          willChange: 'backdrop-filter',
         }}
       >
         {/* Gradient Overlay - Themed with dark color */}
@@ -307,8 +267,8 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
               top: '50%',
               transform: 'translateY(-50%)',
               height: '160px',
-              background: `linear-gradient(135deg, rgba(0, 0, 0, 0) 60%, ${lightRimColor.rgba(0.75)} 100%)`,
-              borderRadius: '28px',
+              background: `linear-gradient(135deg, rgba(255, 255, 255, 0) 40%, ${lightRimColor.rgba(0.75)} 100%)`,
+              borderRadius: '36px',
               filter: 'blur(5px)',
               mixBlendMode: 'overlay',
             }}
@@ -383,6 +343,112 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
             `,
           }}
         />
+
+        {/* Progress Blobs - Blurred and clipped inside box */}
+        <div
+          style={{
+            position: 'absolute',
+            left: '50%',
+            top: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '172px',
+            height: '172px',
+            zIndex: 10,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'flex-end',
+            gap: '10px',
+            filter: 'blur(15px)',
+          }}
+        >
+          {/* Two ellipses for progress blobs - vertically stacked */}
+          <div
+            style={{
+              height: '180px',
+              width: '180px', // Same width as box
+              position: 'relative',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'flex-end',
+            }}
+          >
+            {/* Top blob - Hue +20 */}
+            <div
+              style={{
+                width: '120%',
+                height: '24px',
+                borderRadius: '50%',
+                backgroundColor: blobColors.top,
+              }}
+            />
+            {/* Bottom blob - Hue -20 */}
+            <div
+              style={{
+                width: '120%',
+                height: '20px',
+                borderRadius: '50%',
+                backgroundColor: blobColors.bottom,
+                marginTop: '-4px',
+              }}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Pull Tab Container */}
+      <div
+        style={{
+          position: 'absolute',
+          left: '50%',
+          top: '-3px', // 3px higher than the box
+          transform: 'translateX(-50%)',
+          width: '180px',
+          height: '176px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'flex-start',
+          paddingTop: '0',
+          paddingBottom: '40px',
+          paddingLeft: '20px',
+          paddingRight: '20px',
+          zIndex: 2,
+        }}
+      >
+        {/* Pull Tab */}
+        <div
+          style={{
+            position: 'relative',
+            width: 'auto', // Narrow width for pull tab
+            height: '100%', // Full height of container (136px after padding)
+            backdropFilter: 'blur(9.287px)',
+            WebkitBackdropFilter: 'blur(9.287px)',
+            backgroundColor: 'rgba(255, 255, 255, 0.2)',
+            border: '0.5px solid rgba(255, 255, 255, 0)',
+            borderRadius: '16px 16px 100px 100px', // Top corners 4px, bottom corners 100px
+            boxShadow: 'inset 0px 0px 4px 0px rgba(255, 255, 255, 0.8)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'flex-end',
+            padding: '5px',
+            overflow: 'hidden',
+          }}
+        >
+          {/* Pull Tab Icon - Placeholder for ellipse icon */}
+          <div
+            style={{
+              width: '18px',
+              height: '18px',
+              borderRadius: '50%',
+              backgroundColor: 'rgba(255, 255, 255, 0.6)',
+              mixBlendMode: 'overlay',
+              boxShadow: `0px 1.5px 2px 0px ${darkRimColor.rgba(1)}`,
+            }}
+          />
+        </div>
       </div>
 
       {/* Shadow under the box - Y+145 from top edge, width 156px (156/180 ratio) */}
