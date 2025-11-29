@@ -35,6 +35,7 @@ const STATIC_STYLES = {
     transform: 'translate(-50%, -50%)',
     width: '100%',
     height: '100%',
+    zIndex: 2,
   },
   lightCornerWrapper: {
     position: 'absolute',
@@ -60,7 +61,7 @@ const STATIC_STYLES = {
     transform: 'translate(-50%, -50%)',
     width: '172px',
     height: '172px',
-    zIndex: 10,
+    zIndex: 1,
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
@@ -261,6 +262,64 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
             }
           })
           
+          // Add white inner shadow filter
+          const filterId = 'logoInnerShadow'
+          let filter = defs.querySelector(`#${filterId}`)
+          if (!filter) {
+            filter = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'filter')
+            filter.setAttribute('id', filterId)
+            filter.setAttribute('x', '-50%')
+            filter.setAttribute('y', '-50%')
+            filter.setAttribute('width', '200%')
+            filter.setAttribute('height', '200%')
+            
+            // Create inner shadow using feGaussianBlur and feOffset
+            const feGaussianBlur = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'feGaussianBlur')
+            feGaussianBlur.setAttribute('in', 'SourceAlpha')
+            feGaussianBlur.setAttribute('stdDeviation', '3')
+            feGaussianBlur.setAttribute('result', 'blur')
+            filter.appendChild(feGaussianBlur)
+            
+            const feOffset = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'feOffset')
+            feOffset.setAttribute('in', 'blur')
+            feOffset.setAttribute('dx', '0')
+            feOffset.setAttribute('dy', '0')
+            feOffset.setAttribute('result', 'offsetBlur')
+            filter.appendChild(feOffset)
+            
+            const feFlood = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'feFlood')
+            feFlood.setAttribute('flood-color', 'rgba(255, 255, 255, 1)')
+            feFlood.setAttribute('flood-opacity', '1')
+            feFlood.setAttribute('result', 'white')
+            filter.appendChild(feFlood)
+            
+            const feComposite1 = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'feComposite')
+            feComposite1.setAttribute('in', 'white')
+            feComposite1.setAttribute('in2', 'offsetBlur')
+            feComposite1.setAttribute('operator', 'in')
+            feComposite1.setAttribute('result', 'innerShadow')
+            filter.appendChild(feComposite1)
+            
+            const feComposite2 = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'feComposite')
+            feComposite2.setAttribute('in', 'SourceGraphic')
+            feComposite2.setAttribute('in2', 'innerShadow')
+            feComposite2.setAttribute('operator', 'over')
+            filter.appendChild(feComposite2)
+            
+            defs.appendChild(filter)
+          }
+          
+          // Apply filter to all paths and shapes
+          const shapes = svgElement.querySelectorAll('path, circle, rect, polygon')
+          shapes.forEach(shape => {
+            const currentFilter = shape.getAttribute('filter')
+            if (currentFilter) {
+              shape.setAttribute('filter', `${currentFilter} url(#${filterId})`)
+            } else {
+              shape.setAttribute('filter', `url(#${filterId})`)
+            }
+          })
+          
           // Ensure SVG fills its container properly
           svgElement.setAttribute('width', '100%')
           svgElement.setAttribute('height', '100%')
@@ -364,7 +423,9 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
         inset 0px -1px 6px 0px ${lightRimColor.rgba(0.5)},
         inset 0px -5px 15px 5px ${lightRimColor.rgba(1)},
         inset 0px 10px 15px 0px ${lightRimColor.rgba(0.5)},
-        inset 0px 0px 20px 0px ${lightRimColor.rgba(0.5)}
+        inset 0px 0px 20px 0px ${lightRimColor.rgba(0.5)},
+        inset 4px 4px 15px 0px rgba(255, 255, 255, .5),
+        inset 0px 0px 8px 3px rgba(255, 255, 255, 1)
       `,
     }),
     [lightRimColor]
@@ -393,11 +454,15 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
       color: 'transparent',
       display: 'inline-block',
       textShadow: `
-        ${darkRimColor.rgba(0.2)} .1px 1.5px .5px,
-        ${lightRimColor.rgba(.4)} 0px -0.5px 2px,
-        ${lightRimColor.rgba(.2)} 0px -0.5px 2px
+        ${darkRimColor.rgba(.07)} 0px .5px .5px,
+        
+        ${lightRimColor.rgba(.05)} 0px -0.5px 1px,
+        ${lightRimColor.rgba(.1)} 0px -0.5px .5px
       `,
-      filter: `drop-shadow(0px 1.5px 5px rgba(255, 255, 255, 0.5))`,
+      filter: `
+        drop-shadow(0px 1.5px 8px rgba(255, 255, 255, 0.8))
+        drop-shadow(0px 1px 1px ${darkRimColor.rgba(0.9)})
+      `,
     }),
     [lightRimColor, darkRimColor]
   )
