@@ -1,7 +1,121 @@
 'use client'
 
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, memo } from 'react'
 import { hexToHsl, hslToHex } from '@/utils/colors'
+
+// Layout 3 box sizing tokens (keep visuals in sync with Figma)
+const BOX_WIDTH = 180
+const BOX_HEIGHT = 176
+const BOX_RADIUS = 36
+const BOTTOM_SHADOW_WIDTH = 156
+
+// Helper to create a themed color variant from a base hex with a lightness delta
+const makeThemedColor = (baseHex, deltaL) => {
+  const [h, s, l] = hexToHsl(baseHex)
+  const newL = Math.max(0, Math.min(100, l + deltaL))
+  const newHex = hslToHex(h, s, newL)
+  const r = parseInt(newHex.slice(1, 3), 16)
+  const g = parseInt(newHex.slice(3, 5), 16)
+  const b = parseInt(newHex.slice(5, 7), 16)
+  const rgba = (opacity) => `rgba(${r}, ${g}, ${b}, ${opacity})`
+  return { hex: newHex, r, g, b, rgba }
+}
+
+// Static style objects (never change, can be reused)
+const STATIC_STYLES = {
+  container: {
+    width: `${BOX_WIDTH}px`,
+    height: `${BOX_HEIGHT}px`,
+    margin: '0 auto',
+  },
+  shadingContainer: {
+    position: 'absolute',
+    left: '50%',
+    top: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: '100%',
+    height: '100%',
+  },
+  lightCornerWrapper: {
+    position: 'absolute',
+    left: 'calc(50% - 30px)',
+    top: 'calc(50% - 35.5px)',
+    transform: 'translate(-50%, -50%) rotate(180deg)',
+    width: '100px',
+    height: '90px',
+    mixBlendMode: 'overlay',
+  },
+  lightCornerInner: {
+    position: 'absolute',
+    inset: '-15.56% -16% -17.78% -14%',
+    width: 'auto',
+    height: 'auto',
+    maxWidth: 'none',
+    display: 'block',
+  },
+  progressBlobsContainer: {
+    position: 'absolute',
+    left: '50%',
+    top: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: '172px',
+    height: '172px',
+    zIndex: 10,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    gap: '10px',
+    filter: 'blur(15px)',
+  },
+  progressBlobsInner: {
+    height: '180px',
+    width: '180px',
+    position: 'relative',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+  },
+  logoWrapper: {
+    width: '70.8px',
+    height: '72px',
+    mixBlendMode: 'overlay',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  logoImage: {
+    width: '60%',
+    height: '60%',
+    objectFit: 'contain',
+    display: 'block',
+  },
+  progressText: {
+    position: 'relative',
+    fontSize: '20px',
+    fontFamily: "'Goody Sans', sans-serif",
+    fontWeight: 'bold',
+    lineHeight: 1,
+    textAlign: 'center',
+    whiteSpace: 'pre',
+    letterSpacing: '-0.2px',
+    mixBlendMode: 'normal',
+    margin: 0,
+  },
+  pullTabIcon: {
+    width: '18px',
+    height: '18px',
+    borderRadius: '50%',
+    backgroundColor: 'rgba(255, 255, 255, 0.6)',
+    mixBlendMode: 'overlay',
+  },
+  shadowImage: {
+    display: 'block',
+    width: `${BOTTOM_SHADOW_WIDTH}px`,
+    height: 'auto',
+  },
+}
 
 const Layout3Box = ({ boxColor = '#1987C7' }) => {
   const [lightCornerSvg, setLightCornerSvg] = useState(null)
@@ -9,22 +123,8 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
   // Base color is rgba(255, 203, 168, 0.3) - convert to hex first
   const baseOrangeColor = '#FFCBA8' // RGB(255, 203, 168) from the base color
   
-  // Calculate lighter shade of base orange for white highlights (themed)
-  // Need to calculate this early so it's available in useEffect
-  const lightRimColor = useMemo(() => {
-    const [h, s, l] = hexToHsl(baseOrangeColor)
-    // Lighten by increasing lightness - adjust this value to make lighter/darker
-    // Current: increases by 15 - increase this number to make lighter, decrease to make darker
-    const lighterL = Math.min(100, l + 10)
-    const lighterColor = hslToHex(h, s, lighterL)
-    // Convert hex to RGB values
-    const r = parseInt(lighterColor.slice(1, 3), 16)
-    const g = parseInt(lighterColor.slice(3, 5), 16)
-    const b = parseInt(lighterColor.slice(5, 7), 16)
-    // Helper function to create rgba with custom opacity
-    const rgba = (opacity) => `rgba(${r}, ${g}, ${b}, ${opacity})`
-    return { hex: lighterColor, r, g, b, rgba }
-  }, [])
+  // Lighter shade of base orange for white highlights (themed)
+  const lightRimColor = useMemo(() => makeThemedColor(baseOrangeColor, 10), [])
 
   // Load and parse SVG for Light Corner to enable CSS styling
   useEffect(() => {
@@ -97,20 +197,13 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
       })
   }, [lightRimColor])
 
-  // Calculate darker shade of base orange color for Dark Rim 2 border
-  const darkRim2BorderColor = useMemo(() => {
-    const [h, s, l] = hexToHsl(baseOrangeColor)
-    // Darken by reducing lightness by 35%
-    const darkerL = Math.max(0, l - 35)
-    const darkerColor = hslToHex(h, s, darkerL)
-    // Convert hex to rgba with 40% opacity
-    const r = parseInt(darkerColor.slice(1, 3), 16)
-    const g = parseInt(darkerColor.slice(3, 5), 16)
-    const b = parseInt(darkerColor.slice(5, 7), 16)
-    return `rgba(${r}, ${g}, ${b}, 0.4)`
-  }, [])
+  // Darker shade for Dark Rim 2 border
+  const darkRim2BorderColor = useMemo(
+    () => makeThemedColor(baseOrangeColor, -35).rgba(0.4),
+    []
+  )
 
-  // Calculate blob colors based on box color with hue shifts
+  // Blob colors based on box color with hue shifts
   const blobColors = useMemo(() => {
     const [h, s, l] = hexToHsl(baseOrangeColor)
     // Top blob: hue +10
@@ -122,60 +215,148 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
     return { top: topBlobColor, bottom: bottomBlobColor }
   }, [])
 
-  // Calculate darker shade of base orange for Dark Rim gradient and shadows
-  const darkRimColor = useMemo(() => {
-    const [h, s, l] = hexToHsl(baseOrangeColor)
-    // Darken slightly for rim effect (keep close to base so it stays soft)
-    const darkerL = Math.max(0, l - 1)
-    const darkerColor = hslToHex(h, s, darkerL)
-    // Convert hex to RGB values
-    const r = parseInt(darkerColor.slice(1, 3), 16)
-    const g = parseInt(darkerColor.slice(3, 5), 16)
-    const b = parseInt(darkerColor.slice(5, 7), 16)
-    // Helper function to create rgba with custom opacity
-    const rgba = (opacity) => `rgba(${r}, ${g}, ${b}, ${opacity})`
-    // Log the color for debugging
-    console.log('Dark Rim Color:', {
-      hex: darkerColor,
-      rgb: `rgb(${r}, ${g}, ${b})`,
-      hsl: `hsl(${h}, ${s}%, ${darkerL}%)`,
-      baseColor: baseOrangeColor,
-      baseL: l,
-      darkerL: darkerL
-    })
-    return { hex: darkerColor, r, g, b, rgba }
-  }, [])
+  // Dark rim for gradients/shadows (soft, close to base)
+  const darkRimColor = useMemo(() => makeThemedColor(baseOrangeColor, -1), [])
 
   // Darker themed color specifically for strong text/drop shadows
-  const darkRimShadowColor = useMemo(() => {
-    const [h, s, l] = hexToHsl(baseOrangeColor)
-    // Much darker than box for clear contrast
-    const darkerL = Math.max(0, l - 30)
-    const darkerColor = hslToHex(h, s, darkerL)
-    const r = parseInt(darkerColor.slice(1, 3), 16)
-    const g = parseInt(darkerColor.slice(3, 5), 16)
-    const b = parseInt(darkerColor.slice(5, 7), 16)
-    const rgba = (opacity) => `rgba(${r}, ${g}, ${b}, ${opacity})`
-    return { hex: darkerColor, r, g, b, rgba }
-  }, [])
+  const darkRimShadowColor = useMemo(
+    () => makeThemedColor(baseOrangeColor, -30),
+    []
+  )
 
+  // Memoize SVG mask string (only changes if dimensions change, which they don't)
+  const svgMaskString = useMemo(
+    () => `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='${BOX_WIDTH}' height='${BOX_HEIGHT}'%3E%3Crect width='${BOX_WIDTH}' height='${BOX_HEIGHT}' rx='${BOX_RADIUS}' ry='${BOX_RADIUS}' fill='white'/%3E%3C/svg%3E")`,
+    []
+  )
+
+  // Memoize dynamic style objects that depend on themed colors
+  const gradientOverlayStyle = useMemo(
+    () => ({
+      position: 'absolute',
+      inset: 0,
+      opacity: 1,
+      background: `linear-gradient(-45deg, rgba(255, 255, 255, 0.975) 0%, ${darkRimColor.rgba(1)} 100%)`,
+      mixBlendMode: 'soft-light',
+      borderRadius: `${BOX_RADIUS}px`,
+    }),
+    [darkRimColor]
+  )
+
+  const darkRimStyle = useMemo(
+    () => ({
+      position: 'absolute',
+      left: '5.55%',
+      right: '5.56%',
+      top: '50%',
+      transform: 'translateY(-50%) rotate(180deg)',
+      width: '160px',
+      height: '160px',
+      filter: 'blur(3px)',
+      mixBlendMode: 'overlay',
+      borderRadius: '28px',
+      background: `linear-gradient(135deg, rgba(0, 0, 0, 0) 40%, ${darkRimColor.rgba(0.5)} 100%)`,
+      boxShadow: `inset -16px -14px 16px 5px ${darkRimColor.rgba(0.01)}, inset 6px 12px 13px 5px ${lightRimColor.rgba(0.45)}`,
+    }),
+    [darkRimColor, lightRimColor]
+  )
+
+  const lightRimStyle = useMemo(
+    () => ({
+      position: 'absolute',
+      left: '5.55%',
+      right: '5.56%',
+      top: '50%',
+      transform: 'translateY(-50%)',
+      height: '160px',
+      background: `linear-gradient(135deg, rgba(255, 255, 255, 0) 40%, ${lightRimColor.rgba(0.75)} 100%)`,
+      borderRadius: `${BOX_RADIUS}px`,
+      filter: 'blur(5px)',
+      mixBlendMode: 'overlay',
+    }),
+    [lightRimColor]
+  )
+
+  const insetShadowsStyle = useMemo(
+    () => ({
+      position: 'absolute',
+      inset: 0,
+      pointerEvents: 'none',
+      borderRadius: `${BOX_RADIUS}px`,
+      boxShadow: `
+        inset 0px -1px 6px 0px ${lightRimColor.rgba(0.5)},
+        inset 0px -5px 15px 5px #ffb98a,
+        inset 0px 10px 15px 0px ${lightRimColor.rgba(0.5)},
+        inset 0px 0px 20px 0px ${lightRimColor.rgba(0.5)}
+      `,
+    }),
+    [lightRimColor]
+  )
+
+  const progressTextShadowStyle = useMemo(
+    () => ({
+      position: 'absolute',
+      inset: 0,
+      transform: 'translateY(1px)',
+      color: darkRimShadowColor.rgba(0.5),
+      filter: 'blur(1.1px)',
+      opacity: 0.5,
+    }),
+    [darkRimShadowColor]
+  )
+
+  const progressTextGradientStyle = useMemo(
+    () => ({
+      position: 'relative',
+      background: `linear-gradient(to bottom, #ffffff, ${lightRimColor.hex})`,
+      WebkitBackgroundClip: 'text',
+      backgroundClip: 'text',
+      WebkitTextFillColor: 'transparent',
+      color: 'transparent',
+      display: 'inline-block',
+      textShadow: `
+        ${darkRimColor.rgba(0.05)} .1px .5px .5px,
+        ${lightRimColor.rgba(0.35)} 0px -0.75px 3px,
+        ${lightRimColor.rgba(0.25)} 0px -0.5px 0.25px
+      `,
+    }),
+    [lightRimColor, darkRimColor]
+  )
+
+  const logoGlowStyle = useMemo(
+    () => ({
+      width: '100%',
+      height: '100%',
+      borderRadius: '999px',
+      background: 'radial-gradient(circle at 30% 20%, rgba(255,255,255,0.9), rgba(255,255,255,0.1))',
+      boxShadow: `0px 4px 10px ${darkRimShadowColor.rgba(0.3)}`,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    }),
+    [darkRimShadowColor]
+  )
+
+  const pullTabIconStyle = useMemo(
+    () => ({
+      ...STATIC_STYLES.pullTabIcon,
+      boxShadow: `0px 1.5px 2px 0px ${darkRimColor.rgba(1)}`,
+    }),
+    [darkRimColor]
+  )
 
   return (
     <div 
       className="relative"
-      style={{
-        width: '180px',
-        height: '176px',
-        margin: '0 auto',
-      }}
+      style={STATIC_STYLES.container}
     >
       {/* Main Box Container */}
       <div
         style={{
           position: 'relative',
-          width: '180px',
-          height: '176px',
-          borderRadius: '36px',
+          width: `${BOX_WIDTH}px`,
+          height: `${BOX_HEIGHT}px`,
+          borderRadius: `${BOX_RADIUS}px`,
           overflow: 'hidden',
           zIndex: 1,
           // Background with translucent peach color - very low opacity for backdrop filter visibility
@@ -188,45 +369,12 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
         }}
       >
         {/* Gradient Overlay - Themed with dark color */}
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            opacity: 1,
-            background: `linear-gradient(-45deg, rgba(255, 255, 255, 0.975) 0%, ${darkRimColor.rgba(1)} 100%)`,
-            mixBlendMode: 'soft-light',
-            borderRadius: '36px',
-          }}
-        />
+        <div style={gradientOverlayStyle} />
 
         {/* Shading Layers */}
-        <div
-          style={{
-            position: 'absolute',
-            left: '50%',
-            top: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: '100%',
-            height: '100%',
-          }}
-        >
+        <div style={STATIC_STYLES.shadingContainer}>
           {/* Dark Rim - Gradient with blur (themed: transparent -> dark orange) */}
-          <div
-            style={{
-              position: 'absolute',
-              left: '5.55%',
-              right: '5.56%',
-              top: '50%',
-              transform: 'translateY(-50%) rotate(180deg)',
-              width: '160px',
-              height: '160px',
-              filter: 'blur(3px)',
-              mixBlendMode: 'overlay',
-              borderRadius: '28px',
-              background: `linear-gradient(135deg, rgba(0, 0, 0, 0) 40%, ${darkRimColor.rgba(0.5)} 100%)`,
-              boxShadow: `inset -16px -14px 16px 5px ${darkRimColor.rgba(0.01)}, inset 6px 12px 13px 5px ${lightRimColor.rgba(0.45)}`,
-            }}
-          />
+          <div style={darkRimStyle} />
 
           {/* Dark Rim 2 - Border effect with themed brand color (darker shade) */}
           <div
@@ -235,57 +383,27 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
               left: '50%',
               top: '50%',
               transform: 'translate(-50%, -50%) rotate(180deg)',
-              width: '180px',
-              height: '176px',
+              width: `${BOX_WIDTH}px`,
+              height: `${BOX_HEIGHT}px`,
               border: `1.5px solid ${darkRim2BorderColor}`,
-              borderRadius: '36px',
+              borderRadius: `${BOX_RADIUS}px`,
               filter: 'blur(1.5px)',
               mixBlendMode: 'normal',
             }}
           />
 
           {/* Light Corner - Inline SVG for CSS styling control */}
-          <div
-            style={{
-              position: 'absolute',
-              left: 'calc(50% - 30px)',
-              top: 'calc(50% - 35.5px)',
-              transform: 'translate(-50%, -50%) rotate(180deg)',
-              width: '100px',
-              height: '90px',
-              mixBlendMode: 'overlay',
-            }}
-          >
+          <div style={STATIC_STYLES.lightCornerWrapper}>
             {lightCornerSvg && (
               <div
-                style={{
-                  position: 'absolute',
-                  inset: '-15.56% -16% -17.78% -14%',
-                  width: 'auto',
-                  height: 'auto',
-                  maxWidth: 'none',
-                  display: 'block',
-                }}
+                style={STATIC_STYLES.lightCornerInner}
                 dangerouslySetInnerHTML={{ __html: lightCornerSvg }}
               />
             )}
           </div>
 
           {/* Light Rim - Soft highlight with 135deg gradient */}
-          <div
-            style={{
-              position: 'absolute',
-              left: '5.55%',
-              right: '5.56%',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              height: '160px',
-              background: `linear-gradient(135deg, rgba(255, 255, 255, 0) 40%, ${lightRimColor.rgba(0.75)} 100%)`,
-              borderRadius: '36px',
-              filter: 'blur(5px)',
-              mixBlendMode: 'overlay',
-            }}
-          />
+          <div style={lightRimStyle} />
         </div>
 
         {/* Bottom Shadow - Image asset at bottom of box */}
@@ -297,13 +415,12 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
             bottom: '4.5px',
             transform: 'translateX(-50%)',
             height: '10px',
-            width: '156px',
+            width: `${BOTTOM_SHADOW_WIDTH}px`,
             mixBlendMode: 'multiply',
             zIndex: 5,
           }}
         >
-          {/* TODO: Extract Bottom Shadow SVG/image from Figma and replace placeholder */}
-          {/* Themed: dark color uses darkRimColor instead of black */}
+          {/* Bottom Shadow - Themed: dark color uses darkRimColor instead of black */}
           <div
             style={{
               position: 'absolute',
@@ -324,14 +441,14 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
             position: 'absolute',
             inset: 0,
             mixBlendMode: 'overlay',
-            borderRadius: '36px',
+            borderRadius: `${BOX_RADIUS}px`,
             backgroundImage: 'url(/assets/noise-dark.png)',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundColor: 'rgba(0, 0, 0, 0.5)',
             // Use CSS mask to clip noise to box shape
-            WebkitMaskImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='176'%3E%3Crect width='180' height='176' rx='36' ry='36' fill='white'/%3E%3C/svg%3E")`,
-            maskImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='176'%3E%3Crect width='180' height='176' rx='36' ry='36' fill='white'/%3E%3C/svg%3E")`,
+            WebkitMaskImage: svgMaskString,
+            maskImage: svgMaskString,
             WebkitMaskSize: '100% 100%',
             maskSize: '100% 100%',
             WebkitMaskRepeat: 'no-repeat',
@@ -342,51 +459,12 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
         />
 
         {/* Inset Shadows for depth */}
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            pointerEvents: 'none',
-            borderRadius: '36px',
-            boxShadow: `
-              inset 0px -1px 6px 0px ${lightRimColor.rgba(0.5)},
-              inset 0px -5px 15px 5px #ffb98a,
-              inset 0px 10px 15px 0px ${lightRimColor.rgba(0.5)},
-              inset 0px 0px 20px 0px ${lightRimColor.rgba(0.5)}
-            `,
-          }}
-        />
+        <div style={insetShadowsStyle} />
 
         {/* Progress Blobs - Blurred and clipped inside box */}
-        <div
-          style={{
-            position: 'absolute',
-            left: '50%',
-            top: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: '172px',
-            height: '172px',
-            zIndex: 10,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'flex-end',
-            gap: '10px',
-            filter: 'blur(15px)',
-          }}
-        >
+        <div style={STATIC_STYLES.progressBlobsContainer}>
           {/* Two ellipses for progress blobs - vertically stacked */}
-          <div
-            style={{
-              height: '180px',
-              width: '180px', // Same width as box
-              position: 'relative',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'flex-end',
-            }}
-          >
+          <div style={STATIC_STYLES.progressBlobsInner}>
             {/* Top blob - Hue +20 */}
             <div
               style={{
@@ -409,6 +487,32 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
           </div>
         </div>
 
+        {/* Logo Container - centered within the box (no absolute positioning) */}
+        <div
+          style={{
+            position: 'relative',
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px',
+            zIndex: 8,
+            pointerEvents: 'none',
+          }}
+        >
+          <div style={STATIC_STYLES.logoWrapper}>
+            {/* Apple logo container with glow/shadow */}
+            <div style={logoGlowStyle}>
+              <img
+                src="/assets/GiftSent/SVG Logo/Apple.svg"
+                alt="Apple logo"
+                style={STATIC_STYLES.logoImage}
+              />
+            </div>
+          </div>
+        </div>
+
         {/* Progress Indicator - Positioned at bottom of box, behind shading layers */}
         <div
           style={{
@@ -424,51 +528,13 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
             zIndex: 10,
           }}
         >
-          <p
-            style={{
-              position: 'relative',
-              fontSize: '20px',
-              fontFamily: "'Goody Sans', sans-serif",
-              fontWeight: 'bold',
-              lineHeight: 1,
-              textAlign: 'center',
-              whiteSpace: 'pre',
-              letterSpacing: '-0.2px',
-              // Use normal blend so shadow stays strong; gradient span handles visual blending
-              mixBlendMode: 'normal',
-              margin: 0,
-            }}
-          >
+          <p style={STATIC_STYLES.progressText}>
             {/* Shadow text behind - uses darkRimColor, slightly blurred */}
-            <span
-              style={{
-                position: 'absolute',
-                inset: 0,
-                transform: 'translateY(1px)',
-                color: darkRimShadowColor.rgba(.5),
-                filter: 'blur(1.1px)',
-                opacity: .5,
-              }}
-            >
+            <span style={progressTextShadowStyle}>
               1/25
             </span>
             {/* Foreground gradient text */}
-            <span
-              style={{
-                position: 'relative',
-                background: `linear-gradient(to bottom, #ffffff, ${lightRimColor.hex})`,
-                WebkitBackgroundClip: 'text',
-                backgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                color: 'transparent',
-                display: 'inline-block',
-                textShadow: `
-                  ${darkRimColor.rgba(0.05)} .1px .5px .5px,
-                  ${lightRimColor.rgba(0.35)} 0px -0.75px 3px,
-                  ${lightRimColor.rgba(0.25)} 0px -0.5px 0.25px
-                `,
-              }}
-            >
+            <span style={progressTextGradientStyle}>
               1/25
             </span>
           </p>
@@ -482,8 +548,8 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
           left: '50%',
           top: '-3px', // 3px higher than the box
           transform: 'translateX(-50%)',
-          width: '180px',
-          height: '176px',
+          width: `${BOX_WIDTH}px`,
+          height: `${BOX_HEIGHT}px`,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -516,16 +582,7 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
           }}
         >
           {/* Pull Tab Icon - Placeholder for ellipse icon */}
-          <div
-            style={{
-              width: '18px',
-              height: '18px',
-              borderRadius: '50%',
-              backgroundColor: 'rgba(255, 255, 255, 0.6)',
-              mixBlendMode: 'overlay',
-              boxShadow: `0px 1.5px 2px 0px ${darkRimColor.rgba(1)}`,
-            }}
-          />
+          <div style={pullTabIconStyle} />
         </div>
       </div>
 
@@ -536,7 +593,7 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
           left: '7%',
           top: '125px',
           transform: 'none',
-          width: '156px',
+            width: `${BOTTOM_SHADOW_WIDTH}px`,
           height: 'auto',
           scale: '1.2',
           zIndex: 0,
@@ -545,16 +602,12 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
         <img
           src="/assets/shadow3.png"
           alt=""
-          style={{
-            display: 'block',
-            width: '156px',
-            height: 'auto',
-          }}
+          style={STATIC_STYLES.shadowImage}
         />
       </div>
     </div>
   )
 }
 
-export default Layout3Box
+export default memo(Layout3Box)
 
