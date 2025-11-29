@@ -143,7 +143,7 @@ const ControlBar = ({
       <div className="hidden md:flex items-center justify-center gap-2 shrink-0">
         {isSentTab && (
           <>
-            {[1, 2].map((num) => (
+            {[1, 2, 3].map((num) => (
               <TabButton
                 key={num}
                 label={`Layout ${num}`}
@@ -407,6 +407,7 @@ const ControlBar = ({
                       >
                         <option value="1">Layout 1</option>
                         <option value="2">Layout 2</option>
+                        <option value="3">Layout 3</option>
                       </select>
                       <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
                         <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import ControlBar from '@/components/ControlBar'
 import CardGrid from '@/components/CardGrid'
+import Layout3Canvas from '@/components/Layout3Canvas'
 import { shuffleArray, generateRandomSentCardData } from '@/utils/cardData'
 import { FOOTER_CONFIG, LAYOUT_CONFIG } from '@/constants/sentCardConstants'
 
@@ -138,7 +139,7 @@ export default function Home() {
   const [useColoredBackground, setUseColoredBackground] = useState(false) // Toggle for theming
   const [animationType, setAnimationType] = useState('highlight') // Animation type: 'highlight', 'breathing', or 'none'
   const [enable3D, setEnable3D] = useState(false) // Standalone 3D toggle that works with highlight or breathing
-  const [layoutNumber, setLayoutNumber] = useState('1') // '1' | '2' - which layout pair to use
+  const [layoutNumber, setLayoutNumber] = useState('1') // '1' | '2' | '3' - which layout to use
   const [style, setStyle] = useState('A') // 'A' | 'B' - for Layout 1 only: Style A = Box1/Envelope1, Style B = Box2/Envelope2
   const [viewType, setViewType] = useState('mixed') // 'mixed' | 'batch' | 'single' - what to display
   const [mixSeed, setMixSeed] = useState(0) // Seed to regenerate mix when toggled
@@ -635,24 +636,28 @@ export default function Home() {
           onStyleChange={setStyle}
         />
         {/* Content */}
-        <CardGrid
-          key={`card-grid-${layoutNumber}-${style}`}
-          activeTab={activeTab}
-          cardStates={cardStates}
-          messages={messages}
-          boxPairs={boxPairs}
-          cardHandlers={cardHandlers}
-          viewType={viewType}
-          layoutNumber={layoutNumber}
-          useColoredBackground={layoutNumber === '1' ? useColoredBackground : false}
-          animationType={animationType}
-          enable3D={enable3D}
-          sentCards={sentCards}
-          mixedCardTypes={mixedCardTypes}
-          getSentCardProps={getSentCardProps}
-          getSingle1Props={getSingle1Props}
-          getSentCard4Props={getSentCard4Props}
-        />
+        {layoutNumber === '3' ? (
+          <Layout3Canvas />
+        ) : (
+          <CardGrid
+            key={`card-grid-${layoutNumber}-${style}`}
+            activeTab={activeTab}
+            cardStates={cardStates}
+            messages={messages}
+            boxPairs={boxPairs}
+            cardHandlers={cardHandlers}
+            viewType={viewType}
+            layoutNumber={layoutNumber}
+            useColoredBackground={layoutNumber === '1' ? useColoredBackground : false}
+            animationType={animationType}
+            enable3D={enable3D}
+            sentCards={sentCards}
+            mixedCardTypes={mixedCardTypes}
+            getSentCardProps={getSentCardProps}
+            getSingle1Props={getSingle1Props}
+            getSentCard4Props={getSentCard4Props}
+          />
+        )}
       </div>
     </div>
   )
