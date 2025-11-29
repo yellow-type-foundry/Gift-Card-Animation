@@ -151,6 +151,9 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
   
   // Vibrant color for shadow (more saturated)
   const vibrantShadowColor = useMemo(() => makeVibrantColor(baseColor, 50), [baseColor])
+  
+  // Hover color - base color with L+3
+  const hoverColor = useMemo(() => makeThemedColor(baseColor, 3), [baseColor])
 
   // Load and parse SVG for Light Corner to enable CSS styling
   useEffect(() => {
@@ -508,7 +511,10 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
   const pullTabIconStyle = useMemo(
     () => ({
       ...STATIC_STYLES.pullTabIcon,
-      boxShadow: `0px 1.5px 2px 0px ${darkRimColor.rgba(1)}`,
+      boxShadow: `
+        0px 1.5px 2px 0px ${darkRimColor.rgba(1)},
+        inset 0px 0px 3px 0px rgba(255, 255, 255, 0.95)
+      `,
     }),
     [darkRimColor]
   )
