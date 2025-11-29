@@ -125,7 +125,7 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
   // Calculate darker shade of base orange for Dark Rim gradient and shadows
   const darkRimColor = useMemo(() => {
     const [h, s, l] = hexToHsl(baseOrangeColor)
-    // Darken by reducing lightness by 40-50% for rim effect
+    // Darken slightly for rim effect (keep close to base so it stays soft)
     const darkerL = Math.max(0, l - 1)
     const darkerColor = hslToHex(h, s, darkerL)
     // Convert hex to RGB values
@@ -143,6 +143,19 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
       baseL: l,
       darkerL: darkerL
     })
+    return { hex: darkerColor, r, g, b, rgba }
+  }, [])
+
+  // Darker themed color specifically for strong text/drop shadows
+  const darkRimShadowColor = useMemo(() => {
+    const [h, s, l] = hexToHsl(baseOrangeColor)
+    // Much darker than box for clear contrast
+    const darkerL = Math.max(0, l - 30)
+    const darkerColor = hslToHex(h, s, darkerL)
+    const r = parseInt(darkerColor.slice(1, 3), 16)
+    const g = parseInt(darkerColor.slice(3, 5), 16)
+    const b = parseInt(darkerColor.slice(5, 7), 16)
+    const rgba = (opacity) => `rgba(${r}, ${g}, ${b}, ${opacity})`
     return { hex: darkerColor, r, g, b, rgba }
   }, [])
 
@@ -394,6 +407,71 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
               }}
             />
           </div>
+        </div>
+
+        {/* Progress Indicator - Positioned at bottom of box, behind shading layers */}
+        <div
+          style={{
+            position: 'absolute',
+            left: '50%',
+            bottom: 0,
+            transform: 'translateX(-50%)',
+            width: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '12px',
+            zIndex: 10,
+          }}
+        >
+          <p
+            style={{
+              position: 'relative',
+              fontSize: '20px',
+              fontFamily: "'Goody Sans', sans-serif",
+              fontWeight: 'bold',
+              lineHeight: 1,
+              textAlign: 'center',
+              whiteSpace: 'pre',
+              letterSpacing: '-0.2px',
+              // Use normal blend so shadow stays strong; gradient span handles visual blending
+              mixBlendMode: 'normal',
+              margin: 0,
+            }}
+          >
+            {/* Shadow text behind - uses darkRimColor, slightly blurred */}
+            <span
+              style={{
+                position: 'absolute',
+                inset: 0,
+                transform: 'translateY(1px)',
+                color: darkRimShadowColor.rgba(.5),
+                filter: 'blur(1.1px)',
+                opacity: .5,
+              }}
+            >
+              1/25
+            </span>
+            {/* Foreground gradient text */}
+            <span
+              style={{
+                position: 'relative',
+                background: `linear-gradient(to bottom, #ffffff, ${lightRimColor.hex})`,
+                WebkitBackgroundClip: 'text',
+                backgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                color: 'transparent',
+                display: 'inline-block',
+                textShadow: `
+                  ${darkRimColor.rgba(0.05)} .1px .5px .5px,
+                  ${lightRimColor.rgba(0.35)} 0px -0.75px 3px,
+                  ${lightRimColor.rgba(0.25)} 0px -0.5px 0.25px
+                `,
+              }}
+            >
+              1/25
+            </span>
+          </p>
         </div>
       </div>
 
