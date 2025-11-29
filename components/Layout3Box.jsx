@@ -277,6 +277,36 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
           />
         </div>
 
+        {/* Bottom Shadow - Image asset at bottom of box */}
+        {/* Positioned outside shading layers container to avoid clipping */}
+        <div
+          style={{
+            position: 'absolute',
+            left: '50%',
+            bottom: '4.5px',
+            transform: 'translateX(-50%)',
+            height: '10px',
+            width: '156px',
+            mixBlendMode: 'multiply',
+            zIndex: 5,
+          }}
+        >
+          {/* TODO: Extract Bottom Shadow SVG/image from Figma and replace placeholder */}
+          {/* Themed: dark color uses darkRimColor instead of black */}
+          <div
+            style={{
+              position: 'absolute',
+              inset: '-200% -25.64%',
+              width: 'auto',
+              height: 'auto',
+              maxWidth: 'none',
+              display: 'block',
+              background: `linear-gradient(to top, ${darkRimColor.rgba(0.3)} 0%, rgba(0, 0, 0, 0) 100%)`,
+              borderRadius: '4px',
+            }}
+          />
+        </div>
+
         {/* Noise Overlay - PNG masked to box shape */}
         <div
           style={{
