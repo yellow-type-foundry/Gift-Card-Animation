@@ -249,6 +249,34 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
           />
         </div>
 
+        {/* Top Highlight - Image asset at top of box */}
+        <div
+          style={{
+            position: 'absolute',
+            left: '50%',
+            top: '0',
+            transform: 'translateX(-50%)',
+            height: '8px',
+            width: '156px',
+            mixBlendMode: 'soft-light',
+            zIndex: 10,
+          }}
+        >
+          {/* TODO: Extract Top Highlight SVG/image from Figma and replace placeholder */}
+          <div
+            style={{
+              position: 'absolute',
+              inset: '-100% -5.13%',
+              width: 'auto',
+              height: 'auto',
+              maxWidth: 'none',
+              display: 'block',
+              background: 'linear-gradient(to bottom, rgba(255, 255, 255, 0.83) 0%, rgba(255, 255, 255, 0.1) 100%)',
+              borderRadius: '4px',
+            }}
+          />
+        </div>
+
         {/* Noise Overlay - PNG masked to box shape */}
         <div
           style={{
