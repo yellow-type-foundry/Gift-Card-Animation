@@ -119,6 +119,7 @@ const STATIC_STYLES = {
 
 const Layout3Box = ({ boxColor = '#1987C7' }) => {
   const [lightCornerSvg, setLightCornerSvg] = useState(null)
+  const [logoSvg, setLogoSvg] = useState(null)
 
   // Base color is rgba(255, 203, 168, 0.3) - convert to hex first
   const baseOrangeColor = '#FFCBA8' // RGB(255, 203, 168) from the base color
@@ -196,6 +197,82 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
         `)
       })
   }, [lightRimColor])
+
+  // Load and parse SVG for Apple logo to add white gradient
+  useEffect(() => {
+    fetch('/assets/GiftSent/SVG Logo/Apple.svg')
+      .then(res => res.text())
+      .then(svgText => {
+        // Parse SVG and make it styleable
+        const parser = new DOMParser()
+        const svgDoc = parser.parseFromString(svgText, 'image/svg+xml')
+        const svgElement = svgDoc.querySelector('svg')
+        
+        if (svgElement) {
+          // Make gradient IDs unique to avoid conflicts
+          const gradientId = 'logoWhiteGradient'
+          const defs = svgElement.querySelector('defs') || svgDoc.createElementNS('http://www.w3.org/2000/svg', 'defs')
+          if (!svgElement.querySelector('defs')) {
+            svgElement.insertBefore(defs, svgElement.firstChild)
+          }
+          
+          // Update gradient if it exists, or create one
+          let gradient = defs.querySelector(`#${gradientId}`)
+          if (!gradient) {
+            gradient = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'linearGradient')
+            gradient.setAttribute('id', gradientId)
+            gradient.setAttribute('x1', '0%')
+            gradient.setAttribute('y1', '0%')
+            gradient.setAttribute('x2', '0%')
+            gradient.setAttribute('y2', '100%')
+            defs.appendChild(gradient)
+          }
+          
+          // Update gradient stops: top 100% white, bottom 40% white
+          const stops = gradient.querySelectorAll('stop')
+          // Remove existing stops
+          stops.forEach(stop => stop.remove())
+          
+          const stop1 = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'stop')
+          stop1.setAttribute('offset', '0%')
+          stop1.setAttribute('stop-color', 'rgba(255, 255, 255, 1)')
+          stop1.setAttribute('stop-opacity', '1')
+          gradient.appendChild(stop1)
+          
+          const stop2 = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'stop')
+          stop2.setAttribute('offset', '100%')
+          stop2.setAttribute('stop-color', 'rgba(255, 255, 255, 0.8)')
+          stop2.setAttribute('stop-opacity', '0.7')
+          gradient.appendChild(stop2)
+          
+          // Update paths to use the gradient
+          const paths = svgElement.querySelectorAll('path')
+          paths.forEach(path => {
+            path.setAttribute('fill', `url(#${gradientId})`)
+          })
+          
+          // Also check for other elements that might have fill
+          const allElements = svgElement.querySelectorAll('*')
+          allElements.forEach(el => {
+            if (el.tagName === 'path' || el.tagName === 'circle' || el.tagName === 'rect' || el.tagName === 'polygon') {
+              if (!el.getAttribute('fill') || el.getAttribute('fill') !== 'none') {
+                el.setAttribute('fill', `url(#${gradientId})`)
+              }
+            }
+          })
+          
+          // Ensure SVG fills its container properly
+          svgElement.setAttribute('width', '100%')
+          svgElement.setAttribute('height', '100%')
+          svgElement.setAttribute('preserveAspectRatio', 'xMidYMid meet')
+          
+          setLogoSvg(svgElement.outerHTML)
+        }
+      })
+      .catch(err => {
+        console.warn('Apple logo SVG not found:', err)
+      })
+  }, [])
 
   // Darker shade for Dark Rim 2 border
   const darkRim2BorderColor = useMemo(
@@ -285,7 +362,7 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
       borderRadius: `${BOX_RADIUS}px`,
       boxShadow: `
         inset 0px -1px 6px 0px ${lightRimColor.rgba(0.5)},
-        inset 0px -5px 15px 5px #ffb98a,
+        inset 0px -5px 15px 5px ${lightRimColor.rgba(1)},
         inset 0px 10px 15px 0px ${lightRimColor.rgba(0.5)},
         inset 0px 0px 20px 0px ${lightRimColor.rgba(0.5)}
       `,
@@ -298,9 +375,9 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
       position: 'absolute',
       inset: 0,
       transform: 'translateY(1px)',
-      color: darkRimShadowColor.rgba(0.5),
+      color: darkRimShadowColor.rgba(0.65),
       filter: 'blur(1.1px)',
-      opacity: 0.5,
+      opacity: .8,
     }),
     [darkRimShadowColor]
   )
@@ -308,31 +385,33 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
   const progressTextGradientStyle = useMemo(
     () => ({
       position: 'relative',
-      background: `linear-gradient(to bottom, #ffffff, ${lightRimColor.hex})`,
+      background: `linear-gradient(to bottom, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 1) 50%, rgba(255, 255, 255, .9) 100%)`,
+      backgroundPosition: '50% 100%',
       WebkitBackgroundClip: 'text',
       backgroundClip: 'text',
       WebkitTextFillColor: 'transparent',
       color: 'transparent',
       display: 'inline-block',
       textShadow: `
-        ${darkRimColor.rgba(0.05)} .1px .5px .5px,
-        ${lightRimColor.rgba(0.35)} 0px -0.75px 3px,
-        ${lightRimColor.rgba(0.25)} 0px -0.5px 0.25px
+        ${darkRimColor.rgba(0.2)} .1px 1.5px .5px,
+        ${lightRimColor.rgba(.4)} 0px -0.5px 2px,
+        ${lightRimColor.rgba(.2)} 0px -0.5px 2px
       `,
+      filter: `drop-shadow(0px 1.5px 5px rgba(255, 255, 255, 0.5))`,
     }),
     [lightRimColor, darkRimColor]
   )
 
-  const logoGlowStyle = useMemo(
+  const logoImageStyle = useMemo(
     () => ({
-      width: '100%',
-      height: '100%',
-      borderRadius: '999px',
-      background: 'radial-gradient(circle at 30% 20%, rgba(255,255,255,0.9), rgba(255,255,255,0.1))',
-      boxShadow: `0px 4px 10px ${darkRimShadowColor.rgba(0.3)}`,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
+      ...STATIC_STYLES.logoImage,
+      filter: `
+        drop-shadow(0px 0px 8px ${lightRimColor.rgba(0.8)})
+        drop-shadow(0px 0px 12px ${lightRimColor.rgba(0.95)})
+        drop-shadow(0px 4px 20px rgba(255, 255, 255, 0.35))
+        drop-shadow(0px 4px 2px ${darkRimShadowColor.rgba(0.75)})
+      `,
+      mixBlendMode: 'overlay',
     }),
     [darkRimShadowColor]
   )
@@ -502,14 +581,24 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
           }}
         >
           <div style={STATIC_STYLES.logoWrapper}>
-            {/* Apple logo container with glow/shadow */}
-            <div style={logoGlowStyle}>
+            {/* Apple logo with white gradient and shadow effect */}
+            {logoSvg ? (
+              <div
+                style={{
+                  ...logoImageStyle,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+                dangerouslySetInnerHTML={{ __html: logoSvg }}
+              />
+            ) : (
               <img
                 src="/assets/GiftSent/SVG Logo/Apple.svg"
                 alt="Apple logo"
-                style={STATIC_STYLES.logoImage}
+                style={logoImageStyle}
               />
-            </div>
+            )}
           </div>
         </div>
 
@@ -555,7 +644,7 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
           alignItems: 'center',
           justifyContent: 'flex-start',
           paddingTop: '0',
-          paddingBottom: '40px',
+          paddingBottom: '130px',
           paddingLeft: '20px',
           paddingRight: '20px',
           zIndex: 2,
