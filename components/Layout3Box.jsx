@@ -132,7 +132,8 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
       style={{
         width: '180px',
         height: '176px',
-        margin: '0 auto'
+        margin: '0 auto',
+        zIndex: 0,
       }}
     >
       {/* Main Box Container */}
@@ -143,8 +144,12 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
           height: '176px',
           borderRadius: '36px',
           overflow: 'hidden',
+          zIndex: 1,
           // Background with translucent peach color
-          backgroundColor: 'rgba(255, 203, 168, 0.3)',
+          backgroundColor: 'rgb(252, 222, 202)',
+          // Backdrop blur for frosted glass effect
+          backdropFilter: 'blur(10px)',
+          WebkitBackdropFilter: 'blur(10px)',
         }}
       >
         {/* Gradient Overlay with Backdrop Blur */}
@@ -152,7 +157,7 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
           style={{
             position: 'absolute',
             inset: 0,
-            background: 'linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.5) 100%)',
+            background: 'linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.05) 100%)',
             backdropFilter: 'blur(30px)',
             WebkitBackdropFilter: 'blur(30px)',
             mixBlendMode: 'overlay',
@@ -184,7 +189,7 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
               filter: 'blur(3px)',
               mixBlendMode: 'overlay',
               borderRadius: '28px',
-              background: `linear-gradient(135deg, rgba(0, 0, 0, 0) 0%, ${darkRimColor.rgba(0.5)} 100%)`,
+              background: `linear-gradient(135deg, rgba(0, 0, 0, 0) 40%, ${darkRimColor.rgba(0.5)} 100%)`,
               boxShadow: `inset -16px -14px 16px 5px ${darkRimColor.rgba(0.01)}, inset 6px 12px 13px 5px ${lightRimColor.rgba(0.45)}`,
             }}
           />
@@ -245,34 +250,6 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
               borderRadius: '28px',
               filter: 'blur(5px)',
               mixBlendMode: 'overlay',
-            }}
-          />
-        </div>
-
-        {/* Top Highlight - Image asset at top of box */}
-        <div
-          style={{
-            position: 'absolute',
-            left: '50%',
-            top: '0',
-            transform: 'translateX(-50%)',
-            height: '8px',
-            width: '156px',
-            mixBlendMode: 'soft-light',
-            zIndex: 10,
-          }}
-        >
-          {/* TODO: Extract Top Highlight SVG/image from Figma and replace placeholder */}
-          <div
-            style={{
-              position: 'absolute',
-              inset: '-100% -5.13%',
-              width: 'auto',
-              height: 'auto',
-              maxWidth: 'none',
-              display: 'block',
-              background: 'linear-gradient(to bottom, rgba(255, 255, 255, 0.83) 0%, rgba(255, 255, 255, 0.1) 100%)',
-              borderRadius: '4px',
             }}
           />
         </div>
@@ -343,6 +320,30 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
               inset 0px 10px 15px 0px ${lightRimColor.rgba(0.5)},
               inset 0px 0px 20px 0px ${lightRimColor.rgba(0.5)}
             `,
+          }}
+        />
+      </div>
+
+      {/* Shadow under the box - Y+145 from top edge, width 156px (156/180 ratio) */}
+      <div
+        style={{
+          position: 'absolute',
+          left: '7%',
+          top: '125px',
+          transform: 'none',
+          width: '156px',
+          height: 'auto',
+          scale: '1.2',
+          zIndex: 0,
+        }}
+      >
+        <img
+          src="/assets/shadow3.png"
+          alt=""
+          style={{
+            display: 'block',
+            width: '156px',
+            height: 'auto',
           }}
         />
       </div>
