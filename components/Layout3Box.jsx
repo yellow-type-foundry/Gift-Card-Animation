@@ -110,11 +110,23 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
     return `rgba(${r}, ${g}, ${b}, 0.4)`
   }, [])
 
+  // Calculate blob colors based on box color with hue shifts
+  const blobColors = useMemo(() => {
+    const [h, s, l] = hexToHsl(baseOrangeColor)
+    // Top blob: hue +20
+    const topBlobHue = (h + 20) % 360
+    const topBlobColor = hslToHex(topBlobHue, s, l)
+    // Bottom blob: hue -20
+    const bottomBlobHue = (h - 20 + 360) % 360 // Add 360 to handle negative
+    const bottomBlobColor = hslToHex(bottomBlobHue, s, l)
+    return { top: topBlobColor, bottom: bottomBlobColor }
+  }, [])
+
   // Calculate darker shade of base orange for Dark Rim gradient and shadows
   const darkRimColor = useMemo(() => {
     const [h, s, l] = hexToHsl(baseOrangeColor)
     // Darken by reducing lightness by 40-50% for rim effect
-    const darkerL = Math.max(0, l - 10)
+    const darkerL = Math.max(0, l - 5)
     const darkerColor = hslToHex(h, s, darkerL)
     // Convert hex to RGB values
     const r = parseInt(darkerColor.slice(1, 3), 16)
@@ -136,6 +148,56 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
         zIndex: 0,
       }}
     >
+      {/* Progress Blobs - Behind the box (lower z-index) - 2 CSS ellipses */}
+      <div
+        style={{
+          position: 'absolute',
+          left: '50%',
+          top: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '172px',
+          height: '172px',
+          zIndex: -1,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'flex-end',
+          gap: '10px',
+        }}
+      >
+        {/* Two ellipses for progress blobs */}
+        <div
+          style={{
+            height: '43.999px',
+            width: '156px',
+            position: 'relative',
+            display: 'flex',
+            gap: '8px',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          {/* Top blob - Hue +20 from box color */}
+          <div
+            style={{
+              width: '60px',
+              height: '20px',
+              borderRadius: '50%',
+              backgroundColor: blobColors.top,
+            }}
+          />
+          {/* Bottom blob - Hue -20 from box color */}
+          <div
+            style={{
+              width: '60px',
+              height: '20px',
+              borderRadius: '50%',
+              backgroundColor: blobColors.bottom,
+            }}
+          />
+        </div>
+      </div>
+
       {/* Main Box Container */}
       <div
         style={{
@@ -146,21 +208,20 @@ const Layout3Box = ({ boxColor = '#1987C7' }) => {
           overflow: 'hidden',
           zIndex: 1,
           // Background with translucent peach color
-          backgroundColor: 'rgb(252, 222, 202)',
+          backgroundColor: 'rgb(252, 222, 202, .3)',
           // Backdrop blur for frosted glass effect
-          backdropFilter: 'blur(10px)',
-          WebkitBackdropFilter: 'blur(10px)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
         }}
       >
-        {/* Gradient Overlay with Backdrop Blur */}
+        {/* Gradient Overlay - Themed with dark color */}
         <div
           style={{
             position: 'absolute',
             inset: 0,
-            background: 'linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.05) 100%)',
-            backdropFilter: 'blur(30px)',
-            WebkitBackdropFilter: 'blur(30px)',
-            mixBlendMode: 'overlay',
+            opacity: 1,
+            background: `linear-gradient(-45deg, rgba(255, 255, 255, 0.975) 0%, ${darkRimColor.rgba(1)} 100%)`,
+            mixBlendMode: 'soft-light',
             borderRadius: '36px',
           }}
         />
