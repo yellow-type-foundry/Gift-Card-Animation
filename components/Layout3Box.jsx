@@ -141,6 +141,7 @@ const STATIC_STYLES = {
 const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Logo/Apple.svg', className = '', style = {} }) => {
   const [lightCornerSvg, setLightCornerSvg] = useState(null)
   const [logoSvg, setLogoSvg] = useState(null)
+  const [isHovered, setIsHovered] = useState(false)
 
   // Base color from prop - used for all themed colors
   const baseColor = boxColor
@@ -477,14 +478,14 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
       color: 'transparent',
       display: 'inline-block',
       textShadow: `
-        ${darkRimColor.rgba(.07)} 0px .5px .5px,
+        ${darkRimColor.rgba(.08)} 0px .5px .5px,
         
         ${lightRimColor.rgba(.05)} 0px -0.5px 1px,
         ${lightRimColor.rgba(.1)} 0px -0.5px .5px
       `,
       filter: `
         drop-shadow(0px 1.5px 8px rgba(255, 255, 255, 0.8))
-        drop-shadow(0px 1px 1px ${darkRimColor.rgba(0.9)})
+        drop-shadow(0px 1px 1px ${darkRimColor.rgba(0.2)})
       `,
     }),
     [lightRimColor, darkRimColor]
@@ -516,6 +517,8 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
     <div 
       className={className ? `relative ${className}` : 'relative'}
       style={{ ...STATIC_STYLES.container, ...style }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       {/* Main Box Container */}
       <div
@@ -526,6 +529,8 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
           borderRadius: `${BOX_RADIUS}px`,
           overflow: 'hidden',
           zIndex: 1,
+          transform: isHovered ? 'translateY(-8px)' : 'translateY(0)',
+          transition: 'transform 0.3s ease-out',
           // Background with translucent peach color - very low opacity for backdrop filter visibility
           backgroundColor: 'rgba(252, 222, 202, 0.05)',
           // Backdrop blur for frosted glass effect
@@ -636,7 +641,7 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '12px',
+            padding: '16px',
             zIndex: 10,
           }}
         >
@@ -659,7 +664,7 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
           position: 'absolute',
           left: '50%',
           top: '50%',
-          transform: 'translate(-50%, -50%)',
+          transform: isHovered ? 'translate(-50%, calc(-50% - 8px))' : 'translate(-50%, -50%)',
           width: '100%',
           height: '100%',
           display: 'flex',
@@ -669,6 +674,7 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
           zIndex: 8,
           pointerEvents: 'none',
           overflow: 'visible',
+          transition: 'transform 0.3s ease-out',
         }}
       >
         <div style={STATIC_STYLES.logoWrapper}>
@@ -726,7 +732,7 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
           position: 'absolute',
           left: '50%',
           top: '-3px', // 3px higher than the box
-          transform: 'translateX(-50%)',
+          transform: isHovered ? 'translateX(-50%) translateY(-8px)' : 'translateX(-50%)',
           width: `${BOX_WIDTH}px`,
           height: `${BOX_HEIGHT}px`,
           display: 'flex',
@@ -738,6 +744,7 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
           paddingLeft: '20px',
           paddingRight: '20px',
           zIndex: 2,
+          transition: 'transform 0.3s ease-out',
         }}
       >
         {/* Pull Tab */}
@@ -776,6 +783,8 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
           height: 'auto',
           scale: '1.25',
           zIndex: 0,
+          opacity: isHovered ? 0.25 : 1,
+          transition: 'opacity 0.25s ease-out',
         }}
       >
         {/* Shadow image */}
