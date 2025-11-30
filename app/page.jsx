@@ -143,6 +143,7 @@ export default function Home() {
   const [style, setStyle] = useState('A') // 'A' | 'B' - for Layout 1 only: Style A = Box1/Envelope1, Style B = Box2/Envelope2
   const [viewType, setViewType] = useState('mixed') // 'mixed' | 'batch' | 'single' - what to display
   const [mixSeed, setMixSeed] = useState(0) // Seed to regenerate mix when toggled
+  const [layout3ShuffleSeed, setLayout3ShuffleSeed] = useState(0) // Seed to trigger Layout 3 shuffle
   const [showSettingsMenu, setShowSettingsMenu] = useState(false) // Mobile settings menu visibility
   const [cardStates, setCardStates] = useState({
     card1: 'unopened',
@@ -601,7 +602,12 @@ export default function Home() {
     if (viewType === 'mixed') {
       setMixSeed(Date.now())
     }
-  }, [viewType])
+    
+    // Trigger Layout 3 shuffle
+    if (layoutNumber === '3') {
+      setLayout3ShuffleSeed(Date.now())
+    }
+  }, [viewType, layoutNumber])
   
   return (
     <div className="min-h-screen bg-[#f0f1f5] flex items-start overflow-visible">
@@ -637,7 +643,7 @@ export default function Home() {
         />
         {/* Content */}
         {layoutNumber === '3' ? (
-          <Layout3Canvas />
+          <Layout3Canvas shuffleSeed={layout3ShuffleSeed} />
         ) : (
           <CardGrid
             key={`card-grid-${layoutNumber}-${style}`}

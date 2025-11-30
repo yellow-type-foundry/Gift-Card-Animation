@@ -58,17 +58,17 @@ const generateRandomProgress = () => {
   return { current, total }
 }
 
-const Layout3Canvas = () => {
+const Layout3Canvas = ({ shuffleSeed = 0 }) => {
   const [shuffledConfigs, setShuffledConfigs] = useState(BOX_CONFIGS)
   const [progressValues, setProgressValues] = useState([])
 
   useEffect(() => {
-    // Shuffle boxes on component mount/reload
+    // Shuffle boxes on component mount/reload or when shuffleSeed changes
     const shuffled = shuffleArray(BOX_CONFIGS)
     setShuffledConfigs(shuffled)
     // Generate random progress values for each shuffled box
     setProgressValues(shuffled.map(() => generateRandomProgress()))
-  }, [])
+  }, [shuffleSeed])
 
   return (
     <div 

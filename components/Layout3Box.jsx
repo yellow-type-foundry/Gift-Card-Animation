@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useMemo, memo } from 'react'
+import React, { useState, useEffect, useMemo, memo, useRef } from 'react'
 import { hexToHsl, hslToHex } from '@/utils/colors'
 
 // Layout 3 box sizing tokens (keep visuals in sync with Figma)
@@ -71,9 +71,17 @@ const STATIC_STYLES = {
     transform: 'translate(-50%, -50%)',
     width: `${BOX_WIDTH}px`,
     height: `${BOX_HEIGHT}px`,
+    minWidth: `${BOX_WIDTH}px`,
+    maxWidth: `${BOX_WIDTH}px`,
+    minHeight: `${BOX_HEIGHT}px`,
+    maxHeight: `${BOX_HEIGHT}px`,
     zIndex: 1,
     padding: '1px',
-    filter: 'blur(20px)',
+    filter: 'blur(1px)',
+    // Ensure container doesn't scale or transform
+    transformOrigin: 'center center',
+    willChange: 'auto',
+    boxSizing: 'border-box',
   },
   progressBlobsInner: {
     height: '180px',
@@ -141,6 +149,9 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
   const [isHovered, setIsHovered] = useState(false)
   const [blobGridColors, setBlobGridColors] = useState([])
   const [blobAnimations, setBlobAnimations] = useState([])
+  const [dotPositions, setDotPositions] = useState([])
+  const dotRefs = useRef([])
+  const animationRunningRef = useRef(false)
 
   // Base color from prop - used for all themed colors
   const baseColor = boxColor
@@ -159,7 +170,7 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
       const randomL = Math.max(0, Math.min(100, baseL + (Math.random() * 60 - 30)))
       colors.push(hslToHex(randomH, randomS, randomL))
       
-      // Generate random animation parameters for firefly-like movement
+      // Generate random animation parameters for organic, randomized movement
       // Random starting position within container (accounting for padding and circle size)
       // Ensure uniform distribution across entire container - use center-biased but still random
       const padding = 1
@@ -170,8 +181,8 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
       const startX = padding + Math.random() * availableWidth
       const startY = padding + Math.random() * availableHeight
       
-      // Random movement distances (gentle, like fireflies) - ensure we stay within bounds
-      // Create varied, truly random movement in all directions with no bias
+      // Random movement distances - organic, randomized movement in all directions
+      // Ensure truly random distribution with no directional bias
       const maxMove = 30
       
       // Generate completely independent random movements for each waypoint
@@ -186,8 +197,8 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
       const moveX3 = (Math.random() - 0.5) * maxMove * 2 // Independent random, no return bias
       const moveY3 = (Math.random() - 0.5) * maxMove * 2 // Independent random, no return bias
       
-      const duration = 5 + Math.random() * 5 // 5-10 seconds (slow, gentle)
-      const delay = Math.random() * 2 // 0-2 seconds delay
+      const duration = 2 + Math.random() * 2 // 2-4 seconds (faster movement)
+      const delay = Math.random() * 1 // 0-1 seconds delay
       
       animations.push({
         startX,
@@ -205,7 +216,137 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
     
     setBlobGridColors(colors)
     setBlobAnimations(animations)
+    
+    // Initialize dot positions with randomized velocities in all directions
+    const initialPositions = animations.map(anim => {
+      // Generate random angle and speed for truly organic movement
+      // Use Math.random() twice to ensure uniform distribution
+      const angle = Math.random() * Math.PI * 2 // Random direction (0 to 2π)
+      const speed = 0.5 + Math.random() * 0.8 // Random speed (0.5 to 1.3) - faster
+      return {
+        x: anim.startX,
+        y: anim.startY,
+        vx: Math.cos(angle) * speed, // velocity x - truly random direction
+        vy: Math.sin(angle) * speed, // velocity y - truly random direction
+      }
+    })
+    setDotPositions(initialPositions)
+    animationRunningRef.current = false // Reset flag when positions are reinitialized
   }, [baseColor])
+
+  // Animation loop for dot interactions - only runs on hover
+  useEffect(() => {
+    if (dotPositions.length === 0) {
+      animationRunningRef.current = false
+      return
+    }
+    
+    if (!isHovered) {
+      animationRunningRef.current = false
+      return
+    }
+    
+    if (animationRunningRef.current) return
+    
+    animationRunningRef.current = true
+    
+    const REPULSION_DISTANCE = 40 // Distance at which dots start repelling
+    const REPULSION_FORCE = 0.02 // Strength of repulsion
+    const DAMPING = 0.99 // Less damping to keep movement going
+    const MIN_VELOCITY = 0.825 // Minimum velocity to maintain infinite movement (increased for faster)
+    const WANDER_STRENGTH = 0.03 // Random wander to prevent bias (increased for more variation)
+    const BOUNDARY_PADDING = 1
+    // Use max circle size for boundary calculations (container is fixed, only dots scale)
+    const currentCircleSize = 58 // Max circle size
+    const maxX = BOX_WIDTH - currentCircleSize - BOUNDARY_PADDING
+    const maxY = BOX_HEIGHT - currentCircleSize - BOUNDARY_PADDING
+    
+    let animationFrameId
+    let isRunning = true
+    
+    const updatePositions = () => {
+      if (!isRunning || !isHovered) {
+        animationRunningRef.current = false
+        return
+      }
+      
+      setDotPositions(prevPositions => {
+        if (prevPositions.length === 0) return prevPositions
+        
+        const newPositions = prevPositions.map((pos, i) => {
+          let newX = pos.x + pos.vx
+          let newY = pos.y + pos.vy
+          let newVx = pos.vx
+          let newVy = pos.vy
+          
+          // Check collision with other dots
+          prevPositions.forEach((otherPos, j) => {
+            if (i === j) return
+            
+            const dx = newX - otherPos.x
+            const dy = newY - otherPos.y
+            const distance = Math.sqrt(dx * dx + dy * dy)
+            
+            if (distance < REPULSION_DISTANCE && distance > 0) {
+              // Apply repulsion force
+              const force = REPULSION_FORCE * (1 - distance / REPULSION_DISTANCE)
+              const angle = Math.atan2(dy, dx)
+              newVx += Math.cos(angle) * force
+              newVy += Math.sin(angle) * force
+            }
+          })
+          
+          // Apply damping
+          newVx *= DAMPING
+          newVy *= DAMPING
+          
+          // Add random wander to prevent bias and keep movement organic
+          newVx += (Math.random() - 0.5) * WANDER_STRENGTH
+          newVy += (Math.random() - 0.5) * WANDER_STRENGTH
+          
+          // Ensure minimum velocity to keep infinite movement
+          const currentSpeed = Math.sqrt(newVx * newVx + newVy * newVy)
+          if (currentSpeed < MIN_VELOCITY && currentSpeed > 0) {
+            // Maintain direction but boost to minimum speed
+            const scale = MIN_VELOCITY / currentSpeed
+            newVx *= scale
+            newVy *= scale
+          } else if (currentSpeed === 0) {
+            // If completely stopped, give random velocity
+            const angle = Math.random() * Math.PI * 2
+            newVx = Math.cos(angle) * MIN_VELOCITY
+            newVy = Math.sin(angle) * MIN_VELOCITY
+          }
+          
+          // Boundary collision
+          if (newX < BOUNDARY_PADDING || newX > maxX) {
+            newVx *= -0.8 // Bounce with energy loss
+            newX = Math.max(BOUNDARY_PADDING, Math.min(maxX, newX))
+          }
+          if (newY < BOUNDARY_PADDING || newY > maxY) {
+            newVy *= -0.8 // Bounce with energy loss
+            newY = Math.max(BOUNDARY_PADDING, Math.min(maxY, newY))
+          }
+          
+          return { x: newX, y: newY, vx: newVx, vy: newVy }
+        })
+        
+        return newPositions
+      })
+      
+      animationFrameId = requestAnimationFrame(updatePositions)
+    }
+    
+    animationFrameId = requestAnimationFrame(updatePositions)
+    
+    return () => {
+      isRunning = false
+      animationRunningRef.current = false
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId)
+      }
+    }
+  }, [dotPositions.length, isHovered]) // Run when hovered or when positions are initialized
   
   // Lighter shade of base color for white highlights (themed)
   const lightRimColor = useMemo(() => makeThemedColor(baseColor, 10), [baseColor])
@@ -594,7 +735,7 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
     [darkRimColor]
   )
 
-  // Generate CSS keyframes for firefly-like animations
+  // Generate CSS keyframes for organic, randomized animations
   const blobKeyframes = useMemo(() => {
     if (blobAnimations.length === 0) return null
     
@@ -653,6 +794,56 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
+      {/* Halo Glow - Duplicate dots behind box on hover */}
+      {isHovered && (
+        <div style={{
+          position: 'absolute',
+          left: '50%',
+          top: '50%',
+          width: `${BOX_WIDTH}px`,
+          height: `${BOX_HEIGHT}px`,
+          minWidth: `${BOX_WIDTH}px`,
+          maxWidth: `${BOX_WIDTH}px`,
+          minHeight: `${BOX_HEIGHT}px`,
+          maxHeight: `${BOX_HEIGHT}px`,
+          zIndex: 0, // Behind the box (box is at zIndex 1+)
+          transform: 'translate(-50%, -50%) scale(1.2)',
+          opacity: 0.7,
+          padding: '1px',
+          filter: 'blur(1px)', // Keep the container blur for consistency
+          transformOrigin: 'center center',
+          boxSizing: 'border-box',
+        }}>
+          {blobGridColors.length > 0 && blobGridColors.map((color, index) => {
+            const anim = blobAnimations[index]
+            const position = dotPositions[index]
+            if (!anim) return null
+            
+            // Use JavaScript position if available, otherwise fall back to CSS animation
+            const useJSAnimation = position !== undefined
+            
+            return (
+              <div
+                key={`halo-${index}`}
+                style={{
+                  position: 'absolute',
+                  width: `${circleSize}px`,
+                  height: `${circleSize}px`,
+                  borderRadius: '50%',
+                  backgroundColor: color,
+                  mixBlendMode: 'overlay',
+                  filter: 'blur(20px)',
+                  left: useJSAnimation ? `${position.x}px` : `${anim.startX}px`,
+                  top: useJSAnimation ? `${position.y}px` : `${anim.startY}px`,
+                  transition: 'none', // No transition for smooth 60fps updates
+                  animation: useJSAnimation ? 'none' : `blobMove${index} ${anim.duration}s cubic-bezier(0.4, 0, 0.6, 1) infinite`,
+                  animationDelay: useJSAnimation ? '0s' : `${anim.delay}s`,
+                }}
+              />
+            )
+          })}
+        </div>
+      )}
       {/* Main Box Container */}
       <div
         style={{
@@ -737,25 +928,40 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
         {/* Inset Shadows for depth */}
         <div style={insetShadowsStyle} />
 
-        {/* Progress Blobs - Firefly-like floating circles (9 dots) */}
-        <div style={STATIC_STYLES.progressBlobsContainer}>
+        {/* Progress Blobs - Organic floating circles with randomized movement (9 dots) */}
+        <div style={{
+          ...STATIC_STYLES.progressBlobsContainer,
+          width: `${BOX_WIDTH}px`,
+          height: `${BOX_HEIGHT}px`,
+        }}>
           {blobGridColors.length > 0 && blobGridColors.map((color, index) => {
             const anim = blobAnimations[index]
+            const position = dotPositions[index]
             if (!anim) return null
+            
+            // Use JavaScript position if available, otherwise fall back to CSS animation
+            const useJSAnimation = position !== undefined
             
             return (
               <div
                 key={index}
+                ref={el => dotRefs.current[index] = el}
                 style={{
                   position: 'absolute',
                   width: `${circleSize}px`,
                   height: `${circleSize}px`,
                   borderRadius: '50%',
                   backgroundColor: color,
-                  left: `${anim.startX}px`,
-                  top: `${anim.startY}px`,
-                  animation: `blobMove${index} ${anim.duration}s cubic-bezier(0.4, 0, 0.6, 1) infinite`,
-                  animationDelay: `${anim.delay}s`,
+                  mixBlendMode: 'overlay',
+                  boxShadow: `
+                    inset 0px 0px 16px 0px rgba(255, 255, 255, 0.6),
+                    inset 0px 0px 4px 0px rgba(255, 255, 255, 0.5)
+                  `,
+                  left: useJSAnimation ? `${position.x}px` : `${anim.startX}px`,
+                  top: useJSAnimation ? `${position.y}px` : `${anim.startY}px`,
+                  transition: 'none', // No transition for smooth 60fps updates
+                  animation: useJSAnimation ? 'none' : `blobMove${index} ${anim.duration}s cubic-bezier(0.4, 0, 0.6, 1) infinite`,
+                  animationDelay: useJSAnimation ? '0s' : `${anim.delay}s`,
                 }}
               />
             )
