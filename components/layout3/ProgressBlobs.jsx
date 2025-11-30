@@ -69,8 +69,8 @@ const ProgressBlobs = ({ blobGridColors, blobAnimations, dotPositions, circleSiz
           
           // Calculate edge proximity for ellipse deformation
           // Circular by default, elliptical when touching edge, circular again when away from edge
-          const EDGE_DETECTION_DISTANCE = circleSize * 0.2 // Start deforming only when very close to edge (20% of circle size)
-          const MAX_DEFORMATION = 0.5 // Maximum squeeze (50% of original size)
+          const EDGE_DETECTION_DISTANCE = circleSize * 0.065 // Start deforming only when very close to edge (20% of circle size)
+          const MAX_DEFORMATION = 0.2 // Maximum squeeze (50% of original size)
           
           // Calculate distance from dot edge to box edge
           // currentX and currentY are the top-left position of the dot
@@ -110,6 +110,43 @@ const ProgressBlobs = ({ blobGridColors, blobAnimations, dotPositions, circleSiz
           // Touching top/bottom: scaleX = 1, scaleY < 1 (vertical ellipse)
           // Touching corner: scaleX < 1, scaleY < 1 (ellipse in both directions)
           
+          // Convert color to RGB for gradient calculations (30% water droplet effect)
+          const hexToRgb = (hex) => {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
+            return result ? {
+              r: parseInt(result[1], 16),
+              g: parseInt(result[2], 16),
+              b: parseInt(result[3], 16)
+            } : { r: 25, g: 135, b: 199 }
+          }
+          const rgb = hexToRgb(color)
+          
+          // Create subtle water droplet effect (30% blend)
+          // Lighter center (like light refraction in water), darker edges
+          const centerColor = `rgba(${Math.min(255, rgb.r + 40)}, ${Math.min(255, rgb.g + 40)}, ${Math.min(255, rgb.b + 40)}, 0.25)`
+          const edgeColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.18)`
+          const highlightColor = `rgba(255, 255, 255, 0.12)` // Water droplet highlight (subtle)
+          
+          // Blend: 70% original solid color + 30% water droplet gradient
+          const baseColor = color // 70% - original solid color
+          const gradientOverlay = `radial-gradient(circle at 30% 30%, ${highlightColor} 0%, ${centerColor} 35%, ${edgeColor} 100%)` // 30% - water droplet
+          
+          // Blend shadows: 70% original + 30% water droplet shadows
+          const originalShadow = `
+            inset 0px 0px 16px 0px rgba(255, 255, 255, 0.6),
+            inset 0px 0px 4px 0px rgba(255, 255, 255, 0.5)
+          `
+          const waterShadow = `
+            inset 0px -2px 8px 0px rgba(0, 0, 0, 0.2),
+            inset 0px 2px 12px 0px rgba(255, 255, 255, 0.5),
+            0px 0px 20px 0px rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.3)
+          `
+          // Use original shadow as base (70%), add subtle water glow (30%)
+          const blendedShadow = `
+            ${originalShadow},
+            0px 0px 6px 0px rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.1)
+          `
+          
           return (
             <div
               key={index}
@@ -118,12 +155,10 @@ const ProgressBlobs = ({ blobGridColors, blobAnimations, dotPositions, circleSiz
                 width: `${circleSize}px`,
                 height: `${circleSize}px`,
                 borderRadius: '50%',
-                backgroundColor: color,
+                backgroundColor: baseColor, // 70% - original solid color
+                backgroundImage: gradientOverlay, // 30% - water droplet overlay
                 mixBlendMode: 'overlay',
-                boxShadow: `
-                  inset 0px 0px 16px 0px rgba(255, 255, 255, 0.6),
-                  inset 0px 0px 4px 0px rgba(255, 255, 255, 0.5)
-                `,
+                boxShadow: blendedShadow,
                 filter: disableBlurReveal ? 'blur(20px)' : (isHovered ? 'blur(2px)' : 'blur(20px)'), // Keep blur constant if disabled, otherwise reveal on hover
                 left: `${currentX}px`,
                 top: `${currentY}px`,
@@ -133,6 +168,7 @@ const ProgressBlobs = ({ blobGridColors, blobAnimations, dotPositions, circleSiz
                 transition: 'filter 0.005s ease-out, transform 0.01s cubic-bezier(0.68, -0.6, 0.32, 1.6)',
                 animation: 'none', // No CSS animation
                 animationDelay: '0s',
+                opacity: 0.97, // Very slight transparency (30% of 0.9 = subtle)
               }}
             />
           )

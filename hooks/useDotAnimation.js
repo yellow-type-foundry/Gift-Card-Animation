@@ -63,7 +63,7 @@ export const useDotAnimation = (blobAnimations, isHovered, circleSize) => {
     const REPULSION_DISTANCE = 40
     const REPULSION_FORCE = 0.03 // Increased for more visible movement
     const DAMPING = 0.98 // Reduced damping for more movement
-    const MIN_VELOCITY = 1.45 // 1.45x faster (was 1.2)
+    const MIN_VELOCITY = 1.2 // Increased for more visible movement
     const WANDER_STRENGTH = 0.05 // Increased for more variation
     const VELOCITY_SMOOTHING = 0.1 // Reduced smoothing for more responsive movement
     const BOUNDARY_PADDING = 1
