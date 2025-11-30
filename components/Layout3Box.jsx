@@ -69,15 +69,11 @@ const STATIC_STYLES = {
     left: '50%',
     top: '50%',
     transform: 'translate(-50%, -50%)',
-    width: '172px',
-    height: '172px',
+    width: `${BOX_WIDTH}px`,
+    height: `${BOX_HEIGHT}px`,
     zIndex: 1,
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    gap: '10px',
-    filter: 'blur(15px)',
+    padding: '1px',
+    filter: 'blur(20px)',
   },
   progressBlobsInner: {
     height: '180px',
@@ -143,9 +139,73 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
   const [lightCornerSvg, setLightCornerSvg] = useState(null)
   const [logoSvg, setLogoSvg] = useState(null)
   const [isHovered, setIsHovered] = useState(false)
+  const [blobGridColors, setBlobGridColors] = useState([])
+  const [blobAnimations, setBlobAnimations] = useState([])
 
   // Base color from prop - used for all themed colors
   const baseColor = boxColor
+
+  // Generate random HSL values within ±30 of base color for 3x3 grid
+  // Also generate random animation parameters for each circle
+  useEffect(() => {
+    const [baseH, baseS, baseL] = hexToHsl(baseColor)
+    const colors = []
+    const animations = []
+    
+    for (let i = 0; i < 9; i++) {
+      // Randomize within ±30 range
+      const randomH = (baseH + (Math.random() * 60 - 30) + 360) % 360
+      const randomS = Math.max(0, Math.min(100, baseS + (Math.random() * 60 - 30)))
+      const randomL = Math.max(0, Math.min(100, baseL + (Math.random() * 60 - 30)))
+      colors.push(hslToHex(randomH, randomS, randomL))
+      
+      // Generate random animation parameters for firefly-like movement
+      // Random starting position within container (accounting for padding and circle size)
+      // Ensure uniform distribution across entire container - use center-biased but still random
+      const padding = 1
+      const maxCircleSize = 58 // Approximate max size
+      const availableWidth = Math.max(0, BOX_WIDTH - (padding * 2) - maxCircleSize)
+      const availableHeight = Math.max(0, BOX_HEIGHT - (padding * 2) - maxCircleSize)
+      // Distribute evenly across available space
+      const startX = padding + Math.random() * availableWidth
+      const startY = padding + Math.random() * availableHeight
+      
+      // Random movement distances (gentle, like fireflies) - ensure we stay within bounds
+      // Create varied, truly random movement in all directions with no bias
+      const maxMove = 30
+      
+      // Generate completely independent random movements for each waypoint
+      // Ensure uniform distribution in all directions by using independent random for X and Y
+      const moveX1 = (Math.random() - 0.5) * maxMove * 2 // ±30px, centered around 0
+      const moveY1 = (Math.random() - 0.5) * maxMove * 2 // ±30px, centered around 0
+      const moveX2 = (Math.random() - 0.5) * maxMove * 2 // ±30px, centered around 0
+      const moveY2 = (Math.random() - 0.5) * maxMove * 2 // ±30px, centered around 0
+      
+      // For the third waypoint, create a path that helps return toward start
+      // Use completely independent random to avoid any directional bias
+      const moveX3 = (Math.random() - 0.5) * maxMove * 2 // Independent random, no return bias
+      const moveY3 = (Math.random() - 0.5) * maxMove * 2 // Independent random, no return bias
+      
+      const duration = 5 + Math.random() * 5 // 5-10 seconds (slow, gentle)
+      const delay = Math.random() * 2 // 0-2 seconds delay
+      
+      animations.push({
+        startX,
+        startY,
+        moveX1,
+        moveY1,
+        moveX2,
+        moveY2,
+        moveX3,
+        moveY3,
+        duration,
+        delay,
+      })
+    }
+    
+    setBlobGridColors(colors)
+    setBlobAnimations(animations)
+  }, [baseColor])
   
   // Lighter shade of base color for white highlights (themed)
   const lightRimColor = useMemo(() => makeThemedColor(baseColor, 10), [baseColor])
@@ -367,17 +427,31 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
     [baseColor]
   )
 
-  // Blob colors based on box color with hue shifts
-  const blobColors = useMemo(() => {
-    const [h, s, l] = hexToHsl(baseColor)
-    // Top blob: hue +10
-    const topBlobHue = (h + 10) % 360
-    const topBlobColor = hslToHex(topBlobHue, s, l)
-    // Bottom blob: hue -10
-    const bottomBlobHue = (h - 10 + 360) % 360 // Add 360 to handle negative
-    const bottomBlobColor = hslToHex(bottomBlobHue, s, l)
-    return { top: topBlobColor, bottom: bottomBlobColor }
-  }, [baseColor])
+  // Calculate progress ratio (0 to 1)
+  const progressRatio = useMemo(() => {
+    return progress.current / progress.total
+  }, [progress])
+
+  // Calculate circle size based on progress
+  // Grid fills container: BOX_WIDTH x BOX_HEIGHT with 1px padding and 1px gap
+  // Available space: (BOX_WIDTH - 2px padding) x (BOX_HEIGHT - 2px padding)
+  // For 3x3 grid with 1px gaps: 2 gaps = 2px total
+  // Per circle: (available - gaps) / 3
+  const circleSize = useMemo(() => {
+    const padding = 1
+    const gap = 1
+    const availableWidth = BOX_WIDTH - (padding * 2)
+    const availableHeight = BOX_HEIGHT - (padding * 2)
+    const totalGapWidth = gap * 2 // 2 gaps for 3 columns
+    const totalGapHeight = gap * 2 // 2 gaps for 3 rows
+    
+    const maxCircleWidth = (availableWidth - totalGapWidth) / 3
+    const maxCircleHeight = (availableHeight - totalGapHeight) / 3
+    const maxSize = Math.min(maxCircleWidth, maxCircleHeight) // Use smaller to fit both dimensions
+    
+    const minSize = 8 // Minimum circle size
+    return minSize + (maxSize - minSize) * progressRatio
+  }, [progressRatio])
 
   // Dark rim for gradients/shadows (soft, close to base)
   const darkRimColor = useMemo(() => makeThemedColor(baseColor, -1), [baseColor])
@@ -520,13 +594,65 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
     [darkRimColor]
   )
 
+  // Generate CSS keyframes for firefly-like animations
+  const blobKeyframes = useMemo(() => {
+    if (blobAnimations.length === 0) return null
+    
+    return blobAnimations.map((anim, index) => {
+      const keyframeName = `blobMove${index}`
+      // Calculate positions relative to starting point
+      const x1 = anim.startX + anim.moveX1
+      const y1 = anim.startY + anim.moveY1
+      const x2 = anim.startX + anim.moveX2
+      const y2 = anim.startY + anim.moveY2
+      const x3 = anim.startX + anim.moveX3
+      const y3 = anim.startY + anim.moveY3
+      
+      // Ensure positions stay within bounds (use approximate max circle size for clamping)
+      const maxCircleSizeForClamp = 58
+      const minX = 1
+      const maxX = BOX_WIDTH - maxCircleSizeForClamp - 1
+      const minY = 1
+      const maxY = BOX_HEIGHT - maxCircleSizeForClamp - 1
+      
+      // Clamp positions but ensure we don't create bias
+      const clampX = (x) => Math.max(minX, Math.min(maxX, x))
+      const clampY = (y) => Math.max(minY, Math.min(maxY, y))
+      
+      // Use transform instead of left/top to avoid layout issues and potential bias
+      const startXFinal = clampX(anim.startX)
+      const startYFinal = clampY(anim.startY)
+      
+      return `
+        @keyframes ${keyframeName} {
+          0%, 100% {
+            transform: translate(${startXFinal - anim.startX}px, ${startYFinal - anim.startY}px);
+          }
+          25% {
+            transform: translate(${clampX(x1) - anim.startX}px, ${clampY(y1) - anim.startY}px);
+          }
+          50% {
+            transform: translate(${clampX(x2) - anim.startX}px, ${clampY(y2) - anim.startY}px);
+          }
+          75% {
+            transform: translate(${clampX(x3) - anim.startX}px, ${clampY(y3) - anim.startY}px);
+          }
+        }
+      `
+    }).join('\n')
+  }, [blobAnimations])
+
   return (
-    <div 
-      className={className ? `relative ${className}` : 'relative'}
-      style={{ ...STATIC_STYLES.container, ...style }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
+    <>
+      {blobKeyframes && (
+        <style dangerouslySetInnerHTML={{ __html: blobKeyframes }} />
+      )}
+      <div 
+        className={className ? `relative ${className}` : 'relative'}
+        style={{ ...STATIC_STYLES.container, ...style }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
       {/* Main Box Container */}
       <div
         style={{
@@ -611,30 +737,29 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
         {/* Inset Shadows for depth */}
         <div style={insetShadowsStyle} />
 
-        {/* Progress Blobs - Blurred and clipped inside box */}
+        {/* Progress Blobs - Firefly-like floating circles (9 dots) */}
         <div style={STATIC_STYLES.progressBlobsContainer}>
-          {/* Two ellipses for progress blobs - vertically stacked */}
-          <div style={STATIC_STYLES.progressBlobsInner}>
-            {/* Top blob - Hue +20 */}
-            <div
-              style={{
-                width: '120%',
-                height: '24px',
-                borderRadius: '50%',
-                backgroundColor: blobColors.top,
-              }}
-            />
-            {/* Bottom blob - Hue -20 */}
-            <div
-              style={{
-                width: '120%',
-                height: '20px',
-                borderRadius: '50%',
-                backgroundColor: blobColors.bottom,
-                marginTop: '-4px',
-              }}
-            />
-          </div>
+          {blobGridColors.length > 0 && blobGridColors.map((color, index) => {
+            const anim = blobAnimations[index]
+            if (!anim) return null
+            
+            return (
+              <div
+                key={index}
+                style={{
+                  position: 'absolute',
+                  width: `${circleSize}px`,
+                  height: `${circleSize}px`,
+                  borderRadius: '50%',
+                  backgroundColor: color,
+                  left: `${anim.startX}px`,
+                  top: `${anim.startY}px`,
+                  animation: `blobMove${index} ${anim.duration}s cubic-bezier(0.4, 0, 0.6, 1) infinite`,
+                  animationDelay: `${anim.delay}s`,
+                }}
+              />
+            )
+          })}
         </div>
 
         {/* Progress Indicator - Positioned at bottom of box, behind shading layers */}
@@ -837,6 +962,7 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
         />
       </div>
     </div>
+    </>
   )
 }
 
