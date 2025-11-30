@@ -23,7 +23,7 @@ import ShadingLayers from '@/components/layout3/ShadingLayers'
  * @param {object} style - Additional inline styles for the root container
  * @param {boolean} isHovered - External hover state (if provided, uses this instead of internal state)
  */
-const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Logo/Apple.svg', progress = { current: 1, total: 25 }, className = '', style = {}, isHovered: externalIsHovered }) => {
+const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Logo/Apple.svg', progress = { current: 1, total: 25 }, className = '', style = {}, isHovered: externalIsHovered, hideProgressIndicator = false }) => {
   const [lightCornerSvg, setLightCornerSvg] = useState(null)
   const [internalIsHovered, setInternalIsHovered] = useState(false)
   
@@ -250,7 +250,7 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
         />
 
         {/* Progress Indicator */}
-        <ProgressIndicator progress={progress} baseColor={baseColor} />
+        {!hideProgressIndicator && <ProgressIndicator progress={progress} baseColor={baseColor} />}
       </div>
 
       {/* Logo */}

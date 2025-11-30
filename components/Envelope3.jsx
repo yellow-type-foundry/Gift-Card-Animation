@@ -29,13 +29,25 @@ const Envelope3 = ({
   coverImage,
   className = '', 
   style = {}, 
-  isHovered: externalIsHovered 
+  isHovered: externalIsHovered,
+  hideProgressIndicator = false
 }) => {
   const [lightCornerSvg, setLightCornerSvg] = useState(null)
   const [internalIsHovered, setInternalIsHovered] = useState(false)
   
   // Use external hover state if provided, otherwise use internal state
   const isHovered = externalIsHovered !== undefined ? externalIsHovered : internalIsHovered
+
+  // Extract scale from style prop if present
+  const scaleValue = useMemo(() => {
+    if (style?.transform) {
+      const scaleMatch = style.transform.match(/scale\(([\d.]+)\)/)
+      if (scaleMatch) {
+        return parseFloat(scaleMatch[1])
+      }
+    }
+    return 1
+  }, [style?.transform])
 
   // Base color from prop - used for all themed colors
   const baseColor = boxColor
@@ -178,15 +190,19 @@ const Envelope3 = ({
       data-name="Envelope"
       style={{ 
         ...STATIC_STYLES.container, 
-        ...style,
         // Ensure no clipping - allow content to extend beyond bounds
         overflow: 'visible',
-        // Explicitly set min/max to ensure exact size
-        minWidth: `${BOX_WIDTH}px`,
-        maxWidth: `${BOX_WIDTH}px`,
-        minHeight: `${BOX_HEIGHT}px`,
-        maxHeight: `${BOX_HEIGHT}px`,
+        // When scaled, adjust dimensions to allow visual scaling
+        // Base dimensions stay the same, but allow overflow for scale transform
+        width: `${BOX_WIDTH}px`,
+        height: `${BOX_HEIGHT}px`,
+        minWidth: scaleValue !== 1 ? 'unset' : `${BOX_WIDTH}px`,
+        maxWidth: scaleValue !== 1 ? 'unset' : `${BOX_WIDTH}px`,
+        minHeight: scaleValue !== 1 ? 'unset' : `${BOX_HEIGHT}px`,
+        maxHeight: scaleValue !== 1 ? 'unset' : `${BOX_HEIGHT}px`,
         boxSizing: 'border-box',
+        // Apply style prop last so any transforms can override
+        ...style,
       }}
       onMouseEnter={externalIsHovered === undefined ? () => setInternalIsHovered(true) : undefined}
       onMouseLeave={externalIsHovered === undefined ? () => setInternalIsHovered(false) : undefined}
@@ -322,7 +338,7 @@ const Envelope3 = ({
         />
 
         {/* Progress Indicator */}
-        <ProgressIndicator progress={progress} baseColor={baseColor} />
+        {!hideProgressIndicator && <ProgressIndicator progress={progress} baseColor={baseColor} />}
       </div>
 
       <ShadowContainer

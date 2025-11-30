@@ -800,25 +800,52 @@ const SentCard = ({
   // Box3 (layout2BoxType === '3' or layout1Style === 'C') always uses the batch card's envelope offsetY to match Envelope3
   // Box2 (layout2BoxType === '2' or default) uses boxOffsetY from single2.box.offsetY
   const layout2Box3OffsetY = -7 // Layout 2 batch card envelope offsetY
+  const layout1Box3OffsetY = 32 // Layout 1 Style C Box3/Envelope3 offsetY
+  const layout1Box3Scale = 1.15 // Layout 1 Style C Box3/Envelope3 scale
   const isBox3 = (hideEnvelope && showGiftBoxWhenHidden && !useBox1 && layout2BoxType === '3') ||
                  (hideEnvelope && showGiftBoxWhenHidden && !useBox1 && layout1Style === 'C')
-  // For Layout 2 Box3, use -7. For Layout 1 Style C Box3, use envelopeOffsetY (0) to match Envelope3
-  const box3OffsetY = (layout2BoxType === '3') ? layout2Box3OffsetY : envelopeOffsetY
-  const effectiveOffsetY = isBox3
+  const isEnvelope3 = (hideEnvelope && !showGiftBoxWhenHidden && layout2BoxType === '3') ||
+                      (hideEnvelope && !showGiftBoxWhenHidden && layout1Style === 'C')
+  // For Layout 2 Box3, use -7. For Layout 1 Style C Box3/Envelope3, use -16
+  const box3OffsetY = (layout1Style === 'C') ? layout1Box3OffsetY : ((layout2BoxType === '3') ? layout2Box3OffsetY : envelopeOffsetY)
+  const effectiveOffsetY = (isBox3 || isEnvelope3)
     ? box3OffsetY 
     : ((hideEnvelope && showGiftBoxWhenHidden && !useBox1 && layout2BoxType !== '3' && layout1Style !== 'C') 
       ? (boxOffsetY !== undefined ? boxOffsetY : envelopeOffsetY) 
       : envelopeOffsetY)
   // For single cards with Box2, use boxScale if provided, otherwise use envelopeScale
-  // Box3 (layout2BoxType === '3' or layout1Style === 'C') always uses envelopeScale to match Envelope3
-  const effectiveScale = (hideEnvelope && showGiftBoxWhenHidden && !useBox1 && layout2BoxType !== '3' && layout1Style !== 'C' && boxScale !== undefined) ? boxScale : envelopeScale
-  const envelopeInnerWrapperStyle = useMemo(() => ({
-    position: 'absolute',
-    left: '50%',
-    top: '50%',
-    transform: `translate(-50%, -50%) translateY(${effectiveOffsetY || 0}px) scale(${effectiveScale || 1})`,
-    transformOrigin: 'center center',
-  }), [effectiveOffsetY, effectiveScale, hideEnvelope, showGiftBoxWhenHidden, useBox1, layout2BoxType, boxOffsetY, envelopeOffsetY, boxScale, envelopeScale])
+  // Box3/Envelope3 (layout2BoxType === '3' or layout1Style === 'C') uses envelopeScale, except Layout 1 Style C uses 1.2
+  // For Layout 1 Style C, both Box3 and Envelope3 should use 1.2 scale
+  const box3Scale = (layout1Style === 'C') ? layout1Box3Scale : envelopeScale
+  // For Layout 1 Style C, ensure both Box3 and Envelope3 use 1.2 scale
+  // Priority: Layout 1 Style C > Layout 2 Box3/Envelope3 > Box2 > default envelopeScale
+  const effectiveScale = useMemo(() => {
+    if (layout1Style === 'C' && (isBox3 || isEnvelope3)) {
+      return layout1Box3Scale // 1.2 for Layout 1 Style C
+    }
+    if (isBox3 || isEnvelope3) {
+      return box3Scale // envelopeScale for Layout 2 Box3/Envelope3
+    }
+    if (hideEnvelope && showGiftBoxWhenHidden && !useBox1 && layout2BoxType !== '3' && layout1Style !== 'C' && boxScale !== undefined) {
+      return boxScale // Box2 scale
+    }
+    return envelopeScale // Default
+  }, [layout1Style, isBox3, isEnvelope3, layout1Box3Scale, box3Scale, hideEnvelope, showGiftBoxWhenHidden, useBox1, layout2BoxType, boxScale, envelopeScale])
+  // For Envelope3, we apply scale directly to the component, not the wrapper
+  // For Box3 and others, we apply scale to the wrapper
+  const envelopeInnerWrapperStyle = useMemo(() => {
+    const offsetYValue = effectiveOffsetY || 0
+    // Only apply scale to wrapper if it's NOT Envelope3 (Envelope3 gets scale applied directly)
+    const scaleValue = (isEnvelope3) ? 1 : (effectiveScale || 1)
+    return {
+      position: 'absolute',
+      left: '50%',
+      top: '50%',
+      transform: `translate(-50%, -50%) translateY(${offsetYValue}px) scale(${scaleValue})`,
+      transformOrigin: 'center center',
+      willChange: 'transform', // Optimize for transforms
+    }
+  }, [effectiveOffsetY, effectiveScale, isEnvelope3])
 
   const box1WrapperStyle = useMemo(() => ({
     position: 'relative',
@@ -1270,6 +1297,7 @@ const SentCard = ({
                     logoPath={svgLogoPath}
                     progress={validatedProgress}
                     isHovered={isHovered}
+                    hideProgressIndicator={layout1Style === 'C'}
                   />
                 ) : (
                   // Box2 (default)
@@ -1311,6 +1339,15 @@ const SentCard = ({
                     progress={validatedProgress}
                     coverImage={boxImage}
                     isHovered={isHovered}
+                    hideProgressIndicator={layout1Style === 'C'}
+                    style={(() => {
+                      const scale = (isEnvelope3 && layout1Style === 'C') ? layout1Box3Scale : ((isEnvelope3) ? envelopeScale : 1)
+                      console.log('[SentCard] Envelope3 scale:', { isEnvelope3, layout1Style, scale, effectiveScale, layout1Box3Scale })
+                      return {
+                        transform: `scale(${scale})`,
+                        transformOrigin: 'center center',
+                      }
+                    })()}
                   />
                 ) : (
                   <Envelope2
@@ -1339,13 +1376,34 @@ const SentCard = ({
                 )}
               </div>
             ) : hideEnvelope && !showGiftBoxWhenHidden ? (
-              // LAYOUT 2 (Batch 2) or Box 2 (Single 2): Envelope1, Envelope2, or Envelope3
-              // For Style 1 (layout2BoxType === '1'), use Envelope1 (exactly like Layout 1, just scaled)
-              // For Style 3 (layout2BoxType === '3'), use Envelope3
-              // For Style 2 (default), use Envelope2
+              // LAYOUT 2 (Batch 2) or Layout 1 Style C (Batch): Envelope1, Envelope2, or Envelope3
+              // For Layout 1 Style C (layout1Style === 'C'), use Envelope3
+              // For Layout 2 Style 1 (layout2BoxType === '1'), use Envelope1 (exactly like Layout 1, just scaled)
+              // For Layout 2 Style 3 (layout2BoxType === '3'), use Envelope3
+              // For Layout 2 Style 2 (default), use Envelope2
               <>
                 {console.log('[SentCard] hideEnvelope:', hideEnvelope, 'showGiftBoxWhenHidden:', showGiftBoxWhenHidden, 'hidePaper prop:', hidePaper) || null}
-                {layout2BoxType === '1' ? (
+                {(layout1Style === 'C' || layout2BoxType === '3') ? (
+                  // Envelope3 for Layout 1 Style C or Layout 2 Style 3
+                  <div style={envelopeInnerWrapperStyle}>
+                    <Envelope3
+                      boxColor={envelope3Color}
+                      logoPath={svgLogoPath}
+                      progress={validatedProgress}
+                      coverImage={boxImage}
+                      isHovered={isHovered}
+                      hideProgressIndicator={layout1Style === 'C'}
+                      style={(() => {
+                        const scale = (isEnvelope3 && layout1Style === 'C') ? layout1Box3Scale : ((isEnvelope3) ? envelopeScale : 1)
+                        console.log('[SentCard] Envelope3 scale:', { isEnvelope3, layout1Style, scale, effectiveScale, layout1Box3Scale })
+                        return {
+                          transform: `scale(${scale})`,
+                          transformOrigin: 'center center',
+                        }
+                      })()}
+                    />
+                  </div>
+                ) : layout2BoxType === '1' ? (
                   // Envelope1: Render exactly as in Layout 1, wrapped in scaled container
                   // Need fixed dimensions (300px x 384px) for Envelope1's absolute positioning to work
                   <div style={{
@@ -1563,14 +1621,25 @@ const SentCard = ({
                       </svg>
                     </div>
                   </div>
-                ) : layout2BoxType === '3' ? (
-                  <Envelope3
-                    boxColor={envelopeBoxColor}
-                    logoPath={svgLogoPath}
-                    progress={validatedProgress}
-                    coverImage={boxImage}
-                    isHovered={isHovered}
-                  />
+                ) : (layout1Style === 'C' || layout2BoxType === '3') ? (
+                  // Envelope3 for Layout 1 Style C or Layout 2 Style 3
+                  <div style={envelopeInnerWrapperStyle}>
+                    <Envelope3
+                      boxColor={envelope3Color}
+                      logoPath={svgLogoPath}
+                      progress={validatedProgress}
+                      coverImage={boxImage}
+                      isHovered={isHovered}
+                      hideProgressIndicator={layout1Style === 'C'}
+                      style={(() => {
+                        const scale = (layout1Style === 'C') ? layout1Box3Scale : envelopeScale
+                        return {
+                          transform: `scale(${scale})`,
+                          transformOrigin: 'center center',
+                        }
+                      })()}
+                    />
+                  </div>
                 ) : (
                   <Envelope2
                     progress={validatedProgress}
