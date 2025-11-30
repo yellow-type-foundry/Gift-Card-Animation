@@ -79,10 +79,13 @@ const ProgressBlobs = ({ blobGridColors, blobAnimations, dotPositions, circleSiz
                   inset 0px 0px 16px 0px rgba(255, 255, 255, 0.6),
                   inset 0px 0px 4px 0px rgba(255, 255, 255, 0.5)
                 `,
+                filter: isHovered ? 'blur(2px)' : 'blur(20px)', // Reveal blobs on hover by reducing blur
                 left: useJSAnimation ? `${position.x}px` : `${anim.startX}px`,
                 top: useJSAnimation ? `${position.y}px` : `${anim.startY}px`,
                 // Smooth transition when returning to initial position, no transition during JS animation for 60fps
-                transition: useJSAnimation ? 'none' : 'left 0.6s cubic-bezier(0.4, 0, 0.2, 1), top 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+                transition: useJSAnimation 
+                  ? 'filter 0.3s ease-out' 
+                  : 'left 0.6s cubic-bezier(0.4, 0, 0.2, 1), top 0.6s cubic-bezier(0.4, 0, 0.2, 1), filter 0.3s ease-out',
                 animation: 'none', // No CSS animation
                 animationDelay: '0s',
               }}

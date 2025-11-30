@@ -43,7 +43,6 @@ const HaloGlow = ({ blobGridColors, blobAnimations, dotPositions, circleSize, is
               filter: 'blur(20px)',
               left: useJSAnimation ? `${position.x}px` : `${anim.startX}px`,
               top: useJSAnimation ? `${position.y}px` : `${anim.startY}px`,
-              transition: 'none',
               animation: useJSAnimation ? 'none' : `blobMove${index} ${anim.duration}s cubic-bezier(0.4, 0, 0.6, 1) infinite`,
               animationDelay: useJSAnimation ? '0s' : `${anim.delay}s`,
             }}
