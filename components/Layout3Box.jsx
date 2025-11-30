@@ -21,10 +21,14 @@ import ShadingLayers from '@/components/layout3/ShadingLayers'
  * @param {object} progress - Progress object with current and total (default: { current: 1, total: 25 })
  * @param {string} className - Additional CSS classes for the root container
  * @param {object} style - Additional inline styles for the root container
+ * @param {boolean} isHovered - External hover state (if provided, uses this instead of internal state)
  */
-const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Logo/Apple.svg', progress = { current: 1, total: 25 }, className = '', style = {} }) => {
+const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Logo/Apple.svg', progress = { current: 1, total: 25 }, className = '', style = {}, isHovered: externalIsHovered }) => {
   const [lightCornerSvg, setLightCornerSvg] = useState(null)
-  const [isHovered, setIsHovered] = useState(false)
+  const [internalIsHovered, setInternalIsHovered] = useState(false)
+  
+  // Use external hover state if provided, otherwise use internal state
+  const isHovered = externalIsHovered !== undefined ? externalIsHovered : internalIsHovered
 
   // Base color from prop - used for all themed colors
   const baseColor = boxColor
@@ -174,8 +178,8 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
         // Ensure no clipping - allow content to extend beyond bounds
         overflow: 'visible',
       }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseEnter={externalIsHovered === undefined ? () => setInternalIsHovered(true) : undefined}
+      onMouseLeave={externalIsHovered === undefined ? () => setInternalIsHovered(false) : undefined}
     >
       <HaloGlow
         blobGridColors={blobGridColors}

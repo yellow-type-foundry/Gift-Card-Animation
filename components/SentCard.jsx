@@ -491,6 +491,17 @@ const SentCard = ({
     return capSaturation(adjustToLuminance(dominantColor, 85), 70)
   }, [headerBgOverride, hideEnvelope, showGiftBoxWhenHidden, hideProgressBarInBox, svgLogoPath, SINGLE2_LUMINANCE, SINGLE2_SATURATION, dominantColor]) // dominantColor only used for Single 1 and Batch 2, not Single 2
 
+  // Calculate box color for Box3 (Layout3Box) - use brand color directly without HSL adjustments (matching Layout 3)
+  const box3Color = useMemo(() => {
+    if (hideEnvelope && showGiftBoxWhenHidden && layout2BoxType === '3') {
+      // Look up brand color from map
+      const brandColor = LOGO_BRAND_COLORS[svgLogoPath]
+      // If no brand color mapping found, use Columbia blue as fallback
+      return brandColor || '#1987C7'
+    }
+    return themedBoxColor // Fallback to themedBoxColor if not Box3
+  }, [hideEnvelope, showGiftBoxWhenHidden, layout2BoxType, svgLogoPath, themedBoxColor])
+
   // Calculate logo brand color (used for logo gradient ID generation)
   // Uses the same Single 2 caps as the box color for consistency
   const logoBrandColor = useMemo(() => {
@@ -1222,11 +1233,12 @@ const SentCard = ({
                     />
                   </div>
                 ) : layout2BoxType === '3' ? (
-                  // Box3 (Layout3Box)
+                  // Box3 (Layout3Box) - use vibrant brand color directly (matching Layout 3)
                   <Layout3Box
-                    boxColor={themedBoxColor}
+                    boxColor={box3Color}
                     logoPath={svgLogoPath}
                     progress={validatedProgress}
+                    isHovered={isHovered}
                   />
                 ) : (
                   // Box2 (default)

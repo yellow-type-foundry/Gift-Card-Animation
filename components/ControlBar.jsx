@@ -205,106 +205,10 @@ const ControlBar = ({
                   onClick={(e) => e.stopPropagation()}
                 >
                   <div className="space-y-4">
-                    {/* Style toggle - only show for layout 1 */}
-                      {layoutNumber === '1' && (
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-[#525F7A]">Style</span>
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => onStyleChange('A')}
-                              className={`px-3 py-1 rounded-[8px] text-xs transition-colors ${
-                                style === 'A' 
-                                  ? 'bg-[#5a3dff] text-white' 
-                                  : 'bg-gray-100 text-[#525F7A] hover:bg-gray-200'
-                              }`}
-                            >
-                              A
-                            </button>
-                            <button
-                              onClick={() => onStyleChange('B')}
-                              className={`px-3 py-1 rounded-[8px] text-xs transition-colors ${
-                                style === 'B' 
-                                  ? 'bg-[#5a3dff] text-white' 
-                                  : 'bg-gray-100 text-[#525F7A] hover:bg-gray-200'
-                              }`}
-                            >
-                              B
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                    {/* Theming toggle - only show for layout 1 */}
-                      {layoutNumber === '1' && (
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-[#525F7A]">Theming</span>
-                          <button
-                            onClick={() => !isSingleView && onThemingChange(!useColoredBackground)}
-                            disabled={isSingleView}
-                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
-                              useColoredBackground ? 'bg-[#5a3dff]' : 'bg-gray-300'
-                            } ${isSingleView ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'}`}
-                            role="switch"
-                            aria-checked={useColoredBackground}
-                            aria-disabled={isSingleView}
-                            aria-label="Toggle theming"
-                          >
-                            <span
-                              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                                useColoredBackground ? 'translate-x-6' : 'translate-x-1'
-                              }`}
-                            />
-                          </button>
-                        </div>
-                      )}
-                      {/* Animation selector - show for layout 2, or layout 1 style B */}
-                      {(layoutNumber === '2' || (layoutNumber === '1' && style === 'B')) && (
-                        <div className="flex items-center justify-between">
-                          <label htmlFor="animation-select-styling" className="text-sm text-[#525F7A]">Animation</label>
-                          <div className="relative inline-block">
-                            <select
-                              id="animation-select-styling"
-                              value={animationType}
-                              onChange={handleAnimationChange}
-                              className="py-2 pl-3 pr-8 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0 appearance-none cursor-pointer"
-                              style={animationSelectStyle}
-                            >
-                              <option value="highlight">Shimmer</option>
-                              <option value="breathing">Breathing</option>
-                              <option value="none">None</option>
-                            </select>
-                            <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
-                              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M3 4.5L6 7.5L9 4.5" stroke="#525F7A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                              </svg>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                      {/* 3D toggle - show for layout 2, or layout 1 style B */}
-                      {(layoutNumber === '2' || (layoutNumber === '1' && style === 'B')) && (
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-[#525F7A]">3D Effect</span>
-                          <button
-                            onClick={() => onEnable3DChange(!enable3D)}
-                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
-                              enable3D ? 'bg-[#5a3dff]' : 'bg-gray-300'
-                            } cursor-pointer`}
-                            role="switch"
-                            aria-checked={enable3D}
-                            aria-label="Toggle 3D effect"
-                          >
-                            <span
-                              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                                enable3D ? 'translate-x-6' : 'translate-x-1'
-                              }`}
-                            />
-                          </button>
-                        </div>
-                      )}
-                      {/* Box selector - only show for Layout 2 */}
+                    {/* Box selector - only show for Layout 2 */}
                       {layoutNumber === '2' && (
                         <div className="flex items-center justify-between">
-                          <span className="text-sm text-[#525F7A]">Box</span>
+                          <span className="text-sm text-[#525F7A]">Style</span>
                           <div className="flex items-center gap-2">
                             <button
                               onClick={() => onLayout2BoxTypeChange('1')}
@@ -337,6 +241,102 @@ const ControlBar = ({
                               3
                             </button>
                           </div>
+                        </div>
+                      )}
+                    {/* Style toggle - only show for layout 1 */}
+                      {layoutNumber === '1' && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-[#525F7A]">Style</span>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => onStyleChange('A')}
+                              className={`px-3 py-1 rounded-[8px] text-xs transition-colors ${
+                                style === 'A' 
+                                  ? 'bg-[#5a3dff] text-white' 
+                                  : 'bg-gray-100 text-[#525F7A] hover:bg-gray-200'
+                              }`}
+                            >
+                              1
+                            </button>
+                            <button
+                              onClick={() => onStyleChange('B')}
+                              className={`px-3 py-1 rounded-[8px] text-xs transition-colors ${
+                                style === 'B' 
+                                  ? 'bg-[#5a3dff] text-white' 
+                                  : 'bg-gray-100 text-[#525F7A] hover:bg-gray-200'
+                              }`}
+                            >
+                              2
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    {/* Theming toggle - only show for layout 1 */}
+                      {layoutNumber === '1' && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-[#525F7A]">Theming</span>
+                          <button
+                            onClick={() => !isSingleView && onThemingChange(!useColoredBackground)}
+                            disabled={isSingleView}
+                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
+                              useColoredBackground ? 'bg-[#5a3dff]' : 'bg-gray-300'
+                            } ${isSingleView ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'}`}
+                            role="switch"
+                            aria-checked={useColoredBackground}
+                            aria-disabled={isSingleView}
+                            aria-label="Toggle theming"
+                          >
+                            <span
+                              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                                useColoredBackground ? 'translate-x-6' : 'translate-x-1'
+                              }`}
+                            />
+                          </button>
+                        </div>
+                      )}
+                      {/* Animation selector - show for layout 2, or layout 1 style B (hide when Box 3 is selected) */}
+                      {(layoutNumber === '2' || (layoutNumber === '1' && style === 'B')) && !(layoutNumber === '2' && layout2BoxType === '3') && (
+                        <div className="flex items-center justify-between">
+                          <label htmlFor="animation-select-styling" className="text-sm text-[#525F7A]">Animation</label>
+                          <div className="relative inline-block">
+                            <select
+                              id="animation-select-styling"
+                              value={animationType}
+                              onChange={handleAnimationChange}
+                              className="py-2 pl-3 pr-8 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0 appearance-none cursor-pointer"
+                              style={animationSelectStyle}
+                            >
+                              <option value="highlight">Shimmer</option>
+                              <option value="breathing">Breathing</option>
+                              <option value="none">None</option>
+                            </select>
+                            <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M3 4.5L6 7.5L9 4.5" stroke="#525F7A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      {/* 3D toggle - show for layout 2, or layout 1 style B (hide when Box 3 is selected) */}
+                      {(layoutNumber === '2' || (layoutNumber === '1' && style === 'B')) && !(layoutNumber === '2' && layout2BoxType === '3') && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-[#525F7A]">3D Effect</span>
+                          <button
+                            onClick={() => onEnable3DChange(!enable3D)}
+                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
+                              enable3D ? 'bg-[#5a3dff]' : 'bg-gray-300'
+                            } cursor-pointer`}
+                            role="switch"
+                            aria-checked={enable3D}
+                            aria-label="Toggle 3D effect"
+                          >
+                            <span
+                              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                                enable3D ? 'translate-x-6' : 'translate-x-1'
+                              }`}
+                            />
+                          </button>
                         </div>
                       )}
                     </div>
@@ -456,106 +456,10 @@ const ControlBar = ({
                       </div>
                     </div>
                   </div>
-                  {/* Style toggle - only show for layout 1 */}
-                  {layoutNumber === '1' && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-[#525F7A]">Style</span>
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => onStyleChange('A')}
-                          className={`px-3 py-1 rounded-[8px] text-xs transition-colors ${
-                            style === 'A' 
-                              ? 'bg-[#5a3dff] text-white' 
-                              : 'bg-gray-100 text-[#525F7A] hover:bg-gray-200'
-                          }`}
-                        >
-                          A
-                        </button>
-                        <button
-                          onClick={() => onStyleChange('B')}
-                          className={`px-3 py-1 rounded-[8px] text-xs transition-colors ${
-                            style === 'B' 
-                              ? 'bg-[#5a3dff] text-white' 
-                              : 'bg-gray-100 text-[#525F7A] hover:bg-gray-200'
-                          }`}
-                        >
-                          B
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                  {/* Theming toggle - only show for layout 1 */}
-                  {layoutNumber === '1' && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-[#525F7A]">Theming</span>
-                      <button
-                        onClick={() => !isSingleView && onThemingChange(!useColoredBackground)}
-                        disabled={isSingleView}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
-                          useColoredBackground ? 'bg-[#5a3dff]' : 'bg-gray-300'
-                        } ${isSingleView ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'}`}
-                        role="switch"
-                        aria-checked={useColoredBackground}
-                        aria-disabled={isSingleView}
-                        aria-label="Toggle theming"
-                      >
-                        <span
-                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                            useColoredBackground ? 'translate-x-6' : 'translate-x-1'
-                          }`}
-                        />
-                      </button>
-                    </div>
-                  )}
-                  {/* Animation selector - only show for layout 2 */}
-                  {layoutNumber === '2' && (
-                    <div className="flex items-center justify-between">
-                      <label htmlFor="animation-select-mobile" className="text-sm text-[#525F7A]">Animation</label>
-                      <div className="relative inline-block">
-                        <select
-                          id="animation-select-mobile"
-                          value={animationType}
-                          onChange={handleAnimationChange}
-                          className="py-2 pl-3 pr-8 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0 appearance-none cursor-pointer"
-                          style={animationSelectStyle}
-                        >
-                          <option value="highlight">Shimmer</option>
-                          <option value="breathing">Breathing</option>
-                          <option value="none">None</option>
-                        </select>
-                        <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
-                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M3 4.5L6 7.5L9 4.5" stroke="#525F7A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  {/* 3D toggle - only show for layout 2 */}
-                  {layoutNumber === '2' && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-[#525F7A]">3D Effect</span>
-                      <button
-                        onClick={() => onEnable3DChange(!enable3D)}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
-                          enable3D ? 'bg-[#5a3dff]' : 'bg-gray-300'
-                        } cursor-pointer`}
-                        role="switch"
-                        aria-checked={enable3D}
-                        aria-label="Toggle 3D effect"
-                      >
-                        <span
-                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                            enable3D ? 'translate-x-6' : 'translate-x-1'
-                          }`}
-                        />
-                      </button>
-                    </div>
-                  )}
                   {/* Box selector - only show for Layout 2 */}
                   {layoutNumber === '2' && (
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-[#525F7A]">Box</span>
+                      <span className="text-sm text-[#525F7A]">Style</span>
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => onLayout2BoxTypeChange('1')}
@@ -588,6 +492,102 @@ const ControlBar = ({
                           3
                         </button>
                       </div>
+                    </div>
+                  )}
+                  {/* Style toggle - only show for layout 1 */}
+                  {layoutNumber === '1' && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-[#525F7A]">Style</span>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => onStyleChange('A')}
+                          className={`px-3 py-1 rounded-[8px] text-xs transition-colors ${
+                            style === 'A' 
+                              ? 'bg-[#5a3dff] text-white' 
+                              : 'bg-gray-100 text-[#525F7A] hover:bg-gray-200'
+                          }`}
+                        >
+                          1
+                        </button>
+                        <button
+                          onClick={() => onStyleChange('B')}
+                          className={`px-3 py-1 rounded-[8px] text-xs transition-colors ${
+                            style === 'B' 
+                              ? 'bg-[#5a3dff] text-white' 
+                              : 'bg-gray-100 text-[#525F7A] hover:bg-gray-200'
+                          }`}
+                        >
+                          2
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  {/* Theming toggle - only show for layout 1 */}
+                  {layoutNumber === '1' && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-[#525F7A]">Theming</span>
+                      <button
+                        onClick={() => !isSingleView && onThemingChange(!useColoredBackground)}
+                        disabled={isSingleView}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
+                          useColoredBackground ? 'bg-[#5a3dff]' : 'bg-gray-300'
+                        } ${isSingleView ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'}`}
+                        role="switch"
+                        aria-checked={useColoredBackground}
+                        aria-disabled={isSingleView}
+                        aria-label="Toggle theming"
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                            useColoredBackground ? 'translate-x-6' : 'translate-x-1'
+                          }`}
+                        />
+                      </button>
+                    </div>
+                  )}
+                  {/* Animation selector - only show for layout 2 (hide when Box 3 is selected) */}
+                  {layoutNumber === '2' && layout2BoxType !== '3' && (
+                    <div className="flex items-center justify-between">
+                      <label htmlFor="animation-select-mobile" className="text-sm text-[#525F7A]">Animation</label>
+                      <div className="relative inline-block">
+                        <select
+                          id="animation-select-mobile"
+                          value={animationType}
+                          onChange={handleAnimationChange}
+                          className="py-2 pl-3 pr-8 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0 appearance-none cursor-pointer"
+                          style={animationSelectStyle}
+                        >
+                          <option value="highlight">Shimmer</option>
+                          <option value="breathing">Breathing</option>
+                          <option value="none">None</option>
+                        </select>
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M3 4.5L6 7.5L9 4.5" stroke="#525F7A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {/* 3D toggle - only show for layout 2 (hide when Box 3 is selected) */}
+                  {layoutNumber === '2' && layout2BoxType !== '3' && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-[#525F7A]">3D Effect</span>
+                      <button
+                        onClick={() => onEnable3DChange(!enable3D)}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
+                          enable3D ? 'bg-[#5a3dff]' : 'bg-gray-300'
+                        } cursor-pointer`}
+                        role="switch"
+                        aria-checked={enable3D}
+                        aria-label="Toggle 3D effect"
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                            enable3D ? 'translate-x-6' : 'translate-x-1'
+                          }`}
+                        />
+                      </button>
                     </div>
                   )}
                   {/* View selector */}
