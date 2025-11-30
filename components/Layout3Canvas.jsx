@@ -80,7 +80,7 @@ const Layout3Canvas = ({ shuffleSeed = 0 }) => {
         style={{ maxWidth: '1200px', overflow: 'visible' }}
       >
         {/* Row 1 */}
-        <div className="flex items-center justify-center gap-8" style={{ overflow: 'visible' }}>
+        <div className="flex flex-col md:flex-row items-center justify-center gap-8" style={{ overflow: 'visible' }}>
           {shuffledConfigs.slice(0, 4).map((config, index) => (
             <Layout3Box
               key={`row1-${index}-${config.logoPath}`}
@@ -91,7 +91,7 @@ const Layout3Canvas = ({ shuffleSeed = 0 }) => {
           ))}
         </div>
         {/* Row 2 */}
-        <div className="flex items-center justify-center gap-8" style={{ overflow: 'visible' }}>
+        <div className="flex flex-col md:flex-row items-center justify-center gap-8" style={{ overflow: 'visible' }}>
           {shuffledConfigs.slice(4, 8).map((config, index) => (
             <Layout3Box
               key={`row2-${index}-${config.logoPath}`}
