@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useRef } from 'react'
 import Image from 'next/image'
 import { makeThemedColor, makeVibrantColor } from '@/utils/colors'
 import { BOX_WIDTH, BOX_HEIGHT, BOX_RADIUS, STATIC_STYLES } from '@/constants/layout3Tokens'
@@ -35,6 +35,8 @@ const Envelope3 = ({
 }) => {
   const [lightCornerSvg, setLightCornerSvg] = useState(null)
   const [internalIsHovered, setInternalIsHovered] = useState(false)
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+  const boxRef = useRef(null)
   
   // Use external hover state if provided, otherwise use internal state
   const isHovered = externalIsHovered !== undefined ? externalIsHovered : internalIsHovered
@@ -185,6 +187,50 @@ const Envelope3 = ({
     [lightRimColor]
   )
 
+  // Handle mouse move for specular highlight
+  const handleMouseMove = (e) => {
+    if (boxRef.current) {
+      const rect = boxRef.current.getBoundingClientRect()
+      const x = e.clientX - rect.left
+      const y = e.clientY - rect.top
+      setMousePosition({ x, y })
+    }
+  }
+
+  // Specular highlight style
+  const specularHighlightStyle = useMemo(() => {
+    if (!isHovered) {
+      return { 
+        opacity: 0, 
+        pointerEvents: 'none',
+        visibility: 'hidden'
+      }
+    }
+    
+    const highlightSize = 360
+    // Default to center if mouse position is (0, 0) or not set
+    const highlightX = mousePosition.x > 0 ? mousePosition.x : BOX_WIDTH / 2
+    const highlightY = mousePosition.y > 0 ? mousePosition.y : BOX_HEIGHT / 2
+    
+    return {
+      position: 'absolute',
+      left: `${highlightX}px`,
+      top: `${highlightY}px`,
+      width: `${highlightSize}px`,
+      height: `${highlightSize}px`,
+      borderRadius: '50%',
+      background: 'radial-gradient(circle, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.25) 15%, rgba(255, 255, 255, 0.1) 35%, rgba(255, 255, 255, 0.05) 55%, transparent 80%)',
+      transform: 'translate(-50%, -50%)',
+      pointerEvents: 'none',
+      zIndex: 999,
+      opacity: 1,
+      visibility: 'visible',
+      transition: 'opacity 0.2s ease-out',
+      mixBlendMode: 'screen',
+      filter: 'blur(8px)',
+    }
+  }, [isHovered, mousePosition])
+
   return (
     <div 
       className={className ? `relative ${className}` : 'relative'}
@@ -210,6 +256,8 @@ const Envelope3 = ({
     >
       {/* Main Box Container */}
       <div
+        ref={boxRef}
+        onMouseMove={handleMouseMove}
         style={{
           position: 'relative',
           width: `${BOX_WIDTH}px`,
@@ -243,7 +291,7 @@ const Envelope3 = ({
         <EnvelopeLayers coverImage={coverImage} baseColor={baseColor} isHovered={isHovered} />
 
         {/* Shading Layers - identical to Box3 */}
-        <ShadingLayers baseColor={baseColor} lightCornerSvg={lightCornerSvg} />
+        <ShadingLayers baseColor={baseColor} lightCornerSvg={lightCornerSvg} isHovered={isHovered} />
 
         {/* Noise Overlay */}
         <div
@@ -268,6 +316,9 @@ const Envelope3 = ({
         />
 
         <div style={insetShadowsStyle} />
+
+        {/* Specular Highlight */}
+        <div style={specularHighlightStyle} />
 
         <ProgressBlobs
           blobGridColors={blobGridColors}

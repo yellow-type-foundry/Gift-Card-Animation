@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useMemo, memo } from 'react'
+import React, { useState, useEffect, useMemo, useRef, memo } from 'react'
 import { makeThemedColor, makeVibrantColor } from '@/utils/colors'
 import { BOX_WIDTH, BOX_HEIGHT, BOX_RADIUS, STATIC_STYLES } from '@/constants/layout3Tokens'
 import { useBlobColors } from '@/hooks/useBlobColors'
@@ -26,6 +26,9 @@ import ShadingLayers from '@/components/layout3/ShadingLayers'
 const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Logo/Apple.svg', progress = { current: 1, total: 25 }, className = '', style = {}, isHovered: externalIsHovered, hideProgressIndicator = false }) => {
   const [lightCornerSvg, setLightCornerSvg] = useState(null)
   const [internalIsHovered, setInternalIsHovered] = useState(false)
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+  const boxRef = useRef(null)
+  const rootRef = useRef(null)
   
   // Use external hover state if provided, otherwise use internal state
   const isHovered = externalIsHovered !== undefined ? externalIsHovered : internalIsHovered
@@ -59,6 +62,13 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
 
   // Use dot animation hook
   const dotPositions = useDotAnimation(blobAnimations, isHovered, circleSize)
+
+  // Initialize mouse position to center when hover becomes true (for external hover)
+  useEffect(() => {
+    if (isHovered && mousePosition.x === 0 && mousePosition.y === 0) {
+      setMousePosition({ x: BOX_WIDTH / 2, y: BOX_HEIGHT / 2 })
+    }
+  }, [isHovered])
 
   // Themed colors
   const lightRimColor = useMemo(() => makeThemedColor(baseColor, 10), [baseColor])
@@ -168,9 +178,72 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
     [lightRimColor]
   )
 
+  // Handle mouse move for specular highlight
+  const handleMouseMove = (e) => {
+    if (boxRef.current) {
+      const rect = boxRef.current.getBoundingClientRect()
+      const x = e.clientX - rect.left
+      const y = e.clientY - rect.top
+      // Clamp to box bounds
+      const clampedX = Math.max(0, Math.min(BOX_WIDTH, x))
+      const clampedY = Math.max(0, Math.min(BOX_HEIGHT, y))
+      setMousePosition({ x: clampedX, y: clampedY })
+    }
+  }
+
+  // Initialize mouse position on hover enter
+  const handleMouseEnter = (e) => {
+    if (externalIsHovered === undefined) {
+      setInternalIsHovered(true)
+    }
+    if (boxRef.current && e) {
+      const rect = boxRef.current.getBoundingClientRect()
+      const x = e.clientX - rect.left
+      const y = e.clientY - rect.top
+      const clampedX = Math.max(0, Math.min(BOX_WIDTH, x))
+      const clampedY = Math.max(0, Math.min(BOX_HEIGHT, y))
+      setMousePosition({ x: clampedX, y: clampedY })
+    }
+  }
+
+  // Specular highlight style
+  const specularHighlightStyle = useMemo(() => {
+    if (!isHovered) {
+      return { 
+        opacity: 0, 
+        pointerEvents: 'none',
+        visibility: 'hidden'
+      }
+    }
+    
+    const highlightSize = 400
+    // Default to center if mouse position is (0, 0) or not set
+    const highlightX = mousePosition.x > 0 ? mousePosition.x : BOX_WIDTH / 2
+    const highlightY = mousePosition.y > 0 ? mousePosition.y : BOX_HEIGHT / 2
+    
+    return {
+      position: 'absolute',
+      left: `${highlightX}px`,
+      top: `${highlightY}px`,
+      width: `${highlightSize}px`,
+      height: `${highlightSize}px`,
+      borderRadius: '50%',
+      background: 'radial-gradient(circle, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.25) 15%, rgba(255, 255, 255, 0.1) 35%, rgba(255, 255, 255, 0.05) 55%, transparent 80%)',
+      transform: 'translate(-50%, -50%)',
+      pointerEvents: 'none',
+      zIndex: 999,
+      opacity: .45,
+      visibility: 'visible',
+      transition: 'opacity 0.2s ease-out',
+      mixBlendMode: 'screen',
+      filter: 'blur(10px)',
+    }
+  }, [isHovered, mousePosition])
+
 
   return (
     <div 
+      ref={rootRef}
       className={className ? `relative ${className}` : 'relative'}
       style={{ 
         ...STATIC_STYLES.container, 
@@ -184,8 +257,9 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
         maxHeight: `${BOX_HEIGHT}px`,
         boxSizing: 'border-box',
       }}
-      onMouseEnter={externalIsHovered === undefined ? () => setInternalIsHovered(true) : undefined}
+      onMouseEnter={handleMouseEnter}
       onMouseLeave={externalIsHovered === undefined ? () => setInternalIsHovered(false) : undefined}
+      onMouseMove={isHovered ? handleMouseMove : undefined}
     >
       <HaloGlow
         blobGridColors={blobGridColors}
@@ -197,6 +271,7 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
 
       {/* Main Box Container */}
       <div
+        ref={boxRef}
         style={{
           position: 'relative',
           width: `${BOX_WIDTH}px`,
@@ -215,7 +290,7 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
         <div style={gradientOverlayStyle} />
 
         {/* Shading Layers */}
-        <ShadingLayers baseColor={baseColor} lightCornerSvg={lightCornerSvg} />
+        <ShadingLayers baseColor={baseColor} lightCornerSvg={lightCornerSvg} isHovered={isHovered} />
 
         {/* Noise Overlay */}
         <div
@@ -248,6 +323,9 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
           circleSize={circleSize}
           isHovered={isHovered}
         />
+
+        {/* Specular Highlight - placed after blobs to be on top */}
+        <div style={specularHighlightStyle} />
 
         {/* Progress Indicator */}
         {!hideProgressIndicator && <ProgressIndicator progress={progress} baseColor={baseColor} />}
