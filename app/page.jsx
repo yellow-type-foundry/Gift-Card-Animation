@@ -139,7 +139,7 @@ export default function Home() {
   const [animationType, setAnimationType] = useState('highlight') // Animation type: 'highlight', 'breathing', or 'none'
   const [enable3D, setEnable3D] = useState(false) // Standalone 3D toggle that works with highlight or breathing
   const [layoutNumber, setLayoutNumber] = useState('1') // '1' | '2' - which layout to use
-  const [style, setStyle] = useState('A') // 'A' | 'B' | 'C' - for Layout 1 only: Style A = Box1/Envelope1, Style B = Box2/Envelope2, Style C = Box3/Envelope3
+  const [style, setStyle] = useState('1') // '1' | '2' | '3' - for Layout 1 only: Style 1 = Box1/Envelope1, Style 2 = Box2/Envelope2, Style 3 = Box3/Envelope3
   const [viewType, setViewType] = useState('mixed') // 'mixed' | 'batch' | 'single' - what to display
   const [mixSeed, setMixSeed] = useState(0) // Seed to regenerate mix when toggled
   const [showSettingsMenu, setShowSettingsMenu] = useState(false) // Mobile settings menu visibility
@@ -276,24 +276,24 @@ export default function Home() {
   
   // Helper function to get Single 1 specific props (with Box1/Box2 controls)
   const getSingle1Props = useCallback((card, useColoredBackground, layoutNum = '1', animationType = 'highlight', enable3D = false) => {
-    // Layout 1 single cards: Switch between Box1 (Style A) and Box2 (Style B)
-    // Style A: single1 config (Box1)
-    // Style B: Use EXACT same config logic as batch card - reads from 'default' for layout flags, 'layout1StyleB' for envelope/container
-    const singleConfigKey = style === 'A' ? 'single1' : 'default' // Batch uses 'default' as base layoutConfig
+    // Layout 1 single cards: Switch between Box1 (Style 1) and Box2 (Style 2)
+    // Style 1: single1 config (Box1)
+    // Style 2: Use EXACT same config logic as batch card - reads from 'default' for layout flags, 'layout1StyleB' for envelope/container
+    const singleConfigKey = style === '1' ? 'single1' : 'default' // Batch uses 'default' as base layoutConfig
     const layoutConfig = LAYOUT_CONFIG[singleConfigKey] || LAYOUT_CONFIG.single1 // Fallback to single1
     
-    // For Style B, use EXACT same config logic as batch card
+    // For Style 2, use EXACT same config logic as batch card
     let effectiveLayoutConfig = layoutConfig
     let effectiveEnvelopeContainer = effectiveLayoutConfig.envelopeContainer
     
-    if (style === 'B') {
-      // For single cards Style B, use layout1SingleStyleB (has enableConfetti)
+    if (style === '2') {
+      // For single cards Style 2, use layout1SingleStyleB (has enableConfetti)
       // For batch cards, use layout1StyleB (batch config)
       // Since this is getSingle1Props, we use layout1SingleStyleB
       effectiveLayoutConfig = LAYOUT_CONFIG.layout1SingleStyleB || LAYOUT_CONFIG.layout1StyleB
       effectiveEnvelopeContainer = effectiveLayoutConfig.envelopeContainer || LAYOUT_CONFIG.layout1StyleB.envelopeContainer
     }
-    // Style C uses the same config as Style B for now (Box3/Envelope3 will be handled in SentCard)
+    // Style 3 uses the same config as Style 2 for now (Box3/Envelope3 will be handled in SentCard)
     
     const effectiveEnvelopeScale = effectiveLayoutConfig?.envelope?.scale || 1
     const effectiveEnvelopeOffsetY = effectiveLayoutConfig?.envelope?.offsetY || 0
@@ -318,10 +318,10 @@ export default function Home() {
       progressOutsideEnvelope: layoutConfig.progressOutsideEnvelope,
       showRedline: effectiveLayoutConfig.showRedline || false,
       // Hide envelope setting - ONLY difference: single uses Box2 (showGiftBoxWhenHidden: true)
-      hideEnvelope: (style === 'B' || style === 'C') ? true : (layoutConfig.hideEnvelope || false),
-      showGiftBoxWhenHidden: (style === 'B' || style === 'C') ? true : false, // Style B = Box2, Style C = Box3
-      // Box1 exclusive controls (Style A only - Box1)
-      useBox1: style === 'A' ? !!layoutConfig.box1 : false,
+      hideEnvelope: (style === '2' || style === '3') ? true : (layoutConfig.hideEnvelope || false),
+      showGiftBoxWhenHidden: (style === '2' || style === '3') ? true : false, // Style 2 = Box2, Style 3 = Box3
+      // Box1 exclusive controls (Style 1 only - Box1)
+      useBox1: style === '1' ? !!layoutConfig.box1 : false,
       // Layout 1 style (for Box3/Envelope3 support)
       layout1Style: style,
       box1OffsetY: layoutConfig.box1?.offsetY,
@@ -353,8 +353,8 @@ export default function Home() {
       envelopeBoxSaturation: effectiveEnvelopeContainer?.boxSaturation,
       hidePaper: effectiveLayoutConfig.hidePaper !== undefined ? effectiveLayoutConfig.hidePaper : false,
       // Layout flags - EXACT same as batch card
-      hideProgressBarInBox: (style === 'B') ? true : (effectiveLayoutConfig.hideProgressBarInBox || false),
-      centerLogoInBox: style === 'B' ? (effectiveLayoutConfig.logoContainer?.centerLogo !== undefined ? effectiveLayoutConfig.logoContainer.centerLogo : false) : (effectiveLayoutConfig.centerLogoInBox || false),
+      hideProgressBarInBox: (style === '2') ? true : (effectiveLayoutConfig.hideProgressBarInBox || false),
+      centerLogoInBox: style === '2' ? (effectiveLayoutConfig.logoContainer?.centerLogo !== undefined ? effectiveLayoutConfig.logoContainer.centerLogo : false) : (effectiveLayoutConfig.centerLogoInBox || false),
       enableConfetti: effectiveLayoutConfig.enableConfetti || false,
       // Header settings - EXACT same as batch card
       headerHeight: effectiveLayoutConfig.header.height,
@@ -422,12 +422,12 @@ export default function Home() {
     const isLayout2 = !useSingleConfig && layoutNum === '2'
     
     // ============================================================================
-    // LAYOUT 1: Style switching between Style A and Style B
+    // LAYOUT 1: Style switching between Style 1 and Style 2
     // ============================================================================
-    // Style A:
+    // Style 1:
     //   - Single card: Box1 (Box1 with PNG image)
     //   - Batch card: Envelope1 (Envelope1 with 8 breathing grid cells)
-    // Style B:
+    // Style 2:
     //   - Single card: Box2 (Box2 component)
     //   - Batch card: Envelope2 (Envelope2 with paper component)
     // For Layout 2 and other layouts, use their own config values
@@ -437,12 +437,12 @@ export default function Home() {
     let effectiveLayoutConfig = layoutConfig
     let effectiveEnvelopeContainer = effectiveLayoutConfig.envelopeContainer
     
-    if (isLayout1 && !useSingleConfig && style === 'B') {
-      // Style B batch: Use Layout 1 Style B's separate config (does NOT affect Layout 2)
+    if (isLayout1 && !useSingleConfig && style === '2') {
+      // Style 2 batch: Use Layout 1 Style 2's separate config (does NOT affect Layout 2)
       effectiveLayoutConfig = LAYOUT_CONFIG.layout1StyleB
       effectiveEnvelopeContainer = LAYOUT_CONFIG.layout1StyleB.envelopeContainer
     }
-    // Style A: Use Layout 1's config (already set as layoutConfig)
+    // Style 1: Use Layout 1's config (already set as layoutConfig)
     
     // ============================================================================
     // ENVELOPE SETTINGS - Layout-specific overrides
@@ -472,26 +472,26 @@ export default function Home() {
       // LAYOUT 1 SPECIFIC: hideEnvelope based on style
       // ============================================================================
       // Single cards: 
-      //   - Style A: useBox1=true, hideEnvelope=false (Box1)
-      //   - Style B: hideEnvelope=true, showGiftBoxWhenHidden=true (Box2)
-      //   - Style C: hideEnvelope=true, showGiftBoxWhenHidden=true (Box3)
+      //   - Style 1: useBox1=true, hideEnvelope=false (Box1)
+      //   - Style 2: hideEnvelope=true, showGiftBoxWhenHidden=true (Box2)
+      //   - Style 3: hideEnvelope=true, showGiftBoxWhenHidden=true (Box3)
       // Batch cards:
-      //   - Style A: hideEnvelope=false (Envelope1)
-      //   - Style B: hideEnvelope=true, showGiftBoxWhenHidden=false (Envelope2)
-      //   - Style C: hideEnvelope=true, showGiftBoxWhenHidden=false (Envelope3)
+      //   - Style 1: hideEnvelope=false (Envelope1)
+      //   - Style 2: hideEnvelope=true, showGiftBoxWhenHidden=false (Envelope2)
+      //   - Style 3: hideEnvelope=true, showGiftBoxWhenHidden=false (Envelope3)
       // For Layout 2 and single configs, use their own config value
       hideEnvelope: isLayout1 
-        ? (useSingleConfig ? ((style === 'B' || style === 'C') ? true : false) : ((style === 'B' || style === 'C') ? true : false))
+        ? (useSingleConfig ? ((style === '2' || style === '3') ? true : false) : ((style === '2' || style === '3') ? true : false))
         : (layoutConfig.hideEnvelope || false),
       
       // Show gift box when envelope is hidden
-      // Style B single: showGiftBoxWhenHidden=true (Box2)
-      // Style C single: showGiftBoxWhenHidden=true (Box3)
-      // Style B batch: showGiftBoxWhenHidden=false (Envelope2)
-      // Style C batch: showGiftBoxWhenHidden=false (Envelope3)
-      // Style A: showGiftBoxWhenHidden=false (Box1/Envelope1 don't use this)
+      // Style 2 single: showGiftBoxWhenHidden=true (Box2)
+      // Style 3 single: showGiftBoxWhenHidden=true (Box3)
+      // Style 2 batch: showGiftBoxWhenHidden=false (Envelope2)
+      // Style 3 batch: showGiftBoxWhenHidden=false (Envelope3)
+      // Style 1: showGiftBoxWhenHidden=false (Box1/Envelope1 don't use this)
       showGiftBoxWhenHidden: isLayout1
-        ? (useSingleConfig ? ((style === 'B' || style === 'C') ? true : false) : ((style === 'B' || style === 'C') ? false : false))
+        ? (useSingleConfig ? ((style === '2' || style === '3') ? true : false) : ((style === '2' || style === '3') ? false : false))
         : (effectiveLayoutConfig.showGiftBoxWhenHidden || false),
       // Layout 1 style (for Box3/Envelope3 support)
       layout1Style: isLayout1 ? style : undefined,
@@ -500,8 +500,8 @@ export default function Home() {
       // LAYOUT 1 SPECIFIC: hideProgressBarInBox
       // ============================================================================
       // Box progress bar setting (false for Layout 1 batch - Envelope 1, otherwise use config)
-      // Layout 1 style B: Hide progress bar in box/envelope
-      hideProgressBarInBox: (isLayout1 && style === 'B') ? true : (effectiveLayoutConfig.hideProgressBarInBox || false),
+      // Layout 1 style 2: Hide progress bar in box/envelope
+      hideProgressBarInBox: (isLayout1 && style === '2') ? true : (effectiveLayoutConfig.hideProgressBarInBox || false),
       
       // Box logo centering setting
       centerLogoInBox: effectiveLayoutConfig.centerLogoInBox || false,
@@ -525,8 +525,8 @@ export default function Home() {
       // ============================================================================
       // ENVELOPE CONTAINER SETTINGS
       // ============================================================================
-      // Style B batch: Uses Layout 2's envelopeContainer (has paper - padding.top: 46.5)
-      // Style A batch: Uses Layout 1's default envelopeContainer (no paper - padding.top: 21)
+      // Style 2 batch: Uses Layout 2's envelopeContainer (has paper - padding.top: 46.5)
+      // Style 1 batch: Uses Layout 1's default envelopeContainer (no paper - padding.top: 21)
       // Layout 2: Use their own envelopeContainer settings
       envelopeContainerPadding: effectiveEnvelopeContainer?.padding,
       envelopeContainerMargin: effectiveEnvelopeContainer?.margin,
@@ -539,7 +539,7 @@ export default function Home() {
       // Paper visibility control (for Envelope2)
       hidePaper: effectiveLayoutConfig.hidePaper !== undefined ? effectiveLayoutConfig.hidePaper : false,
       // Box1 exclusive controls (not used for batch cards - batch uses Envelope1/Envelope2)
-      useBox1: false, // Batch cards don't use Box1, they use Envelope1 (Style A) or Envelope2 (Style B)
+      useBox1: false, // Batch cards don't use Box1, they use Envelope1 (Style 1) or Envelope2 (Style 2)
       // Header settings (for all layouts) - Use effective layout config
       headerHeight: effectiveLayoutConfig.header.height,
       headerUseFlex: effectiveLayoutConfig.header.useFlex,

@@ -161,7 +161,7 @@ const SentCard = ({
   const confettiCanvasRef = useRef(null)
   const confettiCanvasFrontRef = useRef(null)
   const confettiCanvasMirroredRef = useRef(null)
-  // Layout 1 Style B confetti: Multiple canvas layers for varied blur
+  // Layout 1 Style 2 confetti: Multiple canvas layers for varied blur
   const confettiCanvasBlur1Ref = useRef(null) // 0.5-2px blur
   const confettiCanvasBlur2Ref = useRef(null) // 2-4px blur
   const confettiCanvasBlur3Ref = useRef(null) // 4-6px blur
@@ -424,14 +424,14 @@ const SentCard = ({
   const PROGRESS_BAR_SATURATION = 50 // Saturation for progress bar indicator (0-100)
 
   // Extract dominant color from gift container image (for Single 1) or boxImage (for other layouts)
-  // For Style B (Box2), use brand color from logo instead of cover image
+  // For Style 2 (Box2), use brand color from logo instead of cover image
   const imageForColorExtraction = useBox1 && box1Image ? box1Image : boxImage
   const { dominantColor: extractedDominantColor } = useDominantColor(imageForColorExtraction, '#f4c6fa')
   
-  // For Style B (Box2), use brand color from logo for theming instead of cover image
+  // For Style 2 (Box2), use brand color from logo for theming instead of cover image
   const dominantColor = useMemo(() => {
     if (hideEnvelope && showGiftBoxWhenHidden && !useBox1) {
-      // Style B (Box2): Use brand color from logo for header theming
+      // Style 2 (Box2): Use brand color from logo for header theming
       const brandColor = LOGO_BRAND_COLORS[svgLogoPath]
       return brandColor || extractedDominantColor // Fallback to extracted color if no brand color
     }
@@ -497,13 +497,13 @@ const SentCard = ({
   // Calculate box color for Box3 (Layout3Box) - use brand color directly without HSL adjustments (matching Layout 3)
   const box3Color = useMemo(() => {
     const isBox3 = (hideEnvelope && showGiftBoxWhenHidden && layout2BoxType === '3') || 
-                   (hideEnvelope && showGiftBoxWhenHidden && layout1Style === 'C')
+                   (hideEnvelope && showGiftBoxWhenHidden && layout1Style === '3')
     if (isBox3) {
       // For single cards (Box3), use vibrant brand color
       // Look up brand color from map
       const brandColor = LOGO_BRAND_COLORS[svgLogoPath] || '#1987C7'
-      // For Layout 1 Style C and Layout 2 Style 3, reduce vibrancy by 20% (reduce saturation by 20%)
-      if (layout1Style === 'C' || layout2BoxType === '3') {
+      // For Layout 1 Style 3 and Layout 2 Style 3, reduce vibrancy by 20% (reduce saturation by 20%)
+      if (layout1Style === '3' || layout2BoxType === '3') {
         const [h, s, l] = hexToHsl(brandColor)
         const reducedS = s * 0.8 // Reduce saturation by 20%
         return hslToHex(h, reducedS, l)
@@ -559,11 +559,11 @@ const SentCard = ({
   // Calculate vibrant color for Envelope3 - keep theming but match Box3 vibrancy
   const envelope3Color = useMemo(() => {
     const isEnvelope3 = (hideEnvelope && !showGiftBoxWhenHidden && layout2BoxType === '3') ||
-                        (hideEnvelope && !showGiftBoxWhenHidden && layout1Style === 'C')
+                        (hideEnvelope && !showGiftBoxWhenHidden && layout1Style === '3')
     if (isEnvelope3) {
       // For batch cards (Envelope3), use themed color but make it vibrant to match Box3
-      // For Layout 1 Style C and Layout 2 Style 3, reduce vibrancy by 20% (reduce deltaS from 50 to 40)
-      const deltaS = (layout1Style === 'C' || layout2BoxType === '3') ? 40 : 50
+      // For Layout 1 Style 3 and Layout 2 Style 3, reduce vibrancy by 20% (reduce deltaS from 50 to 40)
+      const deltaS = (layout1Style === '3' || layout2BoxType === '3') ? 40 : 50
       return makeVibrantColor(envelopeBoxColor, deltaS)
     }
     return envelopeBoxColor // Fallback to envelopeBoxColor if not Envelope3
@@ -592,16 +592,16 @@ const SentCard = ({
   // Confetti animation - disabled for Batch 2 and Single 2, but can be enabled via prop
   const shouldShowConfetti = enableConfetti || !hideEnvelope
   
-  // Layout 1 Style B detection: Uses advanced confetti system (box collision, multiple blur layers)
-  // Style B has: hideEnvelope=true, hideProgressBarInBox=true, enableConfetti=true
+  // Layout 1 Style 2 detection: Uses advanced confetti system (box collision, multiple blur layers)
+  // Style 2 has: hideEnvelope=true, hideProgressBarInBox=true, enableConfetti=true
   const isLayout1StyleB = hideEnvelope && hideProgressBarInBox && enableConfetti
   
-  // Pass blur canvas refs array for Layout 1 Style B (uses advanced confetti system)
+  // Pass blur canvas refs array for Layout 1 Style 2 (uses advanced confetti system)
   const blurCanvasRefs = useMemo(() => {
     return isLayout1StyleB ? [confettiCanvasBlur1Ref, confettiCanvasBlur2Ref, confettiCanvasBlur3Ref, confettiCanvasBlur4Ref] : null
   }, [isLayout1StyleB])
   
-  // Layout 1 Style B: Use advanced confetti hook (has box collision, blur layers, etc.)
+  // Layout 1 Style 2: Use advanced confetti hook (has box collision, blur layers, etc.)
   const finalPauseState = pauseConfetti || shouldPauseConfetti
   useConfettiLayout0(
     isLayout1StyleB && shouldShowConfetti && effectiveHovered, 
@@ -616,7 +616,7 @@ const SentCard = ({
     pauseAtFrame,
     immediateFrame
   )
-  // Layout 1 Style A and other layouts: Use Layout 1 confetti hook
+  // Layout 1 Style 1 and other layouts: Use Layout 1 confetti hook
   useConfettiLayout1(
     !isLayout1StyleB && shouldShowConfetti && effectiveHovered, 
     !isLayout1StyleB && shouldShowConfetti && allAccepted, 
@@ -655,13 +655,13 @@ const SentCard = ({
     zIndex: 0
   }), [])
 
-  // Layout 1 Style B: Use advanced blur values with variation (multiple blur layers)
-  // Layout 1 Style A: Use standard blur values
+  // Layout 1 Style 2: Use advanced blur values with variation (multiple blur layers)
+  // Layout 1 Style 1: Use standard blur values
   const CONFETTI_BLUR_1 = isLayout1StyleB ? 'blur(1px)' : null // 1px blur
   const CONFETTI_BLUR_2 = isLayout1StyleB ? 'blur(3px)' : null // 3px blur
   const CONFETTI_BLUR_3 = isLayout1StyleB ? 'blur(7px)' : null // 7px blur
   const CONFETTI_BLUR_4 = isLayout1StyleB ? 'blur(10px)' : null // 10px blur
-  // Layout 1 Style A: Standard blur values
+  // Layout 1 Style 1: Standard blur values
   const CONFETTI_BLUR = isLayout1StyleB ? null : 'blur(1.25px)'
   const CONFETTI_BACK_BLUR = isLayout1StyleB ? null : 'blur(4px)'
   // Separate blur for mirrored confetti
@@ -789,7 +789,7 @@ const SentCard = ({
           right: '0px',
           bottom: '0px'
         }),
-    // Layout 1 single style B: Box should be behind union shape (zIndex: 25)
+    // Layout 1 single style 2: Box should be behind union shape (zIndex: 25)
     // Condition: hideEnvelope && showGiftBoxWhenHidden && !useBox1 (Box2)
     zIndex: (hideEnvelope && showGiftBoxWhenHidden && !useBox1) 
       ? 20  // Behind union shape (zIndex: 25)
@@ -804,36 +804,42 @@ const SentCard = ({
   
   // Inner wrapper style - absolutely positioned, handles scale and offsetY
   // For single cards with Box2, use boxOffsetY if provided, otherwise use envelopeOffsetY
-  // Box3 (layout2BoxType === '3' or layout1Style === 'C') always uses the batch card's envelope offsetY to match Envelope3
+  // Box3 (layout2BoxType === '3' or layout1Style === '3') uses its own offsetY
+  // Envelope3 (layout2BoxType === '3' or layout1Style === '3') uses its own offsetY (separate from Box3)
   // Box2 (layout2BoxType === '2' or default) uses boxOffsetY from single2.box.offsetY
-  const layout2Box3OffsetY = -7 // Layout 2 batch card envelope offsetY
-  const layout1Box3OffsetY = 32 // Layout 1 Style C Box3/Envelope3 offsetY
-  const layout1Box3Scale = 1.125 // Layout 1 Style C Box3/Envelope3 scale
+  const layout2Box3OffsetY = -7 // Layout 2 single card Box3 offsetY
+  const layout2Envelope3OffsetY = 0 // Layout 2 batch card Envelope3 offsetY (exclusive, doesn't affect Box3)
+  const layout1Box3OffsetY = 32 // Layout 1 Style 3 Box3/Envelope3 offsetY (shared for Layout 1)
+  const layout1Box3Scale = 1.125 // Layout 1 Style 3 Box3/Envelope3 scale
   const isBox3 = (hideEnvelope && showGiftBoxWhenHidden && !useBox1 && layout2BoxType === '3') ||
-                 (hideEnvelope && showGiftBoxWhenHidden && !useBox1 && layout1Style === 'C')
+                 (hideEnvelope && showGiftBoxWhenHidden && !useBox1 && layout1Style === '3')
   const isEnvelope3 = (hideEnvelope && !showGiftBoxWhenHidden && layout2BoxType === '3') ||
-                      (hideEnvelope && !showGiftBoxWhenHidden && layout1Style === 'C')
-  // For Layout 2 Box3, use -7. For Layout 1 Style C Box3/Envelope3, use -16
-  const box3OffsetY = (layout1Style === 'C') ? layout1Box3OffsetY : ((layout2BoxType === '3') ? layout2Box3OffsetY : envelopeOffsetY)
-  const effectiveOffsetY = (isBox3 || isEnvelope3)
+                      (hideEnvelope && !showGiftBoxWhenHidden && layout1Style === '3')
+  // Box3 offsetY: Layout 1 Style 3 uses layout1Box3OffsetY, Layout 2 uses layout2Box3OffsetY
+  const box3OffsetY = (layout1Style === '3') ? layout1Box3OffsetY : ((layout2BoxType === '3') ? layout2Box3OffsetY : envelopeOffsetY)
+  // Envelope3 offsetY: Layout 1 Style 3 uses layout1Box3OffsetY, Layout 2 uses layout2Envelope3OffsetY (separate from Box3)
+  const envelope3OffsetY = (layout1Style === '3') ? layout1Box3OffsetY : ((layout2BoxType === '3') ? layout2Envelope3OffsetY : envelopeOffsetY)
+  const effectiveOffsetY = isBox3
     ? box3OffsetY 
-    : ((hideEnvelope && showGiftBoxWhenHidden && !useBox1 && layout2BoxType !== '3' && layout1Style !== 'C') 
-      ? (boxOffsetY !== undefined ? boxOffsetY : envelopeOffsetY) 
-      : envelopeOffsetY)
+    : (isEnvelope3
+      ? envelope3OffsetY
+      : ((hideEnvelope && showGiftBoxWhenHidden && !useBox1 && layout2BoxType !== '3' && layout1Style !== '3') 
+        ? (boxOffsetY !== undefined ? boxOffsetY : envelopeOffsetY) 
+        : envelopeOffsetY))
   // For single cards with Box2, use boxScale if provided, otherwise use envelopeScale
-  // Box3/Envelope3 (layout2BoxType === '3' or layout1Style === 'C') uses envelopeScale, except Layout 1 Style C uses 1.2
-  // For Layout 1 Style C, both Box3 and Envelope3 should use 1.2 scale
-  const box3Scale = (layout1Style === 'C') ? layout1Box3Scale : envelopeScale
-  // For Layout 1 Style C, ensure both Box3 and Envelope3 use 1.2 scale
-  // Priority: Layout 1 Style C > Layout 2 Box3/Envelope3 > Box2 > default envelopeScale
+  // Box3/Envelope3 (layout2BoxType === '3' or layout1Style === '3') uses envelopeScale, except Layout 1 Style 3 uses 1.125
+  // For Layout 1 Style 3, both Box3 and Envelope3 should use 1.125 scale
+  const box3Scale = (layout1Style === '3') ? layout1Box3Scale : envelopeScale
+  // For Layout 1 Style 3, ensure both Box3 and Envelope3 use 1.125 scale
+  // Priority: Layout 1 Style 3 > Layout 2 Box3/Envelope3 > Box2 > default envelopeScale
   const effectiveScale = useMemo(() => {
-    if (layout1Style === 'C' && (isBox3 || isEnvelope3)) {
-      return layout1Box3Scale // 1.2 for Layout 1 Style C
+    if (layout1Style === '3' && (isBox3 || isEnvelope3)) {
+      return layout1Box3Scale // 1.125 for Layout 1 Style 3
     }
     if (isBox3 || isEnvelope3) {
       return box3Scale // envelopeScale for Layout 2 Box3/Envelope3
     }
-    if (hideEnvelope && showGiftBoxWhenHidden && !useBox1 && layout2BoxType !== '3' && layout1Style !== 'C' && boxScale !== undefined) {
+    if (hideEnvelope && showGiftBoxWhenHidden && !useBox1 && layout2BoxType !== '3' && layout1Style !== '3' && boxScale !== undefined) {
       return boxScale // Box2 scale
     }
     return envelopeScale // Default
@@ -853,6 +859,16 @@ const SentCard = ({
       willChange: 'transform', // Optimize for transforms
     }
   }, [effectiveOffsetY, effectiveScale, isEnvelope3])
+
+  // Memoized style for Envelope3 scale transform (used in multiple places)
+  const envelope3ScaleStyle = useMemo(() => {
+    // Use layout1Box3Scale for Layout 1 Style 3, otherwise use scale 1 for Layout 2 Style 3 (no additional scaling)
+    const scale = (layout1Style === '3') ? layout1Box3Scale : 1
+    return {
+      transform: `scale(${scale})`,
+      transformOrigin: 'center center',
+    }
+  }, [layout1Style, layout1Box3Scale])
 
   const box1WrapperStyle = useMemo(() => ({
     position: 'relative',
@@ -910,7 +926,7 @@ const SentCard = ({
       {/* Full card confetti canvas - at card level to avoid overflow clipping */}
       {shouldShowConfetti && hideEnvelope && (
         <>
-          {/* Layout 1 Style B: Multiple blur layers for varied blur (1px to 10px) */}
+          {/* Layout 1 Style 2: Multiple blur layers for varied blur (1px to 10px) */}
           {isLayout1StyleB && CONFETTI_BLUR_1 ? (
             <>
               <canvas
@@ -933,7 +949,7 @@ const SentCard = ({
                 className="absolute inset-0 pointer-events-none"
                 style={{ zIndex: (hideEnvelope && showGiftBoxWhenHidden && !useBox1) ? 21 : 1, filter: CONFETTI_BLUR_4, position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
               />
-              {/* Front canvas for Layout 1 Style B - particles in front of box */}
+              {/* Front canvas for Layout 1 Style 2 - particles in front of box */}
               <canvas
                 ref={confettiCanvasFrontRef}
                 className="absolute inset-0 pointer-events-none"
@@ -956,13 +972,13 @@ const SentCard = ({
             </>
           ) : (
             <>
-              {/* Layout 1 Style A: Back layer - behind envelope/gift container */}
+              {/* Layout 1 Style 1: Back layer - behind envelope/gift container */}
               <canvas
                 ref={confettiCanvasRef}
                 className="absolute inset-0 pointer-events-none"
                 style={{ zIndex: 1, filter: CONFETTI_BACK_BLUR, position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
               />
-              {/* Layout 1 Style A: Front layer - in front of envelope/gift container */}
+              {/* Layout 1 Style 1: Front layer - in front of envelope/gift container */}
               <canvas
                 ref={confettiCanvasFrontRef}
                 className="absolute inset-0 pointer-events-none"
@@ -1112,7 +1128,7 @@ const SentCard = ({
                 style={{ zIndex: 1, pointerEvents: 'none', filter: CONFETTI_BACK_BLUR }}
               />
               {/* Confetti canvas (front layer - in front of envelope) */}
-              {/* For Layout 1 style B single cards (Box2), front particles should be above the box (zIndex: 20) */}
+              {/* For Layout 1 style 2 single cards (Box2), front particles should be above the box (zIndex: 20) */}
               <canvas
                 ref={confettiCanvasFrontRef}
                 className="absolute inset-0"
@@ -1148,7 +1164,7 @@ const SentCard = ({
               />
             </div>
           )}
-          {/* Header background for Box1 (Style A) - when overlayProgressOnEnvelope is false */}
+          {/* Header background for Box1 (Style 1) - when overlayProgressOnEnvelope is false */}
           {!overlayProgressOnEnvelope && useBox1 && (
             <div
               aria-hidden="true"
@@ -1280,7 +1296,7 @@ const SentCard = ({
               </div>
             ) : null}
             {hideEnvelope && showGiftBoxWhenHidden ? (
-              // Gift Box Container (for Single 2 or Layout 1 Style C) - supports Box1, Box2, or Box3
+              // Gift Box Container (for Single 2 or Layout 1 Style 3) - supports Box1, Box2, or Box3
               // Wrapped in inner div for absolute positioning with scale/offsetY
               <div style={envelopeInnerWrapperStyle}>
                 {useBox1 || layout2BoxType === '1' ? (
@@ -1297,14 +1313,14 @@ const SentCard = ({
                       style={box1ImageStyle}
                     />
                   </div>
-                ) : (layout2BoxType === '3' || layout1Style === 'C') ? (
+                ) : (layout2BoxType === '3' || layout1Style === '3') ? (
                   // Box3 (Layout3Box) - use vibrant brand color directly (matching Layout 3)
                   <Layout3Box
                     boxColor={box3Color}
                     logoPath={svgLogoPath}
                     progress={validatedProgress}
                     isHovered={isHovered}
-                    hideProgressIndicator={layout1Style === 'C'}
+                    hideProgressIndicator={layout1Style === '3'}
                   />
                 ) : (
                   // Box2 (default)
@@ -1337,18 +1353,18 @@ const SentCard = ({
             ) : hideEnvelope && !showGiftBoxWhenHidden && hideProgressBarInBox ? (
               // Envelope2 or Envelope3
               // Wrapped in inner div for absolute positioning with scale/offsetY
-              // For Style 3 (layout2BoxType === '3' or layout1Style === 'C'), use Envelope3 instead of Envelope2
+              // For Style 3 (layout2BoxType === '3' or layout1Style === '3'), use Envelope3 instead of Envelope2
               <div style={envelopeInnerWrapperStyle}>
-                {(layout2BoxType === '3' || layout1Style === 'C') ? (
+                {(layout2BoxType === '3' || layout1Style === '3') ? (
                   <Envelope3
                     boxColor={envelope3Color}
                     logoPath={svgLogoPath}
                     progress={validatedProgress}
                     coverImage={boxImage}
                     isHovered={isHovered}
-                    hideProgressIndicator={layout1Style === 'C'}
+                    hideProgressIndicator={layout1Style === '3'}
                     style={(() => {
-                      const scale = (isEnvelope3 && layout1Style === 'C') ? layout1Box3Scale : ((isEnvelope3) ? envelopeScale : 1)
+                      const scale = (isEnvelope3 && layout1Style === '3') ? layout1Box3Scale : ((isEnvelope3) ? envelopeScale : 1)
                       console.log('[SentCard] Envelope3 scale:', { isEnvelope3, layout1Style, scale, effectiveScale, layout1Box3Scale })
                       return {
                         transform: `scale(${scale})`,
@@ -1383,15 +1399,15 @@ const SentCard = ({
                 )}
               </div>
             ) : hideEnvelope && !showGiftBoxWhenHidden ? (
-              // LAYOUT 2 (Batch 2) or Layout 1 Style C (Batch): Envelope1, Envelope2, or Envelope3
-              // For Layout 1 Style C (layout1Style === 'C'), use Envelope3
+              // LAYOUT 2 (Batch 2) or Layout 1 Style 3 (Batch): Envelope1, Envelope2, or Envelope3
+              // For Layout 1 Style 3 (layout1Style === '3'), use Envelope3
               // For Layout 2 Style 1 (layout2BoxType === '1'), use Envelope1 (exactly like Layout 1, just scaled)
               // For Layout 2 Style 3 (layout2BoxType === '3'), use Envelope3
               // For Layout 2 Style 2 (default), use Envelope2
               <>
                 {console.log('[SentCard] hideEnvelope:', hideEnvelope, 'showGiftBoxWhenHidden:', showGiftBoxWhenHidden, 'hidePaper prop:', hidePaper) || null}
-                {(layout1Style === 'C' || layout2BoxType === '3') ? (
-                  // Envelope3 for Layout 1 Style C or Layout 2 Style 3
+                {(layout1Style === '3' || layout2BoxType === '3') ? (
+                  // Envelope3 for Layout 1 Style 3 or Layout 2 Style 3
                   <div style={envelopeInnerWrapperStyle}>
                     <Envelope3
                       boxColor={envelope3Color}
@@ -1399,15 +1415,8 @@ const SentCard = ({
                       progress={validatedProgress}
                       coverImage={boxImage}
                       isHovered={isHovered}
-                      hideProgressIndicator={layout1Style === 'C'}
-                      style={(() => {
-                        const scale = (isEnvelope3 && layout1Style === 'C') ? layout1Box3Scale : ((isEnvelope3) ? envelopeScale : 1)
-                        console.log('[SentCard] Envelope3 scale:', { isEnvelope3, layout1Style, scale, effectiveScale, layout1Box3Scale })
-                        return {
-                          transform: `scale(${scale})`,
-                          transformOrigin: 'center center',
-                        }
-                      })()}
+                      hideProgressIndicator={layout1Style === '3'}
+                      style={envelope3ScaleStyle}
                     />
                   </div>
                 ) : layout2BoxType === '1' ? (
@@ -1628,8 +1637,8 @@ const SentCard = ({
                       </svg>
                     </div>
                   </div>
-                ) : (layout1Style === 'C' || layout2BoxType === '3') ? (
-                  // Envelope3 for Layout 1 Style C or Layout 2 Style 3
+                ) : (layout1Style === '3' || layout2BoxType === '3') ? (
+                  // Envelope3 for Layout 1 Style 3 or Layout 2 Style 3
                   <div style={envelopeInnerWrapperStyle}>
                     <Envelope3
                       boxColor={envelope3Color}
@@ -1637,14 +1646,8 @@ const SentCard = ({
                       progress={validatedProgress}
                       coverImage={boxImage}
                       isHovered={isHovered}
-                      hideProgressIndicator={layout1Style === 'C'}
-                      style={(() => {
-                        const scale = (layout1Style === 'C') ? layout1Box3Scale : envelopeScale
-                        return {
-                          transform: `scale(${scale})`,
-                          transformOrigin: 'center center',
-                        }
-                      })()}
+                      hideProgressIndicator={layout1Style === '3'}
+                      style={envelope3ScaleStyle}
                     />
                   </div>
                 ) : (
