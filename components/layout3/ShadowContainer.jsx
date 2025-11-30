@@ -18,7 +18,7 @@ const ShadowContainer = ({ vibrantShadowColor, isHovered }) => {
       }}
     >
       <img
-        src="/assets/shadow3.png"
+        src="/assets/Shadow3.png"
         alt=""
         style={STATIC_STYLES.shadowImage}
       />
@@ -28,8 +28,8 @@ const ShadowContainer = ({ vibrantShadowColor, isHovered }) => {
           inset: 0,
           backgroundColor: vibrantShadowColor,
           mixBlendMode: 'color',
-          WebkitMaskImage: 'url(/assets/shadow3.png)',
-          maskImage: 'url(/assets/shadow3.png)',
+          WebkitMaskImage: 'url(/assets/Shadow3.png)',
+          maskImage: 'url(/assets/Shadow3.png)',
           WebkitMaskSize: '100% 100%',
           maskSize: '100% 100%',
           WebkitMaskRepeat: 'no-repeat',
@@ -45,8 +45,8 @@ const ShadowContainer = ({ vibrantShadowColor, isHovered }) => {
           backgroundColor: vibrantShadowColor,
           opacity: 0.95,
           mixBlendMode: 'color',
-          WebkitMaskImage: 'url(/assets/shadow3.png)',
-          maskImage: 'url(/assets/shadow3.png)',
+          WebkitMaskImage: 'url(/assets/Shadow3.png)',
+          maskImage: 'url(/assets/Shadow3.png)',
           WebkitMaskSize: '100% 100%',
           maskSize: '100% 100%',
           WebkitMaskRepeat: 'no-repeat',
