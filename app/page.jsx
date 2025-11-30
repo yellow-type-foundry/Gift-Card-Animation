@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import ControlBar from '@/components/ControlBar'
 import CardGrid from '@/components/CardGrid'
-import Layout3Canvas from '@/components/Layout3Canvas'
 import { shuffleArray, generateRandomSentCardData } from '@/utils/cardData'
 import { FOOTER_CONFIG, LAYOUT_CONFIG } from '@/constants/sentCardConstants'
 
@@ -139,11 +138,10 @@ export default function Home() {
   const [useColoredBackground, setUseColoredBackground] = useState(false) // Toggle for theming
   const [animationType, setAnimationType] = useState('highlight') // Animation type: 'highlight', 'breathing', or 'none'
   const [enable3D, setEnable3D] = useState(false) // Standalone 3D toggle that works with highlight or breathing
-  const [layoutNumber, setLayoutNumber] = useState('1') // '1' | '2' | '3' - which layout to use
+  const [layoutNumber, setLayoutNumber] = useState('1') // '1' | '2' - which layout to use
   const [style, setStyle] = useState('A') // 'A' | 'B' - for Layout 1 only: Style A = Box1/Envelope1, Style B = Box2/Envelope2
   const [viewType, setViewType] = useState('mixed') // 'mixed' | 'batch' | 'single' - what to display
   const [mixSeed, setMixSeed] = useState(0) // Seed to regenerate mix when toggled
-  const [layout3ShuffleSeed, setLayout3ShuffleSeed] = useState(0) // Seed to trigger Layout 3 shuffle
   const [showSettingsMenu, setShowSettingsMenu] = useState(false) // Mobile settings menu visibility
   const [layout2BoxType, setLayout2BoxType] = useState('2') // '1' | '2' | '3' - for Layout 2 single card: Box1, Box2, or Box3
   const [cardStates, setCardStates] = useState({
@@ -604,10 +602,6 @@ export default function Home() {
       setMixSeed(Date.now())
     }
     
-    // Trigger Layout 3 shuffle
-    if (layoutNumber === '3') {
-      setLayout3ShuffleSeed(Date.now())
-    }
   }, [viewType, layoutNumber])
   
   return (
@@ -645,10 +639,7 @@ export default function Home() {
           onLayout2BoxTypeChange={setLayout2BoxType}
         />
         {/* Content */}
-        {layoutNumber === '3' ? (
-          <Layout3Canvas shuffleSeed={layout3ShuffleSeed} />
-        ) : (
-          <CardGrid
+        <CardGrid
             key={`card-grid-${layoutNumber}-${style}`}
             activeTab={activeTab}
             cardStates={cardStates}
@@ -667,7 +658,6 @@ export default function Home() {
             getSentCard4Props={getSentCard4Props}
             layout2BoxType={layout2BoxType}
           />
-        )}
       </div>
     </div>
   )

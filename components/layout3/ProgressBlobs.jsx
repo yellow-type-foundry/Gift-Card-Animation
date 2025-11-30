@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react'
 import { BOX_WIDTH, BOX_HEIGHT, STATIC_STYLES } from '@/constants/layout3Tokens'
 
-const ProgressBlobs = ({ blobGridColors, blobAnimations, dotPositions, circleSize, isHovered }) => {
+const ProgressBlobs = ({ blobGridColors, blobAnimations, dotPositions, circleSize, isHovered, disableBlurReveal = false }) => {
   // Generate CSS keyframes for organic, randomized animations
   const blobKeyframes = useMemo(() => {
     if (blobAnimations.length === 0) return null
@@ -81,7 +81,7 @@ const ProgressBlobs = ({ blobGridColors, blobAnimations, dotPositions, circleSiz
                   inset 0px 0px 16px 0px rgba(255, 255, 255, 0.6),
                   inset 0px 0px 4px 0px rgba(255, 255, 255, 0.5)
                 `,
-                filter: isHovered ? 'blur(2px)' : 'blur(20px)', // Reveal blobs on hover by reducing blur
+                filter: disableBlurReveal ? 'blur(20px)' : (isHovered ? 'blur(2px)' : 'blur(20px)'), // Keep blur constant if disabled, otherwise reveal on hover
                 left: `${currentX}px`,
                 top: `${currentY}px`,
                 // Only transition filter, no transition for position (dots freeze in place when hover ends)

@@ -152,129 +152,61 @@ const EnvelopeLayers = ({ coverImage, baseColor, isHovered = false }) => {
                 }}
                 data-name="Cells"
               >
-                {/* Cell 04 - Base layer */}
+                {/* Cell 04 */}
                 <div
-                  className="grid-cell-base gc-4"
                   style={{
                     gridArea: '1 / 1',
                     backgroundColor: cellColor,
                     marginLeft: 0,
                     marginTop: 0,
-                    opacity: 0.2,
+                    opacity: CELL_OPACITY,
                     borderRadius: '4.457px',
                     width: `${CELL_SIZE}px`,
                     height: `${CELL_SIZE}px`,
-                    willChange: 'opacity',
                   }}
                   data-name="Cell 04"
                 />
-                {/* Cell 04 - Overlay layer */}
+                {/* Cell 03 */}
                 <div
-                  className="grid-cell-overlay gc-4"
-                  style={{
-                    gridArea: '1 / 1',
-                    backgroundColor: cellColor,
-                    marginLeft: 0,
-                    marginTop: 0,
-                    opacity: 0.10,
-                    borderRadius: '4.457px',
-                    width: `${CELL_SIZE}px`,
-                    height: `${CELL_SIZE}px`,
-                    willChange: 'opacity',
-                  }}
-                />
-                {/* Cell 03 - Base layer */}
-                <div
-                  className="grid-cell-base gc-3"
                   style={{
                     gridArea: '1 / 1',
                     backgroundColor: cellColor,
                     marginLeft: `${36.55}px`,
                     marginTop: 0,
-                    opacity: 0.2,
+                    opacity: CELL_OPACITY,
                     borderRadius: '4.457px',
                     width: `${CELL_SIZE}px`,
                     height: `${CELL_SIZE}px`,
-                    willChange: 'opacity',
                   }}
                   data-name="Cell 03"
                 />
-                {/* Cell 03 - Overlay layer */}
+                {/* Cell 02 */}
                 <div
-                  className="grid-cell-overlay gc-3"
-                  style={{
-                    gridArea: '1 / 1',
-                    backgroundColor: cellColor,
-                    marginLeft: `${36.55}px`,
-                    marginTop: 0,
-                    opacity: 0.10,
-                    borderRadius: '4.457px',
-                    width: `${CELL_SIZE}px`,
-                    height: `${CELL_SIZE}px`,
-                    willChange: 'opacity',
-                  }}
-                />
-                {/* Cell 02 - Base layer */}
-                <div
-                  className="grid-cell-base gc-2"
                   style={{
                     gridArea: '1 / 1',
                     backgroundColor: cellColor,
                     marginLeft: `${73.1}px`,
                     marginTop: 0,
-                    opacity: 0.2,
+                    opacity: CELL_OPACITY,
                     borderRadius: '4.457px',
                     width: `${CELL_SIZE}px`,
                     height: `${CELL_SIZE}px`,
-                    willChange: 'opacity',
                   }}
                   data-name="Cell 02"
                 />
-                {/* Cell 02 - Overlay layer */}
+                {/* Cell 01 */}
                 <div
-                  className="grid-cell-overlay gc-2"
-                  style={{
-                    gridArea: '1 / 1',
-                    backgroundColor: cellColor,
-                    marginLeft: `${73.1}px`,
-                    marginTop: 0,
-                    opacity: 0.10,
-                    borderRadius: '4.457px',
-                    width: `${CELL_SIZE}px`,
-                    height: `${CELL_SIZE}px`,
-                    willChange: 'opacity',
-                  }}
-                />
-                {/* Cell 01 - Base layer */}
-                <div
-                  className="grid-cell-base gc-1"
                   style={{
                     gridArea: '1 / 1',
                     backgroundColor: cellColor,
                     marginLeft: `${109.65}px`,
                     marginTop: 0,
-                    opacity: 0.2,
+                    opacity: CELL_OPACITY,
                     borderRadius: '4.457px',
                     width: `${CELL_SIZE}px`,
                     height: `${CELL_SIZE}px`,
-                    willChange: 'opacity',
                   }}
                   data-name="Cell 01"
-                />
-                {/* Cell 01 - Overlay layer */}
-                <div
-                  className="grid-cell-overlay gc-1"
-                  style={{
-                    gridArea: '1 / 1',
-                    backgroundColor: cellColor,
-                    marginLeft: `${109.65}px`,
-                    marginTop: 0,
-                    opacity: 0.10,
-                    borderRadius: '4.457px',
-                    width: `${CELL_SIZE}px`,
-                    height: `${CELL_SIZE}px`,
-                    willChange: 'opacity',
-                  }}
                 />
               </div>
             </div>

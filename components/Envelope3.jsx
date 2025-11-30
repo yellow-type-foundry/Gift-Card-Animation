@@ -4,7 +4,10 @@ import React, { useState, useEffect, useMemo } from 'react'
 import Image from 'next/image'
 import { makeThemedColor, makeVibrantColor } from '@/utils/colors'
 import { BOX_WIDTH, BOX_HEIGHT, BOX_RADIUS, STATIC_STYLES } from '@/constants/layout3Tokens'
+import { useBlobColors } from '@/hooks/useBlobColors'
+import { useDotAnimation } from '@/hooks/useDotAnimation'
 import EnvelopeLayers from '@/components/layout3/EnvelopeLayers'
+import ProgressBlobs from '@/components/layout3/ProgressBlobs'
 import ProgressIndicator from '@/components/layout3/ProgressIndicator'
 import ShadowContainer from '@/components/layout3/ShadowContainer'
 
@@ -36,6 +39,32 @@ const Envelope3 = ({
 
   // Base color from prop - used for all themed colors
   const baseColor = boxColor
+
+  // Use custom hooks for blob colors and dot animation
+  const { blobGridColors, blobAnimations } = useBlobColors(baseColor)
+
+  // Calculate progress ratio and circle size
+  const progressRatio = useMemo(() => {
+    return progress.current / progress.total
+  }, [progress])
+
+  const circleSize = useMemo(() => {
+    const padding = 1
+    const gap = 1
+    const availableWidth = BOX_WIDTH - (padding * 2)
+    const availableHeight = BOX_HEIGHT - (padding * 2)
+    const totalGapWidth = gap * 2
+    const totalGapHeight = gap * 2
+    
+    const maxCircleWidth = (availableWidth - totalGapWidth) / 3
+    const maxCircleHeight = (availableHeight - totalGapHeight) / 3
+    const maxSize = Math.min(maxCircleWidth, maxCircleHeight)
+    
+    const minSize = 8
+    return minSize + (maxSize - minSize) * progressRatio
+  }, [progressRatio])
+
+  const dotPositions = useDotAnimation(blobAnimations, isHovered, circleSize)
 
   // Themed colors
   const lightRimColor = useMemo(() => makeThemedColor(baseColor, 10), [baseColor])
@@ -276,6 +305,15 @@ const Envelope3 = ({
         />
 
         <div style={insetShadowsStyle} />
+
+        <ProgressBlobs
+          blobGridColors={blobGridColors}
+          blobAnimations={blobAnimations}
+          dotPositions={dotPositions}
+          circleSize={circleSize}
+          isHovered={isHovered}
+          disableBlurReveal={true}
+        />
 
         {/* Progress Indicator */}
         <ProgressIndicator progress={progress} baseColor={baseColor} />

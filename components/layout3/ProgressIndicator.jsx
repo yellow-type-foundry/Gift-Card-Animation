@@ -7,6 +7,14 @@ const ProgressIndicator = ({ progress, baseColor }) => {
   const lightRimColor = useMemo(() => makeThemedColor(baseColor, 10), [baseColor])
   const darkRimColor = useMemo(() => makeThemedColor(baseColor, -1), [baseColor])
 
+  // Show "Done" when progress is complete, otherwise show current/total
+  const progressText = useMemo(() => {
+    if (progress.current >= progress.total) {
+      return 'Done'
+    }
+    return `${progress.current}/${progress.total}`
+  }, [progress.current, progress.total])
+
   const progressTextShadowStyle = useMemo(
     () => ({
       position: 'absolute',
@@ -59,10 +67,10 @@ const ProgressIndicator = ({ progress, baseColor }) => {
     >
       <p style={STATIC_STYLES.progressText}>
         <span style={progressTextShadowStyle}>
-          {progress.current}/{progress.total}
+          {progressText}
         </span>
         <span style={progressTextGradientStyle}>
-          {progress.current}/{progress.total}
+          {progressText}
         </span>
       </p>
     </div>
