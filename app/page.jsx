@@ -145,6 +145,7 @@ export default function Home() {
   const [mixSeed, setMixSeed] = useState(0) // Seed to regenerate mix when toggled
   const [layout3ShuffleSeed, setLayout3ShuffleSeed] = useState(0) // Seed to trigger Layout 3 shuffle
   const [showSettingsMenu, setShowSettingsMenu] = useState(false) // Mobile settings menu visibility
+  const [layout2BoxType, setLayout2BoxType] = useState('2') // '1' | '2' | '3' - for Layout 2 single card: Box1, Box2, or Box3
   const [cardStates, setCardStates] = useState({
     card1: 'unopened',
     card2: 'unopened',
@@ -640,6 +641,8 @@ export default function Home() {
           onSettingsMenuToggle={setShowSettingsMenu}
           style={style}
           onStyleChange={setStyle}
+          layout2BoxType={layout2BoxType}
+          onLayout2BoxTypeChange={setLayout2BoxType}
         />
         {/* Content */}
         {layoutNumber === '3' ? (
@@ -662,6 +665,7 @@ export default function Home() {
             getSentCardProps={getSentCardProps}
             getSingle1Props={getSingle1Props}
             getSentCard4Props={getSentCard4Props}
+            layout2BoxType={layout2BoxType}
           />
         )}
       </div>

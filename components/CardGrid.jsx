@@ -23,7 +23,8 @@ const CardGrid = ({
   mixedCardTypes,
   getSentCardProps,
   getSingle1Props,
-  getSentCard4Props
+  getSentCard4Props,
+  layout2BoxType
 }) => {
   if (activeTab === 'gift') {
     return (
@@ -166,6 +167,7 @@ const CardGrid = ({
                         {...getSentCardProps(card, layoutNumber, useColoredBackground, animationType, enable3D, true)}
                         hideEnvelope={true}
                         showGiftBoxWhenHidden={true}
+                        layout2BoxType={layout2BoxType}
                       />
                     )
                   }
@@ -192,6 +194,7 @@ const CardGrid = ({
                     {...getSentCardProps(card, layoutNumber, useColoredBackground, animationType, enable3D, true)}
                     hideEnvelope={true}
                     showGiftBoxWhenHidden={true}
+                    layout2BoxType={layout2BoxType}
                   />
                 ))
               }
@@ -221,6 +224,7 @@ const CardGrid = ({
                     {...getSentCardProps(card, layoutNumber, useColoredBackground, animationType, enable3D, true)}
                     hideEnvelope={true}
                     showGiftBoxWhenHidden={true}
+                    layout2BoxType={layout2BoxType}
                   />
                 ))
               }

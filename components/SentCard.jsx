@@ -16,6 +16,7 @@ import Envelope1 from '@/components/sent-card/Envelope1'
 import CardShape from '@/components/sent-card/CardShape'
 import Box2 from '@/components/sent-card/Box2'
 import Envelope2 from '@/components/sent-card/Envelope2'
+import Layout3Box from '@/components/Layout3Box'
 import ShareModal from '@/components/ShareModal'
 import { PROGRESS_PILL_RADIUS, HEADER_OVERLAY_BG, PROGRESS_GLOW_BOX_SHADOW, ENVELOPE_DIMENSIONS, FOOTER_CONFIG } from '@/constants/sentCardConstants'
 
@@ -146,6 +147,8 @@ const SentCard = ({
   // Modal/sharing mode props
   forceHovered = false,
   pauseConfetti = false,
+  // Layout 2 box type selection: '1' | '2' | '3' (for single view only)
+  layout2BoxType = '2',
   pauseAtFrame = null, // Pause animation at specific frame for capture (e.g., 84 for peak)
   immediateFrame = null // Render confetti at this frame instantly (no animation, for fast capture)
 }) => {
@@ -340,9 +343,9 @@ const SentCard = ({
     isDone
   } = useProgressAnimation(progress)
   
-  // Select Box1 image randomly but consistently per card - only when useBox1 is true
+  // Select Box1 image randomly but consistently per card - when useBox1 is true or layout2BoxType is '1'
   const box1Image = useMemo(() => {
-    if (!useBox1) return null
+    if (!useBox1 && layout2BoxType !== '1') return null
     // Use boxImage as a seed for consistent random selection per card
     // This ensures each card gets a random brand that stays the same across re-renders
     let hash = 0
@@ -352,7 +355,7 @@ const SentCard = ({
     }
     const index = Math.abs(hash) % BOX1_IMAGES.length
     return BOX1_IMAGES[index]
-  }, [useBox1, boxImage])
+  }, [useBox1, layout2BoxType, boxImage])
   
   // Map PNG logo to SVG logo for Single 2 (Box2) text emboss styling
   // For Single 2, select logo randomly but consistently per card (same as box1Image)
@@ -1201,33 +1204,57 @@ const SentCard = ({
               </div>
             ) : null}
             {hideEnvelope && showGiftBoxWhenHidden ? (
-              // Gift Box Container (for Single 2)
+              // Gift Box Container (for Single 2) - supports Box1, Box2, or Box3
               // Wrapped in inner div for absolute positioning with scale/offsetY
               <div style={envelopeInnerWrapperStyle}>
-                <Box2
-                  progress={validatedProgress}
-                  boxColor={themedBoxColor}
-                  progressBarSourceColor={progressBarSourceColor}
-                  progressBarLuminance={PROGRESS_BAR_LUMINANCE}
-                  progressBarSaturation={PROGRESS_BAR_SATURATION}
-                  isHovered={isHovered}
-                  logoPath={svgLogoPath}
-                  logoBrandColor={logoBrandColor}
-                  animationType={animationType}
-                  enable3D={enable3D}
-                  parallaxX={parallaxX}
-                  parallaxY={parallaxY}
-                  tiltX={tiltX}
-                  tiltY={tiltY}
-                  hideProgressBar={hideProgressBarInBox}
-                  centerLogo={centerLogoInBox}
-                  logoScale={logoScale}
-                  // Box controls (overrides GIFT_BOX_TOKENS when provided)
-                  boxWidth={boxWidth}
-                  boxHeight={boxHeight}
-                  boxBorderRadius={boxBorderRadius}
-                  boxScale={boxScale}
-                />
+                {layout2BoxType === '1' ? (
+                  // Box1 Image
+                  <div style={box1WrapperStyle}>
+                    <Image
+                      src={box1Image}
+                      alt="Box1"
+                      fill
+                      sizes="200px"
+                      priority={true}
+                      quality={100}
+                      unoptimized={true}
+                      style={box1ImageStyle}
+                    />
+                  </div>
+                ) : layout2BoxType === '3' ? (
+                  // Box3 (Layout3Box)
+                  <Layout3Box
+                    boxColor={themedBoxColor}
+                    logoPath={svgLogoPath}
+                    progress={validatedProgress}
+                  />
+                ) : (
+                  // Box2 (default)
+                  <Box2
+                    progress={validatedProgress}
+                    boxColor={themedBoxColor}
+                    progressBarSourceColor={progressBarSourceColor}
+                    progressBarLuminance={PROGRESS_BAR_LUMINANCE}
+                    progressBarSaturation={PROGRESS_BAR_SATURATION}
+                    isHovered={isHovered}
+                    logoPath={svgLogoPath}
+                    logoBrandColor={logoBrandColor}
+                    animationType={animationType}
+                    enable3D={enable3D}
+                    parallaxX={parallaxX}
+                    parallaxY={parallaxY}
+                    tiltX={tiltX}
+                    tiltY={tiltY}
+                    hideProgressBar={hideProgressBarInBox}
+                    centerLogo={centerLogoInBox}
+                    logoScale={logoScale}
+                    // Box controls (overrides GIFT_BOX_TOKENS when provided)
+                    boxWidth={boxWidth}
+                    boxHeight={boxHeight}
+                    boxBorderRadius={boxBorderRadius}
+                    boxScale={boxScale}
+                  />
+                )}
               </div>
             ) : hideEnvelope && !showGiftBoxWhenHidden && hideProgressBarInBox ? (
               // Envelope2

@@ -24,7 +24,9 @@ const ControlBar = ({
   showSettingsMenu,
   onSettingsMenuToggle,
   style,
-  onStyleChange
+  onStyleChange,
+  layout2BoxType = '2',
+  onLayout2BoxTypeChange = () => {}
 }) => {
 
   const handleViewChange = (e) => {
@@ -299,6 +301,44 @@ const ControlBar = ({
                           </button>
                         </div>
                       )}
+                      {/* Box selector - only show for Layout 2 */}
+                      {layoutNumber === '2' && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-[#525F7A]">Box</span>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => onLayout2BoxTypeChange('1')}
+                              className={`px-3 py-1 rounded-[8px] text-xs transition-colors ${
+                                layout2BoxType === '1' 
+                                  ? 'bg-[#5a3dff] text-white' 
+                                  : 'bg-gray-100 text-[#525F7A] hover:bg-gray-200'
+                              }`}
+                            >
+                              1
+                            </button>
+                            <button
+                              onClick={() => onLayout2BoxTypeChange('2')}
+                              className={`px-3 py-1 rounded-[8px] text-xs transition-colors ${
+                                layout2BoxType === '2' 
+                                  ? 'bg-[#5a3dff] text-white' 
+                                  : 'bg-gray-100 text-[#525F7A] hover:bg-gray-200'
+                              }`}
+                            >
+                              2
+                            </button>
+                            <button
+                              onClick={() => onLayout2BoxTypeChange('3')}
+                              className={`px-3 py-1 rounded-[8px] text-xs transition-colors ${
+                                layout2BoxType === '3' 
+                                  ? 'bg-[#5a3dff] text-white' 
+                                  : 'bg-gray-100 text-[#525F7A] hover:bg-gray-200'
+                              }`}
+                            >
+                              3
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </>,
@@ -510,6 +550,44 @@ const ControlBar = ({
                           }`}
                         />
                       </button>
+                    </div>
+                  )}
+                  {/* Box selector - only show for Layout 2 */}
+                  {layoutNumber === '2' && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-[#525F7A]">Box</span>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => onLayout2BoxTypeChange('1')}
+                          className={`px-3 py-1 rounded-[8px] text-xs transition-colors ${
+                            layout2BoxType === '1' 
+                              ? 'bg-[#5a3dff] text-white' 
+                              : 'bg-gray-100 text-[#525F7A] hover:bg-gray-200'
+                          }`}
+                        >
+                          1
+                        </button>
+                        <button
+                          onClick={() => onLayout2BoxTypeChange('2')}
+                          className={`px-3 py-1 rounded-[8px] text-xs transition-colors ${
+                            layout2BoxType === '2' 
+                              ? 'bg-[#5a3dff] text-white' 
+                              : 'bg-gray-100 text-[#525F7A] hover:bg-gray-200'
+                          }`}
+                        >
+                          2
+                        </button>
+                        <button
+                          onClick={() => onLayout2BoxTypeChange('3')}
+                          className={`px-3 py-1 rounded-[8px] text-xs transition-colors ${
+                            layout2BoxType === '3' 
+                              ? 'bg-[#5a3dff] text-white' 
+                              : 'bg-gray-100 text-[#525F7A] hover:bg-gray-200'
+                          }`}
+                        >
+                          3
+                        </button>
+                      </div>
                     </div>
                   )}
                   {/* View selector */}

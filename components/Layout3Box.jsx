@@ -14,7 +14,8 @@ import ProgressIndicator from '@/components/layout3/ProgressIndicator'
 import ShadingLayers from '@/components/layout3/ShadingLayers'
 
 /**
- * Layout3Box - A themed box component with gradient effects, shadows, and dynamic theming
+ * Layout3Box (box3) - A themed box component with gradient effects, shadows, and dynamic theming
+ * Referred to as "box3" in code for consistency with box1 and box2
  * @param {string} boxColor - The base color for theming (default: '#1987C7')
  * @param {string} logoPath - Path to the logo SVG file (default: '/assets/GiftSent/SVG Logo/Apple.svg')
  * @param {object} progress - Progress object with current and total (default: { current: 1, total: 25 })
