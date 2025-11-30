@@ -556,18 +556,29 @@ const SentCard = ({
     )
   }, [dominantColor, EFFECTIVE_BOX_LUMINANCE, EFFECTIVE_BOX_SATURATION])
 
-  // Calculate vibrant color for Envelope3 - keep theming but match Box3 vibrancy
+  // Calculate vibrant color for Envelope3 - match Box3's S and L values (vibrancy) but keep Envelope3's Hue
   const envelope3Color = useMemo(() => {
     const isEnvelope3 = (hideEnvelope && !showGiftBoxWhenHidden && layout2BoxType === '3') ||
                         (hideEnvelope && !showGiftBoxWhenHidden && layout1Style === '3')
     if (isEnvelope3) {
-      // For batch cards (Envelope3), use themed color but make it vibrant to match Box3
-      // For Layout 1 Style 3 and Layout 2 Style 3, reduce vibrancy by 20% (reduce deltaS from 50 to 40)
-      const deltaS = (layout1Style === '3' || layout2BoxType === '3') ? 40 : 50
-      return makeVibrantColor(envelopeBoxColor, deltaS)
+      // Get Box3's color to extract its S and L values
+      const brandColor = LOGO_BRAND_COLORS[svgLogoPath] || '#1987C7'
+      let box3S, box3L
+      if (layout1Style === '3' || layout2BoxType === '3') {
+        const [h, s, l] = hexToHsl(brandColor)
+        box3S = s * 0.8 // Box3's saturation (reduced by 20%)
+        box3L = l // Box3's lightness
+      } else {
+        const [h, s, l] = hexToHsl(brandColor)
+        box3S = s // Box3's saturation
+        box3L = l // Box3's lightness
+      }
+      // Apply Box3's S and L values to Envelope3's base color (keeping Envelope3's Hue)
+      const [envelopeH, envelopeS, envelopeL] = hexToHsl(envelopeBoxColor)
+      return hslToHex(envelopeH, box3S, box3L)
     }
     return envelopeBoxColor // Fallback to envelopeBoxColor if not Envelope3
-  }, [hideEnvelope, showGiftBoxWhenHidden, layout2BoxType, layout1Style, envelopeBoxColor])
+  }, [hideEnvelope, showGiftBoxWhenHidden, layout2BoxType, layout1Style, svgLogoPath, envelopeBoxColor])
 
   // Flap color - uses layout-specific luminance/saturation
   const envelopeFlapColor = useMemo(() => {

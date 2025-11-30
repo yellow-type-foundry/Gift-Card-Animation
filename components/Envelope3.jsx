@@ -10,6 +10,7 @@ import EnvelopeLayers from '@/components/layout3/EnvelopeLayers'
 import ProgressBlobs from '@/components/layout3/ProgressBlobs'
 import ProgressIndicator from '@/components/layout3/ProgressIndicator'
 import ShadowContainer from '@/components/layout3/ShadowContainer'
+import ShadingLayers from '@/components/layout3/ShadingLayers'
 
 /**
  * Envelope3 - A new envelope component with paper layer, cover image, and cells
@@ -241,68 +242,8 @@ const Envelope3 = ({
         {/* NEW Envelope Layers */}
         <EnvelopeLayers coverImage={coverImage} baseColor={baseColor} isHovered={isHovered} />
 
-        {/* Shading Layers (similar to Box3 but may need adjustments) */}
-        <div style={STATIC_STYLES.shadingContainer}>
-          {/* Dark rim */}
-          <div
-            style={{
-              position: 'absolute',
-              left: '5.55%',
-              right: '5.56%',
-              top: '50%',
-              transform: 'translateY(-50%) rotate(180deg)',
-              width: '160px',
-              height: '160px',
-              filter: 'blur(3px)',
-              mixBlendMode: 'overlay',
-              borderRadius: '28px',
-              background: `linear-gradient(135deg, rgba(0, 0, 0, 0) 40%, ${darkRimColor.rgba(0.5)} 100%)`,
-              boxShadow: `inset -16px -14px 16px 5px ${darkRimColor.rgba(0.3)}, inset 6px 12px 13px 5px rgba(255, 255, 255, 0.3)`,
-            }}
-          />
-
-          {/* Border rim */}
-          <div
-            style={{
-              position: 'absolute',
-              left: '50%',
-              top: '50%',
-              transform: 'translate(-50%, -50%) rotate(180deg)',
-              width: `${BOX_WIDTH}px`,
-              height: `${BOX_HEIGHT}px`,
-              border: '1.5px solid rgba(0, 0, 0, 0.4)',
-              borderRadius: `${BOX_RADIUS}px`,
-              filter: 'blur(1.5px)',
-              mixBlendMode: 'overlay',
-            }}
-          />
-
-          {/* Light corner */}
-          <div style={STATIC_STYLES.lightCornerWrapper}>
-            {lightCornerSvg && (
-              <div
-                style={STATIC_STYLES.lightCornerInner}
-                dangerouslySetInnerHTML={{ __html: lightCornerSvg }}
-              />
-            )}
-          </div>
-
-          {/* Light rim */}
-          <div
-            style={{
-              position: 'absolute',
-              left: '5.55%',
-              right: '5.56%',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              height: '160px',
-              background: `linear-gradient(135deg, rgba(255, 255, 255, 0) 40%, ${lightRimColor.rgba(0.75)} 100%)`,
-              borderRadius: `${BOX_RADIUS}px`,
-              filter: 'blur(5px)',
-              mixBlendMode: 'overlay',
-            }}
-          />
-        </div>
+        {/* Shading Layers - identical to Box3 */}
+        <ShadingLayers baseColor={baseColor} lightCornerSvg={lightCornerSvg} />
 
         {/* Noise Overlay */}
         <div
