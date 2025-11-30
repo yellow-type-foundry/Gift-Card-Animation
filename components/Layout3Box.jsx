@@ -562,6 +562,7 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
                   alignItems: 'center',
                   justifyContent: 'center',
                   overflow: 'visible',
+                  transform: 'scale(1.2)',
                   ...logoImageStyle,
                 }}
                 dangerouslySetInnerHTML={{ __html: logoSvg }}
@@ -576,6 +577,7 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
                   height: getLogoHeight(),
                   overflow: 'visible',
                   display: 'block', // Ensure no extra spacing
+                  transform: 'scale(1.1)',
                 }}
               />
             )}
