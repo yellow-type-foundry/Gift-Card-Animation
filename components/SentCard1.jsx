@@ -46,7 +46,7 @@ const LOGO_BRAND_COLORS = {
   '/assets/GiftSent/SVG Logo/Goody.svg': '#B89EFF',
   '/assets/GiftSent/SVG Logo/Chipotle.svg': '#AC2318',
   '/assets/GiftSent/SVG Logo/Logo.svg': '#1987C7', // Columbia
-  '/assets/GiftSent/SVG Logo/Nike.svg': '#B8B8B8',
+  '/assets/GiftSent/SVG Logo/Nike.svg': '#111111',
   '/assets/GiftSent/SVG Logo/Apple.svg': '#D6D6D6',
   '/assets/GiftSent/SVG Logo/Supergoop.svg': '#0000B4',
   '/assets/GiftSent/SVG Logo/Tiffany & Co.svg': '#81D8D0',

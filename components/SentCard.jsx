@@ -48,7 +48,7 @@ const LOGO_BRAND_COLORS = {
   '/assets/GiftSent/SVG Logo/Goody.svg': '#B89EFF',
   '/assets/GiftSent/SVG Logo/Chipotle.svg': '#AC2318',
   '/assets/GiftSent/SVG Logo/Logo.svg': '#1987C7', // Columbia
-  '/assets/GiftSent/SVG Logo/Nike.svg': '#B8B8B8',
+  '/assets/GiftSent/SVG Logo/Nike.svg': '#111111',
   '/assets/GiftSent/SVG Logo/Apple.svg': '#D6D6D6',
   '/assets/GiftSent/SVG Logo/Supergoop.svg': '#0000B4',
   '/assets/GiftSent/SVG Logo/Tiffany & Co.svg': '#81D8D0',
@@ -506,9 +506,12 @@ const SentCard = ({
       if (layout1Style === '3' || layout2BoxType === '3') {
         const [h, s, l] = hexToHsl(brandColor)
         const reducedS = s * 0.8 // Reduce saturation by 20%
-        return hslToHex(h, reducedS, l)
+        const cappedL = Math.min(80, l) // Cap lightness at 80
+        return hslToHex(h, reducedS, cappedL)
       }
-      return brandColor
+      const [h, s, l] = hexToHsl(brandColor)
+      const cappedL = Math.min(80, l) // Cap lightness at 80
+      return hslToHex(h, s, cappedL)
     }
     return themedBoxColor // Fallback to themedBoxColor if not Box3
   }, [hideEnvelope, showGiftBoxWhenHidden, layout2BoxType, layout1Style, svgLogoPath, themedBoxColor])
@@ -567,11 +570,11 @@ const SentCard = ({
       if (layout1Style === '3' || layout2BoxType === '3') {
         const [h, s, l] = hexToHsl(brandColor)
         box3S = s * 0.8 // Box3's saturation (reduced by 20%)
-        box3L = l // Box3's lightness
+        box3L = Math.min(80, l) // Box3's lightness (capped at 80)
       } else {
         const [h, s, l] = hexToHsl(brandColor)
         box3S = s // Box3's saturation
-        box3L = l // Box3's lightness
+        box3L = Math.min(80, l) // Box3's lightness (capped at 80)
       }
       // Apply Box3's S and L values to Envelope3's base color (keeping Envelope3's Hue)
       const [envelopeH, envelopeS, envelopeL] = hexToHsl(envelopeBoxColor)

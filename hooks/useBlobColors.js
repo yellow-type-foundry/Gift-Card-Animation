@@ -15,11 +15,11 @@ export const useBlobColors = (baseColor) => {
     const animations = []
     
     for (let i = 0; i < 9; i++) {
-      // Randomize within ±40 range for H and S, ±20 for L
-      const randomH = (baseH + (Math.random() * 90 - 40) + 360) % 360
+      // Keep hue constant for fluidity effect, only vary S and L
+      const randomH = baseH // Keep hue constant
       // Preserve monochrome (S=0) if base color is monochrome
-      const randomS = baseS === 0 ? 0 : Math.max(0, Math.min(100, baseS + (Math.random() * 90 - 40)))
-      const randomL = Math.max(0, Math.min(100, baseL + (Math.random() * 40 - 20)))
+      const randomS = baseS === 0 ? 0 : Math.max(0, Math.min(100, baseS + (Math.random() * 30 - 15))) // ±15 range
+      const randomL = Math.max(0, Math.min(100, baseL + (Math.random() * 40 - 15)))
       colors.push(hslToHex(randomH, randomS, randomL))
       
       // Generate random animation parameters

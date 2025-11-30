@@ -214,21 +214,6 @@ const EnvelopeLayers = ({ coverImage, baseColor, isHovered = false }) => {
         </div>
       </div>
 
-      {/* NEW-Front Shadow */}
-      <div
-        style={{
-          position: 'absolute',
-          height: '96px',
-          left: 0,
-          top: 0,
-          width: `${BOX_WIDTH}px`,
-          zIndex: 3,
-        }}
-        data-name="NEW-Front Shadow"
-      >
-        {/* TODO: Add front shadow image when asset is available */}
-        {/* <img alt="" src={frontShadowImage} style={{ display: 'block', width: '100%', height: '100%', maxWidth: 'none' }} /> */}
-      </div>
 
       {/* NEW–Envelope shading */}
       <div
