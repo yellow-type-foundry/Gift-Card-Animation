@@ -592,7 +592,7 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
           style={{
             position: 'relative',
             width: 'auto',
-            height: '100%',
+            height: isHovered ? '0' : '100%',
             backdropFilter: 'blur(9.287px)',
             WebkitBackdropFilter: 'blur(9.287px)',
             backgroundColor: 'rgba(255, 255, 255, 0.2)',
@@ -605,6 +605,7 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
             justifyContent: 'flex-end',
             padding: '5px',
             overflow: 'hidden',
+            transition: 'height 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
           }}
         >
           <div style={pullTabIconStyle} />
