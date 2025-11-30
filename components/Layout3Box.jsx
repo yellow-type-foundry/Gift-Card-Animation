@@ -235,9 +235,18 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
             }
           })
           
+          // Remove fixed width/height but keep viewBox for proper scaling
+          svgElement.removeAttribute('width')
+          svgElement.removeAttribute('height')
+          // Don't remove viewBox - it's needed for proper SVG scaling
+          
+          // Set new attributes for proper sizing
           svgElement.setAttribute('width', '100%')
           svgElement.setAttribute('height', '100%')
           svgElement.setAttribute('preserveAspectRatio', 'xMidYMid meet')
+          // Ensure SVG doesn't clip its content
+          svgElement.setAttribute('style', 'overflow: visible;')
+          svgElement.setAttribute('overflow', 'visible')
           
           setLogoSvg(svgElement.outerHTML)
         }
@@ -389,7 +398,12 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
   return (
     <div 
       className={className ? `relative ${className}` : 'relative'}
-      style={{ ...STATIC_STYLES.container, ...style }}
+      style={{ 
+        ...STATIC_STYLES.container, 
+        ...style,
+        // Ensure no clipping - allow content to extend beyond bounds
+        overflow: 'visible',
+      }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -521,7 +535,7 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          padding: '20px',
+          padding: '40px', // Increased padding to accommodate glow (drop-shadow can extend up to 10px)
           zIndex: 8,
           pointerEvents: 'none',
           overflow: 'visible',
@@ -532,7 +546,7 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
           <div
             style={{
               position: 'absolute',
-              inset: '-12.66% -1.84% -9.28% -1.84%',
+              inset: '-12.66% -1.84% -9.28% -1.84%', // Restore original inset values
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -560,6 +574,8 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
                   ...logoImageStyle,
                   width: 'auto',
                   height: getLogoHeight(),
+                  overflow: 'visible',
+                  display: 'block', // Ensure no extra spacing
                 }}
               />
             )}
