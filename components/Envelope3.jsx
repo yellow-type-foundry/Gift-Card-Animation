@@ -326,7 +326,7 @@ const Envelope3 = ({
           dotPositions={dotPositions}
           circleSize={circleSize}
           isHovered={isHovered}
-          disableBlurReveal={true}
+          fixedBlur={10}
         />
 
         {/* Progress Indicator */}

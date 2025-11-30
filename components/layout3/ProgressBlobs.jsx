@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react'
 import { BOX_WIDTH, BOX_HEIGHT, STATIC_STYLES } from '@/constants/layout3Tokens'
 
-const ProgressBlobs = ({ blobGridColors, blobAnimations, dotPositions, circleSize, isHovered, disableBlurReveal = false }) => {
+const ProgressBlobs = ({ blobGridColors, blobAnimations, dotPositions, circleSize, isHovered, disableBlurReveal = false, fixedBlur }) => {
   // Generate CSS keyframes for organic, randomized animations
   const blobKeyframes = useMemo(() => {
     if (blobAnimations.length === 0) return null
@@ -67,10 +67,16 @@ const ProgressBlobs = ({ blobGridColors, blobAnimations, dotPositions, circleSiz
           const currentX = hasPosition ? position.x : anim.startX
           const currentY = hasPosition ? position.y : anim.startY
           
-          // Generate consistent random blur value for this blob (2px to 5px on hover)
-          // Use index and color hash for consistent randomness
-          const blurSeed = (index * 17 + color.charCodeAt(0) + color.charCodeAt(1)) % 1000
-          const randomBlur = 2 + (blurSeed / 1000) * 3 // Random value between 2 and 5
+          // Generate consistent random blur value for this blob (1.5px to 6px on hover)
+          // Use index and full color string hash for consistent randomness
+          // Hash the entire color string to get better variation
+          let colorHash = 0
+          for (let i = 0; i < color.length; i++) {
+            colorHash = ((colorHash << 5) - colorHash) + color.charCodeAt(i)
+            colorHash = colorHash & colorHash // Convert to 32bit integer
+          }
+          const blurSeed = Math.abs((index * 31 + colorHash) % 1000)
+          const randomBlur = 1.5 + (blurSeed / 1000) * 4.5 // Random value between 1.5 and 6
           
           // Calculate edge proximity for ellipse deformation
           // Circular by default, elliptical when touching edge, circular again when away from edge
@@ -164,7 +170,7 @@ const ProgressBlobs = ({ blobGridColors, blobAnimations, dotPositions, circleSiz
                 backgroundImage: gradientOverlay, // 30% - water droplet overlay
                 mixBlendMode: 'overlay',
                 boxShadow: blendedShadow,
-                filter: disableBlurReveal ? 'blur(20px)' : (isHovered ? `blur(${randomBlur}px)` : 'blur(20px)'), // Vary blur from 2-5px on hover, otherwise 20px
+                filter: fixedBlur !== undefined ? `blur(${fixedBlur}px)` : (disableBlurReveal ? 'blur(20px)' : (isHovered ? `blur(${randomBlur}px)` : 'blur(20px)')), // Use fixedBlur if provided, otherwise vary blur from 1.5-6px on hover, or 20px
                 left: `${currentX}px`,
                 top: `${currentY}px`,
                 transform: `scale(${scaleX}, ${scaleY})`,
