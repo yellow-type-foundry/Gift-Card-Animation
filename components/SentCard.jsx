@@ -501,9 +501,14 @@ const SentCard = ({
     if (isBox3) {
       // For single cards (Box3), use vibrant brand color
       // Look up brand color from map
-      const brandColor = LOGO_BRAND_COLORS[svgLogoPath]
-      // If no brand color mapping found, use Columbia blue as fallback
-      return brandColor || '#1987C7'
+      const brandColor = LOGO_BRAND_COLORS[svgLogoPath] || '#1987C7'
+      // For Layout 1 Style C and Layout 2 Style 3, reduce vibrancy by 20% (reduce saturation by 20%)
+      if (layout1Style === 'C' || layout2BoxType === '3') {
+        const [h, s, l] = hexToHsl(brandColor)
+        const reducedS = s * 0.8 // Reduce saturation by 20%
+        return hslToHex(h, reducedS, l)
+      }
+      return brandColor
     }
     return themedBoxColor // Fallback to themedBoxColor if not Box3
   }, [hideEnvelope, showGiftBoxWhenHidden, layout2BoxType, layout1Style, svgLogoPath, themedBoxColor])
@@ -557,7 +562,9 @@ const SentCard = ({
                         (hideEnvelope && !showGiftBoxWhenHidden && layout1Style === 'C')
     if (isEnvelope3) {
       // For batch cards (Envelope3), use themed color but make it vibrant to match Box3
-      return makeVibrantColor(envelopeBoxColor, 50)
+      // For Layout 1 Style C and Layout 2 Style 3, reduce vibrancy by 20% (reduce deltaS from 50 to 40)
+      const deltaS = (layout1Style === 'C' || layout2BoxType === '3') ? 40 : 50
+      return makeVibrantColor(envelopeBoxColor, deltaS)
     }
     return envelopeBoxColor // Fallback to envelopeBoxColor if not Envelope3
   }, [hideEnvelope, showGiftBoxWhenHidden, layout2BoxType, layout1Style, envelopeBoxColor])
@@ -801,7 +808,7 @@ const SentCard = ({
   // Box2 (layout2BoxType === '2' or default) uses boxOffsetY from single2.box.offsetY
   const layout2Box3OffsetY = -7 // Layout 2 batch card envelope offsetY
   const layout1Box3OffsetY = 32 // Layout 1 Style C Box3/Envelope3 offsetY
-  const layout1Box3Scale = 1.15 // Layout 1 Style C Box3/Envelope3 scale
+  const layout1Box3Scale = 1.125 // Layout 1 Style C Box3/Envelope3 scale
   const isBox3 = (hideEnvelope && showGiftBoxWhenHidden && !useBox1 && layout2BoxType === '3') ||
                  (hideEnvelope && showGiftBoxWhenHidden && !useBox1 && layout1Style === 'C')
   const isEnvelope3 = (hideEnvelope && !showGiftBoxWhenHidden && layout2BoxType === '3') ||
