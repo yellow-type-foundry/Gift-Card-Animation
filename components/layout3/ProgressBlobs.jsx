@@ -67,6 +67,49 @@ const ProgressBlobs = ({ blobGridColors, blobAnimations, dotPositions, circleSiz
           const currentX = hasPosition ? position.x : anim.startX
           const currentY = hasPosition ? position.y : anim.startY
           
+          // Calculate edge proximity for ellipse deformation
+          // Circular by default, elliptical when touching edge, circular again when away from edge
+          const EDGE_DETECTION_DISTANCE = circleSize * 0.2 // Start deforming only when very close to edge (20% of circle size)
+          const MAX_DEFORMATION = 0.5 // Maximum squeeze (50% of original size)
+          
+          // Calculate distance from dot edge to box edge
+          // currentX and currentY are the top-left position of the dot
+          const distToLeft = currentX // Distance from dot's left edge to box's left edge (0 = touching)
+          const distToRight = BOX_WIDTH - (currentX + circleSize) // Distance from dot's right edge to box's right edge (0 = touching)
+          const distToTop = currentY // Distance from dot's top edge to box's top edge (0 = touching)
+          const distToBottom = BOX_HEIGHT - (currentY + circleSize) // Distance from dot's bottom edge to box's bottom edge (0 = touching)
+          
+          // Calculate squeeze factors: 0 = no squeeze (circular), 1 = max squeeze (elliptical)
+          // When distance is 0 (touching edge), squeeze = 1
+          // When distance >= EDGE_DETECTION_DISTANCE (away from edge), squeeze = 0
+          const leftSqueeze = distToLeft < EDGE_DETECTION_DISTANCE 
+            ? Math.max(0, Math.min(1, 1 - (distToLeft / EDGE_DETECTION_DISTANCE)))
+            : 0
+          const rightSqueeze = distToRight < EDGE_DETECTION_DISTANCE
+            ? Math.max(0, Math.min(1, 1 - (distToRight / EDGE_DETECTION_DISTANCE)))
+            : 0
+          const topSqueeze = distToTop < EDGE_DETECTION_DISTANCE
+            ? Math.max(0, Math.min(1, 1 - (distToTop / EDGE_DETECTION_DISTANCE)))
+            : 0
+          const bottomSqueeze = distToBottom < EDGE_DETECTION_DISTANCE
+            ? Math.max(0, Math.min(1, 1 - (distToBottom / EDGE_DETECTION_DISTANCE)))
+            : 0
+          
+          // Apply horizontal squeeze when touching left or right edges
+          // scaleX < 1 means squeezed horizontally (elliptical)
+          const horizontalSqueeze = Math.max(leftSqueeze, rightSqueeze)
+          const scaleX = 1 - (horizontalSqueeze * MAX_DEFORMATION)
+          
+          // Apply vertical squeeze when touching top or bottom edges
+          // scaleY < 1 means squeezed vertically (elliptical)
+          const verticalSqueeze = Math.max(topSqueeze, bottomSqueeze)
+          const scaleY = 1 - (verticalSqueeze * MAX_DEFORMATION)
+          
+          // Default: scaleX = 1, scaleY = 1 (circular)
+          // Touching left/right: scaleX < 1, scaleY = 1 (horizontal ellipse)
+          // Touching top/bottom: scaleX = 1, scaleY < 1 (vertical ellipse)
+          // Touching corner: scaleX < 1, scaleY < 1 (ellipse in both directions)
+          
           return (
             <div
               key={index}
@@ -84,8 +127,10 @@ const ProgressBlobs = ({ blobGridColors, blobAnimations, dotPositions, circleSiz
                 filter: disableBlurReveal ? 'blur(20px)' : (isHovered ? 'blur(2px)' : 'blur(20px)'), // Keep blur constant if disabled, otherwise reveal on hover
                 left: `${currentX}px`,
                 top: `${currentY}px`,
-                // Only transition filter, no transition for position (dots freeze in place when hover ends)
-                transition: 'filter 0.3s ease-out',
+                transform: `scale(${scaleX}, ${scaleY})`,
+                transformOrigin: 'center center',
+                // Quick elastic snap-back like a rubber ball - fast return to circular when leaving edge with more bounce
+                transition: 'filter 0.005s ease-out, transform 0.01s cubic-bezier(0.68, -0.6, 0.32, 1.6)',
                 animation: 'none', // No CSS animation
                 animationDelay: '0s',
               }}
