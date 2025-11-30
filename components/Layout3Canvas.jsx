@@ -1,7 +1,17 @@
 'use client'
 
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import Layout3Box from '@/components/Layout3Box'
+
+// Shuffle function (Fisher-Yates algorithm)
+const shuffleArray = (array) => {
+  const shuffled = [...array]
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+  }
+  return shuffled
+}
 
 // Brand colors and logos from Layout 2
 const BOX_CONFIGS = [
@@ -41,7 +51,25 @@ const BOX_CONFIGS = [
   },
 ]
 
+// Generate random progress values
+const generateRandomProgress = () => {
+  const total = Math.floor(Math.random() * 20) + 10 // Random total between 10-30
+  const current = Math.floor(Math.random() * total) + 1 // Random current between 1-total
+  return { current, total }
+}
+
 const Layout3Canvas = () => {
+  const [shuffledConfigs, setShuffledConfigs] = useState(BOX_CONFIGS)
+  const [progressValues, setProgressValues] = useState([])
+
+  useEffect(() => {
+    // Shuffle boxes on component mount/reload
+    const shuffled = shuffleArray(BOX_CONFIGS)
+    setShuffledConfigs(shuffled)
+    // Generate random progress values for each shuffled box
+    setProgressValues(shuffled.map(() => generateRandomProgress()))
+  }, [])
+
   return (
     <div 
       className="w-full bg-white flex items-center justify-center" 
@@ -53,21 +81,23 @@ const Layout3Canvas = () => {
       >
         {/* Row 1 */}
         <div className="flex items-center justify-center gap-8">
-          {BOX_CONFIGS.slice(0, 4).map((config, index) => (
+          {shuffledConfigs.slice(0, 4).map((config, index) => (
             <Layout3Box
-              key={index}
+              key={`row1-${index}-${config.logoPath}`}
               logoPath={config.logoPath}
               boxColor={config.boxColor}
+              progress={progressValues[index] || { current: 1, total: 25 }}
             />
           ))}
         </div>
         {/* Row 2 */}
         <div className="flex items-center justify-center gap-8">
-          {BOX_CONFIGS.slice(4, 8).map((config, index) => (
+          {shuffledConfigs.slice(4, 8).map((config, index) => (
             <Layout3Box
-              key={index + 4}
+              key={`row2-${index}-${config.logoPath}`}
               logoPath={config.logoPath}
               boxColor={config.boxColor}
+              progress={progressValues[index + 4] || { current: 1, total: 25 }}
             />
           ))}
         </div>

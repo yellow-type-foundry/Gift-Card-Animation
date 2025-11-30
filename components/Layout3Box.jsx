@@ -135,10 +135,11 @@ const STATIC_STYLES = {
  * Layout3Box - A themed box component with gradient effects, shadows, and dynamic theming
  * @param {string} boxColor - The base color for theming (default: '#1987C7')
  * @param {string} logoPath - Path to the logo SVG file (default: '/assets/GiftSent/SVG Logo/Apple.svg')
+ * @param {object} progress - Progress object with current and total (default: { current: 1, total: 25 })
  * @param {string} className - Additional CSS classes for the root container
  * @param {object} style - Additional inline styles for the root container
  */
-const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Logo/Apple.svg', className = '', style = {} }) => {
+const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Logo/Apple.svg', progress = { current: 1, total: 25 }, className = '', style = {} }) => {
   const [lightCornerSvg, setLightCornerSvg] = useState(null)
   const [logoSvg, setLogoSvg] = useState(null)
   const [isHovered, setIsHovered] = useState(false)
@@ -654,11 +655,11 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
           <p style={STATIC_STYLES.progressText}>
             {/* Shadow text behind - uses darkRimColor, slightly blurred */}
             <span style={progressTextShadowStyle}>
-              1/25
+              {progress.current}/{progress.total}
             </span>
             {/* Foreground gradient text */}
             <span style={progressTextGradientStyle}>
-              1/25
+              {progress.current}/{progress.total}
             </span>
           </p>
         </div>
