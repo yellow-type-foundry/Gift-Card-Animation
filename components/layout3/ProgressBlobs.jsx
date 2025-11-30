@@ -62,7 +62,7 @@ const ProgressBlobs = ({ blobGridColors, blobAnimations, dotPositions, circleSiz
           if (!anim) return null
           
           // Use JS animation only when hovered AND position exists
-          // When not hovered, dots should be static (no animation)
+          // When not hovered, dots should smoothly return to initial position
           const useJSAnimation = isHovered && position !== undefined && position !== null && typeof position.x === 'number' && typeof position.y === 'number'
           
           return (
@@ -81,8 +81,9 @@ const ProgressBlobs = ({ blobGridColors, blobAnimations, dotPositions, circleSiz
                 `,
                 left: useJSAnimation ? `${position.x}px` : `${anim.startX}px`,
                 top: useJSAnimation ? `${position.y}px` : `${anim.startY}px`,
-                transition: 'none', // No transition for smooth 60fps updates
-                animation: useJSAnimation ? 'none' : 'none', // No animation when not hovered - dots are static
+                // Smooth transition when returning to initial position, no transition during JS animation for 60fps
+                transition: useJSAnimation ? 'none' : 'left 0.6s cubic-bezier(0.4, 0, 0.2, 1), top 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+                animation: 'none', // No CSS animation
                 animationDelay: '0s',
               }}
             />
