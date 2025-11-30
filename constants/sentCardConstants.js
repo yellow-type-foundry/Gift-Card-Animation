@@ -411,6 +411,15 @@ export const LAYOUT_CONFIG = {
     progressOutsideEnvelope: false,
     hideEnvelope: true, // Use Envelope2 instead of default envelope
     showGiftBoxWhenHidden: false, // Use Envelope2 (like Batch 2), not Box2
+    // Box2 settings (SINGLE CARD ONLY - standalone control, does NOT affect batch cards)
+    // NOTE: These settings are ONLY used by single cards when Box2 is shown (layout2BoxType === '2')
+    box: {
+      width: undefined,      // Box width (e.g., '176px') - undefined = use GIFT_BOX_TOKENS default
+      height: undefined,     // Box height (e.g., '176px') - undefined = use GIFT_BOX_TOKENS default
+      borderRadius: undefined, // Box border radius (e.g., '32px') - undefined = use GIFT_BOX_TOKENS default
+      scale: 1,      // Box scale factor (e.g., 1.25) - undefined = use envelope.scale
+      offsetY: 6.1,   // Box vertical offset in pixels
+    },
     // Envelope container settings (SINGLE 2 SPECIFIC - independent control block)
     envelopeContainer: {
       padding: { top: 21, right: 76, bottom: 21, left: 76 },

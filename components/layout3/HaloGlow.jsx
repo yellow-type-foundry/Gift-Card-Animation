@@ -14,7 +14,7 @@ const HaloGlow = ({ blobGridColors, blobAnimations, dotPositions, circleSize, is
       minHeight: `${BOX_HEIGHT}px`,
       maxHeight: `${BOX_HEIGHT}px`,
       zIndex: 0,
-      transform: 'translate(-50%, -50%) scale(1.15)',
+      transform: 'translate(-50%, -50%) scale(1.02)',
       opacity: isHovered ? 0.9 : 0,
       padding: '1px',
       filter: 'blur(1px)',

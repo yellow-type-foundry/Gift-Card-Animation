@@ -791,12 +791,14 @@ const SentCard = ({
   
   // Inner wrapper style - absolutely positioned, handles scale and offsetY
   // For single cards with Box2, use boxOffsetY if provided, otherwise use envelopeOffsetY
-  // Box3 (layout2BoxType === '3') always uses the batch card's envelope offsetY (-4) to match Envelope3
-  // Single cards get boxOffsetY = 48, but Box3 needs to match Envelope3's -4 offsetY
+  // Box3 (layout2BoxType === '3') always uses the batch card's envelope offsetY (-7) to match Envelope3
+  // Box2 (layout2BoxType === '2' or default) uses boxOffsetY from single2.box.offsetY
   const box3EnvelopeOffsetY = -7 // Layout 2 batch card envelope offsetY
   const effectiveOffsetY = (hideEnvelope && showGiftBoxWhenHidden && !useBox1 && layout2BoxType === '3') 
     ? box3EnvelopeOffsetY 
-    : ((hideEnvelope && showGiftBoxWhenHidden && !useBox1 && layout2BoxType !== '3' && boxOffsetY !== undefined) ? boxOffsetY : envelopeOffsetY)
+    : ((hideEnvelope && showGiftBoxWhenHidden && !useBox1 && layout2BoxType !== '3') 
+      ? (boxOffsetY !== undefined ? boxOffsetY : envelopeOffsetY) 
+      : envelopeOffsetY)
   // For single cards with Box2, use boxScale if provided, otherwise use envelopeScale
   // Box3 (layout2BoxType === '3') always uses envelopeScale to match Envelope3
   const effectiveScale = (hideEnvelope && showGiftBoxWhenHidden && !useBox1 && layout2BoxType !== '3' && boxScale !== undefined) ? boxScale : envelopeScale

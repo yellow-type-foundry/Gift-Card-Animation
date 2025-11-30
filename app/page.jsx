@@ -501,6 +501,7 @@ export default function Home() {
       boxHeight: effectiveLayoutConfig.box?.height,
       boxBorderRadius: effectiveLayoutConfig.box?.borderRadius,
       boxScale: effectiveLayoutConfig.box?.scale,
+      boxOffsetY: effectiveLayoutConfig.box?.offsetY, // Box-specific offsetY (overrides envelopeOffsetY for single cards)
       
       // ============================================================================
       // LAYOUT 1 SPECIFIC: enableConfetti
