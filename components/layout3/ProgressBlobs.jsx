@@ -67,7 +67,7 @@ const ProgressBlobs = ({ blobGridColors, blobAnimations, dotPositions, circleSiz
           const currentX = hasPosition ? position.x : anim.startX
           const currentY = hasPosition ? position.y : anim.startY
           
-          // Generate consistent random blur value for this blob (1.5px to 6px on hover)
+          // Generate consistent random blur value for this blob (1.5px to 9px on hover)
           // Use index and full color string hash for consistent randomness
           // Hash the entire color string to get better variation
           let colorHash = 0
@@ -76,7 +76,7 @@ const ProgressBlobs = ({ blobGridColors, blobAnimations, dotPositions, circleSiz
             colorHash = colorHash & colorHash // Convert to 32bit integer
           }
           const blurSeed = Math.abs((index * 31 + colorHash) % 1000)
-          const randomBlur = 1.5 + (blurSeed / 1000) * 4.5 // Random value between 1.5 and 6
+          const randomBlur = 1.5 + (blurSeed / 1000) * 7.5 // Random value between 1.5 and 9
           
           // Calculate edge proximity for ellipse deformation
           // Circular by default, elliptical when touching edge, circular again when away from edge
@@ -170,7 +170,7 @@ const ProgressBlobs = ({ blobGridColors, blobAnimations, dotPositions, circleSiz
                 backgroundImage: gradientOverlay, // 30% - water droplet overlay
                 mixBlendMode: 'overlay',
                 boxShadow: blendedShadow,
-                filter: fixedBlur !== undefined ? `blur(${fixedBlur}px)` : (disableBlurReveal ? 'blur(20px)' : (isHovered ? `blur(${randomBlur}px)` : 'blur(20px)')), // Use fixedBlur if provided, otherwise vary blur from 1.5-6px on hover, or 20px
+                filter: fixedBlur !== undefined ? `blur(${fixedBlur}px)` : (disableBlurReveal ? 'blur(20px)' : (isHovered ? `blur(${randomBlur}px)` : 'blur(20px)')), // Use fixedBlur if provided, otherwise vary blur from 1.5-9px on hover, or 20px
                 left: `${currentX}px`,
                 top: `${currentY}px`,
                 transform: `scale(${scaleX}, ${scaleY})`,
