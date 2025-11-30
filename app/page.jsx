@@ -449,8 +449,24 @@ export default function Home() {
     // ============================================================================
     // Layout 1 batch: Envelope 1 uses Layout 1's default envelope settings (scale: 1, offsetY: 0)
     // Layout 1 single: Box1 uses its own settings
-    const effectiveEnvelopeScale = effectiveLayoutConfig?.envelope?.scale || 1
-    const effectiveEnvelopeOffsetY = effectiveLayoutConfig?.envelope?.offsetY || 0
+    // Layout 2: Use envelope1 or envelope2 based on layout2BoxType
+    let effectiveEnvelopeScale, effectiveEnvelopeOffsetY, effectiveEnvelopeWidth, effectiveEnvelopeHeight
+    if (layoutNum === '2' && !useSingleConfig) {
+      // Layout 2 batch: envelopeScale and envelopeOffsetY are NOT used directly
+      // Instead, envelope1Scale/envelope1OffsetY and envelope2Scale/envelope2OffsetY are passed separately
+      // SentCard will choose which one to use based on layout2BoxType
+      // Set defaults here, but they should be overridden by envelope1/envelope2 specific props
+      effectiveEnvelopeScale = effectiveLayoutConfig?.envelope2?.scale || 1 // Default to envelope2 for Layout 2
+      effectiveEnvelopeOffsetY = effectiveLayoutConfig?.envelope2?.offsetY || 0
+      effectiveEnvelopeWidth = effectiveLayoutConfig?.envelope1?.width // Envelope1 has width/height
+      effectiveEnvelopeHeight = effectiveLayoutConfig?.envelope1?.height
+    } else {
+      // Layout 1 or other: Use envelope config
+      effectiveEnvelopeScale = effectiveLayoutConfig?.envelope?.scale || 1
+      effectiveEnvelopeOffsetY = effectiveLayoutConfig?.envelope?.offsetY || 0
+      effectiveEnvelopeWidth = effectiveLayoutConfig?.envelope?.width
+      effectiveEnvelopeHeight = effectiveLayoutConfig?.envelope?.height
+    }
     
     return {
       from: card.from,
@@ -511,6 +527,16 @@ export default function Home() {
       boxBorderRadius: effectiveLayoutConfig.box?.borderRadius,
       boxScale: effectiveLayoutConfig.box?.scale,
       boxOffsetY: effectiveLayoutConfig.box?.offsetY, // Box-specific offsetY (overrides envelopeOffsetY for single cards)
+      // Box1 settings (for Layout 2 Style 1 when layout2BoxType === '1')
+      box1Scale: effectiveLayoutConfig.box1?.scale,
+      box1Width: effectiveLayoutConfig.box1?.width,
+      box1Height: effectiveLayoutConfig.box1?.height,
+      box1Top: effectiveLayoutConfig.box1?.top,
+      box1Left: effectiveLayoutConfig.box1?.left,
+      box1Right: effectiveLayoutConfig.box1?.right,
+      box1Bottom: effectiveLayoutConfig.box1?.bottom,
+      box1OffsetY: effectiveLayoutConfig.box1?.offsetY,
+      box1TransformOrigin: effectiveLayoutConfig.box1?.transformOrigin,
       
       // ============================================================================
       // LAYOUT 1 SPECIFIC: enableConfetti
@@ -522,6 +548,15 @@ export default function Home() {
       // Envelope settings (overridden for box style in Layout 1 only)
       envelopeScale: effectiveEnvelopeScale,
       envelopeOffsetY: effectiveEnvelopeOffsetY,
+      envelopeWidth: effectiveEnvelopeWidth,
+      envelopeHeight: effectiveEnvelopeHeight,
+      // Pass envelope1 and envelope2 configs separately for Layout 2
+      envelope1Scale: effectiveLayoutConfig.envelope1?.scale,
+      envelope1OffsetY: effectiveLayoutConfig.envelope1?.offsetY,
+      envelope1Width: effectiveLayoutConfig.envelope1?.width,
+      envelope1Height: effectiveLayoutConfig.envelope1?.height,
+      envelope2Scale: effectiveLayoutConfig.envelope2?.scale,
+      envelope2OffsetY: effectiveLayoutConfig.envelope2?.offsetY,
       // ============================================================================
       // ENVELOPE CONTAINER SETTINGS
       // ============================================================================

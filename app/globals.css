@@ -174,10 +174,13 @@
 }
 
 /* Trigger animation only when hovering the Image Container block */
-[data-name="Envelope"] .grid-cell-base { opacity: 0.2; will-change: opacity; }
-[data-name="Envelope"] .grid-cell-overlay { opacity: 0.10; will-change: opacity; }
+[data-name="Envelope"] .grid-cell-base,
+[data-name="Box1"] .grid-cell-base { opacity: 0.2; will-change: opacity; }
+[data-name="Envelope"] .grid-cell-overlay,
+[data-name="Box1"] .grid-cell-overlay { opacity: 0.10; will-change: opacity; }
 /* Restore breathing on hover */
 [data-name="Envelope"]:hover .grid-cell-base,
+[data-name="Box1"]:hover .grid-cell-base,
 [data-name="Gift Card"]:hover .grid-cell-base {
   animation-name: grid-breathe-base;
   animation-duration: 1000ms;
@@ -186,6 +189,7 @@
   animation-direction: normal;
 }
 [data-name="Envelope"]:hover .grid-cell-overlay,
+[data-name="Box1"]:hover .grid-cell-overlay,
 [data-name="Gift Card"]:hover .grid-cell-overlay {
   animation-name: grid-breathe-overlay;
   animation-duration: 1000ms;

@@ -67,6 +67,15 @@ const SentCard = ({
   footerPadEqual = false,
   envelopeScale = 1,
   envelopeOffsetY = 0,
+  envelopeWidth,
+  envelopeHeight,
+  // Layout 2 separate envelope configs
+  envelope1Scale,
+  envelope1OffsetY,
+  envelope1Width,
+  envelope1Height,
+  envelope2Scale,
+  envelope2OffsetY,
   confettiWhiteOverlay = false,
   envelopeHighZ = false,
   overlayProgressOnEnvelope = false,
@@ -759,6 +768,44 @@ const SentCard = ({
     display: 'block'
   }), [])
 
+  // Calculate Box1 scale and transform origin for container transform
+  // NO HARDCODED VALUES - All Box1 settings must come from config
+  const isBox1Rendered = (useBox1 || layout2BoxType === '1') && hideEnvelope && showGiftBoxWhenHidden
+  const containerScale = useMemo(() => {
+    // For Box1, MUST use box1Scale from config
+    if (isBox1Rendered) {
+      if (box1Scale === undefined) {
+        console.warn('Box1 scale is undefined. Please set box1.scale in the config.')
+        return 1 // Fallback only for Box1, but config should always define this
+      }
+      return box1Scale
+    }
+    // For non-Box1, use envelope scale
+    if (progressOutsideEnvelope && envelopeScale2 !== undefined) {
+      return envelopeScale2
+    }
+    return envelopeScale
+  }, [isBox1Rendered, box1Scale, progressOutsideEnvelope, envelopeScale2, envelopeScale])
+  
+  const containerTransformOrigin = useMemo(() => {
+    if (hideEnvelope && hideProgressBarInBox) {
+      return 'center center'
+    }
+    // For Box1, MUST use box1TransformOrigin from config
+    if (isBox1Rendered) {
+      if (box1TransformOrigin === undefined) {
+        console.warn('Box1 transformOrigin is undefined. Please set box1.transformOrigin in the config.')
+        return 'center top' // Fallback only for Box1, but config should always define this
+      }
+      return box1TransformOrigin
+    }
+    // For non-Box1, use other transform origins
+    if (progressOutsideEnvelope && transformOrigin2 !== undefined) {
+      return transformOrigin2
+    }
+    return 'center top'
+  }, [hideEnvelope, hideProgressBarInBox, isBox1Rendered, box1TransformOrigin, progressOutsideEnvelope, transformOrigin2])
+
   const envelopeContainerStyle = useMemo(() => {
     // Container positioning logic
     
@@ -776,19 +823,13 @@ const SentCard = ({
             minHeight: 0,
             overflow: 'visible',
           }
-      : useBox1 && box1Top !== undefined
+      : (useBox1 || layout2BoxType === '1')
       ? {
-          top: `${box1Top + (box1OffsetY !== undefined ? box1OffsetY : 0)}px`,
+          // NO HARDCODED VALUES - All positioning must come from config
+          top: box1Top !== undefined ? `${box1Top + (box1OffsetY !== undefined ? box1OffsetY : 0)}px` : undefined,
           left: box1Left !== undefined ? `${box1Left}px` : undefined,
           right: box1Right !== undefined ? `${box1Right}px` : undefined,
-          bottom: box1Bottom !== undefined ? `${box1Bottom}px` : 'auto'
-        }
-      : useBox1
-      ? {
-          top: `${4 + (box1OffsetY !== undefined ? box1OffsetY : 0)}px`,
-          left: '-2px',
-          right: '2px',
-          bottom: '0px'
+          bottom: box1Bottom !== undefined ? `${box1Bottom}px` : undefined,
         }
       : progressOutsideEnvelope && envelopeTopBase2 !== undefined 
       ? {
@@ -812,9 +853,9 @@ const SentCard = ({
     // All other layouts: apply transform directly to container (scale + translateY for offsetY)
     transform: hideEnvelope && hideProgressBarInBox 
       ? 'none'
-      : `translateY(${progressOutsideEnvelope && envelopeOffsetY2 !== undefined ? envelopeOffsetY2 : (envelopeOffsetY || 0)}px) scale(${useBox1 && box1Scale !== undefined ? box1Scale : (progressOutsideEnvelope && envelopeScale2 !== undefined ? envelopeScale2 : envelopeScale)})`,
-      transformOrigin: (hideEnvelope && hideProgressBarInBox) ? 'center center' : (useBox1 && box1TransformOrigin !== undefined ? box1TransformOrigin : (progressOutsideEnvelope && transformOrigin2 !== undefined ? transformOrigin2 : 'center top'))
-  }}, [hideEnvelope, hideProgressBarInBox, useBox1, box1Top, box1OffsetY, box1Left, box1Right, box1Bottom, progressOutsideEnvelope, envelopeTopBase2, envelopeOffsetY2, envelopeOffsetY, envelopeLeft2, envelopeRight2, envelopeHighZ, overlayProgressOnEnvelope, box1Scale, envelopeScale2, envelopeScale, box1TransformOrigin, transformOrigin2])
+      : `translateY(${progressOutsideEnvelope && envelopeOffsetY2 !== undefined ? envelopeOffsetY2 : (envelopeOffsetY || 0)}px) scale(${containerScale})`,
+      transformOrigin: containerTransformOrigin
+  }}, [hideEnvelope, hideProgressBarInBox, useBox1, layout2BoxType, box1Top, box1OffsetY, box1Left, box1Right, box1Bottom, progressOutsideEnvelope, envelopeTopBase2, envelopeOffsetY2, envelopeOffsetY, envelopeLeft2, envelopeRight2, envelopeHighZ, overlayProgressOnEnvelope, containerScale, containerTransformOrigin])
   
   // Inner wrapper style - absolutely positioned, handles scale and offsetY
   // For single cards with Box2, use boxOffsetY if provided, otherwise use envelopeOffsetY
@@ -829,23 +870,40 @@ const SentCard = ({
                  (hideEnvelope && showGiftBoxWhenHidden && !useBox1 && layout1Style === '3')
   const isEnvelope3 = (hideEnvelope && !showGiftBoxWhenHidden && layout2BoxType === '3') ||
                       (hideEnvelope && !showGiftBoxWhenHidden && layout1Style === '3')
+  // Envelope1: Layout 2 batch Style 1 (layout2BoxType === '1')
+  const isEnvelope1 = (hideEnvelope && !showGiftBoxWhenHidden && layout2BoxType === '1')
+  // Envelope2: Layout 2 batch Style 2 (layout2BoxType === '2' OR undefined/default, AND not Envelope1/Envelope3)
+  // Also Layout 1 batch Style 2 uses Envelope2, but that uses layout1StyleB.envelope, not layout2.envelope2
+  const isEnvelope2 = (hideEnvelope && !showGiftBoxWhenHidden && layout2BoxType !== '1' && layout2BoxType !== '3' && layout1Style !== '3')
   // Box3 offsetY: Layout 1 Style 3 uses layout1Box3OffsetY, Layout 2 uses layout2Box3OffsetY
   const box3OffsetY = (layout1Style === '3') ? layout1Box3OffsetY : ((layout2BoxType === '3') ? layout2Box3OffsetY : envelopeOffsetY)
   // Envelope3 offsetY: Layout 1 Style 3 uses layout1Box3OffsetY, Layout 2 uses layout2Envelope3OffsetY (separate from Box3)
   const envelope3OffsetY = (layout1Style === '3') ? layout1Box3OffsetY : ((layout2BoxType === '3') ? layout2Envelope3OffsetY : envelopeOffsetY)
+  // Envelope1 offsetY: Use envelope1OffsetY from config (layout2.envelope1.offsetY)
+  const envelope1OffsetYValue = isEnvelope1 && envelope1OffsetY !== undefined ? envelope1OffsetY : envelopeOffsetY
+  // Envelope2 offsetY: Use envelope2OffsetY from config (layout2.envelope2.offsetY)
+  const envelope2OffsetYValue = isEnvelope2 && envelope2OffsetY !== undefined ? envelope2OffsetY : envelopeOffsetY
   const effectiveOffsetY = isBox3
     ? box3OffsetY 
     : (isEnvelope3
       ? envelope3OffsetY
-      : ((hideEnvelope && showGiftBoxWhenHidden && !useBox1 && layout2BoxType !== '3' && layout1Style !== '3') 
-        ? (boxOffsetY !== undefined ? boxOffsetY : envelopeOffsetY) 
-        : envelopeOffsetY))
+      : (isEnvelope1
+        ? envelope1OffsetYValue
+        : (isEnvelope2
+          ? envelope2OffsetYValue
+          : ((hideEnvelope && showGiftBoxWhenHidden && !useBox1 && layout2BoxType !== '3' && layout1Style !== '3') 
+            ? (boxOffsetY !== undefined ? boxOffsetY : envelopeOffsetY) 
+            : envelopeOffsetY))))
   // For single cards with Box2, use boxScale if provided, otherwise use envelopeScale
   // Box3/Envelope3 (layout2BoxType === '3' or layout1Style === '3') uses envelopeScale, except Layout 1 Style 3 uses 1.125
   // For Layout 1 Style 3, both Box3 and Envelope3 should use 1.125 scale
   const box3Scale = (layout1Style === '3') ? layout1Box3Scale : envelopeScale
+  // Envelope1 scale: Use envelope1Scale from config (layout2.envelope1.scale)
+  const envelope1ScaleValue = isEnvelope1 && envelope1Scale !== undefined ? envelope1Scale : envelopeScale
+  // Envelope2 scale: Use envelope2Scale from config (layout2.envelope2.scale)
+  const envelope2ScaleValue = isEnvelope2 && envelope2Scale !== undefined ? envelope2Scale : envelopeScale
   // For Layout 1 Style 3, ensure both Box3 and Envelope3 use 1.125 scale
-  // Priority: Layout 1 Style 3 > Layout 2 Box3/Envelope3 > Box2 > default envelopeScale
+  // Priority: Layout 1 Style 3 > Layout 2 Box3/Envelope3 > Envelope1 > Envelope2 > Box1 > Box2 > default envelopeScale
   const effectiveScale = useMemo(() => {
     if (layout1Style === '3' && (isBox3 || isEnvelope3)) {
       return layout1Box3Scale // 1.125 for Layout 1 Style 3
@@ -853,11 +911,28 @@ const SentCard = ({
     if (isBox3 || isEnvelope3) {
       return box3Scale // envelopeScale for Layout 2 Box3/Envelope3
     }
+    // Envelope1 scale (for Layout 2 Style 1)
+    if (isEnvelope1) {
+      return envelope1ScaleValue
+    }
+    // Envelope2 scale (for Layout 2 Style 2)
+    if (isEnvelope2) {
+      return envelope2ScaleValue
+    }
+    // Box1 scale (for useBox1 or layout2BoxType === '1')
+    // Check if Box1 is being rendered (single cards with Box1)
+    if ((useBox1 || layout2BoxType === '1') && hideEnvelope && showGiftBoxWhenHidden) {
+      if (box1Scale !== undefined) {
+        return box1Scale // Box1 scale from config (single1.box1.scale)
+      }
+      // Fallback to envelopeScale if box1Scale is not provided
+      return envelopeScale
+    }
     if (hideEnvelope && showGiftBoxWhenHidden && !useBox1 && layout2BoxType !== '3' && layout1Style !== '3' && boxScale !== undefined) {
       return boxScale // Box2 scale
     }
     return envelopeScale // Default
-  }, [layout1Style, isBox3, isEnvelope3, layout1Box3Scale, box3Scale, hideEnvelope, showGiftBoxWhenHidden, useBox1, layout2BoxType, boxScale, envelopeScale])
+  }, [layout1Style, isBox3, isEnvelope3, isEnvelope1, isEnvelope2, layout1Box3Scale, box3Scale, envelope1ScaleValue, envelope2ScaleValue, hideEnvelope, showGiftBoxWhenHidden, useBox1, layout2BoxType, boxScale, envelopeScale, box1Scale])
   // For Envelope3, we apply scale directly to the component, not the wrapper
   // For Box3 and others, we apply scale to the wrapper
   const envelopeInnerWrapperStyle = useMemo(() => {
@@ -884,12 +959,30 @@ const SentCard = ({
     }
   }, [layout1Style, layout1Box3Scale])
 
-  const box1WrapperStyle = useMemo(() => ({
-    position: 'relative',
-    width: box1Width !== undefined ? `${box1Width}px` : '250px',
-    height: box1Height !== undefined ? `${box1Height}px` : '200px',
-    pointerEvents: 'none'
-  }), [box1Width, box1Height])
+  const box1WrapperStyle = useMemo(() => {
+    // NO HARDCODED VALUES - All values must come from config
+    if (box1Width === undefined || box1Height === undefined) {
+      console.warn('Box1 width or height is undefined. Please set box1.width and box1.height in the config.')
+      return {
+        position: 'relative',
+        pointerEvents: 'none',
+        flexShrink: 0,
+      }
+    }
+    const width = `${box1Width}px`
+    const height = `${box1Height}px`
+    return {
+      position: 'relative',
+      width: width,
+      height: height,
+      minWidth: width,
+      maxWidth: width,
+      minHeight: height,
+      maxHeight: height,
+      pointerEvents: 'none',
+      flexShrink: 0,
+    }
+  }, [box1Width, box1Height])
 
   const box1ImageStyle = useMemo(() => ({
     objectFit: 'contain'
@@ -1245,14 +1338,14 @@ const SentCard = ({
 
           {/* Envelope Container - children positioned relative to header */}
           <div
-            className={`${hideEnvelope ? 'relative flex-1' : 'absolute'} ${hideEnvelope ? '' : (useBox1 && box1Top !== undefined ? '' : (progressOutsideEnvelope && envelopeTopBase2 !== undefined ? '' : 'inset-0'))}`}
+            className={`${hideEnvelope ? 'relative flex-1' : 'absolute'} ${hideEnvelope ? '' : ((useBox1 || layout2BoxType === '1') && box1Top !== undefined ? '' : (progressOutsideEnvelope && envelopeTopBase2 !== undefined ? '' : 'inset-0'))}`}
             style={envelopeContainerStyle}
-            data-name={useBox1 ? "Box1" : "Envelope"}
+            data-name={(useBox1 || layout2BoxType === '1') ? "Box1" : "Envelope"}
             data-node-id="1467:49190"
           >
             {/* Debug: Red line at estimated gift container top edge - only for Single 1 - SCALE-AWARE */}
             {/* This is the second floor for confetti particles - particles can land here and roll off */}
-            {useBox1 && (
+            {(useBox1 || layout2BoxType === '1') && (
               <div
                 data-name="Second Floor"
                 data-floor-type="single1"
@@ -1261,9 +1354,10 @@ const SentCard = ({
                   // Scale-aware position: inside envelope container, so it scales with the container
                   // With transform origin 'center top' (or custom), the top edge position is relative to container
                   // Moved up 12px from original position
+                  // NO HARDCODED VALUES - Use box1Top from config
                   top: box1Top !== undefined 
-                    ? `${box1Top - 45 + (box1OffsetY !== undefined ? box1OffsetY : 0)}px` // Single 1 - Box1 top edge position (was -45, now -57 for +12px up)
-                    : `${4 - 45 + (box1OffsetY !== undefined ? box1OffsetY : 0)}px`, // Fallback - adjusted to match (was -45, now -57)
+                    ? `${box1Top - 45 + (box1OffsetY !== undefined ? box1OffsetY : 0)}px` // Single 1 - Box1 top edge position
+                    : undefined, // Must be defined in config
                   left: '50%',
                   transform: 'translateX(-50%)',
                   width: '95px',
@@ -1435,15 +1529,15 @@ const SentCard = ({
                   </div>
                 ) : layout2BoxType === '1' ? (
                   // Envelope1: Render exactly as in Layout 1, wrapped in scaled container
-                  // Need fixed dimensions (300px x 384px) for Envelope1's absolute positioning to work
+                  // NO HARDCODED VALUES - Use envelope1 config (layout2.envelope1)
                   <div style={{
                     position: 'absolute',
                     left: '50%',
                     top: '50%',
-                    transform: `translate(-50%, -50%) translateY(${effectiveOffsetY || 0}px) scale(${envelopeScale || 1})`,
+                    transform: `translate(-50%, -50%) translateY(${envelope1OffsetY !== undefined ? envelope1OffsetY : (envelope1OffsetYValue || 0)}px) scale(${envelope1Scale !== undefined ? envelope1Scale : (envelope1ScaleValue || 1)})`,
                     transformOrigin: 'center center',
-                    width: '300px',
-                    height: '384px',
+                    width: envelope1Width !== undefined ? `${envelope1Width}px` : (envelopeWidth !== undefined ? `${envelopeWidth}px` : '300px'), // Default fallback, but config should always define this
+                    height: envelope1Height !== undefined ? `${envelope1Height}px` : (envelopeHeight !== undefined ? `${envelopeHeight}px` : '384px'), // Default fallback, but config should always define this
                   }}>
                     <div style={envelopeBaseWrapperStyle}>
                       <Envelope1 ids={ids} baseTintColor={baseTintColor} />

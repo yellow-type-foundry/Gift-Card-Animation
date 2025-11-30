@@ -251,8 +251,22 @@ export const LAYOUT_CONFIG = {
       height: 280, // minHeight when useFlex is true
       useFlex: true, // Fill available height
     },
-    // Envelope settings
-    envelope: {
+    // Envelope1 settings (for Layout 2 Style 1 batch cards when layout2BoxType === '1')
+    // SEPARATE CONTROL BLOCK - does NOT affect Envelope2
+    envelope1: {
+      scale: .9,
+      offsetY: -8,
+      left: undefined,
+      right: undefined,
+      top: undefined,
+      transformOrigin: undefined,
+      // Envelope1 wrapper dimensions (required for Envelope1's internal absolute positioning)
+      width: 300,
+      height: 384,
+    },
+    // Envelope2 settings (for Layout 2 Style 2 batch cards when layout2BoxType === '2' or default)
+    // SEPARATE CONTROL BLOCK - does NOT affect Envelope1
+    envelope2: {
       scale: 1,
       offsetY: -4,
       left: undefined,
@@ -411,6 +425,19 @@ export const LAYOUT_CONFIG = {
     progressOutsideEnvelope: false,
     hideEnvelope: true, // Use Envelope2 instead of default envelope
     showGiftBoxWhenHidden: false, // Use Envelope2 (like Batch 2), not Box2
+    // Box1 settings (SINGLE CARD ONLY - for Layout 2 Style 1 when layout2BoxType === '1')
+    // NOTE: These settings are ONLY used by single cards when Box1 is shown (layout2BoxType === '1')
+    box1: {
+      scale: .935,
+      offsetY: 3,
+      width: 360,
+      height: 300,
+      top: 20,
+      left: undefined,
+      right: undefined,
+      bottom: undefined,
+      transformOrigin: 'center top',
+    },
     // Box2 settings (SINGLE CARD ONLY - standalone control, does NOT affect batch cards)
     // NOTE: These settings are ONLY used by single cards when Box2 is shown (layout2BoxType === '2')
     box: {
