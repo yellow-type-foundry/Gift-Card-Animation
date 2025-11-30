@@ -9,7 +9,7 @@ import useProgressAnimation from '@/hooks/useProgressAnimation'
 import useConfettiLayout1 from '@/hooks/useConfettiLayout1'
 import useConfettiLayout0 from '@/hooks/useConfettiLayout0'
 import useComponentIds from '@/hooks/useComponentIds'
-import { capSaturation, adjustToLuminance, hexToHsl, hslToHex } from '@/utils/colors'
+import { capSaturation, adjustToLuminance, hexToHsl, hslToHex, makeVibrantColor } from '@/utils/colors'
 import useHover from '@/hooks/useHover'
 import Footer from '@/components/sent-card/Footer'
 import Envelope1 from '@/components/sent-card/Envelope1'
@@ -17,6 +17,7 @@ import CardShape from '@/components/sent-card/CardShape'
 import Box2 from '@/components/sent-card/Box2'
 import Envelope2 from '@/components/sent-card/Envelope2'
 import Layout3Box from '@/components/Layout3Box'
+import Envelope3 from '@/components/Envelope3'
 import ShareModal from '@/components/ShareModal'
 import { PROGRESS_PILL_RADIUS, HEADER_OVERLAY_BG, PROGRESS_GLOW_BOX_SHADOW, ENVELOPE_DIMENSIONS, FOOTER_CONFIG } from '@/constants/sentCardConstants'
 
@@ -494,6 +495,7 @@ const SentCard = ({
   // Calculate box color for Box3 (Layout3Box) - use brand color directly without HSL adjustments (matching Layout 3)
   const box3Color = useMemo(() => {
     if (hideEnvelope && showGiftBoxWhenHidden && layout2BoxType === '3') {
+      // For single cards (Box3), use vibrant brand color
       // Look up brand color from map
       const brandColor = LOGO_BRAND_COLORS[svgLogoPath]
       // If no brand color mapping found, use Columbia blue as fallback
@@ -544,6 +546,15 @@ const SentCard = ({
       EFFECTIVE_BOX_SATURATION
     )
   }, [dominantColor, EFFECTIVE_BOX_LUMINANCE, EFFECTIVE_BOX_SATURATION])
+
+  // Calculate vibrant color for Envelope3 - keep theming but match Box3 vibrancy
+  const envelope3Color = useMemo(() => {
+    if (hideEnvelope && !showGiftBoxWhenHidden && layout2BoxType === '3') {
+      // For batch cards (Envelope3), use themed color but make it vibrant to match Box3
+      return makeVibrantColor(envelopeBoxColor, 50)
+    }
+    return envelopeBoxColor // Fallback to envelopeBoxColor if not Envelope3
+  }, [hideEnvelope, showGiftBoxWhenHidden, layout2BoxType, envelopeBoxColor])
 
   // Flap color - uses layout-specific luminance/saturation
   const envelopeFlapColor = useMemo(() => {
@@ -1234,11 +1245,13 @@ const SentCard = ({
                   </div>
                 ) : layout2BoxType === '3' ? (
                   // Box3 (Layout3Box) - use vibrant brand color directly (matching Layout 3)
+                  // Position it higher to match Envelope3's position in batch cards
                   <Layout3Box
                     boxColor={box3Color}
                     logoPath={svgLogoPath}
                     progress={validatedProgress}
                     isHovered={isHovered}
+                    style={{ marginTop: '-20px' }}
                   />
                 ) : (
                   // Box2 (default)
@@ -1269,62 +1282,84 @@ const SentCard = ({
                 )}
               </div>
             ) : hideEnvelope && !showGiftBoxWhenHidden && hideProgressBarInBox ? (
-              // Envelope2
+              // Envelope2 or Envelope3
               // Wrapped in inner div for absolute positioning with scale/offsetY
+              // For Style 3 (layout2BoxType === '3'), use Envelope3 instead of Envelope2
               <div style={envelopeInnerWrapperStyle}>
-                <Envelope2
-                  progress={validatedProgress}
-                  boxImage={boxImage}
-                  boxColor={envelopeBoxColor}
-                  flapColor={envelopeFlapColor}
-                  boxOpacity={EFFECTIVE_BOX_OPACITY}
-                  flapOpacity={EFFECTIVE_FLAP_OPACITY}
-                  progressIndicatorShadowColor={progressIndicatorShadowColor}
-                  progressBarSourceColor={progressBarSourceColor}
-                  progressBarLuminance={PROGRESS_BAR_LUMINANCE}
-                  progressBarSaturation={PROGRESS_BAR_SATURATION}
-                  containerPadding={EFFECTIVE_ENVELOPE_PADDING}
-                  containerMargin={EFFECTIVE_ENVELOPE_MARGIN}
-                  isHovered={isHovered}
-                  parallaxX={parallaxX}
-                  parallaxY={parallaxY}
-                  tiltX={tiltX}
-                  tiltY={tiltY}
-                  animationType={animationType}
-                  enable3D={enable3D}
-                  hideProgressBar={hideProgressBarInBox}
-                  hidePaper={hidePaper}
-                />
+                {layout2BoxType === '3' ? (
+                  <Envelope3
+                    boxColor={envelopeBoxColor}
+                    logoPath={svgLogoPath}
+                    progress={validatedProgress}
+                    coverImage={boxImage}
+                    isHovered={isHovered}
+                  />
+                ) : (
+                  <Envelope2
+                    progress={validatedProgress}
+                    boxImage={boxImage}
+                    boxColor={envelopeBoxColor}
+                    flapColor={envelopeFlapColor}
+                    boxOpacity={EFFECTIVE_BOX_OPACITY}
+                    flapOpacity={EFFECTIVE_FLAP_OPACITY}
+                    progressIndicatorShadowColor={progressIndicatorShadowColor}
+                    progressBarSourceColor={progressBarSourceColor}
+                    progressBarLuminance={PROGRESS_BAR_LUMINANCE}
+                    progressBarSaturation={PROGRESS_BAR_SATURATION}
+                    containerPadding={EFFECTIVE_ENVELOPE_PADDING}
+                    containerMargin={EFFECTIVE_ENVELOPE_MARGIN}
+                    isHovered={isHovered}
+                    parallaxX={parallaxX}
+                    parallaxY={parallaxY}
+                    tiltX={tiltX}
+                    tiltY={tiltY}
+                    animationType={animationType}
+                    enable3D={enable3D}
+                    hideProgressBar={hideProgressBarInBox}
+                    hidePaper={hidePaper}
+                  />
+                )}
               </div>
             ) : hideEnvelope && !showGiftBoxWhenHidden ? (
-              // LAYOUT 2 (Batch 2) or Box 2 (Single 2): Envelope2 - NO inner wrapper, container handles positioning
+              // LAYOUT 2 (Batch 2) or Box 2 (Single 2): Envelope2 or Envelope3 - NO inner wrapper, container handles positioning
               // For Box 2 (single cards), hide the paper component (hidePaper: true)
               // For Envelope 2 (batch cards), show the paper component (hidePaper: false)
+              // For Style 3 (layout2BoxType === '3'), use Envelope3 instead of Envelope2
               <>
                 {console.log('[SentCard] hideEnvelope:', hideEnvelope, 'showGiftBoxWhenHidden:', showGiftBoxWhenHidden, 'hidePaper prop:', hidePaper) || null}
-                <Envelope2
-                  progress={validatedProgress}
-                  boxImage={boxImage}
-                  boxColor={envelopeBoxColor}
-                  flapColor={envelopeFlapColor}
-                  boxOpacity={EFFECTIVE_BOX_OPACITY}
-                  flapOpacity={EFFECTIVE_FLAP_OPACITY}
-                  progressIndicatorShadowColor={progressIndicatorShadowColor}
-                  progressBarSourceColor={progressBarSourceColor}
-                  progressBarLuminance={PROGRESS_BAR_LUMINANCE}
-                  progressBarSaturation={PROGRESS_BAR_SATURATION}
-                  containerPadding={EFFECTIVE_ENVELOPE_PADDING}
-                  containerMargin={EFFECTIVE_ENVELOPE_MARGIN}
-                  isHovered={isHovered}
-                  parallaxX={parallaxX}
-                  parallaxY={parallaxY}
-                  tiltX={tiltX}
-                  tiltY={tiltY}
-                  animationType={animationType}
-                  enable3D={enable3D}
-                  hideProgressBar={hideProgressBarInBox}
-                  hidePaper={hidePaper}
-                />
+                {layout2BoxType === '3' ? (
+                  <Envelope3
+                    boxColor={envelopeBoxColor}
+                    logoPath={svgLogoPath}
+                    progress={validatedProgress}
+                    coverImage={boxImage}
+                    isHovered={isHovered}
+                  />
+                ) : (
+                  <Envelope2
+                    progress={validatedProgress}
+                    boxImage={boxImage}
+                    boxColor={envelopeBoxColor}
+                    flapColor={envelopeFlapColor}
+                    boxOpacity={EFFECTIVE_BOX_OPACITY}
+                    flapOpacity={EFFECTIVE_FLAP_OPACITY}
+                    progressIndicatorShadowColor={progressIndicatorShadowColor}
+                    progressBarSourceColor={progressBarSourceColor}
+                    progressBarLuminance={PROGRESS_BAR_LUMINANCE}
+                    progressBarSaturation={PROGRESS_BAR_SATURATION}
+                    containerPadding={EFFECTIVE_ENVELOPE_PADDING}
+                    containerMargin={EFFECTIVE_ENVELOPE_MARGIN}
+                      isHovered={isHovered}
+                    parallaxX={parallaxX}
+                    parallaxY={parallaxY}
+                    tiltX={tiltX}
+                    tiltY={tiltY}
+                    animationType={animationType}
+                    enable3D={enable3D}
+                    hideProgressBar={hideProgressBarInBox}
+                    hidePaper={hidePaper}
+                  />
+                )}
               </>
             ) : useBox1 ? (
               // Box1 Image (replaces envelope)

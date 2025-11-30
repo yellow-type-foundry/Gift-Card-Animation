@@ -147,6 +147,7 @@ const CardGrid = ({
                     <SentCard
                       key={index}
                       {...getSentCardProps(card, layoutNumber, useColoredBackground, animationType, enable3D)}
+                      layout2BoxType={layout2BoxType}
                     />
                   )
                 } else {
@@ -245,6 +246,7 @@ const CardGrid = ({
               <SentCard
                 key={index}
                 {...getSentCardProps(card, layoutNumber, useColoredBackground, animationType)}
+                layout2BoxType={layout2BoxType}
               />
             ))
           )}

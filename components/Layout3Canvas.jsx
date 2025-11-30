@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import Layout3Box from '@/components/Layout3Box'
+import Envelope3 from '@/components/Envelope3'
 
 // Shuffle function (Fisher-Yates algorithm)
 const shuffleArray = (array) => {
@@ -79,27 +80,19 @@ const Layout3Canvas = ({ shuffleSeed = 0 }) => {
         className="flex flex-col items-center justify-center gap-8"
         style={{ maxWidth: '1200px', overflow: 'visible' }}
       >
-        {/* Row 1 */}
+        {/* Envelope3 and Box3 side by side */}
         <div className="flex flex-col md:flex-row items-center justify-center gap-8" style={{ overflow: 'visible' }}>
-          {shuffledConfigs.slice(0, 4).map((config, index) => (
-            <Layout3Box
-              key={`row1-${index}-${config.logoPath}`}
-              logoPath={config.logoPath}
-              boxColor={config.boxColor}
-              progress={progressValues[index] || { current: 1, total: 25 }}
-            />
-          ))}
-        </div>
-        {/* Row 2 */}
-        <div className="flex flex-col md:flex-row items-center justify-center gap-8" style={{ overflow: 'visible' }}>
-          {shuffledConfigs.slice(4, 8).map((config, index) => (
-            <Layout3Box
-              key={`row2-${index}-${config.logoPath}`}
-              logoPath={config.logoPath}
-              boxColor={config.boxColor}
-              progress={progressValues[index + 4] || { current: 1, total: 25 }}
-            />
-          ))}
+          <Envelope3
+            logoPath={BOX_CONFIGS[0].logoPath}
+            boxColor={BOX_CONFIGS[0].boxColor}
+            progress={progressValues[0] || { current: 1, total: 25 }}
+            coverImage="/assets/covers/Birthday01.png"
+          />
+          <Layout3Box
+            logoPath={BOX_CONFIGS[0].logoPath}
+            boxColor={BOX_CONFIGS[0].boxColor}
+            progress={progressValues[0] || { current: 1, total: 25 }}
+          />
         </div>
       </div>
     </div>
