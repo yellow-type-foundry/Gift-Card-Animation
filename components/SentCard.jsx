@@ -1321,13 +1321,231 @@ const SentCard = ({
                 )}
               </div>
             ) : hideEnvelope && !showGiftBoxWhenHidden ? (
-              // LAYOUT 2 (Batch 2) or Box 2 (Single 2): Envelope2 or Envelope3 - NO inner wrapper, container handles positioning
-              // For Box 2 (single cards), hide the paper component (hidePaper: true)
-              // For Envelope 2 (batch cards), show the paper component (hidePaper: false)
-              // For Style 3 (layout2BoxType === '3'), use Envelope3 instead of Envelope2
+              // LAYOUT 2 (Batch 2) or Box 2 (Single 2): Envelope1, Envelope2, or Envelope3
+              // For Style 1 (layout2BoxType === '1'), use Envelope1 (exactly like Layout 1, just scaled)
+              // For Style 3 (layout2BoxType === '3'), use Envelope3
+              // For Style 2 (default), use Envelope2
               <>
                 {console.log('[SentCard] hideEnvelope:', hideEnvelope, 'showGiftBoxWhenHidden:', showGiftBoxWhenHidden, 'hidePaper prop:', hidePaper) || null}
-                {layout2BoxType === '3' ? (
+                {layout2BoxType === '1' ? (
+                  // Envelope1: Render exactly as in Layout 1, wrapped in scaled container
+                  // Need fixed dimensions (300px x 384px) for Envelope1's absolute positioning to work
+                  <div style={{
+                    position: 'absolute',
+                    left: '50%',
+                    top: '50%',
+                    transform: `translate(-50%, -50%) translateY(${effectiveOffsetY || 0}px) scale(${envelopeScale || 1})`,
+                    transformOrigin: 'center center',
+                    width: '300px',
+                    height: '384px',
+                  }}>
+                    <div style={envelopeBaseWrapperStyle}>
+                      <Envelope1 ids={ids} baseTintColor={baseTintColor} />
+                    </div>
+                    <CardShape ids={ids} base2TintColor={base2TintColor} />
+                    {/* Image Container (hosts image) */}
+                    <div
+                      className="absolute"
+                      style={{
+                        left: ENVELOPE_DIMENSIONS.imageContainer.left,
+                        top: ENVELOPE_DIMENSIONS.imageContainer.top,
+                        width: ENVELOPE_DIMENSIONS.imageContainer.width,
+                        height: ENVELOPE_DIMENSIONS.imageContainer.height,
+                        zIndex: 2
+                      }}
+                      data-name="Image Container"
+                    >
+                      <svg
+                        preserveAspectRatio="none"
+                        width="100%"
+                        height="100%"
+                        overflow="visible"
+                        style={{ display: 'block' }}
+                        viewBox="0 0 196 221"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <g filter={`url(#${ids.imageFilterId})`}>
+                          {/* Fill container with white */}
+                          <path
+                            d="M91.6152 149.22L12.7204 83.6651L12.7204 83.665C11.638 82.7656 11.0967 82.3159 10.7076 81.7641C10.3628 81.2753 10.1068 80.7295 9.95108 80.1519C9.77539 79.5 9.77539 78.7963 9.77539 77.3889V40.468C9.77539 35.9875 9.77539 33.7473 10.6473 32.036C11.4143 30.5308 12.6382 29.3069 14.1435 28.5399C15.8548 27.668 18.095 27.668 22.5754 27.668L172.925 27.668C177.406 27.668 179.646 27.6681 181.357 28.54C182.863 29.307 184.086 30.5308 184.853 32.0361C185.725 33.7474 185.725 35.9876 185.725 40.468V77.3889C185.725 78.7963 185.725 79.5 185.55 80.1519C185.394 80.7295 185.138 81.2753 184.793 81.7641C184.404 82.3159 183.863 82.7656 182.78 83.6651L103.886 149.22C101.703 151.034 100.611 151.941 99.3931 152.288C98.3193 152.593 97.1815 152.593 96.1077 152.288C94.8898 151.941 93.7983 151.034 91.6152 149.22Z"
+                            fill="#FFFFFF"
+                          />
+                          {/* Themed 4-item grid clipped to image container */}
+                          <g clipPath={`url(#${ids.imageClipId})`}>
+                            <rect className="grid-cell-base gc-1" x="17.75" y="83" width="36" height="36" rx="4" fill={gridCellBaseColor} />
+                            <rect className="grid-cell-overlay gc-1" x="17.75" y="83" width="36" height="36" rx="4" fill={`url(#${ids.gridCellGradId})`} />
+                            <rect className="grid-cell-base gc-2" x="58.75" y="83" width="36" height="36" rx="4" fill={gridCellBaseColor} />
+                            <rect className="grid-cell-overlay gc-2" x="58.75" y="83" width="36" height="36" rx="4" fill={`url(#${ids.gridCellGradId})`} />
+                            <rect className="grid-cell-base gc-3" x="99.75" y="83" width="36" height="36" rx="4" fill={gridCellBaseColor} />
+                            <rect className="grid-cell-overlay gc-3" x="99.75" y="83" width="36" height="36" rx="4" fill={`url(#${ids.gridCellGradId})`} />
+                            <rect className="grid-cell-base gc-4" x="140.75" y="83" width="36" height="36" rx="4" fill={gridCellBaseColor} />
+                            <rect className="grid-cell-overlay gc-4" x="140.75" y="83" width="36" height="36" rx="4" fill={`url(#${ids.gridCellGradId})`} />
+                            {/* second row with 5px vertical gap */}
+                            <rect className="grid-cell-base gc-5" x="17.75" y="124" width="36" height="36" rx="4" fill={gridCellBaseColor} />
+                            <rect className="grid-cell-overlay gc-5" x="17.75" y="124" width="36" height="36" rx="4" fill={`url(#${ids.gridCellGradId})`} />
+                            <rect className="grid-cell-base gc-6" x="58.75" y="124" width="36" height="36" rx="4" fill={gridCellBaseColor} />
+                            <rect className="grid-cell-overlay gc-6" x="58.75" y="124" width="36" height="36" rx="4" fill={`url(#${ids.gridCellGradId})`} />
+                            <rect className="grid-cell-base gc-7" x="99.75" y="124" width="36" height="36" rx="4" fill={gridCellBaseColor} />
+                            <rect className="grid-cell-overlay gc-7" x="99.75" y="124" width="36" height="36" rx="4" fill={`url(#${ids.gridCellGradId})`} />
+                            <rect className="grid-cell-base gc-8" x="140.75" y="124" width="36" height="36" rx="4" fill={gridCellBaseColor} />
+                            <rect className="grid-cell-overlay gc-8" x="140.75" y="124" width="36" height="36" rx="4" fill={`url(#${ids.gridCellGradId})`} />
+                          </g>
+                          <path
+                            d="M91.6152 149.22L12.7204 83.6651L12.7204 83.665C11.638 82.7656 11.0967 82.3159 10.7076 81.7641C10.3628 81.2753 10.1068 80.7295 9.95108 80.1519C9.77539 79.5 9.77539 78.7963 9.77539 77.3889V40.468C9.77539 35.9875 9.77539 33.7473 10.6473 32.036C11.4143 30.5308 12.6382 29.3069 14.1435 28.5399C15.8548 27.668 18.095 27.668 22.5754 27.668L172.925 27.668C177.406 27.668 179.646 27.6681 181.357 28.54C182.863 29.307 184.086 30.5308 184.853 32.0361C185.725 33.7474 185.725 35.9876 185.725 40.468V77.3889C185.725 78.7963 185.725 79.5 185.55 80.1519C185.394 80.7295 185.138 81.2753 184.793 81.7641C184.404 82.3159 183.863 82.7656 182.78 83.6651L103.886 149.22C101.703 151.034 100.611 151.941 99.3931 152.288C98.3193 152.593 97.1815 152.593 96.1077 152.288C94.8898 151.941 93.7983 151.034 91.6152 149.22Z"
+                            fill={`url(#${ids.imageGradientSoftLightId})`}
+                            style={{ mixBlendMode: 'soft-light' }}
+                          />
+                          <path
+                            d="M91.6152 149.22L12.7204 83.6651L12.7204 83.665C11.638 82.7656 11.0967 82.3159 10.7076 81.7641C10.3628 81.2753 10.1068 80.7295 9.95108 80.1519C9.77539 79.5 9.77539 78.7963 9.77539 77.3889V40.468C9.77539 35.9875 9.77539 33.7473 10.6473 32.036C11.4143 30.5308 12.6382 29.3069 14.1435 28.5399C15.8548 27.668 18.095 27.668 22.5754 27.668L172.925 27.668C177.406 27.668 179.646 27.6681 181.357 28.54C182.863 29.307 184.086 30.5308 184.853 32.0361C185.725 33.7474 185.725 35.9876 185.725 40.468V77.3889C185.725 78.7963 185.725 79.5 185.55 80.1519C185.394 80.7295 185.138 81.2753 184.793 81.7641C184.404 82.3159 183.863 82.7656 182.78 83.6651L103.886 149.22C101.703 151.034 100.611 151.941 99.3931 152.288C98.3193 152.593 97.1815 152.593 96.1077 152.288C94.8898 151.941 93.7983 151.034 91.6152 149.22Z"
+                            fill={`url(#${ids.imageGradientShadowId})`}
+                            fillOpacity="0.35"
+                          />
+                        </g>
+                        <defs>
+                          {/* Define a clipPath that matches the container shape for masking the cover image */}
+                          <clipPath id={ids.imageClipId}>
+                            <path d="M91.6152 149.22L12.7204 83.6651L12.7204 83.665C11.638 82.7656 11.0967 82.3159 10.7076 81.7641C10.3628 81.2753 10.1068 80.7295 9.95108 80.1519C9.77539 79.5 9.77539 78.7963 9.77539 77.3889V40.468C9.77539 35.9875 9.77539 33.7473 10.6473 32.036C11.4143 30.5308 12.6382 29.3069 14.1435 28.5399C15.8548 27.668 18.095 27.668 22.5754 27.668L172.925 27.668C177.406 27.668 179.646 27.6681 181.357 28.54C182.863 29.307 184.086 30.5308 184.853 32.0361C185.725 33.7474 185.725 35.9876 185.725 40.468V77.3889C185.725 78.7963 185.725 79.5 185.55 80.1519C185.394 80.7295 185.138 81.2753 184.793 81.7641C184.404 82.3159 183.863 82.7656 182.78 83.6651L103.886 149.22C101.703 151.034 100.611 151.941 99.3931 152.288C98.3193 152.593 97.1815 152.593 96.1077 152.288C94.8898 151.941 93.7983 151.034 91.6152 149.22Z" />
+                          </clipPath>
+                          <filter
+                            id={ids.imageFilterId}
+                            x="6.37539"
+                            y="26.818"
+                            width="182.75"
+                            height="132.499"
+                            filterUnits="userSpaceOnUse"
+                            colorInterpolationFilters="sRGB"
+                          >
+                            <feFlood floodOpacity="0" result="BackgroundImageFix" />
+                            <feDropShadow dx="0" dy="-2" stdDeviation="3" floodColor="#FFFFFF" floodOpacity="1" result="ds" />
+                            <feBlend mode="normal" in="SourceGraphic" in2="ds" result="shape" />
+                            <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
+                            <feOffset dy="0" />
+                            <feGaussianBlur stdDeviation="2" />
+                            <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1" />
+                            <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.2 0" />
+                            <feBlend mode="normal" in2="shape" result="effect2_innerShadow" />
+                            <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
+                            <feOffset dy="0" />
+                            <feGaussianBlur stdDeviation="2" />
+                            <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1" />
+                            <feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.2 0" />
+                            <feBlend mode="normal" in2="effect2_innerShadow" result="effect3_innerShadow" />
+                          </filter>
+                          <linearGradient
+                            id={ids.imageGradientSoftLightId}
+                            x1="21"
+                            y1="28"
+                            x2="140"
+                            y2="191"
+                            gradientUnits="userSpaceOnUse"
+                          >
+                            <stop stopColor="white" stopOpacity="0.1" />
+                            <stop offset="1" stopColor="white" stopOpacity="0" />
+                          </linearGradient>
+                          <linearGradient
+                            id={ids.imageGradientShadowId}
+                            x1="97"
+                            y1="83"
+                            x2="97"
+                            y2="154"
+                            gradientUnits="userSpaceOnUse"
+                          >
+                            <stop stopOpacity="0" />
+                            <stop offset="1" />
+                          </linearGradient>
+                          <linearGradient
+                            id={ids.gridCellGradId}
+                            x1="0"
+                            y1="0"
+                            x2="0"
+                            y2="1"
+                            gradientUnits="objectBoundingBox"
+                          >
+                            <stop offset="0" stopColor="white" stopOpacity="0.5" />
+                            <stop offset="1" stopColor="white" stopOpacity="0" />
+                          </linearGradient>
+                        </defs>
+                      </svg>
+                    </div>
+                    {/* Image Badge - positioned above fade overlay */}
+                    <div
+                      className="absolute"
+                      style={{
+                        left: ENVELOPE_DIMENSIONS.imageBadge.left,
+                        top: ENVELOPE_DIMENSIONS.imageBadge.top,
+                        width: ENVELOPE_DIMENSIONS.imageBadge.width,
+                        height: ENVELOPE_DIMENSIONS.imageBadge.height,
+                        borderRadius: '4px',
+                        overflow: 'hidden',
+                        zIndex: 100,
+                        pointerEvents: 'none'
+                      }}
+                    >
+                      {/* Cover image under gradient */}
+                      <Image
+                        src={boxImage}
+                        alt=""
+                        fill
+                        sizes="160px"
+                        priority={false}
+                        style={{ objectFit: 'cover' }}
+                      />
+                      {/* Gradient overlay on top */}
+                      <div
+                        className="absolute inset-0"
+                        style={{
+                          background:
+                            'linear-gradient(to bottom, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 20%)',
+                        }}
+                      />
+                    </div>
+                    {/* Image Container Fade (duplicate shape, black gradient fill) */}
+                    <div
+                      className="absolute"
+                      style={{
+                        left: ENVELOPE_DIMENSIONS.imageFade.left,
+                        top: ENVELOPE_DIMENSIONS.imageFade.top,
+                        width: ENVELOPE_DIMENSIONS.imageFade.width,
+                        height: ENVELOPE_DIMENSIONS.imageFade.height,
+                        zIndex: 99,
+                        pointerEvents: 'none'
+                      }}
+                      data-name="Image Fade"
+                    >
+                      <svg
+                        preserveAspectRatio="none"
+                        width="100%"
+                        height="100%"
+                        overflow="visible"
+                        style={{ display: 'block' }}
+                        viewBox="0 0 196 221"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M91.6152 149.22L12.7204 83.6651L12.7204 83.665C11.638 82.7656 11.0967 82.3159 10.7076 81.7641C10.3628 81.2753 10.1068 80.7295 9.95108 80.1519C9.77539 79.5 9.77539 78.7963 9.77539 77.3889V40.468C9.77539 35.9875 9.77539 33.7473 10.6473 32.036C11.4143 30.5308 12.6382 29.3069 14.1435 28.5399C15.8548 27.668 18.095 27.668 22.5754 27.668L172.925 27.668C177.406 27.668 179.646 27.6681 181.357 28.54C182.863 29.307 184.086 30.5308 184.853 32.0361C185.725 33.7474 185.725 35.9876 185.725 40.468V77.3889C185.725 78.7963 185.725 79.5 185.55 80.1519C185.394 80.7295 185.138 81.2753 184.793 81.7641C184.404 82.3159 183.863 82.7656 182.78 83.6651L103.886 149.22C101.703 151.034 100.611 151.941 99.3931 152.288C98.3193 152.593 97.1815 152.593 96.1077 152.288C94.8898 151.941 93.7983 151.034 91.6152 149.22Z"
+                          fill="url(#imageFadeGradient)"
+                        />
+                        <defs>
+                          <linearGradient
+                            id="imageFadeGradient"
+                            x1="97.75"
+                            y1="27.668"
+                            x2="97.75"
+                            y2="221"
+                            gradientUnits="userSpaceOnUse"
+                          >
+                            <stop stopColor="black" stopOpacity="0" />
+                            <stop offset="0.5" stopColor="black" stopOpacity="0" />
+                            <stop offset="0.7" stopColor="black" stopOpacity="0.1" />
+                            <stop offset="1" stopColor="black" stopOpacity="0.3" />
+                          </linearGradient>
+                        </defs>
+                      </svg>
+                    </div>
+                  </div>
+                ) : layout2BoxType === '3' ? (
                   <Envelope3
                     boxColor={envelopeBoxColor}
                     logoPath={svgLogoPath}
