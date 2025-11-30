@@ -253,7 +253,7 @@ export const LAYOUT_CONFIG = {
     },
     // Envelope settings
     envelope: {
-      scale: .95,
+      scale: 1,
       offsetY: -4,
       left: undefined,
       right: undefined,

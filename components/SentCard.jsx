@@ -791,14 +791,22 @@ const SentCard = ({
   
   // Inner wrapper style - absolutely positioned, handles scale and offsetY
   // For single cards with Box2, use boxOffsetY if provided, otherwise use envelopeOffsetY
-  const effectiveOffsetY = (hideEnvelope && showGiftBoxWhenHidden && !useBox1 && boxOffsetY !== undefined) ? boxOffsetY : envelopeOffsetY
+  // Box3 (layout2BoxType === '3') always uses the batch card's envelope offsetY (-4) to match Envelope3
+  // Single cards get boxOffsetY = 48, but Box3 needs to match Envelope3's -4 offsetY
+  const box3EnvelopeOffsetY = -7 // Layout 2 batch card envelope offsetY
+  const effectiveOffsetY = (hideEnvelope && showGiftBoxWhenHidden && !useBox1 && layout2BoxType === '3') 
+    ? box3EnvelopeOffsetY 
+    : ((hideEnvelope && showGiftBoxWhenHidden && !useBox1 && layout2BoxType !== '3' && boxOffsetY !== undefined) ? boxOffsetY : envelopeOffsetY)
+  // For single cards with Box2, use boxScale if provided, otherwise use envelopeScale
+  // Box3 (layout2BoxType === '3') always uses envelopeScale to match Envelope3
+  const effectiveScale = (hideEnvelope && showGiftBoxWhenHidden && !useBox1 && layout2BoxType !== '3' && boxScale !== undefined) ? boxScale : envelopeScale
   const envelopeInnerWrapperStyle = useMemo(() => ({
     position: 'absolute',
     left: '50%',
     top: '50%',
-    transform: `translate(-50%, -50%) translateY(${effectiveOffsetY || 0}px) scale(${envelopeScale || 1})`,
+    transform: `translate(-50%, -50%) translateY(${effectiveOffsetY || 0}px) scale(${effectiveScale || 1})`,
     transformOrigin: 'center center',
-  }), [effectiveOffsetY, envelopeScale, hideEnvelope, showGiftBoxWhenHidden, useBox1, boxOffsetY, envelopeOffsetY])
+  }), [effectiveOffsetY, effectiveScale, hideEnvelope, showGiftBoxWhenHidden, useBox1, layout2BoxType, boxOffsetY, envelopeOffsetY, boxScale, envelopeScale])
 
   const box1WrapperStyle = useMemo(() => ({
     position: 'relative',
@@ -1245,13 +1253,11 @@ const SentCard = ({
                   </div>
                 ) : layout2BoxType === '3' ? (
                   // Box3 (Layout3Box) - use vibrant brand color directly (matching Layout 3)
-                  // Position it higher to match Envelope3's position in batch cards
                   <Layout3Box
                     boxColor={box3Color}
                     logoPath={svgLogoPath}
                     progress={validatedProgress}
                     isHovered={isHovered}
-                    style={{ marginTop: '-20px' }}
                   />
                 ) : (
                   // Box2 (default)

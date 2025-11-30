@@ -181,6 +181,12 @@ const Envelope3 = ({
         ...style,
         // Ensure no clipping - allow content to extend beyond bounds
         overflow: 'visible',
+        // Explicitly set min/max to ensure exact size
+        minWidth: `${BOX_WIDTH}px`,
+        maxWidth: `${BOX_WIDTH}px`,
+        minHeight: `${BOX_HEIGHT}px`,
+        maxHeight: `${BOX_HEIGHT}px`,
+        boxSizing: 'border-box',
       }}
       onMouseEnter={externalIsHovered === undefined ? () => setInternalIsHovered(true) : undefined}
       onMouseLeave={externalIsHovered === undefined ? () => setInternalIsHovered(false) : undefined}
