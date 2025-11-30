@@ -266,6 +266,16 @@ const ControlBar = ({
                             >
                               2
                             </button>
+                            <button
+                              onClick={() => onStyleChange('C')}
+                              className={`px-3 py-1 rounded-[8px] text-xs transition-colors ${
+                                style === 'C' 
+                                  ? 'bg-[#5a3dff] text-white' 
+                                  : 'bg-gray-100 text-[#525F7A] hover:bg-gray-200'
+                              }`}
+                            >
+                              3
+                            </button>
                           </div>
                         </div>
                       )}
@@ -293,7 +303,7 @@ const ControlBar = ({
                         </div>
                       )}
                       {/* Animation selector - show for layout 2, or layout 1 style B (hide when Box 3 is selected) */}
-                      {(layoutNumber === '2' || (layoutNumber === '1' && style === 'B')) && !(layoutNumber === '2' && layout2BoxType === '3') && (
+                      {(layoutNumber === '2' || (layoutNumber === '1' && style === 'B')) && !(layoutNumber === '2' && layout2BoxType === '3') && !(layoutNumber === '1' && style === 'C') && (
                         <div className="flex items-center justify-between">
                           <label htmlFor="animation-select-styling" className="text-sm text-[#525F7A]">Animation</label>
                           <div className="relative inline-block">
@@ -317,7 +327,7 @@ const ControlBar = ({
                         </div>
                       )}
                       {/* 3D toggle - show for layout 2, or layout 1 style B (hide when Box 3 is selected) */}
-                      {(layoutNumber === '2' || (layoutNumber === '1' && style === 'B')) && !(layoutNumber === '2' && layout2BoxType === '3') && (
+                      {(layoutNumber === '2' || (layoutNumber === '1' && style === 'B')) && !(layoutNumber === '2' && layout2BoxType === '3') && !(layoutNumber === '1' && style === 'C') && (
                         <div className="flex items-center justify-between">
                           <span className="text-sm text-[#525F7A]">3D Effect</span>
                           <button
@@ -509,12 +519,22 @@ const ControlBar = ({
                         <button
                           onClick={() => onStyleChange('B')}
                           className={`px-3 py-1 rounded-[8px] text-xs transition-colors ${
-                            style === 'B' 
+                            style === 'B'
                               ? 'bg-[#5a3dff] text-white' 
                               : 'bg-gray-100 text-[#525F7A] hover:bg-gray-200'
                           }`}
                         >
                           2
+                        </button>
+                        <button
+                          onClick={() => onStyleChange('C')}
+                          className={`px-3 py-1 rounded-[8px] text-xs transition-colors ${
+                            style === 'C'
+                              ? 'bg-[#5a3dff] text-white' 
+                              : 'bg-gray-100 text-[#525F7A] hover:bg-gray-200'
+                          }`}
+                        >
+                          3
                         </button>
                       </div>
                     </div>

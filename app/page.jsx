@@ -139,7 +139,7 @@ export default function Home() {
   const [animationType, setAnimationType] = useState('highlight') // Animation type: 'highlight', 'breathing', or 'none'
   const [enable3D, setEnable3D] = useState(false) // Standalone 3D toggle that works with highlight or breathing
   const [layoutNumber, setLayoutNumber] = useState('1') // '1' | '2' - which layout to use
-  const [style, setStyle] = useState('A') // 'A' | 'B' - for Layout 1 only: Style A = Box1/Envelope1, Style B = Box2/Envelope2
+  const [style, setStyle] = useState('A') // 'A' | 'B' | 'C' - for Layout 1 only: Style A = Box1/Envelope1, Style B = Box2/Envelope2, Style C = Box3/Envelope3
   const [viewType, setViewType] = useState('mixed') // 'mixed' | 'batch' | 'single' - what to display
   const [mixSeed, setMixSeed] = useState(0) // Seed to regenerate mix when toggled
   const [showSettingsMenu, setShowSettingsMenu] = useState(false) // Mobile settings menu visibility
@@ -293,6 +293,7 @@ export default function Home() {
       effectiveLayoutConfig = LAYOUT_CONFIG.layout1SingleStyleB || LAYOUT_CONFIG.layout1StyleB
       effectiveEnvelopeContainer = effectiveLayoutConfig.envelopeContainer || LAYOUT_CONFIG.layout1StyleB.envelopeContainer
     }
+    // Style C uses the same config as Style B for now (Box3/Envelope3 will be handled in SentCard)
     
     const effectiveEnvelopeScale = effectiveLayoutConfig?.envelope?.scale || 1
     const effectiveEnvelopeOffsetY = effectiveLayoutConfig?.envelope?.offsetY || 0
@@ -317,10 +318,12 @@ export default function Home() {
       progressOutsideEnvelope: layoutConfig.progressOutsideEnvelope,
       showRedline: effectiveLayoutConfig.showRedline || false,
       // Hide envelope setting - ONLY difference: single uses Box2 (showGiftBoxWhenHidden: true)
-      hideEnvelope: style === 'B' ? true : (layoutConfig.hideEnvelope || false),
-      showGiftBoxWhenHidden: style === 'B' ? true : false, // ONLY difference: true for Box2, false for Envelope2
+      hideEnvelope: (style === 'B' || style === 'C') ? true : (layoutConfig.hideEnvelope || false),
+      showGiftBoxWhenHidden: (style === 'B' || style === 'C') ? true : false, // Style B = Box2, Style C = Box3
       // Box1 exclusive controls (Style A only - Box1)
       useBox1: style === 'A' ? !!layoutConfig.box1 : false,
+      // Layout 1 style (for Box3/Envelope3 support)
+      layout1Style: style,
       box1OffsetY: layoutConfig.box1?.offsetY,
       box1Scale: layoutConfig.box1?.scale,
       box1Width: layoutConfig.box1?.width,
@@ -471,21 +474,27 @@ export default function Home() {
       // Single cards: 
       //   - Style A: useBox1=true, hideEnvelope=false (Box1)
       //   - Style B: hideEnvelope=true, showGiftBoxWhenHidden=true (Box2)
+      //   - Style C: hideEnvelope=true, showGiftBoxWhenHidden=true (Box3)
       // Batch cards:
       //   - Style A: hideEnvelope=false (Envelope1)
       //   - Style B: hideEnvelope=true, showGiftBoxWhenHidden=false (Envelope2)
+      //   - Style C: hideEnvelope=true, showGiftBoxWhenHidden=false (Envelope3)
       // For Layout 2 and single configs, use their own config value
       hideEnvelope: isLayout1 
-        ? (useSingleConfig ? (style === 'B' ? true : false) : (style === 'B' ? true : false))
+        ? (useSingleConfig ? ((style === 'B' || style === 'C') ? true : false) : ((style === 'B' || style === 'C') ? true : false))
         : (layoutConfig.hideEnvelope || false),
       
       // Show gift box when envelope is hidden
       // Style B single: showGiftBoxWhenHidden=true (Box2)
+      // Style C single: showGiftBoxWhenHidden=true (Box3)
       // Style B batch: showGiftBoxWhenHidden=false (Envelope2)
+      // Style C batch: showGiftBoxWhenHidden=false (Envelope3)
       // Style A: showGiftBoxWhenHidden=false (Box1/Envelope1 don't use this)
       showGiftBoxWhenHidden: isLayout1
-        ? (useSingleConfig ? (style === 'B' ? true : false) : (style === 'B' ? false : false))
+        ? (useSingleConfig ? ((style === 'B' || style === 'C') ? true : false) : ((style === 'B' || style === 'C') ? false : false))
         : (effectiveLayoutConfig.showGiftBoxWhenHidden || false),
+      // Layout 1 style (for Box3/Envelope3 support)
+      layout1Style: isLayout1 ? style : undefined,
       
       // ============================================================================
       // LAYOUT 1 SPECIFIC: hideProgressBarInBox

@@ -150,6 +150,8 @@ const SentCard = ({
   pauseConfetti = false,
   // Layout 2 box type selection: '1' | '2' | '3' (for single view only)
   layout2BoxType = '2',
+  // Layout 1 style selection: 'A' | 'B' | 'C' (for Layout 1 only)
+  layout1Style,
   pauseAtFrame = null, // Pause animation at specific frame for capture (e.g., 84 for peak)
   immediateFrame = null // Render confetti at this frame instantly (no animation, for fast capture)
 }) => {
@@ -494,7 +496,9 @@ const SentCard = ({
 
   // Calculate box color for Box3 (Layout3Box) - use brand color directly without HSL adjustments (matching Layout 3)
   const box3Color = useMemo(() => {
-    if (hideEnvelope && showGiftBoxWhenHidden && layout2BoxType === '3') {
+    const isBox3 = (hideEnvelope && showGiftBoxWhenHidden && layout2BoxType === '3') || 
+                   (hideEnvelope && showGiftBoxWhenHidden && layout1Style === 'C')
+    if (isBox3) {
       // For single cards (Box3), use vibrant brand color
       // Look up brand color from map
       const brandColor = LOGO_BRAND_COLORS[svgLogoPath]
@@ -502,7 +506,7 @@ const SentCard = ({
       return brandColor || '#1987C7'
     }
     return themedBoxColor // Fallback to themedBoxColor if not Box3
-  }, [hideEnvelope, showGiftBoxWhenHidden, layout2BoxType, svgLogoPath, themedBoxColor])
+  }, [hideEnvelope, showGiftBoxWhenHidden, layout2BoxType, layout1Style, svgLogoPath, themedBoxColor])
 
   // Calculate logo brand color (used for logo gradient ID generation)
   // Uses the same Single 2 caps as the box color for consistency
@@ -549,12 +553,14 @@ const SentCard = ({
 
   // Calculate vibrant color for Envelope3 - keep theming but match Box3 vibrancy
   const envelope3Color = useMemo(() => {
-    if (hideEnvelope && !showGiftBoxWhenHidden && layout2BoxType === '3') {
+    const isEnvelope3 = (hideEnvelope && !showGiftBoxWhenHidden && layout2BoxType === '3') ||
+                        (hideEnvelope && !showGiftBoxWhenHidden && layout1Style === 'C')
+    if (isEnvelope3) {
       // For batch cards (Envelope3), use themed color but make it vibrant to match Box3
       return makeVibrantColor(envelopeBoxColor, 50)
     }
     return envelopeBoxColor // Fallback to envelopeBoxColor if not Envelope3
-  }, [hideEnvelope, showGiftBoxWhenHidden, layout2BoxType, envelopeBoxColor])
+  }, [hideEnvelope, showGiftBoxWhenHidden, layout2BoxType, layout1Style, envelopeBoxColor])
 
   // Flap color - uses layout-specific luminance/saturation
   const envelopeFlapColor = useMemo(() => {
@@ -791,17 +797,21 @@ const SentCard = ({
   
   // Inner wrapper style - absolutely positioned, handles scale and offsetY
   // For single cards with Box2, use boxOffsetY if provided, otherwise use envelopeOffsetY
-  // Box3 (layout2BoxType === '3') always uses the batch card's envelope offsetY (-7) to match Envelope3
+  // Box3 (layout2BoxType === '3' or layout1Style === 'C') always uses the batch card's envelope offsetY to match Envelope3
   // Box2 (layout2BoxType === '2' or default) uses boxOffsetY from single2.box.offsetY
-  const box3EnvelopeOffsetY = -7 // Layout 2 batch card envelope offsetY
-  const effectiveOffsetY = (hideEnvelope && showGiftBoxWhenHidden && !useBox1 && layout2BoxType === '3') 
-    ? box3EnvelopeOffsetY 
-    : ((hideEnvelope && showGiftBoxWhenHidden && !useBox1 && layout2BoxType !== '3') 
+  const layout2Box3OffsetY = -7 // Layout 2 batch card envelope offsetY
+  const isBox3 = (hideEnvelope && showGiftBoxWhenHidden && !useBox1 && layout2BoxType === '3') ||
+                 (hideEnvelope && showGiftBoxWhenHidden && !useBox1 && layout1Style === 'C')
+  // For Layout 2 Box3, use -7. For Layout 1 Style C Box3, use envelopeOffsetY (0) to match Envelope3
+  const box3OffsetY = (layout2BoxType === '3') ? layout2Box3OffsetY : envelopeOffsetY
+  const effectiveOffsetY = isBox3
+    ? box3OffsetY 
+    : ((hideEnvelope && showGiftBoxWhenHidden && !useBox1 && layout2BoxType !== '3' && layout1Style !== 'C') 
       ? (boxOffsetY !== undefined ? boxOffsetY : envelopeOffsetY) 
       : envelopeOffsetY)
   // For single cards with Box2, use boxScale if provided, otherwise use envelopeScale
-  // Box3 (layout2BoxType === '3') always uses envelopeScale to match Envelope3
-  const effectiveScale = (hideEnvelope && showGiftBoxWhenHidden && !useBox1 && layout2BoxType !== '3' && boxScale !== undefined) ? boxScale : envelopeScale
+  // Box3 (layout2BoxType === '3' or layout1Style === 'C') always uses envelopeScale to match Envelope3
+  const effectiveScale = (hideEnvelope && showGiftBoxWhenHidden && !useBox1 && layout2BoxType !== '3' && layout1Style !== 'C' && boxScale !== undefined) ? boxScale : envelopeScale
   const envelopeInnerWrapperStyle = useMemo(() => ({
     position: 'absolute',
     left: '50%',
@@ -1236,10 +1246,10 @@ const SentCard = ({
               </div>
             ) : null}
             {hideEnvelope && showGiftBoxWhenHidden ? (
-              // Gift Box Container (for Single 2) - supports Box1, Box2, or Box3
+              // Gift Box Container (for Single 2 or Layout 1 Style C) - supports Box1, Box2, or Box3
               // Wrapped in inner div for absolute positioning with scale/offsetY
               <div style={envelopeInnerWrapperStyle}>
-                {layout2BoxType === '1' ? (
+                {useBox1 || layout2BoxType === '1' ? (
                   // Box1 Image
                   <div style={box1WrapperStyle}>
                     <Image
@@ -1253,7 +1263,7 @@ const SentCard = ({
                       style={box1ImageStyle}
                     />
                   </div>
-                ) : layout2BoxType === '3' ? (
+                ) : (layout2BoxType === '3' || layout1Style === 'C') ? (
                   // Box3 (Layout3Box) - use vibrant brand color directly (matching Layout 3)
                   <Layout3Box
                     boxColor={box3Color}
@@ -1292,11 +1302,11 @@ const SentCard = ({
             ) : hideEnvelope && !showGiftBoxWhenHidden && hideProgressBarInBox ? (
               // Envelope2 or Envelope3
               // Wrapped in inner div for absolute positioning with scale/offsetY
-              // For Style 3 (layout2BoxType === '3'), use Envelope3 instead of Envelope2
+              // For Style 3 (layout2BoxType === '3' or layout1Style === 'C'), use Envelope3 instead of Envelope2
               <div style={envelopeInnerWrapperStyle}>
-                {layout2BoxType === '3' ? (
+                {(layout2BoxType === '3' || layout1Style === 'C') ? (
                   <Envelope3
-                    boxColor={envelopeBoxColor}
+                    boxColor={envelope3Color}
                     logoPath={svgLogoPath}
                     progress={validatedProgress}
                     coverImage={boxImage}
