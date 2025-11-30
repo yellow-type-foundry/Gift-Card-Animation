@@ -2,7 +2,7 @@ import React, { useMemo } from 'react'
 import { BOX_WIDTH, BOX_HEIGHT, STATIC_STYLES } from '@/constants/layout3Tokens'
 import { makeThemedColor } from '@/utils/colors'
 
-const PullTab = ({ baseColor, isHovered }) => {
+const PullTab = ({ baseColor, isHovered, isDone }) => {
   const darkRimColor = useMemo(() => makeThemedColor(baseColor, -1), [baseColor])
 
   const pullTabIconStyle = useMemo(
@@ -15,6 +15,9 @@ const PullTab = ({ baseColor, isHovered }) => {
     }),
     [darkRimColor]
   )
+
+  // Pull tab always lifts with the box on hover, but height animation only when DONE
+  const shouldAnimateHeight = isHovered && isDone
 
   return (
     <div
@@ -41,7 +44,7 @@ const PullTab = ({ baseColor, isHovered }) => {
         style={{
           position: 'relative',
           width: 'auto',
-          height: isHovered ? '0' : '100%',
+          height: shouldAnimateHeight ? '0' : '100%',
           backdropFilter: 'blur(9.287px)',
           WebkitBackdropFilter: 'blur(9.287px)',
           backgroundColor: 'rgba(255, 255, 255, 0.2)',

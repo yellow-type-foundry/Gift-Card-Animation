@@ -31,6 +31,9 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
   // Use external hover state if provided, otherwise use internal state
   const isHovered = externalIsHovered !== undefined ? externalIsHovered : internalIsHovered
 
+  // Check if progress is done (DONE status)
+  const isDone = useMemo(() => progress.current >= progress.total, [progress.current, progress.total])
+
   // Base color from prop - used for all themed colors
   const baseColor = boxColor
 
@@ -58,8 +61,8 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
     return minSize + (maxSize - minSize) * progressRatio
   }, [progressRatio])
 
-  // Use dot animation hook
-  const dotPositions = useDotAnimation(blobAnimations, isHovered, circleSize)
+  // Use dot animation hook - only animate on hover if DONE
+  const dotPositions = useDotAnimation(blobAnimations, isHovered && isDone, circleSize)
 
 
   // Themed colors
@@ -256,18 +259,18 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
           blobAnimations={blobAnimations}
           dotPositions={dotPositions}
           circleSize={circleSize}
-          isHovered={isHovered}
+          isHovered={isHovered && isDone}
         />
 
         {/* Logo - moved inside box container to be in same stacking context as blobs */}
-        <Logo logoPath={logoPath} baseColor={baseColor} isHovered={isHovered} />
+        <Logo logoPath={logoPath} baseColor={baseColor} isHovered={isHovered} isDone={isDone} />
 
         {/* Progress Indicator */}
         {!hideProgressIndicator && <ProgressIndicator progress={progress} baseColor={baseColor} />}
       </div>
 
       {/* Pull Tab */}
-      <PullTab baseColor={baseColor} isHovered={isHovered} />
+      <PullTab baseColor={baseColor} isHovered={isHovered} isDone={isDone} />
 
       <ShadowContainer
         vibrantShadowColor={vibrantShadowColor}

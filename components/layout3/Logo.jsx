@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { STATIC_STYLES, LOGO_HEIGHTS } from '@/constants/layout3Tokens'
 import { makeThemedColor } from '@/utils/colors'
 
-const Logo = ({ logoPath, baseColor, isHovered }) => {
+const Logo = ({ logoPath, baseColor, isHovered, isDone }) => {
   const [logoSvg, setLogoSvg] = useState(null)
   const darkRimShadowColor = useMemo(() => makeThemedColor(baseColor, -30), [baseColor])
   const lightRimColor = useMemo(() => makeThemedColor(baseColor, 10), [baseColor])
@@ -167,7 +167,7 @@ const Logo = ({ logoPath, baseColor, isHovered }) => {
         position: 'absolute',
         left: '50%',
         top: '50%',
-        transform: isHovered ? 'translate(-50%, calc(-50% - 8px))' : 'translate(-50%, -50%)',
+        transform: (isHovered && isDone) ? 'translate(-50%, calc(-50% - 8px))' : 'translate(-50%, -50%)',
         width: '100%',
         height: '100%',
         display: 'flex',

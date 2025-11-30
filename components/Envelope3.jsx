@@ -39,6 +39,9 @@ const Envelope3 = ({
   // Use external hover state if provided, otherwise use internal state
   const isHovered = externalIsHovered !== undefined ? externalIsHovered : internalIsHovered
 
+  // Check if progress is done (DONE status)
+  const isDone = useMemo(() => progress.current >= progress.total, [progress.current, progress.total])
+
   // Extract scale from style prop if present
   const scaleValue = useMemo(() => {
     if (style?.transform) {
@@ -77,7 +80,8 @@ const Envelope3 = ({
     return minSize + (maxSize - minSize) * progressRatio
   }, [progressRatio])
 
-  const dotPositions = useDotAnimation(blobAnimations, isHovered, circleSize)
+  // Use dot animation hook - only animate on hover if DONE
+  const dotPositions = useDotAnimation(blobAnimations, isHovered && isDone, circleSize)
 
   // Themed colors
   const lightRimColor = useMemo(() => makeThemedColor(baseColor, 10), [baseColor])
@@ -275,7 +279,7 @@ const Envelope3 = ({
           blobAnimations={blobAnimations}
           dotPositions={dotPositions}
           circleSize={circleSize}
-          isHovered={isHovered}
+          isHovered={isHovered && isDone}
           fixedBlur={10}
         />
 
