@@ -1,139 +1,13 @@
 'use client'
 
-import React, { useState, useEffect, useMemo, memo, useRef } from 'react'
-import { hexToHsl, hslToHex } from '@/utils/colors'
-
-// Layout 3 box sizing tokens (keep visuals in sync with Figma)
-const BOX_WIDTH = 180
-const BOX_HEIGHT = 176
-const BOX_RADIUS = 36
-const BOTTOM_SHADOW_WIDTH = 156
-
-// Helper to create a themed color variant from a base hex with a lightness delta
-const makeThemedColor = (baseHex, deltaL) => {
-  const [h, s, l] = hexToHsl(baseHex)
-  const newL = Math.max(0, Math.min(100, l + deltaL))
-  const newHex = hslToHex(h, s, newL)
-  const r = parseInt(newHex.slice(1, 3), 16)
-  const g = parseInt(newHex.slice(3, 5), 16)
-  const b = parseInt(newHex.slice(5, 7), 16)
-  const rgba = (opacity) => `rgba(${r}, ${g}, ${b}, ${opacity})`
-  return { hex: newHex, r, g, b, rgba }
-}
-
-// Helper to create a more saturated/vibrant color variant
-const makeVibrantColor = (baseHex, deltaS = 20) => {
-  const [h, s, l] = hexToHsl(baseHex)
-  const newS = Math.max(0, Math.min(100, s + deltaS))
-  const newHex = hslToHex(h, newS, l)
-  return newHex
-}
-
-// Static style objects (never change, can be reused)
-const STATIC_STYLES = {
-  container: {
-    width: `${BOX_WIDTH}px`,
-    height: `${BOX_HEIGHT}px`,
-    margin: '0 auto',
-    overflow: 'visible',
-    position: 'relative',
-  },
-  shadingContainer: {
-    position: 'absolute',
-    left: '50%',
-    top: '50%',
-    transform: 'translate(-50%, -50%)',
-    width: '100%',
-    height: '100%',
-    zIndex: 2,
-  },
-  lightCornerWrapper: {
-    position: 'absolute',
-    left: 'calc(50% - 30px)',
-    top: 'calc(50% - 35.5px)',
-    transform: 'translate(-50%, -50%) rotate(180deg)',
-    width: '100px',
-    height: '90px',
-    mixBlendMode: 'overlay',
-  },
-  lightCornerInner: {
-    position: 'absolute',
-    inset: '-15.56% -16% -17.78% -14%',
-    width: 'auto',
-    height: 'auto',
-    maxWidth: 'none',
-    display: 'block',
-  },
-  progressBlobsContainer: {
-    position: 'absolute',
-    left: '50%',
-    top: '50%',
-    transform: 'translate(-50%, -50%)',
-    width: `${BOX_WIDTH}px`,
-    height: `${BOX_HEIGHT}px`,
-    minWidth: `${BOX_WIDTH}px`,
-    maxWidth: `${BOX_WIDTH}px`,
-    minHeight: `${BOX_HEIGHT}px`,
-    maxHeight: `${BOX_HEIGHT}px`,
-    zIndex: 1,
-    padding: '1px',
-    filter: 'blur(1px)',
-    // Ensure container doesn't scale or transform
-    transformOrigin: 'center center',
-    willChange: 'auto',
-    boxSizing: 'border-box',
-  },
-  progressBlobsInner: {
-    height: '180px',
-    width: '180px',
-    position: 'relative',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-  },
-  logoWrapper: {
-    position: 'relative',
-    width: '181.5px',
-    height: '36px',
-    mixBlendMode: 'overlay',
-    display: 'flex',
-    overflow: 'visible',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingTop: '18px',
-  },
-  logoImage: {
-    width: '100%',
-    height: '100%',
-    objectFit: 'contain',
-    display: 'block',
-  },
-  progressText: {
-    position: 'relative',
-    fontSize: '20px',
-    fontFamily: "'Goody Sans', sans-serif",
-    fontWeight: 'bold',
-    lineHeight: 1,
-    textAlign: 'center',
-    whiteSpace: 'pre',
-    letterSpacing: '-0.2px',
-    mixBlendMode: 'normal',
-    margin: 0,
-  },
-  pullTabIcon: {
-    width: '18px',
-    height: '18px',
-    borderRadius: '50%',
-    backgroundColor: 'rgba(255, 255, 255, 0.6)',
-    mixBlendMode: 'overlay',
-  },
-  shadowImage: {
-    display: 'block',
-    width: `${BOTTOM_SHADOW_WIDTH}px`,
-    height: 'auto',
-  },
-}
+import React, { useState, useEffect, useMemo, memo } from 'react'
+import { makeThemedColor, makeVibrantColor } from '@/utils/colors'
+import { BOX_WIDTH, BOX_HEIGHT, BOX_RADIUS, STATIC_STYLES, LOGO_HEIGHTS } from '@/constants/layout3Tokens'
+import { useBlobColors } from '@/hooks/useBlobColors'
+import { useDotAnimation } from '@/hooks/useDotAnimation'
+import ProgressBlobs from '@/components/layout3/ProgressBlobs'
+import HaloGlow from '@/components/layout3/HaloGlow'
+import ShadowContainer from '@/components/layout3/ShadowContainer'
 
 /**
  * Layout3Box - A themed box component with gradient effects, shadows, and dynamic theming
@@ -147,235 +21,60 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
   const [lightCornerSvg, setLightCornerSvg] = useState(null)
   const [logoSvg, setLogoSvg] = useState(null)
   const [isHovered, setIsHovered] = useState(false)
-  const [blobGridColors, setBlobGridColors] = useState([])
-  const [blobAnimations, setBlobAnimations] = useState([])
-  const [dotPositions, setDotPositions] = useState([])
-  const dotRefs = useRef([])
-  const animationRunningRef = useRef(false)
 
   // Base color from prop - used for all themed colors
   const baseColor = boxColor
 
-  // Generate random HSL values within ±30 of base color for 3x3 grid
-  // Also generate random animation parameters for each circle
-  useEffect(() => {
-    const [baseH, baseS, baseL] = hexToHsl(baseColor)
-    const colors = []
-    const animations = []
-    
-    for (let i = 0; i < 9; i++) {
-      // Randomize within ±30 range
-      const randomH = (baseH + (Math.random() * 60 - 30) + 360) % 360
-      const randomS = Math.max(0, Math.min(100, baseS + (Math.random() * 60 - 30)))
-      const randomL = Math.max(0, Math.min(100, baseL + (Math.random() * 60 - 30)))
-      colors.push(hslToHex(randomH, randomS, randomL))
-      
-      // Generate random animation parameters for organic, randomized movement
-      // Random starting position within container (accounting for padding and circle size)
-      // Ensure uniform distribution across entire container - use center-biased but still random
-      const padding = 1
-      const maxCircleSize = 58 // Approximate max size
-      const availableWidth = Math.max(0, BOX_WIDTH - (padding * 2) - maxCircleSize)
-      const availableHeight = Math.max(0, BOX_HEIGHT - (padding * 2) - maxCircleSize)
-      // Distribute evenly across available space
-      const startX = padding + Math.random() * availableWidth
-      const startY = padding + Math.random() * availableHeight
-      
-      // Random movement distances - organic, randomized movement in all directions
-      // Ensure truly random distribution with no directional bias
-      const maxMove = 30
-      
-      // Generate completely independent random movements for each waypoint
-      // Ensure uniform distribution in all directions by using independent random for X and Y
-      const moveX1 = (Math.random() - 0.5) * maxMove * 2 // ±30px, centered around 0
-      const moveY1 = (Math.random() - 0.5) * maxMove * 2 // ±30px, centered around 0
-      const moveX2 = (Math.random() - 0.5) * maxMove * 2 // ±30px, centered around 0
-      const moveY2 = (Math.random() - 0.5) * maxMove * 2 // ±30px, centered around 0
-      
-      // For the third waypoint, create a path that helps return toward start
-      // Use completely independent random to avoid any directional bias
-      const moveX3 = (Math.random() - 0.5) * maxMove * 2 // Independent random, no return bias
-      const moveY3 = (Math.random() - 0.5) * maxMove * 2 // Independent random, no return bias
-      
-      const duration = 2 + Math.random() * 2 // 2-4 seconds (faster movement)
-      const delay = Math.random() * 1 // 0-1 seconds delay
-      
-      animations.push({
-        startX,
-        startY,
-        moveX1,
-        moveY1,
-        moveX2,
-        moveY2,
-        moveX3,
-        moveY3,
-        duration,
-        delay,
-      })
-    }
-    
-    setBlobGridColors(colors)
-    setBlobAnimations(animations)
-    
-    // Initialize dot positions with randomized velocities in all directions
-    const initialPositions = animations.map(anim => {
-      // Generate random angle and speed for truly organic movement
-      // Use Math.random() twice to ensure uniform distribution
-      const angle = Math.random() * Math.PI * 2 // Random direction (0 to 2π)
-      const speed = 0.5 + Math.random() * 0.8 // Random speed (0.5 to 1.3) - faster
-      return {
-        x: anim.startX,
-        y: anim.startY,
-        vx: Math.cos(angle) * speed, // velocity x - truly random direction
-        vy: Math.sin(angle) * speed, // velocity y - truly random direction
-      }
-    })
-    setDotPositions(initialPositions)
-    animationRunningRef.current = false // Reset flag when positions are reinitialized
-  }, [baseColor])
+  // Use custom hooks for blob colors and dot animation
+  const { blobGridColors, blobAnimations } = useBlobColors(baseColor)
 
-  // Animation loop for dot interactions - only runs on hover
-  useEffect(() => {
-    if (dotPositions.length === 0) {
-      animationRunningRef.current = false
-      return
-    }
+  // Calculate progress ratio and circle size
+  const progressRatio = useMemo(() => {
+    return progress.current / progress.total
+  }, [progress])
+
+  const circleSize = useMemo(() => {
+    const padding = 1
+    const gap = 1
+    const availableWidth = BOX_WIDTH - (padding * 2)
+    const availableHeight = BOX_HEIGHT - (padding * 2)
+    const totalGapWidth = gap * 2
+    const totalGapHeight = gap * 2
     
-    if (!isHovered) {
-      animationRunningRef.current = false
-      return
-    }
+    const maxCircleWidth = (availableWidth - totalGapWidth) / 3
+    const maxCircleHeight = (availableHeight - totalGapHeight) / 3
+    const maxSize = Math.min(maxCircleWidth, maxCircleHeight)
     
-    if (animationRunningRef.current) return
-    
-    animationRunningRef.current = true
-    
-    const REPULSION_DISTANCE = 40 // Distance at which dots start repelling
-    const REPULSION_FORCE = 0.02 // Strength of repulsion
-    const DAMPING = 0.99 // Less damping to keep movement going
-    const MIN_VELOCITY = 0.825 // Minimum velocity to maintain infinite movement (increased for faster)
-    const WANDER_STRENGTH = 0.03 // Random wander to prevent bias (increased for more variation)
-    const BOUNDARY_PADDING = 1
-    // Use max circle size for boundary calculations (container is fixed, only dots scale)
-    const currentCircleSize = 58 // Max circle size
-    const maxX = BOX_WIDTH - currentCircleSize - BOUNDARY_PADDING
-    const maxY = BOX_HEIGHT - currentCircleSize - BOUNDARY_PADDING
-    
-    let animationFrameId
-    let isRunning = true
-    
-    const updatePositions = () => {
-      if (!isRunning || !isHovered) {
-        animationRunningRef.current = false
-        return
-      }
-      
-      setDotPositions(prevPositions => {
-        if (prevPositions.length === 0) return prevPositions
-        
-        const newPositions = prevPositions.map((pos, i) => {
-          let newX = pos.x + pos.vx
-          let newY = pos.y + pos.vy
-          let newVx = pos.vx
-          let newVy = pos.vy
-          
-          // Check collision with other dots
-          prevPositions.forEach((otherPos, j) => {
-            if (i === j) return
-            
-            const dx = newX - otherPos.x
-            const dy = newY - otherPos.y
-            const distance = Math.sqrt(dx * dx + dy * dy)
-            
-            if (distance < REPULSION_DISTANCE && distance > 0) {
-              // Apply repulsion force
-              const force = REPULSION_FORCE * (1 - distance / REPULSION_DISTANCE)
-              const angle = Math.atan2(dy, dx)
-              newVx += Math.cos(angle) * force
-              newVy += Math.sin(angle) * force
-            }
-          })
-          
-          // Apply damping
-          newVx *= DAMPING
-          newVy *= DAMPING
-          
-          // Add random wander to prevent bias and keep movement organic
-          newVx += (Math.random() - 0.5) * WANDER_STRENGTH
-          newVy += (Math.random() - 0.5) * WANDER_STRENGTH
-          
-          // Ensure minimum velocity to keep infinite movement
-          const currentSpeed = Math.sqrt(newVx * newVx + newVy * newVy)
-          if (currentSpeed < MIN_VELOCITY && currentSpeed > 0) {
-            // Maintain direction but boost to minimum speed
-            const scale = MIN_VELOCITY / currentSpeed
-            newVx *= scale
-            newVy *= scale
-          } else if (currentSpeed === 0) {
-            // If completely stopped, give random velocity
-            const angle = Math.random() * Math.PI * 2
-            newVx = Math.cos(angle) * MIN_VELOCITY
-            newVy = Math.sin(angle) * MIN_VELOCITY
-          }
-          
-          // Boundary collision
-          if (newX < BOUNDARY_PADDING || newX > maxX) {
-            newVx *= -0.8 // Bounce with energy loss
-            newX = Math.max(BOUNDARY_PADDING, Math.min(maxX, newX))
-          }
-          if (newY < BOUNDARY_PADDING || newY > maxY) {
-            newVy *= -0.8 // Bounce with energy loss
-            newY = Math.max(BOUNDARY_PADDING, Math.min(maxY, newY))
-          }
-          
-          return { x: newX, y: newY, vx: newVx, vy: newVy }
-        })
-        
-        return newPositions
-      })
-      
-      animationFrameId = requestAnimationFrame(updatePositions)
-    }
-    
-    animationFrameId = requestAnimationFrame(updatePositions)
-    
-    return () => {
-      isRunning = false
-      animationRunningRef.current = false
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId)
-      }
-    }
-  }, [dotPositions.length, isHovered]) // Run when hovered or when positions are initialized
-  
-  // Lighter shade of base color for white highlights (themed)
+    const minSize = 8
+    return minSize + (maxSize - minSize) * progressRatio
+  }, [progressRatio])
+
+  // Use dot animation hook
+  const dotPositions = useDotAnimation(blobAnimations, isHovered, circleSize)
+
+  // Themed colors
   const lightRimColor = useMemo(() => makeThemedColor(baseColor, 10), [baseColor])
-  
-  // Vibrant color for shadow (more saturated)
   const vibrantShadowColor = useMemo(() => makeVibrantColor(baseColor, 50), [baseColor])
-  
-  // Hover color - base color with L+3
-  const hoverColor = useMemo(() => makeThemedColor(baseColor, 3), [baseColor])
+  const darkRimColor = useMemo(() => makeThemedColor(baseColor, -1), [baseColor])
+  const darkRimShadowColor = useMemo(() => makeThemedColor(baseColor, -30), [baseColor])
+  const darkRim2BorderColor = useMemo(() => makeThemedColor(baseColor, -35).rgba(0.4), [baseColor])
 
   // Load and parse SVG for Light Corner to enable CSS styling
   useEffect(() => {
     fetch('/assets/placeholder-light-corner.svg')
       .then(res => res.text())
       .then(svgText => {
-        // Parse SVG and make it styleable
         const parser = new DOMParser()
         const svgDoc = parser.parseFromString(svgText, 'image/svg+xml')
         const svgElement = svgDoc.querySelector('svg')
         
         if (svgElement) {
-          // Make gradient IDs unique to avoid conflicts
           const gradientId = 'lightCornerGradient'
           const defs = svgElement.querySelector('defs') || svgDoc.createElementNS('http://www.w3.org/2000/svg', 'defs')
           if (!svgElement.querySelector('defs')) {
             svgElement.insertBefore(defs, svgElement.firstChild)
           }
           
-          // Update gradient if it exists, or create one
           let gradient = defs.querySelector(`#${gradientId}`)
           if (!gradient) {
             gradient = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'linearGradient')
@@ -387,7 +86,6 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
             defs.appendChild(gradient)
           }
           
-          // Update gradient stops for CSS control
           const stops = gradient.querySelectorAll('stop')
           if (stops.length === 0) {
             const stop1 = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'stop')
@@ -397,12 +95,10 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
             
             const stop2 = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'stop')
             stop2.setAttribute('offset', '100%')
-            // Use themed light orange color instead of white
             stop2.setAttribute('stop-color', lightRimColor.rgba(0.5))
             gradient.appendChild(stop2)
           }
           
-          // Update paths to use the gradient
           const paths = svgElement.querySelectorAll('path')
           paths.forEach(path => {
             path.setAttribute('fill', `url(#${gradientId})`)
@@ -413,7 +109,6 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
       })
       .catch(err => {
         console.warn('Light Corner SVG not found, using placeholder:', err)
-        // Fallback: create a simple inline SVG
         setLightCornerSvg(`
           <svg width="100" height="90" viewBox="0 0 100 90" xmlns="http://www.w3.org/2000/svg">
             <defs>
@@ -433,20 +128,17 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
     fetch(logoPath)
       .then(res => res.text())
       .then(svgText => {
-        // Parse SVG and make it styleable
         const parser = new DOMParser()
         const svgDoc = parser.parseFromString(svgText, 'image/svg+xml')
         const svgElement = svgDoc.querySelector('svg')
         
         if (svgElement) {
-          // Make gradient IDs unique to avoid conflicts
           const gradientId = 'logoWhiteGradient'
           const defs = svgElement.querySelector('defs') || svgDoc.createElementNS('http://www.w3.org/2000/svg', 'defs')
           if (!svgElement.querySelector('defs')) {
             svgElement.insertBefore(defs, svgElement.firstChild)
           }
           
-          // Update gradient if it exists, or create one
           let gradient = defs.querySelector(`#${gradientId}`)
           if (!gradient) {
             gradient = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'linearGradient')
@@ -458,9 +150,7 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
             defs.appendChild(gradient)
           }
           
-          // Update gradient stops: top 100% white, bottom 40% white
           const stops = gradient.querySelectorAll('stop')
-          // Remove existing stops
           stops.forEach(stop => stop.remove())
           
           const stop1 = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'stop')
@@ -475,13 +165,11 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
           stop2.setAttribute('stop-opacity', '0.7')
           gradient.appendChild(stop2)
           
-          // Update paths to use the gradient
           const paths = svgElement.querySelectorAll('path')
           paths.forEach(path => {
             path.setAttribute('fill', `url(#${gradientId})`)
           })
           
-          // Also check for other elements that might have fill
           const allElements = svgElement.querySelectorAll('*')
           allElements.forEach(el => {
             if (el.tagName === 'path' || el.tagName === 'circle' || el.tagName === 'rect' || el.tagName === 'polygon') {
@@ -502,7 +190,6 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
             filter.setAttribute('width', '200%')
             filter.setAttribute('height', '200%')
             
-            // Create inner shadow using feGaussianBlur and feOffset
             const feGaussianBlur = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'feGaussianBlur')
             feGaussianBlur.setAttribute('in', 'SourceAlpha')
             feGaussianBlur.setAttribute('stdDeviation', '3')
@@ -538,7 +225,6 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
             defs.appendChild(filter)
           }
           
-          // Apply filter to all paths and shapes
           const shapes = svgElement.querySelectorAll('path, circle, rect, polygon')
           shapes.forEach(shape => {
             const currentFilter = shape.getAttribute('filter')
@@ -549,7 +235,6 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
             }
           })
           
-          // Ensure SVG fills its container properly
           svgElement.setAttribute('width', '100%')
           svgElement.setAttribute('height', '100%')
           svgElement.setAttribute('preserveAspectRatio', 'xMidYMid meet')
@@ -562,54 +247,13 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
       })
   }, [logoPath])
 
-  // Darker shade for Dark Rim 2 border
-  const darkRim2BorderColor = useMemo(
-    () => makeThemedColor(baseColor, -35).rgba(0.4),
-    [baseColor]
-  )
-
-  // Calculate progress ratio (0 to 1)
-  const progressRatio = useMemo(() => {
-    return progress.current / progress.total
-  }, [progress])
-
-  // Calculate circle size based on progress
-  // Grid fills container: BOX_WIDTH x BOX_HEIGHT with 1px padding and 1px gap
-  // Available space: (BOX_WIDTH - 2px padding) x (BOX_HEIGHT - 2px padding)
-  // For 3x3 grid with 1px gaps: 2 gaps = 2px total
-  // Per circle: (available - gaps) / 3
-  const circleSize = useMemo(() => {
-    const padding = 1
-    const gap = 1
-    const availableWidth = BOX_WIDTH - (padding * 2)
-    const availableHeight = BOX_HEIGHT - (padding * 2)
-    const totalGapWidth = gap * 2 // 2 gaps for 3 columns
-    const totalGapHeight = gap * 2 // 2 gaps for 3 rows
-    
-    const maxCircleWidth = (availableWidth - totalGapWidth) / 3
-    const maxCircleHeight = (availableHeight - totalGapHeight) / 3
-    const maxSize = Math.min(maxCircleWidth, maxCircleHeight) // Use smaller to fit both dimensions
-    
-    const minSize = 8 // Minimum circle size
-    return minSize + (maxSize - minSize) * progressRatio
-  }, [progressRatio])
-
-  // Dark rim for gradients/shadows (soft, close to base)
-  const darkRimColor = useMemo(() => makeThemedColor(baseColor, -1), [baseColor])
-
-  // Darker themed color specifically for strong text/drop shadows
-  const darkRimShadowColor = useMemo(
-    () => makeThemedColor(baseColor, -30),
-    [baseColor]
-  )
-
-  // Memoize SVG mask string (only changes if dimensions change, which they don't)
+  // Memoize SVG mask string
   const svgMaskString = useMemo(
     () => `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='${BOX_WIDTH}' height='${BOX_HEIGHT}'%3E%3Crect width='${BOX_WIDTH}' height='${BOX_HEIGHT}' rx='${BOX_RADIUS}' ry='${BOX_RADIUS}' fill='white'/%3E%3C/svg%3E")`,
     []
   )
 
-  // Memoize dynamic style objects that depend on themed colors
+  // Memoize dynamic style objects
   const gradientOverlayStyle = useMemo(
     () => ({
       position: 'absolute',
@@ -698,7 +342,6 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
       display: 'inline-block',
       textShadow: `
         ${darkRimColor.rgba(.08)} 0px .5px .5px,
-        
         ${lightRimColor.rgba(.05)} 0px -0.5px 1px,
         ${lightRimColor.rgba(.1)} 0px -0.5px .5px
       `,
@@ -735,115 +378,29 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
     [darkRimColor]
   )
 
-  // Generate CSS keyframes for organic, randomized animations
-  const blobKeyframes = useMemo(() => {
-    if (blobAnimations.length === 0) return null
-    
-    return blobAnimations.map((anim, index) => {
-      const keyframeName = `blobMove${index}`
-      // Calculate positions relative to starting point
-      const x1 = anim.startX + anim.moveX1
-      const y1 = anim.startY + anim.moveY1
-      const x2 = anim.startX + anim.moveX2
-      const y2 = anim.startY + anim.moveY2
-      const x3 = anim.startX + anim.moveX3
-      const y3 = anim.startY + anim.moveY3
-      
-      // Ensure positions stay within bounds (use approximate max circle size for clamping)
-      const maxCircleSizeForClamp = 58
-      const minX = 1
-      const maxX = BOX_WIDTH - maxCircleSizeForClamp - 1
-      const minY = 1
-      const maxY = BOX_HEIGHT - maxCircleSizeForClamp - 1
-      
-      // Clamp positions but ensure we don't create bias
-      const clampX = (x) => Math.max(minX, Math.min(maxX, x))
-      const clampY = (y) => Math.max(minY, Math.min(maxY, y))
-      
-      // Use transform instead of left/top to avoid layout issues and potential bias
-      const startXFinal = clampX(anim.startX)
-      const startYFinal = clampY(anim.startY)
-      
-      return `
-        @keyframes ${keyframeName} {
-          0%, 100% {
-            transform: translate(${startXFinal - anim.startX}px, ${startYFinal - anim.startY}px);
-          }
-          25% {
-            transform: translate(${clampX(x1) - anim.startX}px, ${clampY(y1) - anim.startY}px);
-          }
-          50% {
-            transform: translate(${clampX(x2) - anim.startX}px, ${clampY(y2) - anim.startY}px);
-          }
-          75% {
-            transform: translate(${clampX(x3) - anim.startX}px, ${clampY(y3) - anim.startY}px);
-          }
-        }
-      `
-    }).join('\n')
-  }, [blobAnimations])
+  // Get logo height from constants
+  const getLogoHeight = () => {
+    for (const [key, value] of Object.entries(LOGO_HEIGHTS)) {
+      if (logoPath.includes(key)) return value
+    }
+    return 'auto'
+  }
 
   return (
-    <>
-      {blobKeyframes && (
-        <style dangerouslySetInnerHTML={{ __html: blobKeyframes }} />
-      )}
-      <div 
-        className={className ? `relative ${className}` : 'relative'}
-        style={{ ...STATIC_STYLES.container, ...style }}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
-      {/* Halo Glow - Duplicate dots behind box on hover */}
-      {isHovered && (
-        <div style={{
-          position: 'absolute',
-          left: '50%',
-          top: '50%',
-          width: `${BOX_WIDTH}px`,
-          height: `${BOX_HEIGHT}px`,
-          minWidth: `${BOX_WIDTH}px`,
-          maxWidth: `${BOX_WIDTH}px`,
-          minHeight: `${BOX_HEIGHT}px`,
-          maxHeight: `${BOX_HEIGHT}px`,
-          zIndex: 0, // Behind the box (box is at zIndex 1+)
-          transform: 'translate(-50%, -50%) scale(1.2)',
-          opacity: 0.7,
-          padding: '1px',
-          filter: 'blur(1px)', // Keep the container blur for consistency
-          transformOrigin: 'center center',
-          boxSizing: 'border-box',
-        }}>
-          {blobGridColors.length > 0 && blobGridColors.map((color, index) => {
-            const anim = blobAnimations[index]
-            const position = dotPositions[index]
-            if (!anim) return null
-            
-            // Use JavaScript position if available, otherwise fall back to CSS animation
-            const useJSAnimation = position !== undefined
-            
-            return (
-              <div
-                key={`halo-${index}`}
-                style={{
-                  position: 'absolute',
-                  width: `${circleSize}px`,
-                  height: `${circleSize}px`,
-                  borderRadius: '50%',
-                  backgroundColor: color,
-                  mixBlendMode: 'overlay',
-                  filter: 'blur(20px)',
-                  left: useJSAnimation ? `${position.x}px` : `${anim.startX}px`,
-                  top: useJSAnimation ? `${position.y}px` : `${anim.startY}px`,
-                  transition: 'none', // No transition for smooth 60fps updates
-                  animation: useJSAnimation ? 'none' : `blobMove${index} ${anim.duration}s cubic-bezier(0.4, 0, 0.6, 1) infinite`,
-                  animationDelay: useJSAnimation ? '0s' : `${anim.delay}s`,
-                }}
-              />
-            )
-          })}
-        </div>
-      )}
+    <div 
+      className={className ? `relative ${className}` : 'relative'}
+      style={{ ...STATIC_STYLES.container, ...style }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <HaloGlow
+        blobGridColors={blobGridColors}
+        blobAnimations={blobAnimations}
+        dotPositions={dotPositions}
+        circleSize={circleSize}
+        isHovered={isHovered}
+      />
+
       {/* Main Box Container */}
       <div
         style={{
@@ -855,24 +412,18 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
           zIndex: 1,
           transform: isHovered ? 'translateY(-8px)' : 'translateY(0)',
           transition: 'transform 0.3s ease-out',
-          // Background with translucent peach color - very low opacity for backdrop filter visibility
           backgroundColor: 'rgba(252, 222, 202, 0.05)',
-          // Backdrop blur for frosted glass effect
           backdropFilter: 'blur(40px)',
           WebkitBackdropFilter: 'blur(40px)',
-          // Ensure backdrop filter works
           willChange: 'backdrop-filter',
         }}
       >
-        {/* Gradient Overlay - Themed with dark color */}
         <div style={gradientOverlayStyle} />
 
         {/* Shading Layers */}
         <div style={STATIC_STYLES.shadingContainer}>
-          {/* Dark Rim - Gradient with blur (themed: transparent -> dark orange) */}
           <div style={darkRimStyle} />
 
-          {/* Dark Rim 2 - Border effect with themed brand color (darker shade) */}
           <div
             style={{
               position: 'absolute',
@@ -888,7 +439,6 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
             }}
           />
 
-          {/* Light Corner - Inline SVG for CSS styling control */}
           <div style={STATIC_STYLES.lightCornerWrapper}>
             {lightCornerSvg && (
               <div
@@ -898,11 +448,10 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
             )}
           </div>
 
-          {/* Light Rim - Soft highlight with 135deg gradient */}
           <div style={lightRimStyle} />
         </div>
 
-        {/* Noise Overlay - PNG masked to box shape */}
+        {/* Noise Overlay */}
         <div
           style={{
             position: 'absolute',
@@ -913,7 +462,6 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            // Use CSS mask to clip noise to box shape
             WebkitMaskImage: svgMaskString,
             maskImage: svgMaskString,
             WebkitMaskSize: '100% 100%',
@@ -925,50 +473,17 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
           }}
         />
 
-        {/* Inset Shadows for depth */}
         <div style={insetShadowsStyle} />
 
-        {/* Progress Blobs - Organic floating circles with randomized movement (9 dots) */}
-        <div style={{
-          ...STATIC_STYLES.progressBlobsContainer,
-          width: `${BOX_WIDTH}px`,
-          height: `${BOX_HEIGHT}px`,
-        }}>
-          {blobGridColors.length > 0 && blobGridColors.map((color, index) => {
-            const anim = blobAnimations[index]
-            const position = dotPositions[index]
-            if (!anim) return null
-            
-            // Use JavaScript position if available, otherwise fall back to CSS animation
-            const useJSAnimation = position !== undefined
-            
-            return (
-              <div
-                key={index}
-                ref={el => dotRefs.current[index] = el}
-                style={{
-                  position: 'absolute',
-                  width: `${circleSize}px`,
-                  height: `${circleSize}px`,
-                  borderRadius: '50%',
-                  backgroundColor: color,
-                  mixBlendMode: 'overlay',
-                  boxShadow: `
-                    inset 0px 0px 16px 0px rgba(255, 255, 255, 0.6),
-                    inset 0px 0px 4px 0px rgba(255, 255, 255, 0.5)
-                  `,
-                  left: useJSAnimation ? `${position.x}px` : `${anim.startX}px`,
-                  top: useJSAnimation ? `${position.y}px` : `${anim.startY}px`,
-                  transition: 'none', // No transition for smooth 60fps updates
-                  animation: useJSAnimation ? 'none' : `blobMove${index} ${anim.duration}s cubic-bezier(0.4, 0, 0.6, 1) infinite`,
-                  animationDelay: useJSAnimation ? '0s' : `${anim.delay}s`,
-                }}
-              />
-            )
-          })}
-        </div>
+        <ProgressBlobs
+          blobGridColors={blobGridColors}
+          blobAnimations={blobAnimations}
+          dotPositions={dotPositions}
+          circleSize={circleSize}
+          isHovered={isHovered}
+        />
 
-        {/* Progress Indicator - Positioned at bottom of box, behind shading layers */}
+        {/* Progress Indicator */}
         <div
           style={{
             position: 'absolute',
@@ -984,11 +499,9 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
           }}
         >
           <p style={STATIC_STYLES.progressText}>
-            {/* Shadow text behind - uses darkRimColor, slightly blurred */}
             <span style={progressTextShadowStyle}>
               {progress.current}/{progress.total}
             </span>
-            {/* Foreground gradient text */}
             <span style={progressTextGradientStyle}>
               {progress.current}/{progress.total}
             </span>
@@ -996,7 +509,7 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
         </div>
       </div>
 
-      {/* Logo Container - positioned outside overflow:hidden container to prevent clipping */}
+      {/* Logo Container */}
       <div
         style={{
           position: 'absolute',
@@ -1016,7 +529,6 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
         }}
       >
         <div style={STATIC_STYLES.logoWrapper}>
-          {/* Logo with inset wrapper matching Layout 2 */}
           <div
             style={{
               position: 'absolute',
@@ -1047,16 +559,7 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
                 style={{
                   ...logoImageStyle,
                   width: 'auto',
-                  height: (() => {
-                    if (logoPath.includes('Goody.svg')) return '40px'
-                    if (logoPath.includes('Chipotle.svg')) return '46px'
-                    if (logoPath.includes('Apple.svg')) return '40px'
-                    if (logoPath.includes('Nike.svg')) return '24px'
-                    if (logoPath.includes('Supergoop.svg')) return '40px'
-                    if (logoPath.includes('Tiffany & Co.svg')) return '16px'
-                    if (logoPath.includes('Logo.svg')) return '20px' // Columbia
-                    return 'auto'
-                  })(),
+                  height: getLogoHeight(),
                 }}
               />
             )}
@@ -1069,7 +572,7 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
         style={{
           position: 'absolute',
           left: '50%',
-          top: '-3px', // 3px higher than the box
+          top: '-3px',
           transform: isHovered ? 'translateX(-50%) translateY(-8px)' : 'translateX(-50%)',
           width: `${BOX_WIDTH}px`,
           height: `${BOX_HEIGHT}px`,
@@ -1085,17 +588,16 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
           transition: 'transform 0.3s ease-out',
         }}
       >
-        {/* Pull Tab */}
         <div
           style={{
             position: 'relative',
-            width: 'auto', // Narrow width for pull tab
-            height: '100%', // Full height of container (136px after padding)
+            width: 'auto',
+            height: '100%',
             backdropFilter: 'blur(9.287px)',
             WebkitBackdropFilter: 'blur(9.287px)',
             backgroundColor: 'rgba(255, 255, 255, 0.2)',
             border: '0.5px solid rgba(255, 255, 255, 0)',
-            borderRadius: '16px 16px 100px 100px', // Top corners 4px, bottom corners 100px
+            borderRadius: '16px 16px 100px 100px',
             boxShadow: 'inset 0px 0px 4px 0px rgba(255, 255, 255, 0.8)',
             display: 'flex',
             flexDirection: 'column',
@@ -1105,72 +607,16 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
             overflow: 'hidden',
           }}
         >
-          {/* Pull Tab Icon - Placeholder for ellipse icon */}
           <div style={pullTabIconStyle} />
         </div>
       </div>
 
-      {/* Shadow under the box - Y+145 from top edge, width 156px (156/180 ratio) */}
-      <div
-        style={{
-          position: 'absolute',
-          left: '7%',
-          top: '122px',
-          transform: 'none',
-          width: `${BOTTOM_SHADOW_WIDTH}px`,
-          height: 'auto',
-          scale: '1.25',
-          zIndex: 0,
-          opacity: isHovered ? 0.25 : 1,
-          transition: 'opacity 0.25s ease-out',
-        }}
-      >
-        {/* Shadow image */}
-        <img
-          src="/assets/shadow3.png"
-          alt=""
-          style={STATIC_STYLES.shadowImage}
-        />
-        {/* Color layer clipped to shadow shape with color blend mode */}
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            backgroundColor: vibrantShadowColor,
-            mixBlendMode: 'color',
-            WebkitMaskImage: 'url(/assets/shadow3.png)',
-            maskImage: 'url(/assets/shadow3.png)',
-            WebkitMaskSize: '100% 100%',
-            maskSize: '100% 100%',
-            WebkitMaskRepeat: 'no-repeat',  
-            maskRepeat: 'no-repeat',
-            WebkitMaskPosition: 'center',
-            maskPosition: 'center',
-          }}
-        />
-        {/* Additional color layer at 50% opacity for enhanced vibrancy */}
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            backgroundColor: vibrantShadowColor,
-            opacity: 0.95,
-            mixBlendMode: 'color',
-            WebkitMaskImage: 'url(/assets/shadow3.png)',
-            maskImage: 'url(/assets/shadow3.png)',
-            WebkitMaskSize: '100% 100%',
-            maskSize: '100% 100%',
-            WebkitMaskRepeat: 'no-repeat',  
-            maskRepeat: 'no-repeat',
-            WebkitMaskPosition: 'center',
-            maskPosition: 'center',
-          }}
-        />
-      </div>
+      <ShadowContainer
+        vibrantShadowColor={vibrantShadowColor}
+        isHovered={isHovered}
+      />
     </div>
-    </>
   )
 }
 
 export default memo(Layout3Box)
-

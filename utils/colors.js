@@ -130,3 +130,32 @@ export const hslToHex = (h, s, l) => {
   }
   return `#${f(0)}${f(8)}${f(4)}`
 }
+
+/**
+ * Create a themed color variant from a base hex with a lightness delta
+ * Preserves monochrome (S=0) if base color is monochrome
+ */
+export const makeThemedColor = (baseHex, deltaL) => {
+  const [h, s, l] = hexToHsl(baseHex)
+  const newL = Math.max(0, Math.min(100, l + deltaL))
+  // Preserve monochrome (S=0) if base color is monochrome
+  const finalS = s === 0 ? 0 : s
+  const newHex = hslToHex(h, finalS, newL)
+  const r = parseInt(newHex.slice(1, 3), 16)
+  const g = parseInt(newHex.slice(3, 5), 16)
+  const b = parseInt(newHex.slice(5, 7), 16)
+  const rgba = (opacity) => `rgba(${r}, ${g}, ${b}, ${opacity})`
+  return { hex: newHex, r, g, b, rgba }
+}
+
+/**
+ * Create a more saturated/vibrant color variant
+ * Preserves monochrome (S=0) if base color is monochrome
+ */
+export const makeVibrantColor = (baseHex, deltaS = 20) => {
+  const [h, s, l] = hexToHsl(baseHex)
+  // Preserve monochrome (S=0) if base color is monochrome
+  const newS = s === 0 ? 0 : Math.max(0, Math.min(100, s + deltaS))
+  const newHex = hslToHex(h, newS, l)
+  return newHex
+}
