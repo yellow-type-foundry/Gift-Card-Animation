@@ -51,12 +51,8 @@ const ProgressBlobs = ({ blobGridColors, blobAnimations, dotPositions, circleSiz
       {blobKeyframes && (
         <style dangerouslySetInnerHTML={{ __html: blobKeyframes }} />
       )}
-      <div style={{
-        ...STATIC_STYLES.progressBlobsContainer,
-        width: `${BOX_WIDTH}px`,
-        height: `${BOX_HEIGHT}px`,
-      }}>
-        {blobGridColors.length > 0 && blobGridColors.map((color, index) => {
+      {/* Render blobs directly without container wrapper to avoid stacking context isolation */}
+      {blobGridColors.length > 0 && blobGridColors.map((color, index) => {
           const anim = blobAnimations[index]
           const position = dotPositions[index]
           if (!anim) return null
@@ -158,11 +154,39 @@ const ProgressBlobs = ({ blobGridColors, blobAnimations, dotPositions, circleSiz
             0px 0px 6px 0px rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.1)
           `
           
+          // Calculate z-index for hover effect: logo appears "inside" blobs
+          // Some blobs in front (z-index > 8), some behind (z-index < 8)
+          // Logo is at z-index 8
+          let blobZIndex = 1 // Default z-index
+          if (isHovered) {
+            // Use consistent random assignment based on blob index and color
+            // This ensures the same blob always has the same z-index layer
+            const zIndexSeed = (index * 23 + color.charCodeAt(0) + color.charCodeAt(1) + color.charCodeAt(2)) % 100
+            // 50% chance to be in front (z-index 9-12), 50% chance to be behind (z-index 4-7)
+            if (zIndexSeed < 50) {
+              // Behind logo (z-index 4-7)
+              blobZIndex = 4 + Math.floor((zIndexSeed / 50) * 4) // 4, 5, 6, or 7
+            } else {
+              // In front of logo (z-index 9-12)
+              blobZIndex = 9 + Math.floor(((zIndexSeed - 50) / 50) * 4) // 9, 10, 11, or 12
+            }
+          }
+
+          // Calculate absolute position relative to box center (since we removed the container)
+          const boxCenterX = BOX_WIDTH / 2
+          const boxCenterY = BOX_HEIGHT / 2
+          const absoluteLeft = boxCenterX + currentX - (circleSize / 2)
+          const absoluteTop = boxCenterY + currentY - (circleSize / 2)
+
           return (
             <div
               key={index}
               style={{
                 position: 'absolute',
+                left: '50%',
+                top: '50%',
+                transform: `translate(calc(-50% + ${currentX - boxCenterX + (circleSize / 2)}px), calc(-50% + ${currentY - boxCenterY + (circleSize / 2)}px)) scale(${scaleX}, ${scaleY})`,
+                transformOrigin: 'center center',
                 width: `${circleSize}px`,
                 height: `${circleSize}px`,
                 borderRadius: '50%',
@@ -171,12 +195,9 @@ const ProgressBlobs = ({ blobGridColors, blobAnimations, dotPositions, circleSiz
                 mixBlendMode: 'overlay',
                 boxShadow: blendedShadow,
                 filter: fixedBlur !== undefined ? `blur(${fixedBlur}px)` : (disableBlurReveal ? 'blur(20px)' : (isHovered ? `blur(${randomBlur}px)` : 'blur(20px)')), // Use fixedBlur if provided, otherwise vary blur from 1.5-9px on hover, or 20px
-                left: `${currentX}px`,
-                top: `${currentY}px`,
-                transform: `scale(${scaleX}, ${scaleY})`,
-                transformOrigin: 'center center',
+                zIndex: blobZIndex,
                 // Quick elastic snap-back like a rubber ball - fast return to circular when leaving edge with more bounce
-                transition: 'filter 0.005s ease-out, transform 0.01s cubic-bezier(0.68, -0.6, 0.32, 1.6)',
+                transition: 'filter 0.005s ease-out, transform 0.01s cubic-bezier(0.68, -0.6, 0.32, 1.6), z-index 0s', // z-index transition is instant
                 animation: 'none', // No CSS animation
                 animationDelay: '0s',
                 opacity: 0.97, // Very slight transparency (30% of 0.9 = subtle)
@@ -184,7 +205,6 @@ const ProgressBlobs = ({ blobGridColors, blobAnimations, dotPositions, circleSiz
             />
           )
         })}
-      </div>
     </>
   )
 }

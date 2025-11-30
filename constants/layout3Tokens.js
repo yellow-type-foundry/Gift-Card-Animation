@@ -50,7 +50,7 @@ export const STATIC_STYLES = {
     maxWidth: `${BOX_WIDTH}px`,
     minHeight: `${BOX_HEIGHT}px`,
     maxHeight: `${BOX_HEIGHT}px`,
-    zIndex: 1,
+    // No z-index - blobs inside will layer directly with Logo (both are children of main box container)
     padding: '1px',
     filter: 'blur(1px)',
     transformOrigin: 'center center',
