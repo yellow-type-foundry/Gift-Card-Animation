@@ -81,9 +81,7 @@ const ControlBar = ({
   const controlBarStyle = useMemo(() => ({
     WebkitOverflowScrolling: 'touch',
     height: '40px',
-    maxWidth: '1272px',
-    marginLeft: 'auto',
-    marginRight: 'auto'
+    width: '100%'
   }), [])
 
   const mobileSettingsButtonStyle = useMemo(() => ({
@@ -111,7 +109,7 @@ const ControlBar = ({
 
   return (
     <div
-      className="w-full grid grid-cols-2 md:grid-cols-3 items-center gap-4 mb-6 overflow-x-auto md:overflow-visible whitespace-nowrap px-5 md:px-0"
+      className="w-full grid grid-cols-2 md:grid-cols-3 items-center gap-4 mb-6 overflow-x-auto md:overflow-visible whitespace-nowrap px-5 md:p-0"
       style={controlBarStyle}
     >
       {/* Toggle - Left side */}

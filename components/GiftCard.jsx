@@ -191,7 +191,7 @@ const GiftCard = ({
       onClick={handleCardClick}
       onMouseEnter={handleHoverEnter}
       onMouseLeave={handleHoverLeave}
-      className="border-solid relative overflow-hidden cursor-pointer w-full md:max-w-[300px]"
+      className="border-solid relative overflow-hidden cursor-pointer w-full"
       style={cardContainerStyle}
       data-name="Default"
     >

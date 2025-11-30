@@ -28,8 +28,8 @@ const CardGrid = ({
 }) => {
   if (activeTab === 'gift') {
     return (
-      <div className="w-full" style={{ maxWidth: '1272px', marginLeft: 'auto', marginRight: 'auto' }}>
-        <div className="grid gift-card-grid" style={{ gap: 'clamp(16px, calc((100% - 1200px) / 3), 24px)' }}>
+      <div className="w-full">
+        <div className="grid gift-card-grid" style={{ gap: '24px' }}>
         <GiftCard
           state={cardStates.card1}
           from="Lisa Tran"
@@ -125,8 +125,8 @@ const CardGrid = ({
 
   if (activeTab === 'sent') {
     return (
-      <div className="w-full" style={{ maxWidth: '1272px', marginLeft: 'auto', marginRight: 'auto' }}>
-        <div className="grid gift-card-grid" style={{ gap: 'clamp(16px, calc((100% - 1200px) / 3), 24px)' }}>
+      <div className="w-full">
+        <div className="grid gift-card-grid" style={{ gap: '24px' }}>
           {viewType === 'mixed' && mixedCardTypes ? (
             // Mixed view: show both batch and single cards
             (() => {
