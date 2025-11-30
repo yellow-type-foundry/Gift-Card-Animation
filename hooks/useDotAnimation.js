@@ -28,6 +28,8 @@ export const useDotAnimation = (blobAnimations, isHovered, circleSize) => {
         y: anim.startY,
         vx: Math.cos(angle) * speed,
         vy: Math.sin(angle) * speed,
+        ax: 0, // acceleration x
+        ay: 0, // acceleration y
       }
     })
     setDotPositions(initialPositions)
@@ -68,6 +70,11 @@ export const useDotAnimation = (blobAnimations, isHovered, circleSize) => {
     const VELOCITY_SMOOTHING = 0.1 // Reduced smoothing for more responsive movement
     const BOUNDARY_PADDING = 1
     const BOUNDARY_SOFTNESS = 20 // Distance from boundary where deceleration starts
+    const ACCELERATION_SMOOTHING = 0.2 // How quickly acceleration changes
+    const MAX_ACCELERATION = 0.4 // Maximum acceleration per frame
+    const ACCELERATION_DECAY = 0.85 // How much acceleration persists (higher = more momentum)
+    const VELOCITY_DRAG = 0.02 // Velocity-based drag on acceleration (makes fast movement harder to change direction)
+    const DT = 1 // Delta time (assuming 60fps, so 1 frame)
     // Use circleSize from ref to get current value
     const currentCircleSize = circleSizeRef.current || 58 // Fallback to max size if undefined
     const maxX = BOX_WIDTH - currentCircleSize - BOUNDARY_PADDING
@@ -86,17 +93,31 @@ export const useDotAnimation = (blobAnimations, isHovered, circleSize) => {
         if (prevPositions.length === 0) return prevPositions
         
         const newPositions = prevPositions.map((pos, i) => {
-          let newX = pos.x + pos.vx
-          let newY = pos.y + pos.vy
-          let newVx = pos.vx
-          let newVy = pos.vy
+          // Initialize acceleration from previous frame (with decay for momentum)
+          let ax = (pos.ax || 0) * ACCELERATION_DECAY
+          let ay = (pos.ay || 0) * ACCELERATION_DECAY
           
-          // Check collision with other dots - smoother repulsion curve
+          // Calculate current speed for velocity-based effects
+          const speed = Math.sqrt(pos.vx * pos.vx + pos.vy * pos.vy)
+          
+          // Velocity-based drag: faster movement creates resistance to acceleration changes
+          // This makes direction changes feel more natural (like inertia)
+          if (speed > 0.5) {
+            const speedFactor = Math.min(speed / 5, 1) // Normalize speed
+            const dragX = -pos.vx * VELOCITY_DRAG * speedFactor
+            const dragY = -pos.vy * VELOCITY_DRAG * speedFactor
+            ax += dragX
+            ay += dragY
+          }
+          
+          // Accumulate repulsion forces
+          let repulsionAx = 0
+          let repulsionAy = 0
           prevPositions.forEach((otherPos, j) => {
             if (i === j) return
             
-            const dx = newX - otherPos.x
-            const dy = newY - otherPos.y
+            const dx = pos.x - otherPos.x
+            const dy = pos.y - otherPos.y
             const distance = Math.sqrt(dx * dx + dy * dy)
             
             if (distance < REPULSION_DISTANCE && distance > 0) {
@@ -105,45 +126,64 @@ export const useDotAnimation = (blobAnimations, isHovered, circleSize) => {
               const smoothFactor = 1 - (normalizedDist * normalizedDist) // Quadratic ease-out
               const force = REPULSION_FORCE * smoothFactor
               const angle = Math.atan2(dy, dx)
-              newVx += Math.cos(angle) * force
-              newVy += Math.sin(angle) * force
+              // Accumulate repulsion acceleration
+              repulsionAx += Math.cos(angle) * force
+              repulsionAy += Math.sin(angle) * force
             }
           })
           
-          // Smooth boundary deceleration (soft boundaries)
-          const distToLeft = newX - BOUNDARY_PADDING
-          const distToRight = maxX - newX
-          const distToTop = newY - BOUNDARY_PADDING
-          const distToBottom = maxY - newY
+          // Accumulate boundary forces
+          let boundaryAx = 0
+          let boundaryAy = 0
+          const distToLeft = pos.x - BOUNDARY_PADDING
+          const distToRight = maxX - pos.x
+          const distToTop = pos.y - BOUNDARY_PADDING
+          const distToBottom = maxY - pos.y
           
-          if (distToLeft < BOUNDARY_SOFTNESS && newVx < 0) {
+          if (distToLeft < BOUNDARY_SOFTNESS && pos.vx < 0) {
             const softFactor = distToLeft / BOUNDARY_SOFTNESS
-            newVx *= 0.5 + (softFactor * 0.5) // Gradually slow down near boundary
+            boundaryAx += (1 - softFactor) * 0.25
           }
-          if (distToRight < BOUNDARY_SOFTNESS && newVx > 0) {
+          if (distToRight < BOUNDARY_SOFTNESS && pos.vx > 0) {
             const softFactor = distToRight / BOUNDARY_SOFTNESS
-            newVx *= 0.5 + (softFactor * 0.5)
+            boundaryAx -= (1 - softFactor) * 0.25
           }
-          if (distToTop < BOUNDARY_SOFTNESS && newVy < 0) {
+          if (distToTop < BOUNDARY_SOFTNESS && pos.vy < 0) {
             const softFactor = distToTop / BOUNDARY_SOFTNESS
-            newVy *= 0.5 + (softFactor * 0.5)
+            boundaryAy += (1 - softFactor) * 0.25
           }
-          if (distToBottom < BOUNDARY_SOFTNESS && newVy > 0) {
+          if (distToBottom < BOUNDARY_SOFTNESS && pos.vy > 0) {
             const softFactor = distToBottom / BOUNDARY_SOFTNESS
-            newVy *= 0.5 + (softFactor * 0.5)
+            boundaryAy -= (1 - softFactor) * 0.25
           }
+          
+          // Add wander acceleration - gradual direction changes
+          const wanderX = (Math.random() - 0.5) * WANDER_STRENGTH
+          const wanderY = (Math.random() - 0.5) * WANDER_STRENGTH
+          
+          // Combine all forces before smoothing
+          const totalForceX = repulsionAx + boundaryAx + wanderX
+          const totalForceY = repulsionAy + boundaryAy + wanderY
+          
+          // Smooth acceleration changes (interpolate towards target)
+          ax = ax * (1 - ACCELERATION_SMOOTHING) + totalForceX * ACCELERATION_SMOOTHING
+          ay = ay * (1 - ACCELERATION_SMOOTHING) + totalForceY * ACCELERATION_SMOOTHING
+          
+          // Clamp acceleration to max (but preserve direction)
+          const accelMagnitude = Math.sqrt(ax * ax + ay * ay)
+          if (accelMagnitude > MAX_ACCELERATION && accelMagnitude > 0) {
+            const scale = MAX_ACCELERATION / accelMagnitude
+            ax *= scale
+            ay *= scale
+          }
+          
+          // Update velocity based on acceleration (v = v + a * dt)
+          let newVx = pos.vx + ax * DT
+          let newVy = pos.vy + ay * DT
           
           // Apply damping
           newVx *= DAMPING
           newVy *= DAMPING
-          
-          // Smoother wander - gradual direction changes instead of random jumps
-          const prevVel = prevVelocitiesRef.current[i] || { vx: 0, vy: 0 }
-          const wanderX = (Math.random() - 0.5) * WANDER_STRENGTH
-          const wanderY = (Math.random() - 0.5) * WANDER_STRENGTH
-          // Blend with previous velocity for smoother transitions
-          newVx = newVx * (1 - VELOCITY_SMOOTHING) + (prevVel.vx + wanderX) * VELOCITY_SMOOTHING
-          newVy = newVy * (1 - VELOCITY_SMOOTHING) + (prevVel.vy + wanderY) * VELOCITY_SMOOTHING
           
           // Store current velocity for next frame smoothing
           prevVelocitiesRef.current[i] = { vx: newVx, vy: newVy }
@@ -160,17 +200,23 @@ export const useDotAnimation = (blobAnimations, isHovered, circleSize) => {
             newVy = Math.sin(angle) * MIN_VELOCITY
           }
           
+          // Update position based on velocity (p = p + v * dt)
+          let newX = pos.x + newVx * DT
+          let newY = pos.y + newVy * DT
+          
           // Boundary collision - smoother bounce
           if (newX < BOUNDARY_PADDING || newX > maxX) {
-            newVx *= -0.7 // Softer bounce
+            newVx *= -0.17 // Softer bounce
             newX = Math.max(BOUNDARY_PADDING, Math.min(maxX, newX))
+            ax *= -0.5 // Reverse acceleration on bounce
           }
           if (newY < BOUNDARY_PADDING || newY > maxY) {
             newVy *= -0.7 // Softer bounce
             newY = Math.max(BOUNDARY_PADDING, Math.min(maxY, newY))
+            ay *= -0.5 // Reverse acceleration on bounce
           }
           
-          return { x: newX, y: newY, vx: newVx, vy: newVy }
+          return { x: newX, y: newY, vx: newVx, vy: newVy, ax, ay }
         })
         
         return newPositions

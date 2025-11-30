@@ -19,7 +19,7 @@ export const useBlobColors = (baseColor) => {
       const randomH = (baseH + (Math.random() * 90 - 40) + 360) % 360
       // Preserve monochrome (S=0) if base color is monochrome
       const randomS = baseS === 0 ? 0 : Math.max(0, Math.min(100, baseS + (Math.random() * 90 - 40)))
-      const randomL = Math.max(0, Math.min(100, baseL + (Math.random() * 40 - 10)))
+      const randomL = Math.max(0, Math.min(100, baseL + (Math.random() * 40 - 20)))
       colors.push(hslToHex(randomH, randomS, randomL))
       
       // Generate random animation parameters
