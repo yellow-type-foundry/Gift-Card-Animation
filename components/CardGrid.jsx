@@ -215,7 +215,7 @@ const CardGrid = ({
                 return sentCards.map((card, index) => (
                   <SentCard
                     key={index}
-                    {...getSingle1Props(card, useColoredBackground, layoutNumber)}
+                    {...getSingle1Props(card, useColoredBackground, layoutNumber, animationType, enable3D)}
                   />
                 ))
               }
@@ -247,7 +247,7 @@ const CardGrid = ({
             sentCards.map((card, index) => (
               <SentCard
                 key={index}
-                {...getSentCardProps(card, layoutNumber, useColoredBackground, animationType)}
+                {...getSentCardProps(card, layoutNumber, useColoredBackground, animationType, enable3D)}
                 layout2BoxType={layout2BoxType}
               />
             ))
