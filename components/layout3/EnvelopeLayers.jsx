@@ -49,7 +49,7 @@ const EnvelopeLayers = ({ coverImage, baseColor, isHovered = false }) => {
           alignItems: 'center',
           justifyContent: 'flex-end',
           overflow: 'hidden',
-          zIndex: 10,
+          zIndex: 20, // Highest z-index to ensure paper is on top of everything
         }}
         data-name="NEW-Paper"
       >

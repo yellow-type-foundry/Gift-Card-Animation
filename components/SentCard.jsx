@@ -900,8 +900,21 @@ const SentCard = ({
   const box3Scale = (layout1Style === '3') ? layout1Box3Scale : envelopeScale
   // Envelope1 scale: Use envelope1Scale from config (layout2.envelope1.scale)
   const envelope1ScaleValue = isEnvelope1 && envelope1Scale !== undefined ? envelope1Scale : envelopeScale
-  // Envelope2 scale: Use envelope2Scale from config (layout2.envelope2.scale)
-  const envelope2ScaleValue = isEnvelope2 && envelope2Scale !== undefined ? envelope2Scale : envelopeScale
+  // Envelope2 scale: 
+  // - For Layout 1 Style 2: Use envelopeScale from layout1StyleB.envelope.scale (ALWAYS, no override)
+  // - For Layout 2 Style 2: Use envelope2Scale from layout2.envelope2.scale
+  const envelope2ScaleValue = useMemo(() => {
+    if (!isEnvelope2) return envelopeScale
+    
+    // Layout 1 Style 2: ALWAYS use envelopeScale directly from props (from layout1StyleB.envelope.scale)
+    // This ensures it's not overridden by envelope2Scale (which is for Layout 2 only)
+    if (layout1Style === '2') {
+      return envelopeScale
+    }
+    
+    // Layout 2 Style 2: Use envelope2Scale if provided, otherwise fallback to envelopeScale
+    return envelope2Scale !== undefined ? envelope2Scale : envelopeScale
+  }, [isEnvelope2, layout1Style, envelopeScale, envelope2Scale])
   // For Layout 1 Style 3, ensure both Box3 and Envelope3 use 1.125 scale
   // Priority: Layout 1 Style 3 > Layout 2 Box3/Envelope3 > Envelope1 > Envelope2 > Box1 > Box2 > default envelopeScale
   const effectiveScale = useMemo(() => {
@@ -915,7 +928,7 @@ const SentCard = ({
     if (isEnvelope1) {
       return envelope1ScaleValue
     }
-    // Envelope2 scale (for Layout 2 Style 2)
+    // Envelope2 scale (for Layout 1 Style 2 or Layout 2 Style 2)
     if (isEnvelope2) {
       return envelope2ScaleValue
     }
@@ -1458,53 +1471,34 @@ const SentCard = ({
                   />
                 )}
               </div>
-            ) : hideEnvelope && !showGiftBoxWhenHidden && hideProgressBarInBox ? (
-              // Envelope2 or Envelope3
-              // Wrapped in inner div for absolute positioning with scale/offsetY
-              // For Style 3 (layout2BoxType === '3' or layout1Style === '3'), use Envelope3 instead of Envelope2
+            ) : hideEnvelope && !showGiftBoxWhenHidden && hideProgressBarInBox && layout1Style !== '3' ? (
+              // Layout 1 Style 2: Always render Envelope2 (never Envelope3)
+              // This block is specifically for Layout 1 Style 2 batch cards
+              // Layout 1 Style 3 should go through the next block
               <div style={envelopeInnerWrapperStyle}>
-                {(layout2BoxType === '3' || layout1Style === '3') ? (
-                  <Envelope3
-                    boxColor={envelope3Color}
-                    logoPath={svgLogoPath}
-                    progress={validatedProgress}
-                    coverImage={boxImage}
-                    isHovered={isHovered}
-                    hideProgressIndicator={layout1Style === '3'}
-                    style={(() => {
-                      const scale = (isEnvelope3 && layout1Style === '3') ? layout1Box3Scale : ((isEnvelope3) ? envelopeScale : 1)
-                      console.log('[SentCard] Envelope3 scale:', { isEnvelope3, layout1Style, scale, effectiveScale, layout1Box3Scale })
-                      return {
-                        transform: `scale(${scale})`,
-                        transformOrigin: 'center center',
-                      }
-                    })()}
-                  />
-                ) : (
-                  <Envelope2
-                    progress={validatedProgress}
-                    boxImage={boxImage}
-                    boxColor={envelopeBoxColor}
-                    flapColor={envelopeFlapColor}
-                    boxOpacity={EFFECTIVE_BOX_OPACITY}
-                    flapOpacity={EFFECTIVE_FLAP_OPACITY}
-                    progressIndicatorShadowColor={progressIndicatorShadowColor}
-                    progressBarSourceColor={progressBarSourceColor}
-                    progressBarLuminance={PROGRESS_BAR_LUMINANCE}
-                    progressBarSaturation={PROGRESS_BAR_SATURATION}
-                    containerPadding={EFFECTIVE_ENVELOPE_PADDING}
-                    containerMargin={EFFECTIVE_ENVELOPE_MARGIN}
-                    isHovered={isHovered}
-                    parallaxX={parallaxX}
-                    parallaxY={parallaxY}
-                    tiltX={tiltX}
-                    tiltY={tiltY}
-                    animationType={animationType}
-                    enable3D={enable3D}
-                    hideProgressBar={hideProgressBarInBox}
-                    hidePaper={hidePaper}
-                  />
-                )}
+                <Envelope2
+                  progress={validatedProgress}
+                  boxImage={boxImage}
+                  boxColor={envelopeBoxColor}
+                  flapColor={envelopeFlapColor}
+                  boxOpacity={EFFECTIVE_BOX_OPACITY}
+                  flapOpacity={EFFECTIVE_FLAP_OPACITY}
+                  progressIndicatorShadowColor={progressIndicatorShadowColor}
+                  progressBarSourceColor={progressBarSourceColor}
+                  progressBarLuminance={PROGRESS_BAR_LUMINANCE}
+                  progressBarSaturation={PROGRESS_BAR_SATURATION}
+                  containerPadding={EFFECTIVE_ENVELOPE_PADDING}
+                  containerMargin={EFFECTIVE_ENVELOPE_MARGIN}
+                  isHovered={isHovered}
+                  parallaxX={parallaxX}
+                  parallaxY={parallaxY}
+                  tiltX={tiltX}
+                  tiltY={tiltY}
+                  animationType={animationType}
+                  enable3D={enable3D}
+                  hideProgressBar={hideProgressBarInBox}
+                  hidePaper={hidePaper}
+                />
               </div>
             ) : hideEnvelope && !showGiftBoxWhenHidden ? (
               // LAYOUT 2 (Batch 2) or Layout 1 Style 3 (Batch): Envelope1, Envelope2, or Envelope3
