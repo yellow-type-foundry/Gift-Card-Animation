@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import ControlBar from '@/components/ControlBar'
+import StylingBar from '@/components/StylingBar'
 import CardGrid from '@/components/CardGrid'
 import { shuffleArray, generateRandomSentCardData } from '@/utils/cardData'
 import { FOOTER_CONFIG, LAYOUT_CONFIG } from '@/constants/sentCardConstants'
@@ -671,11 +672,56 @@ export default function Home() {
   }, [viewType, layoutNumber])
   
   return (
-    <div className="min-h-screen bg-[#f0f1f5] flex items-start overflow-visible">
+    <div className="min-h-screen bg-[#f0f1f5] flex flex-col items-start overflow-visible">
       <div 
-        className="w-full max-w-[1440px] mx-auto px-0 md:px-[80px] lg:px-[240px] pt-5 md:pt-10 pb-10"
+        className="w-full max-w-[1440px] mx-auto px-0 md:px-[80px] lg:px-[240px] pt-5 md:pt-10 pb-10 flex-1"
       >
-        {/* Tabs and Controls Row */}
+        {/* Content */}
+        <CardGrid
+            key={`card-grid-${layoutNumber}-${style}`}
+            activeTab={activeTab}
+            cardStates={cardStates}
+            messages={messages}
+            boxPairs={boxPairs}
+            cardHandlers={cardHandlers}
+            viewType={viewType}
+            layoutNumber={layoutNumber}
+            useColoredBackground={layoutNumber === '1' ? useColoredBackground : false}
+            animationType={animationType}
+            enable3D={enable3D}
+            sentCards={sentCards}
+            mixedCardTypes={mixedCardTypes}
+            getSentCardProps={getSentCardProps}
+            getSingle1Props={getSingle1Props}
+            getSentCard4Props={getSentCard4Props}
+            layout2BoxType={layout2BoxType}
+          />
+      </div>
+      {/* StylingBar at bottom */}
+      <div className="w-full max-w-[1440px] mx-auto px-0 md:px-[80px] lg:px-[240px] pb-4">
+        <StylingBar
+          isSentTab={activeTab === 'sent'}
+          useColoredBackground={useColoredBackground}
+          onThemingChange={setUseColoredBackground}
+          animationType={animationType}
+          onAnimationTypeChange={setAnimationType}
+          enable3D={enable3D}
+          onEnable3DChange={setEnable3D}
+          layoutNumber={layoutNumber}
+          viewType={viewType}
+          onViewChange={(value) => {
+            setViewType(value)
+            if (value === 'mixed') {
+              setMixSeed(Date.now())
+            }
+          }}
+          isSingleView={isSingleView}
+          style={style}
+          layout2BoxType={layout2BoxType}
+        />
+      </div>
+      {/* ControlBar at bottom */}
+      <div className="w-full max-w-[1440px] mx-auto px-0 md:px-[80px] lg:px-[240px] pb-5 md:pb-10">
         <ControlBar
           activeTab={activeTab}
           onTabChange={handleTabChange}
@@ -704,26 +750,6 @@ export default function Home() {
           layout2BoxType={layout2BoxType}
           onLayout2BoxTypeChange={setLayout2BoxType}
         />
-        {/* Content */}
-        <CardGrid
-            key={`card-grid-${layoutNumber}-${style}`}
-            activeTab={activeTab}
-            cardStates={cardStates}
-            messages={messages}
-            boxPairs={boxPairs}
-            cardHandlers={cardHandlers}
-            viewType={viewType}
-            layoutNumber={layoutNumber}
-            useColoredBackground={layoutNumber === '1' ? useColoredBackground : false}
-            animationType={animationType}
-            enable3D={enable3D}
-            sentCards={sentCards}
-            mixedCardTypes={mixedCardTypes}
-            getSentCardProps={getSentCardProps}
-            getSingle1Props={getSingle1Props}
-            getSentCard4Props={getSentCard4Props}
-            layout2BoxType={layout2BoxType}
-          />
       </div>
     </div>
   )

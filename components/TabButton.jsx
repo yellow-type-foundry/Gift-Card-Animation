@@ -7,7 +7,7 @@ import React from 'react'
  * @param {Function} onClick - Click handler function
  */
 const TabButton = ({ label, isActive, onClick }) => {
-  const baseClasses = 'px-4 py-2 rounded-[12px] outline outline-1 outline-offset-[-1px] shrink-0 text-sm'
+  const baseClasses = 'px-5 py-2.5 h-10 rounded-full outline outline-1 outline-offset-[-1px] shrink-0 text-base font-medium'
   const activeClasses = 'bg-white outline-zinc-300 text-black'
   const inactiveClasses = 'bg-[#f0f1f5] outline-zinc-200 text-[#525F7A]'
   
