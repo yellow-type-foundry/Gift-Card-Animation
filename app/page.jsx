@@ -776,7 +776,7 @@ export default function Home() {
           <div className="flex-1 flex justify-end">
             <button
               onClick={handleShuffle}
-              className="flex items-center justify-center w-[56px] h-[56px] rounded-full border border-[#dde2e9] bg-white text-base font-medium text-[#525F7A] hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0"
+              className="flex items-center justify-center w-[56px] h-[56px] rounded-full border border-[#dde2e9] bg-white text-base font-medium text-[#525F7A] hover:bg-gray-50 transition-colors focus:outline-none"
               aria-label="Shuffle cards"
             >
               <svg width="24" height="24" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">

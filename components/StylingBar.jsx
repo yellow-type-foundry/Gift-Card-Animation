@@ -61,8 +61,8 @@ const StylingBar = ({
             <select
               id="animation-select"
               value={animationType}
-              onChange={onAnimationTypeChange}
-              className="h-10 py-2 pl-4 pr-10 rounded-full border border-[#dde2e9] bg-white text-base font-medium text-[#525F7A] focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0 appearance-none cursor-pointer"
+              onChange={(e) => onAnimationTypeChange(e.target.value)}
+              className="h-10 py-2 pl-4 pr-10 rounded-full border border-[#dde2e9] bg-white text-base font-medium text-[#525F7A] focus:outline-none appearance-none cursor-pointer"
             >
               <option value="highlight">Animation: Shimmer</option>
               <option value="breathing">Animation: Breathing</option>
@@ -104,7 +104,7 @@ const StylingBar = ({
               id="view-select"
               value={viewType}
               onChange={(e) => onViewChange(e.target.value)}
-              className="h-10 py-2 pl-4 pr-10 rounded-full border border-[#dde2e9] bg-white text-base font-medium text-[#525F7A] focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0 appearance-none cursor-pointer"
+              className="h-10 py-2 pl-4 pr-10 rounded-full border border-[#dde2e9] bg-white text-base font-medium text-[#525F7A] focus:outline-none appearance-none cursor-pointer"
             >
               <option value="mixed">View: Mixed</option>
               <option value="batch">View: Batch</option>
