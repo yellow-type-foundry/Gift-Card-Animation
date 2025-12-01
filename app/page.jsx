@@ -550,6 +550,8 @@ export default function Home() {
       envelopeOffsetY: effectiveEnvelopeOffsetY,
       envelopeWidth: effectiveEnvelopeWidth,
       envelopeHeight: effectiveEnvelopeHeight,
+      // Envelope group positioning (Layout 1 Style 1 only)
+      envelopeGroup: effectiveLayoutConfig.envelopeGroup,
       // Pass envelope1 and envelope2 configs separately for Layout 2
       envelope1Scale: effectiveLayoutConfig.envelope1?.scale,
       envelope1OffsetY: effectiveLayoutConfig.envelope1?.offsetY,

@@ -143,6 +143,17 @@ export const LAYOUT_CONFIG = {
       height: 280, // minHeight when useFlex is true
       useFlex: true, // Whether to use flex: 1 for fill height
     },
+    // Envelope group positioning (Layout 1 Style 1 only)
+    // Controls the position of the entire Envelope1 group (envelope base, card shape, image container, etc.)
+    envelopeGroup: {
+      // When centered: true, the group is centered horizontally
+      // The offsetX adjusts the horizontal position (in pixels) relative to center
+      // Envelope base center is at 147.75px from its left edge (50px + 97.75px)
+      // To center: offsetX = -147.75px
+      centered: true, // Whether to center the group horizontally
+      offsetX: 0, // Horizontal offset in pixels (applied when centered)
+      offsetY: 0, // Vertical offset in pixels
+    },
     // Envelope settings (will be overridden based on cardStyle)
     envelope: {
       scale: 1, // Default for envelope style; box style uses 1.125

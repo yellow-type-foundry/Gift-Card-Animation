@@ -69,6 +69,7 @@ const SentCard = ({
   envelopeOffsetY = 0,
   envelopeWidth,
   envelopeHeight,
+  envelopeGroup, // Envelope group positioning (Layout 1 Style 1 only)
   // Layout 2 separate envelope configs
   envelope1Scale,
   envelope1OffsetY,
@@ -1812,12 +1813,20 @@ const SentCard = ({
                 <div
                   style={{
                     position: 'absolute',
-                    ...(layout1Style === '1'
-                      ? {
-                          left: '50%',
-                          transform: 'translateX(-50%)',
-                          top: 0,
-                        }
+                    ...(layout1Style === '1' && envelopeGroup?.centered
+                      ? (() => {
+                          // Center the envelope base within the parent container
+                          // Envelope base: left: 50px, width: 195.5px, center at 50 + 97.75 = 147.75px from wrapper's left edge
+                          // To center: position wrapper so envelope base center aligns with parent center
+                          // Formula: left = 50% - (envelope base center position) + user offset
+                          //         = 50% - 147.75px + user offset
+                          const envelopeBaseCenter = 147.75 // Envelope base center from wrapper's left edge
+                          const userOffsetX = envelopeGroup?.offsetX ?? 0
+                          return {
+                            left: `calc(50% - ${envelopeBaseCenter}px + ${userOffsetX}px)`,
+                            top: envelopeGroup?.offsetY || 0,
+                          }
+                        })()
                       : {
                           left: 0,
                           top: 0,
@@ -1832,7 +1841,7 @@ const SentCard = ({
                     <Envelope1 
                       ids={ids} 
                       baseTintColor={baseTintColor} 
-                      centered={layout1Style === '1'}
+                      centered={false}
                       containerOffset={0}
                     />
               {overlayProgressOnEnvelope && !progressOutsideEnvelope && (
@@ -1905,22 +1914,13 @@ const SentCard = ({
               )}
                   </div>
                   {/* Rectangle 1790 (card shape container) - positioned relative to envelope container */}
-                  <CardShape ids={ids} base2TintColor={base2TintColor} centered={layout1Style === '1'} containerOffset={0} />
+                  <CardShape ids={ids} base2TintColor={base2TintColor} centered={false} containerOffset={0} />
                   {/* Image Container (hosts image) - positioned relative to envelope container */}
                   <div
                     className="absolute"
                     style={{
-                      ...(layout1Style === '1'
-                        ? {
-                            left: '50%',
-                            transform: 'translateX(-50%)',
-                            top: ENVELOPE_DIMENSIONS.imageContainer.top,
-                          }
-                        : {
-                            left: ENVELOPE_DIMENSIONS.imageContainer.left,
-                            top: ENVELOPE_DIMENSIONS.imageContainer.top,
-                          }
-                      ),
+                      left: ENVELOPE_DIMENSIONS.imageContainer.left,
+                      top: ENVELOPE_DIMENSIONS.imageContainer.top,
                       width: ENVELOPE_DIMENSIONS.imageContainer.width,
                       height: ENVELOPE_DIMENSIONS.imageContainer.height,
                       zIndex: 2
@@ -2045,17 +2045,8 @@ const SentCard = ({
                     <div
                       className="absolute"
                       style={{
-                        ...(layout1Style === '1'
-                          ? {
-                              left: '50%',
-                              transform: 'translateX(-50%)',
-                              top: ENVELOPE_DIMENSIONS.imageFade.top,
-                            }
-                          : {
-                              left: ENVELOPE_DIMENSIONS.imageFade.left,
-                              top: ENVELOPE_DIMENSIONS.imageFade.top,
-                            }
-                        ),
+                        left: ENVELOPE_DIMENSIONS.imageFade.left,
+                        top: ENVELOPE_DIMENSIONS.imageFade.top,
                         width: ENVELOPE_DIMENSIONS.imageFade.width,
                         height: ENVELOPE_DIMENSIONS.imageFade.height,
                         zIndex: 99,
@@ -2109,22 +2100,8 @@ const SentCard = ({
                   <div
                     className="absolute"
                     style={{
-                      ...(layout1Style === '1'
-                        ? {
-                            // Image Badge was at left: 65px, envelope base at left: 50px
-                            // Offset: 65 - 50 = 15px from envelope base left edge
-                            // Envelope base is 195.5px wide, so center is at 97.75px
-                            // Image Badge is 165px wide, so its center is at 82.5px from its left
-                            // To center Image Badge: 50% + (15 - (195.5/2 - 165/2)) = 50% + (15 - 15.25) = 50% - 0.25px
-                            left: '50%',
-                            transform: 'translateX(calc(-50% - 0.25px))',
-                            top: ENVELOPE_DIMENSIONS.imageBadge.top,
-                          }
-                        : {
-                            left: ENVELOPE_DIMENSIONS.imageBadge.left,
-                            top: ENVELOPE_DIMENSIONS.imageBadge.top,
-                          }
-                      ),
+                      left: ENVELOPE_DIMENSIONS.imageBadge.left,
+                      top: ENVELOPE_DIMENSIONS.imageBadge.top,
                       width: ENVELOPE_DIMENSIONS.imageBadge.width,
                       height: ENVELOPE_DIMENSIONS.imageBadge.height,
                       borderRadius: '4px',
