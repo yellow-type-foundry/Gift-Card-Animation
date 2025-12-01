@@ -56,7 +56,7 @@ function Footer({
         {/* Info first */}
         {infoTitle && !infoInSlot && (
           <div
-            className="content-stretch flex flex-col gap-[4px] items-start leading-[1.4] not-italic relative shrink-0 text-center w-full"
+            className="content-stretch flex flex-col gap-[4px] items-center leading-[1.4] not-italic relative shrink-0 text-center w-full"
             data-name="Gift Message"
             style={{
               opacity: (hideInfoOnHover && isHovered) ? 0 : 1,
@@ -67,7 +67,7 @@ function Footer({
             }}
           >
             <p
-              className="[white-space-collapse:collapse] font-['Goody_Sans:Medium',sans-serif] h-[22px] overflow-ellipsis overflow-hidden relative shrink-0 text-[16px] text-nowrap w-[268px]"
+              className="[white-space-collapse:collapse] font-['Goody_Sans:Medium',sans-serif] h-[22px] overflow-ellipsis overflow-hidden relative shrink-0 text-[16px] text-nowrap w-full"
               style={{
                 fontFamily: 'var(--font-goody-sans)',
                 fontSize: '16px',
@@ -80,7 +80,7 @@ function Footer({
             </p>
             {infoSubtitle && (
               <p
-                className="font-['Goody_Sans:Regular',sans-serif] h-[22px] relative shrink-0 text-[16px] w-[268px]"
+                className="font-['Goody_Sans:Regular',sans-serif] h-[22px] relative shrink-0 text-[16px] w-full"
                 style={{
                   fontFamily: 'var(--font-goody-sans)',
                   fontSize: '16px',
