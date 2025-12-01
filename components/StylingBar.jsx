@@ -4,69 +4,19 @@ import React from 'react'
 
 const StylingBar = ({
   isSentTab,
-  useColoredBackground,
-  onThemingChange,
   animationType,
   onAnimationTypeChange,
-  enable3D,
-  onEnable3DChange,
   layoutNumber,
-  isSingleView,
   style,
   layout2BoxType,
 }) => {
   if (!isSentTab) return null
 
-  const showTheming = layoutNumber === '1' || layoutNumber === '2'
   const showAnimation = (layoutNumber === '1' && style === '2') || (layoutNumber === '2' && layout2BoxType === '2')
-  // Show 3D toggle for Box1/Envelope1, Box2/Envelope2, and Box3/Envelope3
-  const show3D = (layoutNumber === '2' || (layoutNumber === '1' && (style === '1' || style === '2' || style === '3')) || (layoutNumber === '2' && layout2BoxType === '3'))
 
   return (
     <div className="w-fit bg-white rounded-full py-2 px-2 transition-all duration-300 ease-in-out">
       <div className="flex items-center overflow-x-auto md:overflow-visible">
-        {/* Theming toggle - show for layout 1 and layout 2 */}
-        <div 
-          className={`shrink-0 transition-all duration-300 ease-in-out overflow-hidden ${
-            showTheming 
-              ? 'max-w-[200px] opacity-100 mr-2' 
-              : 'max-w-0 opacity-0 mr-0 pointer-events-none'
-          }`}
-        >
-          <button
-            onClick={() => onThemingChange(!useColoredBackground)}
-            className={`h-10 px-4 rounded-full border border-[#dde2e9] text-base font-medium transition-colors focus:outline-none whitespace-nowrap cursor-pointer ${
-              useColoredBackground 
-                ? 'bg-[#5a3dff] text-white' 
-                : 'bg-white text-[#525F7A] hover:bg-gray-50'
-            }`}
-            aria-label="Toggle theming"
-          >
-            Theming
-          </button>
-        </div>
-        
-        {/* 3D toggle */}
-        <div 
-          className={`shrink-0 transition-all duration-300 ease-in-out overflow-hidden ${
-            show3D 
-              ? `max-w-[200px] opacity-100 ${showAnimation ? 'mr-2' : ''}` 
-              : 'max-w-0 opacity-0 mr-0 pointer-events-none'
-          }`}
-        >
-          <button
-            onClick={() => onEnable3DChange(!enable3D)}
-            className={`h-10 px-4 rounded-full border border-[#dde2e9] text-base font-medium transition-colors focus:outline-none cursor-pointer whitespace-nowrap ${
-              enable3D 
-                ? 'bg-[#5a3dff] text-white' 
-                : 'bg-white text-[#525F7A] hover:bg-gray-50'
-            }`}
-            aria-label="Toggle 3D effect"
-          >
-            3D
-          </button>
-        </div>
-        
         {/* Animation selector */}
         <div 
           className={`shrink-0 transition-all duration-300 ease-in-out overflow-hidden ${

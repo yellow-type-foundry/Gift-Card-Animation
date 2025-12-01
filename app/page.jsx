@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import ControlBar from '@/components/ControlBar'
-import StylingBar from '@/components/StylingBar'
 import CardGrid from '@/components/CardGrid'
 import { shuffleArray, generateRandomSentCardData } from '@/utils/cardData'
 import { FOOTER_CONFIG, LAYOUT_CONFIG } from '@/constants/sentCardConstants'
@@ -690,9 +689,13 @@ export default function Home() {
   }, [viewType, layoutNumber])
   
   return (
-    <div className="h-screen bg-[#f0f1f5] flex flex-col items-start overflow-hidden">
+    <div className="h-screen bg-[#f0f1f5] flex flex-col items-start overflow-hidden relative">
       <div 
-        className="w-full max-w-[1440px] mx-auto px-0 md:px-[80px] lg:px-[240px] pt-5 pb-[200px] flex-1"
+        className="w-full max-w-[1440px] mx-auto px-0 md:px-[80px] lg:px-[240px] pt-5 pb-[200px] flex-1 relative"
+        id="content-container"
+        style={{
+          '--content-padding': '0px',
+        }}
       >
         {/* ControlBar */}
         <div className="mb-6">
@@ -746,71 +749,122 @@ export default function Home() {
             layout2BoxType={layout2BoxType}
           />
       </div>
-      {/* StylingBar at bottom */}
-      <div className="fixed bottom-0 left-0 right-0 z-50">
-        <div className="w-full max-w-[1440px] mx-auto px-0 md:px-[80px] lg:px-[240px] pb-6 pt-4 flex items-center justify-between">
-          {/* View selector - Left side */}
-          {activeTab === 'sent' && (
-            <div className="flex-1 flex justify-start">
-              <div className="relative inline-block">
-                <select
-                  id="view-select"
-                  value={viewType}
-                  onChange={(e) => {
-                    const value = e.target.value
-                    setViewType(value)
-                    if (value === 'mixed') {
-                      setMixSeed(Date.now())
-                    }
-                  }}
-                  className="w-[56px] h-[56px] rounded-full border border-[#dde2e9] bg-white text-transparent hover:bg-gray-50 transition-colors focus:outline-none appearance-none cursor-pointer"
-                  aria-label="View type"
-                  style={{ fontSize: 0, color: 'transparent' }}
-                >
-                  <option value="mixed">View: Mixed</option>
-                  <option value="batch">View: Batch</option>
-                  <option value="single">View: Single</option>
-                </select>
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <svg width="24" height="24" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M0.5,8 c0,0,3-5.5,7.5-5.5S15.5,8,15.5,8s-3,5.5-7.5,5.5S0.5,8,0.5,8z" fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round" strokeMiterlimit="10"/>
-                    <circle fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round" cx="8" cy="8" r="2.5"/>
-                  </svg>
-                </div>
-              </div>
-            </div>
-          )}
-          {activeTab !== 'sent' && <div className="flex-1"></div>}
-          {/* StylingBar */}
-          <StylingBar
-            isSentTab={activeTab === 'sent'}
-            useColoredBackground={useColoredBackground}
-            onThemingChange={setUseColoredBackground}
-            animationType={animationType}
-            onAnimationTypeChange={setAnimationType}
-            enable3D={enable3D}
-            onEnable3DChange={setEnable3D}
-            layoutNumber={layoutNumber}
-            isSingleView={isSingleView}
-            style={style}
-            layout2BoxType={layout2BoxType}
-          />
-          {/* Shuffle button - Right side */}
-          <div className="flex-1 flex justify-end">
-            <button
-              onClick={handleShuffle}
-              className="flex items-center justify-center w-[56px] h-[56px] rounded-full border border-[#dde2e9] bg-white text-base font-medium text-[#525F7A] hover:bg-gray-50 transition-colors focus:outline-none"
-              aria-label="Shuffle cards"
-            >
-              <svg width="24" height="24" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M1.5,8A6.5,6.5,0,0,1,13.478,4.5" fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
-                <polyline points="13.5 0.5 13.5 4.5 9.5 4.5" fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M14.5,8A6.5,6.5,0,0,1,2.522,11.5" fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
-                <polyline points="2.5 15.5 2.5 11.5 6.5 11.5" fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </button>
+      {/* StylingBar - Left side */}
+      <div 
+        className="absolute top-1/2 -translate-y-1/2 z-50 flex flex-col items-center gap-3 styling-bar-position"
+      >
+        {/* View selector */}
+        <div className="relative inline-block">
+          <select
+            id="view-select"
+            value={viewType}
+            onChange={(e) => {
+              const value = e.target.value
+              setViewType(value)
+              if (value === 'mixed') {
+                setMixSeed(Date.now())
+              }
+            }}
+            disabled={activeTab !== 'sent'}
+            className={`w-[56px] h-[56px] rounded-full border border-[#dde2e9] bg-white text-transparent transition-colors focus:outline-none appearance-none ${
+              activeTab === 'sent' 
+                ? 'hover:bg-gray-50 cursor-pointer' 
+                : 'opacity-40 cursor-not-allowed'
+            }`}
+            aria-label="View type"
+            style={{ fontSize: 0, color: 'transparent' }}
+          >
+            <option value="mixed">View: Mixed</option>
+            <option value="batch">View: Batch</option>
+            <option value="single">View: Single</option>
+          </select>
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <svg width="24" height="24" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M0.5,8 c0,0,3-5.5,7.5-5.5S15.5,8,15.5,8s-3,5.5-7.5,5.5S0.5,8,0.5,8z" fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round" strokeMiterlimit="10"/>
+              <circle fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round" cx="8" cy="8" r="2.5"/>
+            </svg>
           </div>
         </div>
+        {/* Theming button */}
+        <button
+          onClick={() => setUseColoredBackground(!useColoredBackground)}
+          disabled={activeTab !== 'sent' || (layoutNumber !== '1' && layoutNumber !== '2')}
+          className={`flex items-center justify-center w-[56px] h-[56px] rounded-full border border-[#dde2e9] transition-colors focus:outline-none ${
+            activeTab === 'sent' && (layoutNumber === '1' || layoutNumber === '2')
+              ? useColoredBackground 
+                ? 'bg-[#5a3dff] text-white' 
+                : 'bg-white text-[#525F7A] hover:bg-gray-50 cursor-pointer'
+              : 'bg-white text-[#525F7A] opacity-40 cursor-not-allowed'
+          }`}
+          aria-label="Toggle theming"
+        >
+          <svg width="24" height="24" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M7.5.5,2.086,5.914a2,2,0,0,0,0,2.828l1.586,1.586L.914,13.086a1.414,1.414,0,0,0,0,2h0a1.414,1.414,0,0,0,2,0l2.757-2.757,1.586,1.586a2,2,0,0,0,2.828,0L15.5,8.5Z" fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
+            <line x1="4.5" y1="6.5" x2="9.5" y2="11.5" fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+        {/* 3D button */}
+        <button
+          onClick={() => setEnable3D(!enable3D)}
+          disabled={activeTab !== 'sent' || !(layoutNumber === '2' || (layoutNumber === '1' && (style === '1' || style === '2' || style === '3')) || (layoutNumber === '2' && layout2BoxType === '3'))}
+          className={`flex items-center justify-center w-[56px] h-[56px] rounded-full border border-[#dde2e9] transition-colors focus:outline-none ${
+            activeTab === 'sent' && (layoutNumber === '2' || (layoutNumber === '1' && (style === '1' || style === '2' || style === '3')) || (layoutNumber === '2' && layout2BoxType === '3'))
+              ? enable3D 
+                ? 'bg-[#5a3dff] text-white' 
+                : 'bg-white text-[#525F7A] hover:bg-gray-50 cursor-pointer'
+              : 'bg-white text-[#525F7A] opacity-40 cursor-not-allowed'
+          }`}
+          aria-label="Toggle 3D effect"
+        >
+          <svg width="24" height="24" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="8.5 0.5 15.5 3.5 15.5 12.5 8.5 15.5 1.5 12.5 1.5 3.5 8.5 0.5" fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
+            <polyline points="3.5 4.5 8.5 6.5 13.5 4.5" fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
+            <line x1="8.5" y1="6.5" x2="8.5" y2="13.5" fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+        {/* Animation button */}
+        <button
+          onClick={() => {
+            // Cycle through: highlight -> breathing -> none -> highlight
+            if (animationType === 'highlight') {
+              setAnimationType('breathing')
+            } else if (animationType === 'breathing') {
+              setAnimationType('none')
+            } else {
+              setAnimationType('highlight')
+            }
+          }}
+          disabled={activeTab !== 'sent' || !((layoutNumber === '1' && style === '2') || (layoutNumber === '2' && layout2BoxType === '2'))}
+          className={`flex items-center justify-center w-[56px] h-[56px] rounded-full border border-[#dde2e9] transition-colors focus:outline-none ${
+            activeTab === 'sent' && ((layoutNumber === '1' && style === '2') || (layoutNumber === '2' && layout2BoxType === '2'))
+              ? animationType !== 'none'
+                ? 'bg-[#5a3dff] text-white' 
+                : 'bg-white text-[#525F7A] hover:bg-gray-50 cursor-pointer'
+              : 'bg-white text-[#525F7A] opacity-40 cursor-not-allowed'
+          }`}
+          aria-label="Toggle animation"
+        >
+          <svg width="24" height="24" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <polygon points=".5 13.5 2.5 15.5 11.487 6.487 9.513 4.487 .5 13.5" fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
+            <line x1="7.513" y1="6.487" x2="9.513" y2="8.487" fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M3.5,2.5c1.105,0,2-.895,2-2,0,1.105,.895,2,2,2-1.105,0-2,.895-2,2,0-1.105-.895-2-2-2" fill="currentColor" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M11.5,2.5c1.105,0,2-.895,2-2,0,1.105,.895,2,2,2-1.105,0-2,.895-2,2,0-1.105-.895-2-2-2" fill="currentColor" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M11.5,10.493c1.105,0,2-.895,2-2,0,1.105,.895,2,2,2-1.105,0-2,.895-2,2,0-1.105-.895-2-2-2" fill="currentColor" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+        {/* Shuffle button */}
+        <button
+          onClick={handleShuffle}
+          className="flex items-center justify-center w-[56px] h-[56px] rounded-full border border-[#dde2e9] bg-white text-base font-medium text-[#525F7A] hover:bg-gray-50 transition-colors focus:outline-none"
+          aria-label="Shuffle cards"
+        >
+          <svg width="24" height="24" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M1.5,8A6.5,6.5,0,0,1,13.478,4.5" fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
+            <polyline points="13.5 0.5 13.5 4.5 9.5 4.5" fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M14.5,8A6.5,6.5,0,0,1,2.522,11.5" fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
+            <polyline points="2.5 15.5 2.5 11.5 6.5 11.5" fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
       </div>
     </div>
   )

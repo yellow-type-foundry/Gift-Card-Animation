@@ -557,3 +557,20 @@ body.share-modal-open [data-name="Gift Card"]:not([data-share-modal]) {
   transform: translateY(0) !important;
   box-shadow: none !important;
 }
+
+/* StylingBar positioning - 40px gap from card grid */
+.styling-bar-position {
+  left: max(40px, calc((100vw - min(100vw, 1440px)) / 2 + 0px - 96px));
+}
+
+@media (min-width: 768px) {
+  .styling-bar-position {
+    left: calc((100vw - min(100vw, 1440px)) / 2 + 80px - 96px);
+  }
+}
+
+@media (min-width: 1024px) {
+  .styling-bar-position {
+    left: calc((100vw - min(100vw, 1440px)) / 2 + 240px - 96px);
+  }
+}
