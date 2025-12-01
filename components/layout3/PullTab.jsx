@@ -21,12 +21,12 @@ const PullTab = ({ baseColor, isHovered, isDone, enable3D = false, animationType
 
   // Apply 3D transforms when enabled
   const transformStyle = useMemo(() => {
-    if (isHovered && enable3D && (animationType === 'highlight' || animationType === 'breathing')) {
+    if (isHovered && enable3D) {
       return `translateX(-50%) perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translate(${parallaxX}px, ${parallaxY}px) translate3d(0, -8px, 0) scale(${depthScale})`
     }
     
     return isHovered ? 'translateX(-50%) translateY(-8px)' : 'translateX(-50%)'
-  }, [isHovered, enable3D, animationType, tiltX, tiltY, parallaxX, parallaxY, depthScale])
+  }, [isHovered, enable3D, tiltX, tiltY, parallaxX, parallaxY, depthScale])
 
   return (
     <div
@@ -35,7 +35,7 @@ const PullTab = ({ baseColor, isHovered, isDone, enable3D = false, animationType
         left: '50%',
         top: '-3px',
         transform: transformStyle,
-        transformStyle: (isHovered && enable3D && (animationType === 'highlight' || animationType === 'breathing')) ? 'preserve-3d' : undefined,
+        transformStyle: (isHovered && enable3D) ? 'preserve-3d' : undefined,
         width: `${BOX_WIDTH}px`,
         height: `${BOX_HEIGHT}px`,
         display: 'flex',
@@ -47,7 +47,7 @@ const PullTab = ({ baseColor, isHovered, isDone, enable3D = false, animationType
         paddingLeft: '20px',
         paddingRight: '20px',
         zIndex: 2,
-        transition: (isHovered && enable3D && (animationType === 'highlight' || animationType === 'breathing')) ? 'transform 0.15s ease-out' : 'transform 0.3s ease-out',
+        transition: (isHovered && enable3D) ? 'transform 0.15s ease-out' : 'transform 0.3s ease-out',
       }}
     >
       <div

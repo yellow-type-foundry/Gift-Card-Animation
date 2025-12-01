@@ -48,7 +48,7 @@ const ControlBar = ({
 
   const controlBarStyle = useMemo(() => ({
     WebkitOverflowScrolling: 'touch',
-    height: '40px',
+    height: '36px',
     width: '100%'
   }), [])
 
@@ -72,7 +72,7 @@ const ControlBar = ({
 
 
   return (
-    <div className="w-full bg-white rounded-full p-4">
+    <div className="w-full bg-white rounded-full p-3">
       <div
         className="w-full flex items-center justify-between overflow-x-auto md:overflow-visible whitespace-nowrap relative"
         style={controlBarStyle}
@@ -178,7 +178,7 @@ const ControlBar = ({
                         id="layout-select-mobile"
                         value={layoutNumber}
                         onChange={onLayoutChange}
-                        className="h-10 py-2 pl-4 pr-10 rounded-full border border-[#dde2e9] bg-white text-base font-medium text-[#525F7A] focus:outline-none appearance-none cursor-pointer"
+                        className="h-9 py-2 pl-4 pr-10 rounded-full border border-[#dde2e9] bg-white text-sm font-medium text-[#525F7A] focus:outline-none appearance-none cursor-pointer"
                         style={selectStyle}
                       >
                         <option value="1">Layout: Layout 1</option>
@@ -193,7 +193,7 @@ const ControlBar = ({
                   </div>
                     {/* Style selector */}
                     <div className="flex items-center justify-between">
-                      <span className="text-base text-[#525F7A] font-medium">Style</span>
+                      <span className="text-sm text-[#525F7A] font-medium">Style</span>
                       <SegmentedControl
                         options={[
                           { value: '1', label: 'Style 1' },
@@ -209,7 +209,7 @@ const ControlBar = ({
                     <div className="flex items-center justify-between">
                       <button
                         onClick={() => onThemingChange(!useColoredBackground)}
-                        className={`h-10 px-4 rounded-full border border-[#dde2e9] text-base font-medium transition-colors focus:outline-none cursor-pointer ${
+                        className={`h-9 px-4 rounded-full border border-[#dde2e9] text-sm font-medium transition-colors focus:outline-none cursor-pointer ${
                           useColoredBackground 
                             ? 'bg-[#5a3dff] text-white' 
                             : 'bg-white text-[#525F7A] hover:bg-gray-50'
@@ -228,7 +228,7 @@ const ControlBar = ({
                           id="animation-select-mobile"
                           value={animationType}
                           onChange={handleAnimationChange}
-                          className="h-10 py-2 pl-4 pr-10 rounded-full border border-[#dde2e9] bg-white text-base font-medium text-[#525F7A] focus:outline-none appearance-none cursor-pointer"
+                          className="h-9 py-2 pl-4 pr-10 rounded-full border border-[#dde2e9] bg-white text-sm font-medium text-[#525F7A] focus:outline-none appearance-none cursor-pointer"
                         >
                           <option value="highlight">Animation: Shimmer</option>
                           <option value="breathing">Animation: Breathing</option>
@@ -247,7 +247,7 @@ const ControlBar = ({
                     <div className="flex items-center justify-between">
                       <button
                         onClick={() => onEnable3DChange(!enable3D)}
-                        className={`h-10 px-4 rounded-full border border-[#dde2e9] text-base font-medium transition-colors focus:outline-none cursor-pointer ${
+                        className={`h-9 px-4 rounded-full border border-[#dde2e9] text-sm font-medium transition-colors focus:outline-none cursor-pointer ${
                           enable3D 
                             ? 'bg-[#5a3dff] text-white' 
                             : 'bg-white text-[#525F7A] hover:bg-gray-50'
@@ -265,7 +265,7 @@ const ControlBar = ({
                         id="view-select-mobile"
                         value={viewType}
                         onChange={handleViewChange}
-                        className="h-10 py-2 pl-4 pr-10 rounded-full border border-[#dde2e9] bg-white text-base font-medium text-[#525F7A] focus:outline-none appearance-none cursor-pointer"
+                        className="h-9 py-2 pl-4 pr-10 rounded-full border border-[#dde2e9] bg-white text-sm font-medium text-[#525F7A] focus:outline-none appearance-none cursor-pointer"
                       >
                         <option value="mixed">View: Mixed</option>
                         <option value="batch">View: Batch</option>

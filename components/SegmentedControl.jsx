@@ -59,7 +59,7 @@ const SegmentedControl = ({ options, value, onChange, buttonPadding = 'px-5', ac
           key={option.value}
           onClick={() => onChange(option.value)}
           className={`
-            relative z-10 ${buttonPadding} py-2.5 h-10 rounded-full text-base font-medium transition-colors duration-200
+            relative z-10 ${buttonPadding} py-2 h-9 rounded-full text-sm font-medium transition-colors duration-200
             flex items-center justify-center gap-2
             ${value === option.value 
               ? 'text-black' 

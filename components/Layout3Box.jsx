@@ -45,22 +45,22 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
 
   // 3D effect calculations (similar to Envelope2)
   const depthScale = useMemo(() => {
-    if (!isHovered || !enable3D || (animationType !== 'highlight' && animationType !== 'breathing')) return 1
+    if (!isHovered || !enable3D) return 1
     const distanceFactor = -tiltX / 6
     return 1 + distanceFactor * 0.05
-  }, [isHovered, enable3D, animationType, tiltX])
+  }, [isHovered, enable3D, tiltX])
 
   const brightnessShift = useMemo(() => {
-    if (!isHovered || !enable3D || (animationType !== 'highlight' && animationType !== 'breathing')) return 1
+    if (!isHovered || !enable3D) return 1
     const lightFactor = (-tiltX - tiltY) / 12
     return 1 + lightFactor * 0.15
-  }, [isHovered, enable3D, animationType, tiltX, tiltY])
+  }, [isHovered, enable3D, tiltX, tiltY])
 
   const depthBlur = useMemo(() => {
-    if (!isHovered || !enable3D || (animationType !== 'highlight' && animationType !== 'breathing')) return 0
+    if (!isHovered || !enable3D) return 0
     const blurFactor = Math.max(0, tiltX / 6)
     return blurFactor * 2
-  }, [isHovered, enable3D, animationType, tiltX])
+  }, [isHovered, enable3D, tiltX])
 
   // Base color from prop - used for all themed colors
   const baseColor = boxColor
@@ -240,7 +240,7 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
           borderRadius: `${BOX_RADIUS}px`,
           overflow: 'hidden',
           zIndex: 1,
-          ...(isHovered && enable3D && (animationType === 'highlight' || animationType === 'breathing') ? {
+          ...(isHovered && enable3D ? {
             transform: `perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translate(${parallaxX}px, ${parallaxY}px) translate3d(0, -8px, 0) scale(${1 * depthScale})`,
             transformStyle: 'preserve-3d',
             filter: `brightness(${brightnessShift}) blur(${depthBlur}px)`,

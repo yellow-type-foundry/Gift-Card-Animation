@@ -828,6 +828,7 @@ export default function Home() {
             aria-label="View type"
             data-tooltip="Change view type"
             data-view-button
+            data-menu-open={showViewMenu ? 'true' : undefined}
           >
             <svg width="22" height="22" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M0.5,8 c0,0,3-5.5,7.5-5.5S15.5,8,15.5,8s-3,5.5-7.5,5.5S0.5,8,0.5,8z" fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round" strokeMiterlimit="10"/>
@@ -837,7 +838,7 @@ export default function Home() {
           {/* View menu */}
           {showViewMenu && activeTab === 'sent' && (
             <div 
-              className="absolute right-[calc(100%+12px)] top-1/2 -translate-y-1/2 z-50 bg-white rounded-xl border border-[#dde2e9] shadow-lg p-2 min-w-[140px]"
+              className="absolute right-[calc(100%+12px)] top-1/2 -translate-y-1/2 z-[110] bg-white rounded-xl border border-[#dde2e9] shadow-lg p-2 min-w-[140px]"
               data-view-menu
             >
               <button
@@ -938,6 +939,7 @@ export default function Home() {
             aria-label="Toggle animation"
             data-tooltip="Select animation type"
             data-animation-button
+            data-menu-open={showAnimationMenu ? 'true' : undefined}
           >
             <svg width="22" height="22" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
               <polygon points=".5 13.5 2.5 15.5 11.487 6.487 9.513 4.487 .5 13.5" fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
@@ -950,7 +952,7 @@ export default function Home() {
           {/* Animation menu */}
           {showAnimationMenu && activeTab === 'sent' && ((layoutNumber === '1' && style === '2') || (layoutNumber === '2' && layout2BoxType === '2')) && (
             <div 
-              className="absolute right-[calc(100%+12px)] top-1/2 -translate-y-1/2 z-50 bg-white rounded-xl border border-[#dde2e9] shadow-lg p-2 min-w-[140px]"
+              className="absolute right-[calc(100%+12px)] top-1/2 -translate-y-1/2 z-[110] bg-white rounded-xl border border-[#dde2e9] shadow-lg p-2 min-w-[140px]"
               data-animation-menu
             >
                 <button

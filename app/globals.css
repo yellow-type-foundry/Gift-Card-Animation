@@ -603,3 +603,8 @@ body.share-modal-open [data-name="Gift Card"]:not([data-share-modal]) {
 .styling-bar-tooltip:hover::after {
   opacity: 1;
 }
+
+/* Hide tooltip when menu is open */
+.styling-bar-tooltip[data-menu-open]::after {
+  opacity: 0 !important;
+}
