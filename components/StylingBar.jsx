@@ -34,13 +34,12 @@ const StylingBar = ({
           }`}
         >
           <button
-            onClick={() => !isSingleView && onThemingChange(!useColoredBackground)}
-            disabled={isSingleView}
-            className={`h-10 px-4 rounded-full border border-[#dde2e9] text-base font-medium transition-colors focus:outline-none whitespace-nowrap ${
+            onClick={() => onThemingChange(!useColoredBackground)}
+            className={`h-10 px-4 rounded-full border border-[#dde2e9] text-base font-medium transition-colors focus:outline-none whitespace-nowrap cursor-pointer ${
               useColoredBackground 
                 ? 'bg-[#5a3dff] text-white' 
                 : 'bg-white text-[#525F7A] hover:bg-gray-50'
-            } ${isSingleView ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'}`}
+            }`}
             aria-label="Toggle theming"
           >
             Theming

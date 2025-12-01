@@ -302,7 +302,18 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
       </div>
 
       {/* Pull Tab */}
-      <PullTab baseColor={baseColor} isHovered={isHovered} isDone={isDone} />
+      <PullTab 
+        baseColor={baseColor} 
+        isHovered={isHovered} 
+        isDone={isDone}
+        enable3D={enable3D}
+        animationType={animationType}
+        tiltX={tiltX}
+        tiltY={tiltY}
+        parallaxX={parallaxX}
+        parallaxY={parallaxY}
+        depthScale={depthScale}
+      />
 
       <ShadowContainer
         vibrantShadowColor={vibrantShadowColor}
