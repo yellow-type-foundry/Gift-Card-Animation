@@ -23,6 +23,12 @@ import ShadingLayers from '@/components/layout3/ShadingLayers'
  * @param {string} className - Additional CSS classes for the root container
  * @param {object} style - Additional inline styles for the root container
  * @param {boolean} isHovered - External hover state (if provided, uses this instead of internal state)
+ * @param {boolean} enable3D - Enable 3D tilt effect
+ * @param {string} animationType - Animation type ('highlight', 'breathing', or 'none')
+ * @param {number} tiltX - Tilt X angle for 3D effect
+ * @param {number} tiltY - Tilt Y angle for 3D effect
+ * @param {number} parallaxX - Parallax offset X for tilt effect
+ * @param {number} parallaxY - Parallax offset Y for tilt effect
  */
 const Envelope3 = ({ 
   boxColor = '#1987C7', 
@@ -32,7 +38,13 @@ const Envelope3 = ({
   className = '', 
   style = {}, 
   isHovered: externalIsHovered,
-  hideProgressIndicator = false
+  hideProgressIndicator = false,
+  enable3D = false,
+  animationType = 'none',
+  tiltX = 0,
+  tiltY = 0,
+  parallaxX = 0,
+  parallaxY = 0
 }) => {
   const [lightCornerSvg, setLightCornerSvg] = useState(null)
   const [internalIsHovered, setInternalIsHovered] = useState(false)
@@ -45,6 +57,25 @@ const Envelope3 = ({
 
   // Check if progress is done (DONE status)
   const isDone = useMemo(() => progress.current >= progress.total, [progress.current, progress.total])
+
+  // 3D effect calculations (similar to Envelope2)
+  const depthScale = useMemo(() => {
+    if (!isHovered || !enable3D || (animationType !== 'highlight' && animationType !== 'breathing')) return 1
+    const distanceFactor = -tiltX / 6
+    return 1 + distanceFactor * 0.05
+  }, [isHovered, enable3D, animationType, tiltX])
+
+  const brightnessShift = useMemo(() => {
+    if (!isHovered || !enable3D || (animationType !== 'highlight' && animationType !== 'breathing')) return 1
+    const lightFactor = (-tiltX - tiltY) / 12
+    return 1 + lightFactor * 0.15
+  }, [isHovered, enable3D, animationType, tiltX, tiltY])
+
+  const depthBlur = useMemo(() => {
+    if (!isHovered || !enable3D || (animationType !== 'highlight' && animationType !== 'breathing')) return 0
+    const blurFactor = Math.max(0, tiltX / 6)
+    return blurFactor * 2
+  }, [isHovered, enable3D, animationType, tiltX])
 
   // Extract scale from style prop if present
   const scaleValue = useMemo(() => {
@@ -227,8 +258,16 @@ const Envelope3 = ({
           borderRadius: `${BOX_RADIUS}px`,
           overflow: 'hidden',
           zIndex: 1,
-          transform: isHovered ? 'translate3d(0, -8px, 0)' : 'translate3d(0, 0, 0)',
-          transition: 'transform 0.3s ease-out',
+          ...(isHovered && enable3D && (animationType === 'highlight' || animationType === 'breathing') ? {
+            transform: `perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translate(${parallaxX}px, ${parallaxY}px) translate3d(0, -8px, 0) scale(${1 * depthScale})`,
+            transformStyle: 'preserve-3d',
+            filter: `brightness(${brightnessShift}) blur(${depthBlur}px)`,
+            transition: 'transform 0.15s ease-out, filter 0.15s ease-out'
+          } : {
+            transform: isHovered ? 'translate3d(0, -8px, 0)' : 'translate3d(0, 0, 0)',
+            filter: 'none',
+            transition: 'transform 0.3s ease-out'
+          }),
           backgroundColor: 'rgba(198, 231, 250, 0.4)',
           backdropFilter: 'blur(30px)',
           WebkitBackdropFilter: 'blur(30px)',

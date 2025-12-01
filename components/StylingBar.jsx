@@ -21,7 +21,8 @@ const StylingBar = ({
 
   const showTheming = layoutNumber === '1'
   const showAnimation = (layoutNumber === '2' || (layoutNumber === '1' && style === '2')) && !(layoutNumber === '2' && layout2BoxType === '3') && !(layoutNumber === '1' && style === '3')
-  const show3D = (layoutNumber === '2' || (layoutNumber === '1' && style === '2')) && !(layoutNumber === '2' && layout2BoxType === '3') && !(layoutNumber === '1' && style === '3')
+  // Show 3D toggle for Box1/Envelope1, Box2/Envelope2, and Box3/Envelope3
+  const show3D = (layoutNumber === '2' || (layoutNumber === '1' && (style === '1' || style === '2' || style === '3')) || (layoutNumber === '2' && layout2BoxType === '3'))
 
   return (
     <div className="w-full bg-white rounded-full p-4">
@@ -76,7 +77,7 @@ const StylingBar = ({
         {/* 3D toggle */}
         {show3D && (
           <div className="flex items-center gap-2 shrink-0">
-            <span className="text-base text-[#525F7A] font-medium">3D Effect</span>
+            <span className="text-base text-[#525F7A] font-medium">3D</span>
             <button
               onClick={() => onEnable3DChange(!enable3D)}
               className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${

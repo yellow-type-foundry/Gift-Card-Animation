@@ -265,10 +265,10 @@ const ControlBar = ({
                       </div>
                     </div>
                   )}
-                  {/* 3D toggle - only show for layout 2 (hide when Box 3 is selected) */}
-                  {layoutNumber === '2' && layout2BoxType !== '3' && (
+                  {/* 3D toggle - show for layout 2 (including Box 3) and layout 1 style 1/2/3 */}
+                  {((layoutNumber === '2') || (layoutNumber === '1' && (style === '1' || style === '2' || style === '3'))) && (
                     <div className="flex items-center justify-between">
-                      <span className="text-base text-[#525F7A] font-medium">3D Effect</span>
+                      <span className="text-base text-[#525F7A] font-medium">3D</span>
                       <button
                         onClick={() => onEnable3DChange(!enable3D)}
                         className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${

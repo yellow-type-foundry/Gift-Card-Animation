@@ -211,11 +211,13 @@ const SentCard = ({
   // Generate stable IDs for SVG elements
   const ids = useComponentIds(boxImage, from)
   
-  // Mouse tracking for tilt effect (only for Single 2 and Batch 2 when 3D is enabled)
+  // Mouse tracking for tilt effect (for Single 2, Batch 2, Box3, Envelope3, Box1, and Envelope1 when 3D is enabled)
   const [mousePosition, setMousePosition] = useState({ x: 0.5, y: 0.5 })
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 }) // Pixel position for specular highlight
   const isSingle2OrBatch2 = (hideEnvelope && showGiftBoxWhenHidden) || (hideEnvelope && !showGiftBoxWhenHidden) // Single 2 or Batch 2
-  const shouldApplyTilt = isSingle2OrBatch2 && enable3D && (animationType === 'highlight' || animationType === 'breathing') // Only apply tilt when 3D is enabled
+  const isBox3OrEnvelope3 = (layout2BoxType === '3' || layout1Style === '3') // Box3 or Envelope3
+  const isBox1OrEnvelope1 = (useBox1 || layout2BoxType === '1') || (hideEnvelope && !showGiftBoxWhenHidden && layout2BoxType === '1') || (layout1Style === '1' && !hideEnvelope) // Box1 or Envelope1 (includes Layout 1 Style 1)
+  const shouldApplyTilt = (isSingle2OrBatch2 || isBox3OrEnvelope3 || isBox1OrEnvelope1) && enable3D && (animationType === 'highlight' || animationType === 'breathing') // Only apply tilt when 3D is enabled
   
   // Handle mouse move for tilt effect
   const handleMouseMove = useCallback((e) => {
@@ -997,6 +999,25 @@ const SentCard = ({
     }
   }, [layout1Style, layout1Box3Scale])
 
+  // 3D effect calculations for Box1/Envelope1 (similar to Envelope2)
+  const box1DepthScale = useMemo(() => {
+    if (!isHovered || !enable3D || (animationType !== 'highlight' && animationType !== 'breathing') || !isBox1OrEnvelope1) return 1
+    const distanceFactor = -tiltX / 6
+    return 1 + distanceFactor * 0.05
+  }, [isHovered, enable3D, animationType, tiltX, isBox1OrEnvelope1])
+
+  const box1BrightnessShift = useMemo(() => {
+    if (!isHovered || !enable3D || (animationType !== 'highlight' && animationType !== 'breathing') || !isBox1OrEnvelope1) return 1
+    const lightFactor = (-tiltX - tiltY) / 12
+    return 1 + lightFactor * 0.15
+  }, [isHovered, enable3D, animationType, tiltX, tiltY, isBox1OrEnvelope1])
+
+  const box1DepthBlur = useMemo(() => {
+    if (!isHovered || !enable3D || (animationType !== 'highlight' && animationType !== 'breathing') || !isBox1OrEnvelope1) return 0
+    const blurFactor = Math.max(0, tiltX / 6)
+    return blurFactor * 2
+  }, [isHovered, enable3D, animationType, tiltX, isBox1OrEnvelope1])
+
   const box1WrapperStyle = useMemo(() => {
     // NO HARDCODED VALUES - All values must come from config
     if (box1Width === undefined || box1Height === undefined) {
@@ -1009,7 +1030,7 @@ const SentCard = ({
     }
     const width = `${box1Width}px`
     const height = `${box1Height}px`
-    return {
+    const baseStyle = {
       position: 'relative',
       width: width,
       height: height,
@@ -1020,7 +1041,21 @@ const SentCard = ({
       pointerEvents: 'none',
       flexShrink: 0,
     }
-  }, [box1Width, box1Height])
+    
+    // Apply 3D transforms when enabled
+    if (isHovered && enable3D && (animationType === 'highlight' || animationType === 'breathing') && isBox1OrEnvelope1) {
+      return {
+        ...baseStyle,
+        transform: `perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translate(${parallaxX}px, ${parallaxY}px) scale(${box1DepthScale})`,
+        transformStyle: 'preserve-3d',
+        filter: `brightness(${box1BrightnessShift}) blur(${box1DepthBlur}px)`,
+        transition: 'transform 0.15s ease-out, filter 0.15s ease-out',
+        transformOrigin: 'center center',
+      }
+    }
+    
+    return baseStyle
+  }, [box1Width, box1Height, isHovered, enable3D, animationType, tiltX, tiltY, parallaxX, parallaxY, box1DepthScale, box1BrightnessShift, box1DepthBlur, isBox1OrEnvelope1])
 
   const box1ImageStyle = useMemo(() => ({
     objectFit: 'contain'
@@ -1029,8 +1064,11 @@ const SentCard = ({
   const envelopeBaseWrapperStyle = useMemo(() => ({
     position: 'relative',
     width: '100%',
-    height: '100%'
-  }), [])
+    height: '100%',
+    ...(isHovered && enable3D && (animationType === 'highlight' || animationType === 'breathing') && isBox1OrEnvelope1 ? {
+      transformStyle: 'preserve-3d',
+    } : {})
+  }), [isHovered, enable3D, animationType, isBox1OrEnvelope1])
 
   return (
     <div
@@ -1467,6 +1505,12 @@ const SentCard = ({
                     progress={validatedProgress}
                     isHovered={isHovered}
                     hideProgressIndicator={layout1Style === '3'}
+                    enable3D={enable3D}
+                    animationType={animationType}
+                    tiltX={tiltX}
+                    tiltY={tiltY}
+                    parallaxX={parallaxX}
+                    parallaxY={parallaxY}
                   />
                 ) : (
                   // Box2 (default)
@@ -1545,6 +1589,12 @@ const SentCard = ({
                       isHovered={isHovered}
                       hideProgressIndicator={layout1Style === '3'}
                       style={envelope3ScaleStyle}
+                      enable3D={enable3D}
+                      animationType={animationType}
+                      tiltX={tiltX}
+                      tiltY={tiltY}
+                      parallaxX={parallaxX}
+                      parallaxY={parallaxY}
                     />
                   </div>
                 ) : layout2BoxType === '1' ? (
@@ -1554,7 +1604,15 @@ const SentCard = ({
                     position: 'absolute',
                     left: '50%',
                     top: '50%',
-                    transform: `translate(-50%, -50%) translateY(${envelope1OffsetY !== undefined ? envelope1OffsetY : (envelope1OffsetYValue || 0)}px) scale(${envelope1Scale !== undefined ? envelope1Scale : (envelope1ScaleValue || 1)})`,
+                    ...(isHovered && enable3D && (animationType === 'highlight' || animationType === 'breathing') && isBox1OrEnvelope1 ? {
+                      transform: `translate(-50%, -50%) translateY(${envelope1OffsetY !== undefined ? envelope1OffsetY : (envelope1OffsetYValue || 0)}px) scale(${envelope1Scale !== undefined ? envelope1Scale : (envelope1ScaleValue || 1)}) perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translate(${parallaxX}px, ${parallaxY}px) scale(${box1DepthScale})`,
+                      transformStyle: 'preserve-3d',
+                      filter: `brightness(${box1BrightnessShift}) blur(${box1DepthBlur}px)`,
+                      transition: 'transform 0.15s ease-out, filter 0.15s ease-out',
+                    } : {
+                      transform: `translate(-50%, -50%) translateY(${envelope1OffsetY !== undefined ? envelope1OffsetY : (envelope1OffsetYValue || 0)}px) scale(${envelope1Scale !== undefined ? envelope1Scale : (envelope1ScaleValue || 1)})`,
+                      transition: 'transform 0.3s ease-out',
+                    }),
                     transformOrigin: 'center center',
                     width: envelope1Width !== undefined ? `${envelope1Width}px` : (envelopeWidth !== undefined ? `${envelopeWidth}px` : '300px'), // Default fallback, but config should always define this
                     height: envelope1Height !== undefined ? `${envelope1Height}px` : (envelopeHeight !== undefined ? `${envelopeHeight}px` : '384px'), // Default fallback, but config should always define this
@@ -1790,6 +1848,12 @@ const SentCard = ({
                       isHovered={isHovered}
                       hideProgressIndicator={layout1Style === '3'}
                       style={envelope3ScaleStyle}
+                      enable3D={enable3D}
+                      animationType={animationType}
+                      tiltX={tiltX}
+                      tiltY={tiltY}
+                      parallaxX={parallaxX}
+                      parallaxY={parallaxY}
                     />
                   </div>
                 ) : (
@@ -1850,18 +1914,48 @@ const SentCard = ({
                           //         = 50% - 147.75px + user offset
                           const envelopeBaseCenter = 147.75 // Envelope base center from wrapper's left edge
                           const userOffsetX = envelopeGroup?.offsetX ?? 0
-                          return {
+                          const basePosition = {
                             left: `calc(50% - ${envelopeBaseCenter}px + ${userOffsetX}px)`,
                             top: envelopeGroup?.offsetY || 0,
                           }
+                          // Apply 3D transforms when enabled
+                          if (isHovered && enable3D && (animationType === 'highlight' || animationType === 'breathing') && isBox1OrEnvelope1) {
+                            return {
+                              ...basePosition,
+                              transform: `perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translate(${parallaxX}px, ${parallaxY}px) scale(${box1DepthScale})`,
+                              transformStyle: 'preserve-3d',
+                              filter: `brightness(${box1BrightnessShift}) blur(${box1DepthBlur}px)`,
+                              transition: 'transform 0.15s ease-out, filter 0.15s ease-out',
+                              willChange: 'transform, filter',
+                            }
+                          }
+                          return basePosition
                         })()
-                      : {
-                          left: 0,
-                          top: 0,
-                        }
+                      : (() => {
+                          const basePosition = {
+                            left: 0,
+                            top: 0,
+                          }
+                          // Apply 3D transforms when enabled
+                          if (isHovered && enable3D && (animationType === 'highlight' || animationType === 'breathing') && isBox1OrEnvelope1) {
+                            return {
+                              ...basePosition,
+                              transform: `perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translate(${parallaxX}px, ${parallaxY}px) scale(${box1DepthScale})`,
+                              transformStyle: 'preserve-3d',
+                              filter: `brightness(${box1BrightnessShift}) blur(${box1DepthBlur}px)`,
+                              transition: 'transform 0.15s ease-out, filter 0.15s ease-out',
+                              willChange: 'transform, filter',
+                            }
+                          }
+                          return basePosition
+                        })()
                     ),
                     width: '100%',
-                    height: '100%'
+                    height: '100%',
+                    ...(isHovered && enable3D && (animationType === 'highlight' || animationType === 'breathing') && isBox1OrEnvelope1 ? {
+                      transformStyle: 'preserve-3d',
+                      willChange: 'transform, filter',
+                    } : {})
                   }}
                 >
                   {/* Base (envelope base) - positioned relative to container */}
