@@ -674,7 +674,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-[#f0f1f5] flex flex-col items-start overflow-visible">
       <div 
-        className="w-full max-w-[1440px] mx-auto px-0 md:px-[80px] lg:px-[240px] pt-5 md:pt-10 pb-10 flex-1"
+        className="w-full max-w-[1440px] mx-auto px-0 md:px-[80px] lg:px-[240px] pt-5 md:pt-10 pb-[200px] flex-1"
       >
         {/* Content */}
         <CardGrid
@@ -697,59 +697,62 @@ export default function Home() {
             layout2BoxType={layout2BoxType}
           />
       </div>
-      {/* StylingBar at bottom */}
-      <div className="w-full max-w-[1440px] mx-auto px-0 md:px-[80px] lg:px-[240px] pb-4">
-        <StylingBar
-          isSentTab={activeTab === 'sent'}
-          useColoredBackground={useColoredBackground}
-          onThemingChange={setUseColoredBackground}
-          animationType={animationType}
-          onAnimationTypeChange={setAnimationType}
-          enable3D={enable3D}
-          onEnable3DChange={setEnable3D}
-          layoutNumber={layoutNumber}
-          viewType={viewType}
-          onViewChange={(value) => {
-            setViewType(value)
-            if (value === 'mixed') {
-              setMixSeed(Date.now())
-            }
-          }}
-          isSingleView={isSingleView}
-          style={style}
-          layout2BoxType={layout2BoxType}
-        />
-      </div>
-      {/* ControlBar at bottom */}
-      <div className="w-full max-w-[1440px] mx-auto px-0 md:px-[80px] lg:px-[240px] pb-6">
-        <ControlBar
-          activeTab={activeTab}
-          onTabChange={handleTabChange}
-          onShuffle={handleShuffle}
-          isSentTab={activeTab === 'sent'}
-          useColoredBackground={useColoredBackground}
-          onThemingChange={setUseColoredBackground}
-          animationType={animationType}
-          onAnimationTypeChange={setAnimationType}
-          enable3D={enable3D}
-          onEnable3DChange={setEnable3D}
-          layoutNumber={layoutNumber}
-          onLayoutChange={handleLayoutChange}
-          viewType={viewType}
-          onViewChange={(value) => {
-            setViewType(value)
-            if (value === 'mixed') {
-              setMixSeed(Date.now())
-            }
-          }}
-          isSingleView={isSingleView}
-          showSettingsMenu={showSettingsMenu}
-          onSettingsMenuToggle={setShowSettingsMenu}
-          style={style}
-          onStyleChange={setStyle}
-          layout2BoxType={layout2BoxType}
-          onLayout2BoxTypeChange={setLayout2BoxType}
-        />
+      {/* StylingBar and ControlBar at bottom */}
+      <div className="fixed bottom-0 left-0 right-0 z-50">
+        <div className="w-full max-w-[1440px] mx-auto px-0 md:px-[80px] lg:px-[240px] pb-6 pt-4">
+          {/* StylingBar */}
+          <div className="mb-4">
+            <StylingBar
+              isSentTab={activeTab === 'sent'}
+              useColoredBackground={useColoredBackground}
+              onThemingChange={setUseColoredBackground}
+              animationType={animationType}
+              onAnimationTypeChange={setAnimationType}
+              enable3D={enable3D}
+              onEnable3DChange={setEnable3D}
+              layoutNumber={layoutNumber}
+              viewType={viewType}
+              onViewChange={(value) => {
+                setViewType(value)
+                if (value === 'mixed') {
+                  setMixSeed(Date.now())
+                }
+              }}
+              isSingleView={isSingleView}
+              style={style}
+              layout2BoxType={layout2BoxType}
+            />
+          </div>
+          {/* ControlBar */}
+          <ControlBar
+            activeTab={activeTab}
+            onTabChange={handleTabChange}
+            onShuffle={handleShuffle}
+            isSentTab={activeTab === 'sent'}
+            useColoredBackground={useColoredBackground}
+            onThemingChange={setUseColoredBackground}
+            animationType={animationType}
+            onAnimationTypeChange={setAnimationType}
+            enable3D={enable3D}
+            onEnable3DChange={setEnable3D}
+            layoutNumber={layoutNumber}
+            onLayoutChange={handleLayoutChange}
+            viewType={viewType}
+            onViewChange={(value) => {
+              setViewType(value)
+              if (value === 'mixed') {
+                setMixSeed(Date.now())
+              }
+            }}
+            isSingleView={isSingleView}
+            showSettingsMenu={showSettingsMenu}
+            onSettingsMenuToggle={setShowSettingsMenu}
+            style={style}
+            onStyleChange={setStyle}
+            layout2BoxType={layout2BoxType}
+            onLayout2BoxTypeChange={setLayout2BoxType}
+          />
+        </div>
       </div>
     </div>
   )
