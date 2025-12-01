@@ -109,50 +109,21 @@ const ControlBar = ({
 
   return (
     <div
-      className="w-full grid grid-cols-2 md:grid-cols-3 items-center gap-4 mb-6 overflow-x-auto md:overflow-visible whitespace-nowrap px-5 md:p-0"
+      className="w-full flex items-center justify-between mb-6 overflow-x-auto md:overflow-visible whitespace-nowrap px-5 md:px-0"
       style={controlBarStyle}
     >
-      {/* Toggle - Left side */}
+      {/* Tabs - Left side */}
       <div className="flex items-center gap-2 shrink-0">
-        <div className="flex items-center gap-2">
-          <span className={`text-sm transition-colors ${activeTab === 'gift' ? 'text-[#525F7A] font-medium' : 'text-[#94a3b8]'}`}>
-            Received
-          </span>
-          <button
-            onClick={() => onTabChange(activeTab === 'gift' ? 'sent' : 'gift')}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
-              activeTab === 'sent' ? 'bg-[#5a3dff]' : 'bg-gray-300'
-            } cursor-pointer`}
-            role="switch"
-            aria-checked={activeTab === 'sent'}
-            aria-label="Toggle between Received and Sent"
-          >
-            <span
-              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                activeTab === 'sent' ? 'translate-x-6' : 'translate-x-1'
-              }`}
-            />
-          </button>
-          <span className={`text-sm transition-colors ${activeTab === 'sent' ? 'text-[#525F7A] font-medium' : 'text-[#94a3b8]'}`}>
-            Sent
-          </span>
-        </div>
-      </div>
-      
-      {/* Layout Tabs - Center (only show for Gift Sent tab, hidden on mobile) */}
-      <div className="hidden md:flex items-center justify-center gap-2 shrink-0">
-        {isSentTab && (
-          <>
-            {[1, 2].map((num) => (
-              <TabButton
-                key={num}
-                label={`Layout ${num}`}
-                isActive={layoutNumber === String(num)}
-                onClick={() => onLayoutChange({ target: { value: String(num) } })}
-              />
-            ))}
-          </>
-        )}
+        <TabButton
+          label="Received"
+          isActive={activeTab === 'gift'}
+          onClick={() => onTabChange('gift')}
+        />
+        <TabButton
+          label="Sent"
+          isActive={activeTab === 'sent'}
+          onClick={() => onTabChange('sent')}
+        />
       </div>
       
       {/* Controls - Right side */}
@@ -203,6 +174,34 @@ const ControlBar = ({
                   onClick={(e) => e.stopPropagation()}
                 >
                   <div className="space-y-4">
+                    {/* Layout selector - Desktop */}
+                    {isSentTab && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-[#525F7A]">Layout</span>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => onLayoutChange({ target: { value: '1' } })}
+                            className={`px-3 py-1 rounded-[8px] text-xs transition-colors ${
+                              layoutNumber === '1' 
+                                ? 'bg-[#5a3dff] text-white' 
+                                : 'bg-gray-100 text-[#525F7A] hover:bg-gray-200'
+                            }`}
+                          >
+                            1
+                          </button>
+                          <button
+                            onClick={() => onLayoutChange({ target: { value: '2' } })}
+                            className={`px-3 py-1 rounded-[8px] text-xs transition-colors ${
+                              layoutNumber === '2' 
+                                ? 'bg-[#5a3dff] text-white' 
+                                : 'bg-gray-100 text-[#525F7A] hover:bg-gray-200'
+                            }`}
+                          >
+                            2
+                          </button>
+                        </div>
+                      </div>
+                    )}
                     {/* Box selector - only show for Layout 2 */}
                       {layoutNumber === '2' && (
                         <div className="flex items-center justify-between">
@@ -385,7 +384,6 @@ const ControlBar = ({
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M12 2L14 4L12 6M2 4H14M4 10L2 12L4 14M14 12H2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
-          <span className="hidden md:inline">Shuffle</span>
         </button>
       </div>
       

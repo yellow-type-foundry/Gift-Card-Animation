@@ -4,13 +4,24 @@ import { ENVELOPE_DIMENSIONS } from '@/constants/sentCardConstants'
 /**
  * Envelope1 SVG component
  */
-export default function Envelope1({ ids, baseTintColor }) {
+export default function Envelope1({ ids, baseTintColor, centered = false, containerOffset = 0 }) {
   return (
     <div
       className="absolute"
       style={{
-        left: ENVELOPE_DIMENSIONS.base.left,
-        top: ENVELOPE_DIMENSIONS.base.top,
+        ...(centered 
+          ? { 
+              left: '50%', 
+              transform: 'translateX(-50%)',
+              top: ENVELOPE_DIMENSIONS.base.top,
+            }
+          : {
+              left: containerOffset > 0
+                ? `${parseFloat(ENVELOPE_DIMENSIONS.base.left.replace('px', '')) - containerOffset}px`
+                : ENVELOPE_DIMENSIONS.base.left,
+              top: ENVELOPE_DIMENSIONS.base.top,
+            }
+        ),
         width: ENVELOPE_DIMENSIONS.base.width,
         height: ENVELOPE_DIMENSIONS.base.height,
         zIndex: 1,

@@ -1014,7 +1014,7 @@ const SentCard = ({
       onMouseEnter={handleHoverEnter}
       onMouseMove={shouldApplyTilt ? handleMouseMove : undefined}
       onMouseLeave={shouldApplyTilt ? handleMouseLeaveWithReset : handleHoverLeave}
-      className="border border-[#dde2e9] border-solid relative rounded-[24px] w-full md:w-[300px] overflow-hidden"
+      className="border border-[#dde2e9] border-solid relative rounded-[24px] w-full overflow-hidden"
       style={cardContainerStyle}
       data-name="Gift Card"
       data-animation-type={animationType}
@@ -1666,8 +1666,22 @@ const SentCard = ({
                     <div
                       className="absolute"
                       style={{
-                        left: ENVELOPE_DIMENSIONS.imageBadge.left,
-                        top: ENVELOPE_DIMENSIONS.imageBadge.top,
+                        ...(layout1Style === '1'
+                          ? {
+                              // Center the Image Badge: envelope base is centered at 50%, 
+                              // Image Badge was at left: 65px (15px offset from envelope base left: 50px)
+                              // Envelope base width: 195.5px, Image Badge width: 165px
+                              // To center Image Badge relative to centered envelope: 50% + (65 - 50 - (195.5 - 165)/2)px
+                              // Simplified: 50% + (15 - 15.25)px = 50% - 0.25px
+                              left: '50%',
+                              transform: 'translateX(calc(-50% - 0px))',
+                              top: ENVELOPE_DIMENSIONS.imageBadge.top,
+                            }
+                          : {
+                              left: ENVELOPE_DIMENSIONS.imageBadge.left,
+                              top: ENVELOPE_DIMENSIONS.imageBadge.top,
+                            }
+                        ),
                         width: ENVELOPE_DIMENSIONS.imageBadge.width,
                         height: ENVELOPE_DIMENSIONS.imageBadge.height,
                         borderRadius: '4px',
@@ -1794,9 +1808,33 @@ const SentCard = ({
               </div>
             ) : (
               <>
-                {/* Base (envelope base) - moved inside Envelope so it moves together */}
-                <div style={envelopeBaseWrapperStyle}>
-                  <Envelope1 ids={ids} baseTintColor={baseTintColor} />
+                {/* Envelope1 Container - wraps all envelope elements to move together when centered */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    ...(layout1Style === '1'
+                      ? {
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          top: 0,
+                        }
+                      : {
+                          left: 0,
+                          top: 0,
+                        }
+                    ),
+                    width: '100%',
+                    height: '100%'
+                  }}
+                >
+                  {/* Base (envelope base) - positioned relative to container */}
+                  <div style={envelopeBaseWrapperStyle}>
+                    <Envelope1 
+                      ids={ids} 
+                      baseTintColor={baseTintColor} 
+                      centered={false}
+                      containerOffset={layout1Style === '1' ? parseFloat(ENVELOPE_DIMENSIONS.base.left.replace('px', '')) : 0}
+                    />
               {overlayProgressOnEnvelope && !progressOutsideEnvelope && (
                 <div
                   className="absolute"
@@ -1865,21 +1903,23 @@ const SentCard = ({
                   </div>
                 </div>
               )}
-            </div>
-            {/* Rectangle 1790 (card shape container) - moved inside Envelope */}
-            <CardShape ids={ids} base2TintColor={base2TintColor} />
-            {/* Image Container (hosts image) */}
-            <div
-              className="absolute"
-              style={{
-                left: ENVELOPE_DIMENSIONS.imageContainer.left,
-                top: ENVELOPE_DIMENSIONS.imageContainer.top,
-                width: ENVELOPE_DIMENSIONS.imageContainer.width,
-                height: ENVELOPE_DIMENSIONS.imageContainer.height,
-                zIndex: 2
-              }}
-              data-name="Image Container"
-            >
+                  </div>
+                  {/* Rectangle 1790 (card shape container) - positioned relative to envelope container */}
+                  <CardShape ids={ids} base2TintColor={base2TintColor} centered={false} containerOffset={layout1Style === '1' ? parseFloat(ENVELOPE_DIMENSIONS.base.left.replace('px', '')) : 0} />
+                  {/* Image Container (hosts image) - positioned relative to envelope container */}
+                  <div
+                    className="absolute"
+                    style={{
+                      left: layout1Style === '1' 
+                        ? `${parseFloat(ENVELOPE_DIMENSIONS.imageContainer.left.replace('px', '')) - parseFloat(ENVELOPE_DIMENSIONS.base.left.replace('px', ''))}px`
+                        : ENVELOPE_DIMENSIONS.imageContainer.left,
+                      top: ENVELOPE_DIMENSIONS.imageContainer.top,
+                      width: ENVELOPE_DIMENSIONS.imageContainer.width,
+                      height: ENVELOPE_DIMENSIONS.imageContainer.height,
+                      zIndex: 2
+                    }}
+                    data-name="Image Container"
+                  >
               <svg
                 preserveAspectRatio="none"
                 width="100%"
@@ -1994,19 +2034,21 @@ const SentCard = ({
               </svg>
             </div>
             
-            {/* Image Container Fade (duplicate shape, black gradient fill) */}
-            <div
-              className="absolute"
-              style={{
-                left: ENVELOPE_DIMENSIONS.imageFade.left,
-                top: ENVELOPE_DIMENSIONS.imageFade.top,
-                width: ENVELOPE_DIMENSIONS.imageFade.width,
-                height: ENVELOPE_DIMENSIONS.imageFade.height,
-                zIndex: 99,
-                pointerEvents: 'none'
-              }}
-              data-name="Image Container Fade"
-            >
+                    {/* Image Container Fade (duplicate shape, black gradient fill) - positioned relative to envelope container */}
+                    <div
+                      className="absolute"
+                      style={{
+                        left: layout1Style === '1'
+                          ? `${parseFloat(ENVELOPE_DIMENSIONS.imageFade.left.replace('px', '')) - parseFloat(ENVELOPE_DIMENSIONS.base.left.replace('px', ''))}px`
+                          : ENVELOPE_DIMENSIONS.imageFade.left,
+                        top: ENVELOPE_DIMENSIONS.imageFade.top,
+                        width: ENVELOPE_DIMENSIONS.imageFade.width,
+                        height: ENVELOPE_DIMENSIONS.imageFade.height,
+                        zIndex: 99,
+                        pointerEvents: 'none'
+                      }}
+                      data-name="Image Container Fade"
+                    >
               <svg
                 preserveAspectRatio="none"
                 width="100%"
@@ -2049,20 +2091,22 @@ const SentCard = ({
                 </defs>
               </svg>
             </div>
-            {/* Image Badge - positioned above fade overlay */}
-            <div
-              className="absolute"
-              style={{
-                left: ENVELOPE_DIMENSIONS.imageBadge.left,
-                top: ENVELOPE_DIMENSIONS.imageBadge.top,
-                width: ENVELOPE_DIMENSIONS.imageBadge.width,
-                height: ENVELOPE_DIMENSIONS.imageBadge.height,
-                borderRadius: '4px',
-                overflow: 'hidden',
-                zIndex: 100,
-                pointerEvents: 'none'
-              }}
-            >
+                  {/* Image Badge - positioned above fade overlay - positioned relative to envelope container */}
+                  <div
+                    className="absolute"
+                    style={{
+                      left: layout1Style === '1'
+                        ? `${parseFloat(ENVELOPE_DIMENSIONS.imageBadge.left.replace('px', '')) - parseFloat(ENVELOPE_DIMENSIONS.base.left.replace('px', ''))}px`
+                        : ENVELOPE_DIMENSIONS.imageBadge.left,
+                      top: ENVELOPE_DIMENSIONS.imageBadge.top,
+                      width: ENVELOPE_DIMENSIONS.imageBadge.width,
+                      height: ENVELOPE_DIMENSIONS.imageBadge.height,
+                      borderRadius: '4px',
+                      overflow: 'hidden',
+                      zIndex: 100,
+                      pointerEvents: 'none'
+                    }}
+                  >
               {/* Cover image under gradient */}
               <Image
                 src={boxImage}
@@ -2080,7 +2124,8 @@ const SentCard = ({
                     'linear-gradient(to bottom, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 20%)',
                 }}
               />
-            </div>
+                  </div>
+                </div>
               </>
             )}
           </div>

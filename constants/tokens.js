@@ -33,7 +33,7 @@ export const TOKENS = {
     lg: '12px',
     xl: '16px',
     xxl: '24px',
-    cardPadding: '16px', // p-4
+    cardPadding: '20px', // p-5
     cardGap: '16px',
     headerGap: '8px',
     giftBoxGap: '10px',

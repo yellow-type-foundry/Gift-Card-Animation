@@ -4,13 +4,24 @@ import { ENVELOPE_DIMENSIONS } from '@/constants/sentCardConstants'
 /**
  * Card Shape (hexagon) SVG component
  */
-export default function CardShape({ ids, base2TintColor }) {
+export default function CardShape({ ids, base2TintColor, centered = false, containerOffset = 0 }) {
   return (
     <div
       className="absolute"
       style={{
-        left: ENVELOPE_DIMENSIONS.cardShape.left,
-        top: ENVELOPE_DIMENSIONS.cardShape.top,
+        ...(centered
+          ? {
+              left: '50%',
+              transform: 'translateX(-50%)',
+              top: ENVELOPE_DIMENSIONS.cardShape.top,
+            }
+          : {
+              left: containerOffset > 0
+                ? `${parseFloat(ENVELOPE_DIMENSIONS.cardShape.left.replace('px', '')) - containerOffset}px`
+                : ENVELOPE_DIMENSIONS.cardShape.left,
+              top: ENVELOPE_DIMENSIONS.cardShape.top,
+            }
+        ),
         width: ENVELOPE_DIMENSIONS.cardShape.width,
         height: ENVELOPE_DIMENSIONS.cardShape.height,
         zIndex: 2,

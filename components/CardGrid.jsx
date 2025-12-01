@@ -6,6 +6,8 @@ import SentCard from '@/components/SentCard'
 import SentCard4 from '@/components/SentCard4'
 import { LAYOUT_CONFIG } from '@/constants/sentCardConstants'
 
+const GRID_GAP = '20px'
+
 const CardGrid = ({
   activeTab,
   // Gift Received props
@@ -29,7 +31,7 @@ const CardGrid = ({
   if (activeTab === 'gift') {
     return (
       <div className="w-full">
-        <div className="grid gift-card-grid" style={{ gap: '24px' }}>
+        <div className="grid gift-card-grid" style={{ gap: GRID_GAP }}>
         <GiftCard
           state={cardStates.card1}
           from="Lisa Tran"
@@ -126,7 +128,7 @@ const CardGrid = ({
   if (activeTab === 'sent') {
     return (
       <div className="w-full">
-        <div className="grid gift-card-grid" style={{ gap: '24px' }}>
+        <div className="grid gift-card-grid" style={{ gap: GRID_GAP }}>
           {viewType === 'mixed' && mixedCardTypes ? (
             // Mixed view: show both batch and single cards
             (() => {
