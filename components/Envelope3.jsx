@@ -6,6 +6,7 @@ import { makeThemedColor, makeVibrantColor } from '@/utils/colors'
 import { BOX_WIDTH, BOX_HEIGHT, BOX_RADIUS, STATIC_STYLES } from '@/constants/layout3Tokens'
 import { useBlobColors } from '@/hooks/useBlobColors'
 import { useDotAnimation } from '@/hooks/useDotAnimation'
+import { useIntersectionObserver } from '@/hooks/useIntersectionObserver'
 import EnvelopeLayers from '@/components/layout3/EnvelopeLayers'
 import ProgressBlobs from '@/components/layout3/ProgressBlobs'
 import ProgressIndicator from '@/components/layout3/ProgressIndicator'
@@ -35,6 +36,9 @@ const Envelope3 = ({
 }) => {
   const [lightCornerSvg, setLightCornerSvg] = useState(null)
   const [internalIsHovered, setInternalIsHovered] = useState(false)
+  
+  // Use Intersection Observer to detect if card is visible (pause animations when off-screen)
+  const { elementRef: intersectionRef, isVisible: isCardVisible } = useIntersectionObserver()
   
   // Use external hover state if provided, otherwise use internal state
   const isHovered = externalIsHovered !== undefined ? externalIsHovered : internalIsHovered
@@ -80,8 +84,8 @@ const Envelope3 = ({
     return minSize + (maxSize - minSize) * progressRatio
   }, [progressRatio])
 
-  // Use dot animation hook - only animate on hover if DONE
-  const dotPositions = useDotAnimation(blobAnimations, isHovered && isDone, circleSize)
+  // Use dot animation hook - only animate on hover if DONE AND card is visible
+  const dotPositions = useDotAnimation(blobAnimations, isHovered && isDone && isCardVisible, circleSize)
 
   // Themed colors
   const lightRimColor = useMemo(() => makeThemedColor(baseColor, 10), [baseColor])
@@ -192,6 +196,7 @@ const Envelope3 = ({
 
   return (
     <div 
+      ref={intersectionRef}
       className={className ? `relative ${className}` : 'relative'}
       data-name="Envelope"
       style={{ 
@@ -222,7 +227,7 @@ const Envelope3 = ({
           borderRadius: `${BOX_RADIUS}px`,
           overflow: 'hidden',
           zIndex: 1,
-          transform: isHovered ? 'translateY(-8px)' : 'translateY(0)',
+          transform: isHovered ? 'translate3d(0, -8px, 0)' : 'translate3d(0, 0, 0)',
           transition: 'transform 0.3s ease-out',
           backgroundColor: 'rgba(198, 231, 250, 0.4)',
           backdropFilter: 'blur(30px)',

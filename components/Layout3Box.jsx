@@ -5,6 +5,7 @@ import { makeThemedColor, makeVibrantColor } from '@/utils/colors'
 import { BOX_WIDTH, BOX_HEIGHT, BOX_RADIUS, STATIC_STYLES } from '@/constants/layout3Tokens'
 import { useBlobColors } from '@/hooks/useBlobColors'
 import { useDotAnimation } from '@/hooks/useDotAnimation'
+import { useIntersectionObserver } from '@/hooks/useIntersectionObserver'
 import ProgressBlobs from '@/components/layout3/ProgressBlobs'
 import HaloGlow from '@/components/layout3/HaloGlow'
 import ShadowContainer from '@/components/layout3/ShadowContainer'
@@ -27,6 +28,9 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
   const [lightCornerSvg, setLightCornerSvg] = useState(null)
   const [internalIsHovered, setInternalIsHovered] = useState(false)
   const rootRef = useRef(null)
+  
+  // Use Intersection Observer to detect if card is visible (pause animations when off-screen)
+  const { elementRef: intersectionRef, isVisible: isCardVisible } = useIntersectionObserver()
   
   // Use external hover state if provided, otherwise use internal state
   const isHovered = externalIsHovered !== undefined ? externalIsHovered : internalIsHovered
@@ -61,8 +65,8 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
     return minSize + (maxSize - minSize) * progressRatio
   }, [progressRatio])
 
-  // Use dot animation hook - only animate on hover if DONE
-  const dotPositions = useDotAnimation(blobAnimations, isHovered && isDone, circleSize)
+  // Use dot animation hook - only animate on hover if DONE AND card is visible
+  const dotPositions = useDotAnimation(blobAnimations, isHovered && isDone && isCardVisible, circleSize)
 
 
   // Themed colors
@@ -183,7 +187,10 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
 
   return (
     <div 
-      ref={rootRef}
+      ref={(node) => {
+        rootRef.current = node
+        intersectionRef.current = node // Also set intersection observer ref
+      }}
       className={className ? `relative ${className}` : 'relative'}
       style={{ 
         ...STATIC_STYLES.container, 
@@ -217,7 +224,7 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
           borderRadius: `${BOX_RADIUS}px`,
           overflow: 'hidden',
           zIndex: 1,
-          transform: isHovered ? 'translateY(-8px)' : 'translateY(0)',
+          transform: isHovered ? 'translate3d(0, -8px, 0)' : 'translate3d(0, 0, 0)',
           transition: 'transform 0.3s ease-out',
           backgroundColor: 'rgba(252, 222, 202, 0.05)',
           backdropFilter: 'blur(40px)',

@@ -167,7 +167,7 @@ const Logo = ({ logoPath, baseColor, isHovered, isDone }) => {
         position: 'absolute',
         left: '50%',
         top: '50%',
-        transform: (isHovered && isDone) ? 'translate(-50%, calc(-50% - 8px))' : 'translate(-50%, -50%)',
+        transform: 'translate(-50%, -50%)', // Logo stays in place, no movement on hover
         width: '100%',
         height: '100%',
         display: 'flex',

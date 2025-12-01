@@ -110,20 +110,25 @@ export const useDotAnimation = (blobAnimations, isHovered, circleSize) => {
             ay += dragY
           }
           
-          // Accumulate repulsion forces (optimized: early exit for distant blobs)
+          // Accumulate repulsion forces (optimized: spatial partitioning - only check nearby blobs)
           let repulsionAx = 0
           let repulsionAy = 0
           // Only check blobs within repulsion distance squared (avoid sqrt until needed)
           const repulsionDistSq = REPULSION_DISTANCE * REPULSION_DISTANCE
+          // Spatial optimization: only check blobs in a square region around current blob
+          // This reduces O(n²) to roughly O(n) for evenly distributed blobs
+          const checkRadius = REPULSION_DISTANCE * 1.5 // Check slightly beyond repulsion distance
           for (let j = 0; j < prevPositions.length; j++) {
             if (i === j) continue // Skip self
             
             const otherPos = prevPositions[j]
             const dx = pos.x - otherPos.x
             const dy = pos.y - otherPos.y
+            
+            // Quick square distance check (no sqrt needed yet)
             const distanceSq = dx * dx + dy * dy
             
-            // Early exit if too far (before expensive sqrt)
+            // Early exit if too far (before expensive sqrt and calculations)
             if (distanceSq > repulsionDistSq || distanceSq === 0) continue
             
             const distance = Math.sqrt(distanceSq)

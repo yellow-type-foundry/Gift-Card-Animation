@@ -106,7 +106,7 @@ const Blob = memo(({
         position: 'absolute',
         left: '50%',
         top: '50%',
-        transform: `translate(calc(-50% + ${currentX - boxCenterX + (circleSize / 2)}px), calc(-50% + ${currentY - boxCenterY + (circleSize / 2)}px)) scale(${scaleX}, ${scaleY})`,
+        transform: `translate3d(calc(-50% + ${currentX - boxCenterX + (circleSize / 2)}px), calc(-50% + ${currentY - boxCenterY + (circleSize / 2)}px), 0) scale(${scaleX}, ${scaleY})`,
         transformOrigin: 'center center',
         width: `${circleSize}px`,
         height: `${circleSize}px`,
@@ -121,7 +121,7 @@ const Blob = memo(({
         animation: 'none',
         animationDelay: '0s',
         opacity: 0.97,
-        willChange: 'transform, filter', // GPU acceleration hint
+        willChange: isHovered ? 'transform, filter' : 'auto', // Only hint GPU when actually animating
       }}
     />
   )
