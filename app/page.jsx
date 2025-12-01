@@ -690,7 +690,7 @@ export default function Home() {
   }, [viewType, layoutNumber])
   
   return (
-    <div className="min-h-screen bg-[#f0f1f5] flex flex-col items-start overflow-visible">
+    <div className="h-screen bg-[#f0f1f5] flex flex-col items-start overflow-hidden">
       <div 
         className="w-full max-w-[1440px] mx-auto px-0 md:px-[80px] lg:px-[240px] pt-5 pb-[200px] flex-1"
       >
@@ -749,8 +749,38 @@ export default function Home() {
       {/* StylingBar at bottom */}
       <div className="fixed bottom-0 left-0 right-0 z-50">
         <div className="w-full max-w-[1440px] mx-auto px-0 md:px-[80px] lg:px-[240px] pb-6 pt-4 flex items-center justify-between">
-          {/* Spacer for centering */}
-          <div className="flex-1"></div>
+          {/* View selector - Left side */}
+          {activeTab === 'sent' && (
+            <div className="flex-1 flex justify-start">
+              <div className="relative inline-block">
+                <select
+                  id="view-select"
+                  value={viewType}
+                  onChange={(e) => {
+                    const value = e.target.value
+                    setViewType(value)
+                    if (value === 'mixed') {
+                      setMixSeed(Date.now())
+                    }
+                  }}
+                  className="w-[56px] h-[56px] rounded-full border border-[#dde2e9] bg-white text-transparent hover:bg-gray-50 transition-colors focus:outline-none appearance-none cursor-pointer"
+                  aria-label="View type"
+                  style={{ fontSize: 0, color: 'transparent' }}
+                >
+                  <option value="mixed">View: Mixed</option>
+                  <option value="batch">View: Batch</option>
+                  <option value="single">View: Single</option>
+                </select>
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          )}
+          {activeTab !== 'sent' && <div className="flex-1"></div>}
           {/* StylingBar */}
           <StylingBar
             isSentTab={activeTab === 'sent'}
@@ -761,13 +791,6 @@ export default function Home() {
             enable3D={enable3D}
             onEnable3DChange={setEnable3D}
             layoutNumber={layoutNumber}
-            viewType={viewType}
-            onViewChange={(value) => {
-              setViewType(value)
-              if (value === 'mixed') {
-                setMixSeed(Date.now())
-              }
-            }}
             isSingleView={isSingleView}
             style={style}
             layout2BoxType={layout2BoxType}

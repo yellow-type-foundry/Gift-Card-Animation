@@ -11,8 +11,6 @@ const StylingBar = ({
   enable3D,
   onEnable3DChange,
   layoutNumber,
-  viewType,
-  onViewChange,
   isSingleView,
   style,
   layout2BoxType,
@@ -95,27 +93,6 @@ const StylingBar = ({
           >
             3D
           </button>
-        </div>
-        
-        {/* View selector */}
-        <div className="shrink-0">
-          <div className="relative inline-block">
-            <select
-              id="view-select"
-              value={viewType}
-              onChange={(e) => onViewChange(e.target.value)}
-              className="h-10 py-2 pl-4 pr-10 rounded-full border border-[#dde2e9] bg-white text-base font-medium text-[#525F7A] focus:outline-none appearance-none cursor-pointer"
-            >
-              <option value="mixed">View: Mixed</option>
-              <option value="batch">View: Batch</option>
-              <option value="single">View: Single</option>
-            </select>
-            <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
-              <svg width="16" height="16" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M3 4.5L6 7.5L9 4.5" stroke="#525F7A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
-          </div>
         </div>
       </div>
     </div>
