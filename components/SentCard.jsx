@@ -915,20 +915,17 @@ const SentCard = ({
     if (!isEnvelope2) return envelopeScale
     
     // Layout 1 Style 2: ALWAYS use 1.25 from layout1StyleB.envelope.scale
-    // CRITICAL: This is hardcoded to prevent any override - Layout 1 Style 2 Envelope2 MUST be 1.25
-    // Do NOT use envelopeScale prop as it might be overridden or incorrect when switching layouts
-    // The envelopeScale prop might have a stale value from the previous layout/style
+    // This is the source of truth - hardcode to prevent any override issues
     if (layout1Style === '2') {
       // Layout 1 Style 2 Envelope2 scale is ALWAYS 1.25 from layout1StyleB.envelope.scale
-      // This is the source of truth and cannot be overridden, even when switching from other layouts
-      // We ignore the envelopeScale prop value completely for Layout 1 Style 2
+      // Hardcoded to ensure it's never overridden by stale props or caching
       return 1.25
     }
     
     // Layout 2 Style 2: Use envelope2Scale if provided, otherwise fallback to 1 (default scale)
     // envelope2Scale should always be provided for Layout 2 Style 2 from layout2.envelope2.scale
     return envelope2Scale !== undefined ? envelope2Scale : 1
-  }, [isEnvelope2, layout1Style, envelope2Scale, envelopeScale]) // Keep envelopeScale for early return fallback
+  }, [isEnvelope2, layout1Style, envelope2Scale, envelopeScale])
   // For Layout 1 Style 3, ensure both Box3 and Envelope3 use 1.125 scale
   // Priority: Layout 1 Style 3 > Layout 2 Box3/Envelope3 > Envelope1 > Envelope2 > Box1 > Box2 > default envelopeScale
   const effectiveScale = useMemo(() => {
@@ -945,9 +942,16 @@ const SentCard = ({
     // Envelope2 scale (for Layout 1 Style 2 or Layout 2 Style 2)
     // CRITICAL: This MUST use envelope2ScaleValue, which correctly handles Layout 1 Style 2 vs Layout 2 Style 2
     if (isEnvelope2) {
-      // Double-check: For Layout 1 Style 2, ensure we're using the correct scale
-      if (layout1Style === '2' && envelope2ScaleValue !== envelopeScale) {
-        console.warn(`[effectiveScale] Layout 1 Style 2 Envelope2: envelope2ScaleValue (${envelope2ScaleValue}) !== envelopeScale (${envelopeScale}). Using envelope2ScaleValue.`)
+      if (process.env.NODE_ENV === 'development' && layout1Style === '2') {
+        console.log('[effectiveScale] Layout 1 Style 2 Envelope2:', {
+          isEnvelope2,
+          layout1Style,
+          envelope2ScaleValue,
+          envelopeScale,
+          hideEnvelope,
+          showGiftBoxWhenHidden,
+          layout2BoxType
+        })
       }
       return envelope2ScaleValue
     }
