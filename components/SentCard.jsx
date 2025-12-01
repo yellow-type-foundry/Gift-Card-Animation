@@ -1832,8 +1832,8 @@ const SentCard = ({
                     <Envelope1 
                       ids={ids} 
                       baseTintColor={baseTintColor} 
-                      centered={false}
-                      containerOffset={layout1Style === '1' ? parseFloat(ENVELOPE_DIMENSIONS.base.left.replace('px', '')) : 0}
+                      centered={layout1Style === '1'}
+                      containerOffset={0}
                     />
               {overlayProgressOnEnvelope && !progressOutsideEnvelope && (
                 <div
@@ -1905,15 +1905,22 @@ const SentCard = ({
               )}
                   </div>
                   {/* Rectangle 1790 (card shape container) - positioned relative to envelope container */}
-                  <CardShape ids={ids} base2TintColor={base2TintColor} centered={false} containerOffset={layout1Style === '1' ? parseFloat(ENVELOPE_DIMENSIONS.base.left.replace('px', '')) : 0} />
+                  <CardShape ids={ids} base2TintColor={base2TintColor} centered={layout1Style === '1'} containerOffset={0} />
                   {/* Image Container (hosts image) - positioned relative to envelope container */}
                   <div
                     className="absolute"
                     style={{
-                      left: layout1Style === '1' 
-                        ? `${parseFloat(ENVELOPE_DIMENSIONS.imageContainer.left.replace('px', '')) - parseFloat(ENVELOPE_DIMENSIONS.base.left.replace('px', ''))}px`
-                        : ENVELOPE_DIMENSIONS.imageContainer.left,
-                      top: ENVELOPE_DIMENSIONS.imageContainer.top,
+                      ...(layout1Style === '1'
+                        ? {
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            top: ENVELOPE_DIMENSIONS.imageContainer.top,
+                          }
+                        : {
+                            left: ENVELOPE_DIMENSIONS.imageContainer.left,
+                            top: ENVELOPE_DIMENSIONS.imageContainer.top,
+                          }
+                      ),
                       width: ENVELOPE_DIMENSIONS.imageContainer.width,
                       height: ENVELOPE_DIMENSIONS.imageContainer.height,
                       zIndex: 2
@@ -2038,10 +2045,17 @@ const SentCard = ({
                     <div
                       className="absolute"
                       style={{
-                        left: layout1Style === '1'
-                          ? `${parseFloat(ENVELOPE_DIMENSIONS.imageFade.left.replace('px', '')) - parseFloat(ENVELOPE_DIMENSIONS.base.left.replace('px', ''))}px`
-                          : ENVELOPE_DIMENSIONS.imageFade.left,
-                        top: ENVELOPE_DIMENSIONS.imageFade.top,
+                        ...(layout1Style === '1'
+                          ? {
+                              left: '50%',
+                              transform: 'translateX(-50%)',
+                              top: ENVELOPE_DIMENSIONS.imageFade.top,
+                            }
+                          : {
+                              left: ENVELOPE_DIMENSIONS.imageFade.left,
+                              top: ENVELOPE_DIMENSIONS.imageFade.top,
+                            }
+                        ),
                         width: ENVELOPE_DIMENSIONS.imageFade.width,
                         height: ENVELOPE_DIMENSIONS.imageFade.height,
                         zIndex: 99,
@@ -2095,10 +2109,22 @@ const SentCard = ({
                   <div
                     className="absolute"
                     style={{
-                      left: layout1Style === '1'
-                        ? `${parseFloat(ENVELOPE_DIMENSIONS.imageBadge.left.replace('px', '')) - parseFloat(ENVELOPE_DIMENSIONS.base.left.replace('px', ''))}px`
-                        : ENVELOPE_DIMENSIONS.imageBadge.left,
-                      top: ENVELOPE_DIMENSIONS.imageBadge.top,
+                      ...(layout1Style === '1'
+                        ? {
+                            // Image Badge was at left: 65px, envelope base at left: 50px
+                            // Offset: 65 - 50 = 15px from envelope base left edge
+                            // Envelope base is 195.5px wide, so center is at 97.75px
+                            // Image Badge is 165px wide, so its center is at 82.5px from its left
+                            // To center Image Badge: 50% + (15 - (195.5/2 - 165/2)) = 50% + (15 - 15.25) = 50% - 0.25px
+                            left: '50%',
+                            transform: 'translateX(calc(-50% - 0.25px))',
+                            top: ENVELOPE_DIMENSIONS.imageBadge.top,
+                          }
+                        : {
+                            left: ENVELOPE_DIMENSIONS.imageBadge.left,
+                            top: ENVELOPE_DIMENSIONS.imageBadge.top,
+                          }
+                      ),
                       width: ENVELOPE_DIMENSIONS.imageBadge.width,
                       height: ENVELOPE_DIMENSIONS.imageBadge.height,
                       borderRadius: '4px',

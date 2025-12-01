@@ -7,7 +7,6 @@ import { useBlobColors } from '@/hooks/useBlobColors'
 import { useDotAnimation } from '@/hooks/useDotAnimation'
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver'
 import ProgressBlobs from '@/components/layout3/ProgressBlobs'
-import HaloGlow from '@/components/layout3/HaloGlow'
 import ShadowContainer from '@/components/layout3/ShadowContainer'
 import Logo from '@/components/layout3/Logo'
 import PullTab from '@/components/layout3/PullTab'
@@ -207,14 +206,6 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
       onMouseEnter={handleMouseEnter}
       onMouseLeave={externalIsHovered === undefined ? () => setInternalIsHovered(false) : undefined}
     >
-      <HaloGlow
-        blobGridColors={blobGridColors}
-        blobAnimations={blobAnimations}
-        dotPositions={dotPositions}
-        circleSize={circleSize}
-        isHovered={isHovered}
-      />
-
       {/* Main Box Container */}
       <div
         style={{
