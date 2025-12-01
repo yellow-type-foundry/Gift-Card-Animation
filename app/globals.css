@@ -560,17 +560,46 @@ body.share-modal-open [data-name="Gift Card"]:not([data-share-modal]) {
 
 /* StylingBar positioning - 40px gap from card grid */
 .styling-bar-position {
-  left: max(40px, calc((100vw - min(100vw, 1440px)) / 2 + 0px - 96px));
+  left: max(40px, calc((100vw - min(100vw, 1440px)) / 2 + 0px - 88px));
 }
 
 @media (min-width: 768px) {
   .styling-bar-position {
-    left: calc((100vw - min(100vw, 1440px)) / 2 + 80px - 96px);
+    left: calc((100vw - min(100vw, 1440px)) / 2 + 80px - 88px);
   }
 }
 
 @media (min-width: 1024px) {
   .styling-bar-position {
-    left: calc((100vw - min(100vw, 1440px)) / 2 + 240px - 96px);
+    left: calc((100vw - min(100vw, 1440px)) / 2 + 240px - 88px);
   }
+}
+
+/* StylingBar tooltips */
+.styling-bar-tooltip {
+  position: relative;
+}
+
+.styling-bar-tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  right: calc(100% + 12px);
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: #1f2937;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease-in-out;
+  z-index: 100;
+  font-family: 'Goody Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.styling-bar-tooltip:hover::after {
+  opacity: 1;
 }

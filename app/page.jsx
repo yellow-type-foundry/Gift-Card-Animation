@@ -754,7 +754,7 @@ export default function Home() {
         className="absolute top-1/2 -translate-y-1/2 z-50 flex flex-col items-center gap-3 styling-bar-position"
       >
         {/* View selector */}
-        <div className="relative inline-block">
+        <div className="relative inline-block styling-bar-tooltip" data-tooltip="Change view type">
           <select
             id="view-select"
             value={viewType}
@@ -766,7 +766,7 @@ export default function Home() {
               }
             }}
             disabled={activeTab !== 'sent'}
-            className={`w-[56px] h-[56px] rounded-full border border-[#dde2e9] bg-white text-transparent transition-colors focus:outline-none appearance-none ${
+            className={`w-[48px] h-[48px] rounded-full border border-[#dde2e9] bg-white text-transparent transition-colors focus:outline-none appearance-none ${
               activeTab === 'sent' 
                 ? 'hover:bg-gray-50 cursor-pointer' 
                 : 'opacity-40 cursor-not-allowed'
@@ -779,7 +779,7 @@ export default function Home() {
             <option value="single">View: Single</option>
           </select>
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <svg width="24" height="24" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg width="22" height="22" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M0.5,8 c0,0,3-5.5,7.5-5.5S15.5,8,15.5,8s-3,5.5-7.5,5.5S0.5,8,0.5,8z" fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round" strokeMiterlimit="10"/>
               <circle fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round" cx="8" cy="8" r="2.5"/>
             </svg>
@@ -789,7 +789,7 @@ export default function Home() {
         <button
           onClick={() => setUseColoredBackground(!useColoredBackground)}
           disabled={activeTab !== 'sent' || (layoutNumber !== '1' && layoutNumber !== '2')}
-          className={`flex items-center justify-center w-[56px] h-[56px] rounded-full border border-[#dde2e9] transition-colors focus:outline-none ${
+          className={`styling-bar-tooltip flex items-center justify-center w-[48px] h-[48px] rounded-full border border-[#dde2e9] transition-colors focus:outline-none ${
             activeTab === 'sent' && (layoutNumber === '1' || layoutNumber === '2')
               ? useColoredBackground 
                 ? 'bg-[#5a3dff] text-white' 
@@ -797,8 +797,9 @@ export default function Home() {
               : 'bg-white text-[#525F7A] opacity-40 cursor-not-allowed'
           }`}
           aria-label="Toggle theming"
+          data-tooltip="Toggle theming"
         >
-          <svg width="24" height="24" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg width="22" height="22" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M7.5.5,2.086,5.914a2,2,0,0,0,0,2.828l1.586,1.586L.914,13.086a1.414,1.414,0,0,0,0,2h0a1.414,1.414,0,0,0,2,0l2.757-2.757,1.586,1.586a2,2,0,0,0,2.828,0L15.5,8.5Z" fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
             <line x1="4.5" y1="6.5" x2="9.5" y2="11.5" fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
@@ -807,7 +808,7 @@ export default function Home() {
         <button
           onClick={() => setEnable3D(!enable3D)}
           disabled={activeTab !== 'sent' || !(layoutNumber === '2' || (layoutNumber === '1' && (style === '1' || style === '2' || style === '3')) || (layoutNumber === '2' && layout2BoxType === '3'))}
-          className={`flex items-center justify-center w-[56px] h-[56px] rounded-full border border-[#dde2e9] transition-colors focus:outline-none ${
+          className={`styling-bar-tooltip flex items-center justify-center w-[48px] h-[48px] rounded-full border border-[#dde2e9] transition-colors focus:outline-none ${
             activeTab === 'sent' && (layoutNumber === '2' || (layoutNumber === '1' && (style === '1' || style === '2' || style === '3')) || (layoutNumber === '2' && layout2BoxType === '3'))
               ? enable3D 
                 ? 'bg-[#5a3dff] text-white' 
@@ -815,8 +816,9 @@ export default function Home() {
               : 'bg-white text-[#525F7A] opacity-40 cursor-not-allowed'
           }`}
           aria-label="Toggle 3D effect"
+          data-tooltip="Toggle 3D effect"
         >
-          <svg width="24" height="24" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg width="22" height="22" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
             <polygon points="8.5 0.5 15.5 3.5 15.5 12.5 8.5 15.5 1.5 12.5 1.5 3.5 8.5 0.5" fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
             <polyline points="3.5 4.5 8.5 6.5 13.5 4.5" fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
             <line x1="8.5" y1="6.5" x2="8.5" y2="13.5" fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
@@ -835,7 +837,7 @@ export default function Home() {
             }
           }}
           disabled={activeTab !== 'sent' || !((layoutNumber === '1' && style === '2') || (layoutNumber === '2' && layout2BoxType === '2'))}
-          className={`flex items-center justify-center w-[56px] h-[56px] rounded-full border border-[#dde2e9] transition-colors focus:outline-none ${
+          className={`styling-bar-tooltip flex items-center justify-center w-[48px] h-[48px] rounded-full border border-[#dde2e9] transition-colors focus:outline-none ${
             activeTab === 'sent' && ((layoutNumber === '1' && style === '2') || (layoutNumber === '2' && layout2BoxType === '2'))
               ? animationType !== 'none'
                 ? 'bg-[#5a3dff] text-white' 
@@ -843,8 +845,9 @@ export default function Home() {
               : 'bg-white text-[#525F7A] opacity-40 cursor-not-allowed'
           }`}
           aria-label="Toggle animation"
+          data-tooltip="Cycle animation type"
         >
-          <svg width="24" height="24" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg width="22" height="22" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
             <polygon points=".5 13.5 2.5 15.5 11.487 6.487 9.513 4.487 .5 13.5" fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
             <line x1="7.513" y1="6.487" x2="9.513" y2="8.487" fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
             <path d="M3.5,2.5c1.105,0,2-.895,2-2,0,1.105,.895,2,2,2-1.105,0-2,.895-2,2,0-1.105-.895-2-2-2" fill="currentColor" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
@@ -855,10 +858,11 @@ export default function Home() {
         {/* Shuffle button */}
         <button
           onClick={handleShuffle}
-          className="flex items-center justify-center w-[56px] h-[56px] rounded-full border border-[#dde2e9] bg-white text-base font-medium text-[#525F7A] hover:bg-gray-50 transition-colors focus:outline-none"
+          className="styling-bar-tooltip flex items-center justify-center w-[48px] h-[48px] rounded-full border border-[#dde2e9] bg-white text-base font-medium text-[#525F7A] hover:bg-gray-50 transition-colors focus:outline-none"
           aria-label="Shuffle cards"
+          data-tooltip="Shuffle cards"
         >
-          <svg width="24" height="24" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg width="22" height="22" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M1.5,8A6.5,6.5,0,0,1,13.478,4.5" fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
             <polyline points="13.5 0.5 13.5 4.5 9.5 4.5" fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
             <path d="M14.5,8A6.5,6.5,0,0,1,2.522,11.5" fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
