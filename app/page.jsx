@@ -137,6 +137,8 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState('gift') // 'gift' | 'sent'
   const [useColoredBackground, setUseColoredBackground] = useState(false) // Toggle for theming
   const [animationType, setAnimationType] = useState('highlight') // Animation type: 'highlight', 'breathing', or 'none'
+  const [showAnimationMenu, setShowAnimationMenu] = useState(false)
+  const [showViewMenu, setShowViewMenu] = useState(false)
   const [enable3D, setEnable3D] = useState(false) // Standalone 3D toggle that works with highlight or breathing
   const [layoutNumber, setLayoutNumber] = useState('1') // '1' | '2' - which layout to use
   const [style, setStyle] = useState('1') // '1' | '2' | '3' - for Layout 1 only: Style 1 = Box1/Envelope1, Style 2 = Box2/Envelope2, Style 3 = Box3/Envelope3
@@ -144,6 +146,62 @@ export default function Home() {
   const [mixSeed, setMixSeed] = useState(0) // Seed to regenerate mix when toggled
   const [showSettingsMenu, setShowSettingsMenu] = useState(false) // Mobile settings menu visibility
   const [layout2BoxType, setLayout2BoxType] = useState('2') // '1' | '2' | '3' - for Layout 2 single card: Box1, Box2, or Box3
+
+  // Close animation menu when button becomes disabled
+  useEffect(() => {
+    if (!((activeTab === 'sent' && ((layoutNumber === '1' && style === '2') || (layoutNumber === '2' && layout2BoxType === '2'))))) {
+      setShowAnimationMenu(false)
+    }
+  }, [activeTab, layoutNumber, style, layout2BoxType])
+
+  // Close animation menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showAnimationMenu) {
+        const menuElement = document.querySelector('[data-animation-menu]')
+        const buttonElement = document.querySelector('[data-animation-button]')
+        if (menuElement && !menuElement.contains(event.target) && buttonElement && !buttonElement.contains(event.target)) {
+          setShowAnimationMenu(false)
+        }
+      }
+    }
+
+    if (showAnimationMenu) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [showAnimationMenu])
+
+  // Close view menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showViewMenu) {
+        const menuElement = document.querySelector('[data-view-menu]')
+        const buttonElement = document.querySelector('[data-view-button]')
+        if (menuElement && !menuElement.contains(event.target) && buttonElement && !buttonElement.contains(event.target)) {
+          setShowViewMenu(false)
+        }
+      }
+    }
+
+    if (showViewMenu) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [showViewMenu])
+
+  // Close view menu when button becomes disabled
+  useEffect(() => {
+    if (activeTab !== 'sent') {
+      setShowViewMenu(false)
+    }
+  }, [activeTab])
   
   // Sync style values when switching layouts
   const handleLayoutChange = useCallback((e) => {
@@ -754,36 +812,73 @@ export default function Home() {
         className="absolute top-1/2 -translate-y-1/2 z-50 flex flex-col items-center gap-3 styling-bar-position"
       >
         {/* View selector */}
-        <div className="relative inline-block styling-bar-tooltip" data-tooltip="Change view type">
-          <select
-            id="view-select"
-            value={viewType}
-            onChange={(e) => {
-              const value = e.target.value
-              setViewType(value)
-              if (value === 'mixed') {
-                setMixSeed(Date.now())
+        <div className="relative">
+          <button
+            onClick={() => {
+              if (activeTab === 'sent') {
+                setShowViewMenu(!showViewMenu)
               }
             }}
             disabled={activeTab !== 'sent'}
-            className={`w-[48px] h-[48px] rounded-full border border-[#dde2e9] bg-white text-transparent transition-colors focus:outline-none appearance-none ${
+            className={`styling-bar-tooltip flex items-center justify-center w-[48px] h-[48px] rounded-full border border-[#dde2e9] bg-white transition-colors focus:outline-none ${
               activeTab === 'sent' 
                 ? 'hover:bg-gray-50 cursor-pointer' 
                 : 'opacity-40 cursor-not-allowed'
             }`}
             aria-label="View type"
-            style={{ fontSize: 0, color: 'transparent' }}
+            data-tooltip="Change view type"
+            data-view-button
           >
-            <option value="mixed">View: Mixed</option>
-            <option value="batch">View: Batch</option>
-            <option value="single">View: Single</option>
-          </select>
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <svg width="22" height="22" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M0.5,8 c0,0,3-5.5,7.5-5.5S15.5,8,15.5,8s-3,5.5-7.5,5.5S0.5,8,0.5,8z" fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round" strokeMiterlimit="10"/>
               <circle fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round" cx="8" cy="8" r="2.5"/>
             </svg>
-          </div>
+          </button>
+          {/* View menu */}
+          {showViewMenu && activeTab === 'sent' && (
+            <div 
+              className="absolute right-[calc(100%+12px)] top-1/2 -translate-y-1/2 z-50 bg-white rounded-xl border border-[#dde2e9] shadow-lg p-2 min-w-[140px]"
+              data-view-menu
+            >
+              <button
+                onClick={() => {
+                  setViewType('mixed')
+                  setMixSeed(Date.now())
+                }}
+                className={`w-full text-left px-4 py-2 text-sm font-medium transition-colors rounded-lg ${
+                  viewType === 'mixed'
+                    ? 'bg-[#5a3dff] text-white'
+                    : 'text-[#525F7A] hover:bg-gray-50'
+                }`}
+              >
+                Mixed
+              </button>
+              <button
+                onClick={() => {
+                  setViewType('batch')
+                }}
+                className={`w-full text-left px-4 py-2 text-sm font-medium transition-colors rounded-lg ${
+                  viewType === 'batch'
+                    ? 'bg-[#5a3dff] text-white'
+                    : 'text-[#525F7A] hover:bg-gray-50'
+                }`}
+              >
+                Batch
+              </button>
+              <button
+                onClick={() => {
+                  setViewType('single')
+                }}
+                className={`w-full text-left px-4 py-2 text-sm font-medium transition-colors rounded-lg ${
+                  viewType === 'single'
+                    ? 'bg-[#5a3dff] text-white'
+                    : 'text-[#525F7A] hover:bg-gray-50'
+                }`}
+              >
+                Single
+              </button>
+            </div>
+          )}
         </div>
         {/* Theming button */}
         <button
@@ -825,36 +920,78 @@ export default function Home() {
           </svg>
         </button>
         {/* Animation button */}
-        <button
-          onClick={() => {
-            // Cycle through: highlight -> breathing -> none -> highlight
-            if (animationType === 'highlight') {
-              setAnimationType('breathing')
-            } else if (animationType === 'breathing') {
-              setAnimationType('none')
-            } else {
-              setAnimationType('highlight')
-            }
-          }}
-          disabled={activeTab !== 'sent' || !((layoutNumber === '1' && style === '2') || (layoutNumber === '2' && layout2BoxType === '2'))}
-          className={`styling-bar-tooltip flex items-center justify-center w-[48px] h-[48px] rounded-full border border-[#dde2e9] transition-colors focus:outline-none ${
-            activeTab === 'sent' && ((layoutNumber === '1' && style === '2') || (layoutNumber === '2' && layout2BoxType === '2'))
-              ? animationType !== 'none'
-                ? 'bg-[#5a3dff] text-white' 
-                : 'bg-white text-[#525F7A] hover:bg-gray-50 cursor-pointer'
-              : 'bg-white text-[#525F7A] opacity-40 cursor-not-allowed'
-          }`}
-          aria-label="Toggle animation"
-          data-tooltip="Cycle animation type"
-        >
-          <svg width="22" height="22" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <polygon points=".5 13.5 2.5 15.5 11.487 6.487 9.513 4.487 .5 13.5" fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
-            <line x1="7.513" y1="6.487" x2="9.513" y2="8.487" fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M3.5,2.5c1.105,0,2-.895,2-2,0,1.105,.895,2,2,2-1.105,0-2,.895-2,2,0-1.105-.895-2-2-2" fill="currentColor" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M11.5,2.5c1.105,0,2-.895,2-2,0,1.105,.895,2,2,2-1.105,0-2,.895-2,2,0-1.105-.895-2-2-2" fill="currentColor" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M11.5,10.493c1.105,0,2-.895,2-2,0,1.105,.895,2,2,2-1.105,0-2,.895-2,2,0-1.105-.895-2-2-2" fill="currentColor" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </button>
+        <div className="relative">
+          <button
+            onClick={() => {
+              if (activeTab === 'sent' && ((layoutNumber === '1' && style === '2') || (layoutNumber === '2' && layout2BoxType === '2'))) {
+                setShowAnimationMenu(!showAnimationMenu)
+              }
+            }}
+            disabled={activeTab !== 'sent' || !((layoutNumber === '1' && style === '2') || (layoutNumber === '2' && layout2BoxType === '2'))}
+            className={`styling-bar-tooltip flex items-center justify-center w-[48px] h-[48px] rounded-full border border-[#dde2e9] transition-colors focus:outline-none ${
+              activeTab === 'sent' && ((layoutNumber === '1' && style === '2') || (layoutNumber === '2' && layout2BoxType === '2'))
+                ? animationType !== 'none'
+                  ? 'bg-[#5a3dff] text-white' 
+                  : 'bg-white text-[#525F7A] hover:bg-gray-50 cursor-pointer'
+                : 'bg-white text-[#525F7A] opacity-40 cursor-not-allowed'
+            }`}
+            aria-label="Toggle animation"
+            data-tooltip="Select animation type"
+            data-animation-button
+          >
+            <svg width="22" height="22" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <polygon points=".5 13.5 2.5 15.5 11.487 6.487 9.513 4.487 .5 13.5" fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
+              <line x1="7.513" y1="6.487" x2="9.513" y2="8.487" fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M3.5,2.5c1.105,0,2-.895,2-2,0,1.105,.895,2,2,2-1.105,0-2,.895-2,2,0-1.105-.895-2-2-2" fill="currentColor" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M11.5,2.5c1.105,0,2-.895,2-2,0,1.105,.895,2,2,2-1.105,0-2,.895-2,2,0-1.105-.895-2-2-2" fill="currentColor" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M11.5,10.493c1.105,0,2-.895,2-2,0,1.105,.895,2,2,2-1.105,0-2,.895-2,2,0-1.105-.895-2-2-2" fill="currentColor" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+          {/* Animation menu */}
+          {showAnimationMenu && activeTab === 'sent' && ((layoutNumber === '1' && style === '2') || (layoutNumber === '2' && layout2BoxType === '2')) && (
+            <div 
+              className="absolute right-[calc(100%+12px)] top-1/2 -translate-y-1/2 z-50 bg-white rounded-xl border border-[#dde2e9] shadow-lg p-2 min-w-[140px]"
+              data-animation-menu
+            >
+                <button
+                  onClick={() => {
+                    setAnimationType('highlight')
+                  }}
+                  className={`w-full text-left px-4 py-2 text-sm font-medium transition-colors rounded-lg ${
+                    animationType === 'highlight'
+                      ? 'bg-[#5a3dff] text-white'
+                      : 'text-[#525F7A] hover:bg-gray-50'
+                  }`}
+                >
+                  Shimmer
+                </button>
+                <button
+                  onClick={() => {
+                    setAnimationType('breathing')
+                  }}
+                  className={`w-full text-left px-4 py-2 text-sm font-medium transition-colors rounded-lg ${
+                    animationType === 'breathing'
+                      ? 'bg-[#5a3dff] text-white'
+                      : 'text-[#525F7A] hover:bg-gray-50'
+                  }`}
+                >
+                  Breathing
+                </button>
+                <button
+                  onClick={() => {
+                    setAnimationType('none')
+                  }}
+                  className={`w-full text-left px-4 py-2 text-sm font-medium transition-colors rounded-lg ${
+                    animationType === 'none'
+                      ? 'bg-[#5a3dff] text-white'
+                      : 'text-[#525F7A] hover:bg-gray-50'
+                  }`}
+                >
+                  None
+                </button>
+            </div>
+          )}
+        </div>
         {/* Shuffle button */}
         <button
           onClick={handleShuffle}
