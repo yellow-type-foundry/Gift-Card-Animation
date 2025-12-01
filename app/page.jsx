@@ -735,7 +735,7 @@ export default function Home() {
             cardHandlers={cardHandlers}
             viewType={viewType}
             layoutNumber={layoutNumber}
-            useColoredBackground={layoutNumber === '1' ? useColoredBackground : false}
+            useColoredBackground={(layoutNumber === '1' || layoutNumber === '2') ? useColoredBackground : false}
             animationType={animationType}
             enable3D={enable3D}
             sentCards={sentCards}
