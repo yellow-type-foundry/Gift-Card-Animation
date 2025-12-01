@@ -772,9 +772,9 @@ export default function Home() {
                   <option value="single">View: Single</option>
                 </select>
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <svg width="24" height="24" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M0.5,8 c0,0,3-5.5,7.5-5.5S15.5,8,15.5,8s-3,5.5-7.5,5.5S0.5,8,0.5,8z" fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round" strokeMiterlimit="10"/>
+                    <circle fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round" cx="8" cy="8" r="2.5"/>
                   </svg>
                 </div>
               </div>
@@ -803,7 +803,10 @@ export default function Home() {
               aria-label="Shuffle cards"
             >
               <svg width="24" height="24" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2L14 4L12 6M2 4H14M4 10L2 12L4 14M14 12H2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M1.5,8A6.5,6.5,0,0,1,13.478,4.5" fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
+                <polyline points="13.5 0.5 13.5 4.5 9.5 4.5" fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M14.5,8A6.5,6.5,0,0,1,2.522,11.5" fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
+                <polyline points="2.5 15.5 2.5 11.5 6.5 11.5" fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </button>
           </div>
