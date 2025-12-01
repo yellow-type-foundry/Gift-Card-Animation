@@ -844,7 +844,7 @@ export default function Home() {
           {/* View menu */}
           {showViewMenu && activeTab === 'sent' && (
             <div 
-              className="absolute right-[calc(100%+12px)] top-1/2 -translate-y-1/2 z-[110] bg-white rounded-xl border border-[#dde2e9] shadow-lg p-2 min-w-[140px]"
+              className="absolute right-[calc(100%+12px)] top-1/2 -translate-y-1/2 z-[110] bg-white rounded-xl border border-[#dde2e9] shadow-lg p-2 min-w-[140px] context-menu-enter"
               data-view-menu
             >
               <button
@@ -958,7 +958,7 @@ export default function Home() {
           {/* Animation menu */}
           {showAnimationMenu && activeTab === 'sent' && ((layoutNumber === '1' && style === '2') || (layoutNumber === '2' && layout2BoxType === '2')) && (
             <div 
-              className="absolute right-[calc(100%+12px)] top-1/2 -translate-y-1/2 z-[110] bg-white rounded-xl border border-[#dde2e9] shadow-lg p-2 min-w-[140px]"
+              className="absolute right-[calc(100%+12px)] top-1/2 -translate-y-1/2 z-[110] bg-white rounded-xl border border-[#dde2e9] shadow-lg p-2 min-w-[140px] context-menu-enter"
               data-animation-menu
             >
                 <button
