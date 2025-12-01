@@ -53,7 +53,6 @@ const StylingBar = ({
         {/* Animation selector */}
         {showAnimation && (
           <div className="flex items-center gap-2 shrink-0">
-            <label htmlFor="animation-select" className="text-base text-[#525F7A] font-medium">Animation</label>
             <div className="relative inline-block">
               <select
                 id="animation-select"
@@ -61,9 +60,9 @@ const StylingBar = ({
                 onChange={onAnimationTypeChange}
                 className="h-10 py-2 pl-4 pr-10 rounded-full border border-[#dde2e9] bg-white text-base font-medium text-[#525F7A] focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0 appearance-none cursor-pointer"
               >
-                <option value="highlight">Shimmer</option>
-                <option value="breathing">Breathing</option>
-                <option value="none">None</option>
+                <option value="highlight">Animation: Shimmer</option>
+                <option value="breathing">Animation: Breathing</option>
+                <option value="none">Animation: None</option>
               </select>
               <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
                 <svg width="16" height="16" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -98,7 +97,6 @@ const StylingBar = ({
         
         {/* View selector */}
         <div className="flex items-center gap-2 shrink-0 ml-auto">
-          <label htmlFor="view-select" className="text-base text-[#525F7A] font-medium">View</label>
           <div className="relative inline-block">
             <select
               id="view-select"
@@ -106,9 +104,9 @@ const StylingBar = ({
               onChange={(e) => onViewChange(e.target.value)}
               className="h-10 py-2 pl-4 pr-10 rounded-full border border-[#dde2e9] bg-white text-base font-medium text-[#525F7A] focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0 appearance-none cursor-pointer"
             >
-              <option value="mixed">Mixed</option>
-              <option value="batch">Batch</option>
-              <option value="single">Single</option>
+              <option value="mixed">View: Mixed</option>
+              <option value="batch">View: Batch</option>
+              <option value="single">View: Single</option>
             </select>
             <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
               <svg width="16" height="16" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">

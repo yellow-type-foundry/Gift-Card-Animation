@@ -721,7 +721,7 @@ export default function Home() {
         />
       </div>
       {/* ControlBar at bottom */}
-      <div className="w-full max-w-[1440px] mx-auto px-0 md:px-[80px] lg:px-[240px] pb-5 md:pb-10">
+      <div className="w-full max-w-[1440px] mx-auto px-0 md:px-[80px] lg:px-[240px] pb-6">
         <ControlBar
           activeTab={activeTab}
           onTabChange={handleTabChange}
