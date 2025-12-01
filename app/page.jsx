@@ -116,9 +116,7 @@ export default function Home() {
     card3: 'unopened',
     card4: 'unopened',
     card5: 'unopened',
-    card6: 'unopened',
-    card7: 'unopened',
-    card8: 'unopened'
+    card6: 'unopened'
   })
   
   // Randomize box assignments on client-side only to avoid hydration mismatch
@@ -126,7 +124,7 @@ export default function Home() {
   const [boxPairs, setBoxPairs] = useState(() => {
     // Return default order for initial render (server and client will match)
     const selected = []
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < 6; i++) {
       selected.push(ALL_BOX_PAIRS[i % ALL_BOX_PAIRS.length])
     }
     return selected
@@ -134,14 +132,14 @@ export default function Home() {
   
   // Randomize messages with varying lengths
   const [messages, setMessages] = useState(() => {
-    // Return first 8 messages for initial render (server and client will match)
-    return ALL_MESSAGES.slice(0, 8)
+    // Return first 6 messages for initial render (server and client will match)
+    return ALL_MESSAGES.slice(0, 6)
   })
   
   // SentCard data state
   const [sentCards, setSentCards] = useState(() => {
     // Return default values for initial render (server and client will match)
-    return Array(8).fill(null).map((_, i) => ({
+    return Array(6).fill(null).map((_, i) => ({
       from: ALL_SENDERS[i % ALL_SENDERS.length],
       title: ALL_TITLES[i % ALL_TITLES.length],
       boxImage: ALL_COVERS[i % ALL_COVERS.length],
@@ -156,11 +154,11 @@ export default function Home() {
   useEffect(() => {
     const shuffled = shuffleArray(ALL_BOX_PAIRS)
     const selected = []
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < 6; i++) {
       selected.push(shuffled[i % shuffled.length])
     }
     setBoxPairs(shuffleArray(selected))
-    setMessages(shuffleArray(ALL_MESSAGES).slice(0, 8))
+    setMessages(shuffleArray(ALL_MESSAGES).slice(0, 6))
     
     // Generate randomized SentCard data
     const randomized = generateRandomSentCardData({
@@ -170,7 +168,7 @@ export default function Home() {
       giftTitles: ALL_GIFT_TITLES,
       giftSubtitles: ALL_GIFT_SUBTITLES,
       dates: ALL_SENT_DATES,
-      count: 8,
+      count: 6,
       minDoneCards: 2
     })
     setSentCards(randomized)
@@ -239,8 +237,6 @@ export default function Home() {
     card4: () => handleOpenGift('card4'),
     card5: () => handleOpenGift('card5'),
     card6: () => handleOpenGift('card6'),
-    card7: () => handleOpenGift('card7'),
-    card8: () => handleOpenGift('card8'),
   }), [handleOpenGift])
   
   // Memoize tab button handlers
@@ -256,11 +252,11 @@ export default function Home() {
     // Shuffle Gift Received cards
     const shuffledBoxPairs = shuffleArray(ALL_BOX_PAIRS)
     const selected = []
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < 6; i++) {
       selected.push(shuffledBoxPairs[i % shuffledBoxPairs.length])
     }
     setBoxPairs(shuffleArray(selected))
-    setMessages(shuffleArray(ALL_MESSAGES).slice(0, 8))
+    setMessages(shuffleArray(ALL_MESSAGES).slice(0, 6))
     
     // Shuffle Gift Sent cards
     const randomized = generateRandomSentCardData({
@@ -270,7 +266,7 @@ export default function Home() {
       giftTitles: ALL_GIFT_TITLES,
       giftSubtitles: ALL_GIFT_SUBTITLES,
       dates: ALL_SENT_DATES,
-      count: 8,
+      count: 6,
       minDoneCards: 2
     })
     setSentCards(randomized)
@@ -352,6 +348,28 @@ export default function Home() {
       <div 
         className="absolute top-1/2 -translate-y-1/2 z-50 flex flex-col items-center gap-3 styling-bar-position"
       >
+        {/* Shuffle button */}
+        <button
+          onClick={handleShuffle}
+          className="styling-bar-tooltip flex items-center justify-center w-[48px] h-[48px] rounded-full border border-[#dde2e9] bg-white text-base font-medium text-[#525F7A] hover:bg-gray-50 hover:translate-x-[2px] transition-all ease-out focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+          aria-label="Shuffle cards"
+          data-tooltip="Shuffle cards"
+        >
+          <svg 
+            width="22" 
+            height="22" 
+            viewBox="0 0 16 16" 
+            fill="none" 
+            xmlns="http://www.w3.org/2000/svg"
+            className={isShuffling ? 'shuffle-icon-rotate' : ''}
+            style={{ transformOrigin: 'center' }}
+          >
+            <path d="M1.5,8A6.5,6.5,0,0,1,13.478,4.5" fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
+            <polyline points="13.5 0.5 13.5 4.5 9.5 4.5" fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M14.5,8A6.5,6.5,0,0,1,2.522,11.5" fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
+            <polyline points="2.5 15.5 2.5 11.5 6.5 11.5" fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
         {/* View selector */}
         <div className="relative">
           <button
@@ -535,28 +553,6 @@ export default function Home() {
             </div>
           )}
         </div>
-        {/* Shuffle button */}
-        <button
-          onClick={handleShuffle}
-          className="styling-bar-tooltip flex items-center justify-center w-[48px] h-[48px] rounded-full border border-[#dde2e9] bg-white text-base font-medium text-[#525F7A] hover:bg-gray-50 hover:translate-x-[2px] transition-all ease-out focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
-          aria-label="Shuffle cards"
-          data-tooltip="Shuffle cards"
-        >
-          <svg 
-            width="22" 
-            height="22" 
-            viewBox="0 0 16 16" 
-            fill="none" 
-            xmlns="http://www.w3.org/2000/svg"
-            className={isShuffling ? 'shuffle-icon-rotate' : ''}
-            style={{ transformOrigin: 'center' }}
-          >
-            <path d="M1.5,8A6.5,6.5,0,0,1,13.478,4.5" fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
-            <polyline points="13.5 0.5 13.5 4.5 9.5 4.5" fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M14.5,8A6.5,6.5,0,0,1,2.522,11.5" fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
-            <polyline points="2.5 15.5 2.5 11.5 6.5 11.5" fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </button>
       </div>
     </div>
   )

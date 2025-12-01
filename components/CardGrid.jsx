@@ -30,7 +30,7 @@ const CardGrid = ({
 }) => {
   if (activeTab === 'gift') {
     return (
-      <div className="w-full">
+      <div className="w-full" style={{ overflow: 'visible' }}>
         <div className="grid gift-card-grid" style={{ gap: GRID_GAP }}>
         <GiftCard
           state={cardStates.card1}
@@ -98,28 +98,6 @@ const CardGrid = ({
           box2Image={boxPairs[5].box2}
           onOpenGift={cardHandlers.card6}
         />
-        <GiftCard
-          state={cardStates.card7}
-          from="Olivia Martinez"
-          message={messages[6]}
-          expiryText={cardStates.card7 === 'unopened' ? 'Expiring in 7 days' : undefined}
-          giftTitle="Spa Gift Certificate"
-          giftSubtitle="Bliss Spa"
-          boxImage={boxPairs[6].box1}
-          box2Image={boxPairs[6].box2}
-          onOpenGift={cardHandlers.card7}
-        />
-        <GiftCard
-          state={cardStates.card8}
-          from="Ryan Thompson"
-          message={messages[7]}
-          expiryText={cardStates.card8 === 'unopened' ? 'Expiring in 19 days' : undefined}
-          giftTitle="Gourmet Chocolate Truffles"
-          giftSubtitle="Vosges Haut-Chocolat"
-          boxImage={boxPairs[7].box1}
-          box2Image={boxPairs[7].box2}
-          onOpenGift={cardHandlers.card8}
-        />
         </div>
       </div>
     )
@@ -127,7 +105,7 @@ const CardGrid = ({
 
   if (activeTab === 'sent') {
     return (
-      <div className="w-full">
+      <div className="w-full" style={{ overflow: 'visible' }}>
         <div className="grid gift-card-grid" style={{ gap: GRID_GAP }}>
           {viewType === 'mixed' && mixedCardTypes ? (
             // Mixed view: show both batch and single cards
@@ -141,7 +119,7 @@ const CardGrid = ({
                   </div>
                 )
               }
-              return sentCards.map((card, index) => {
+              return sentCards.slice(0, 6).map((card, index) => {
                 const isBatch = mixedCardTypes[index]
                 
                 if (isBatch) {
@@ -191,7 +169,7 @@ const CardGrid = ({
             (() => {
               // Single 2 (Layout 2) uses SentCard with single2 config (shows gift box)
               if (layoutNumber === '2') {
-                return sentCards.map((card, index) => (
+                return sentCards.slice(0, 6).map((card, index) => (
                   <SentCard
                     key={index}
                     {...getSentCardProps(card, layoutNumber, useColoredBackground, animationType, enable3D, true)}
@@ -212,7 +190,7 @@ const CardGrid = ({
               }
               // Single 1 uses SentCard (with gift container replacing envelope)
               if (layoutNumber === '1') {
-                return sentCards.map((card, index) => (
+                return sentCards.slice(0, 6).map((card, index) => (
                   <SentCard
                     key={index}
                     {...getSingle1Props(card, useColoredBackground, layoutNumber, animationType, enable3D)}
@@ -221,7 +199,7 @@ const CardGrid = ({
               }
               // Single 2 uses SentCard with envelope hidden (shows gift box)
               if (layoutNumber === '2') {
-                return sentCards.map((card, index) => (
+                return sentCards.slice(0, 6).map((card, index) => (
                   <SentCard
                     key={index}
                     {...getSentCardProps(card, layoutNumber, useColoredBackground, animationType, enable3D, true)}
@@ -231,7 +209,7 @@ const CardGrid = ({
                   />
                 ))
               }
-              return sentCards.map((card, index) => {
+              return sentCards.slice(0, 6).map((card, index) => {
                 const props = getSentCard4Props(card, layoutNumber, useColoredBackground)
                 if (!props) return null
                 return (
@@ -244,7 +222,7 @@ const CardGrid = ({
             })()
           ) : (
             // Batch view: show only batch cards
-            sentCards.map((card, index) => (
+            sentCards.slice(0, 6).map((card, index) => (
               <SentCard
                 key={index}
                 {...getSentCardProps(card, layoutNumber, useColoredBackground, animationType, enable3D)}
