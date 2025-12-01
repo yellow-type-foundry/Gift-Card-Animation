@@ -109,7 +109,7 @@ const ControlBar = ({
 
   return (
     <div
-      className="w-full flex items-center justify-between mb-6 overflow-x-auto md:overflow-visible whitespace-nowrap px-5 md:px-0"
+      className="w-full flex items-center justify-between mb-6 overflow-x-auto md:overflow-visible whitespace-nowrap px-5 md:px-0 relative"
       style={controlBarStyle}
     >
       {/* Tabs - Left side */}
@@ -125,6 +125,114 @@ const ControlBar = ({
           onClick={() => onTabChange('sent')}
         />
       </div>
+      
+      {/* Layout + Style selector - Centered */}
+      {isSentTab && (
+        <div className="hidden md:flex items-center gap-4 shrink-0 absolute left-1/2 -translate-x-1/2">
+          {/* Layout selector */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-[#525F7A]">Layout</span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => onLayoutChange({ target: { value: '1' } })}
+                className={`px-3 py-1 rounded-[8px] text-xs transition-colors ${
+                  layoutNumber === '1' 
+                    ? 'bg-[#5a3dff] text-white' 
+                    : 'bg-gray-100 text-[#525F7A] hover:bg-gray-200'
+                }`}
+              >
+                1
+              </button>
+              <button
+                onClick={() => onLayoutChange({ target: { value: '2' } })}
+                className={`px-3 py-1 rounded-[8px] text-xs transition-colors ${
+                  layoutNumber === '2' 
+                    ? 'bg-[#5a3dff] text-white' 
+                    : 'bg-gray-100 text-[#525F7A] hover:bg-gray-200'
+                }`}
+              >
+                2
+              </button>
+            </div>
+          </div>
+          {/* Style selector - Layout 1 */}
+          {layoutNumber === '1' && (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-[#525F7A]">Style</span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => onStyleChange('1')}
+                  className={`px-3 py-1 rounded-[8px] text-xs transition-colors ${
+                    style === '1' 
+                      ? 'bg-[#5a3dff] text-white' 
+                      : 'bg-gray-100 text-[#525F7A] hover:bg-gray-200'
+                  }`}
+                >
+                  1
+                </button>
+                <button
+                  onClick={() => onStyleChange('2')}
+                  className={`px-3 py-1 rounded-[8px] text-xs transition-colors ${
+                    style === '2' 
+                      ? 'bg-[#5a3dff] text-white' 
+                      : 'bg-gray-100 text-[#525F7A] hover:bg-gray-200'
+                  }`}
+                >
+                  2
+                </button>
+                <button
+                  onClick={() => onStyleChange('3')}
+                  className={`px-3 py-1 rounded-[8px] text-xs transition-colors ${
+                    style === '3' 
+                      ? 'bg-[#5a3dff] text-white' 
+                      : 'bg-gray-100 text-[#525F7A] hover:bg-gray-200'
+                  }`}
+                >
+                  3
+                </button>
+              </div>
+            </div>
+          )}
+          {/* Style selector - Layout 2 */}
+          {layoutNumber === '2' && (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-[#525F7A]">Style</span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => onLayout2BoxTypeChange('1')}
+                  className={`px-3 py-1 rounded-[8px] text-xs transition-colors ${
+                    layout2BoxType === '1' 
+                      ? 'bg-[#5a3dff] text-white' 
+                      : 'bg-gray-100 text-[#525F7A] hover:bg-gray-200'
+                  }`}
+                >
+                  1
+                </button>
+                <button
+                  onClick={() => onLayout2BoxTypeChange('2')}
+                  className={`px-3 py-1 rounded-[8px] text-xs transition-colors ${
+                    layout2BoxType === '2' 
+                      ? 'bg-[#5a3dff] text-white' 
+                      : 'bg-gray-100 text-[#525F7A] hover:bg-gray-200'
+                  }`}
+                >
+                  2
+                </button>
+                <button
+                  onClick={() => onLayout2BoxTypeChange('3')}
+                  className={`px-3 py-1 rounded-[8px] text-xs transition-colors ${
+                    layout2BoxType === '3' 
+                      ? 'bg-[#5a3dff] text-white' 
+                      : 'bg-gray-100 text-[#525F7A] hover:bg-gray-200'
+                  }`}
+                >
+                  3
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
       
       {/* Controls - Right side */}
       <div className="flex items-center justify-end gap-4 shrink-0">
@@ -174,110 +282,6 @@ const ControlBar = ({
                   onClick={(e) => e.stopPropagation()}
                 >
                   <div className="space-y-4">
-                    {/* Layout selector - Desktop */}
-                    {isSentTab && (
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-[#525F7A]">Layout</span>
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => onLayoutChange({ target: { value: '1' } })}
-                            className={`px-3 py-1 rounded-[8px] text-xs transition-colors ${
-                              layoutNumber === '1' 
-                                ? 'bg-[#5a3dff] text-white' 
-                                : 'bg-gray-100 text-[#525F7A] hover:bg-gray-200'
-                            }`}
-                          >
-                            1
-                          </button>
-                          <button
-                            onClick={() => onLayoutChange({ target: { value: '2' } })}
-                            className={`px-3 py-1 rounded-[8px] text-xs transition-colors ${
-                              layoutNumber === '2' 
-                                ? 'bg-[#5a3dff] text-white' 
-                                : 'bg-gray-100 text-[#525F7A] hover:bg-gray-200'
-                            }`}
-                          >
-                            2
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                    {/* Box selector - only show for Layout 2 */}
-                      {layoutNumber === '2' && (
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-[#525F7A]">Style</span>
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => onLayout2BoxTypeChange('1')}
-                              className={`px-3 py-1 rounded-[8px] text-xs transition-colors ${
-                                layout2BoxType === '1' 
-                                  ? 'bg-[#5a3dff] text-white' 
-                                  : 'bg-gray-100 text-[#525F7A] hover:bg-gray-200'
-                              }`}
-                            >
-                              1
-                            </button>
-                            <button
-                              onClick={() => onLayout2BoxTypeChange('2')}
-                              className={`px-3 py-1 rounded-[8px] text-xs transition-colors ${
-                                layout2BoxType === '2' 
-                                  ? 'bg-[#5a3dff] text-white' 
-                                  : 'bg-gray-100 text-[#525F7A] hover:bg-gray-200'
-                              }`}
-                            >
-                              2
-                            </button>
-                            <button
-                              onClick={() => onLayout2BoxTypeChange('3')}
-                              className={`px-3 py-1 rounded-[8px] text-xs transition-colors ${
-                                layout2BoxType === '3' 
-                                  ? 'bg-[#5a3dff] text-white' 
-                                  : 'bg-gray-100 text-[#525F7A] hover:bg-gray-200'
-                              }`}
-                            >
-                              3
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                    {/* Style toggle - only show for layout 1 */}
-                      {layoutNumber === '1' && (
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-[#525F7A]">Style</span>
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => onStyleChange('1')}
-                              className={`px-3 py-1 rounded-[8px] text-xs transition-colors ${
-                                style === '1' 
-                                  ? 'bg-[#5a3dff] text-white' 
-                                  : 'bg-gray-100 text-[#525F7A] hover:bg-gray-200'
-                              }`}
-                            >
-                              1
-                            </button>
-                            <button
-                              onClick={() => onStyleChange('2')}
-                              className={`px-3 py-1 rounded-[8px] text-xs transition-colors ${
-                                style === '2' 
-                                  ? 'bg-[#5a3dff] text-white' 
-                                  : 'bg-gray-100 text-[#525F7A] hover:bg-gray-200'
-                              }`}
-                            >
-                              2
-                            </button>
-                            <button
-                              onClick={() => onStyleChange('3')}
-                              className={`px-3 py-1 rounded-[8px] text-xs transition-colors ${
-                                style === '3' 
-                                  ? 'bg-[#5a3dff] text-white' 
-                                  : 'bg-gray-100 text-[#525F7A] hover:bg-gray-200'
-                              }`}
-                            >
-                              3
-                            </button>
-                          </div>
-                        </div>
-                      )}
                     {/* Theming toggle - only show for layout 1 */}
                       {layoutNumber === '1' && (
                         <div className="flex items-center justify-between">

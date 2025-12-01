@@ -144,6 +144,25 @@ export default function Home() {
   const [mixSeed, setMixSeed] = useState(0) // Seed to regenerate mix when toggled
   const [showSettingsMenu, setShowSettingsMenu] = useState(false) // Mobile settings menu visibility
   const [layout2BoxType, setLayout2BoxType] = useState('2') // '1' | '2' | '3' - for Layout 2 single card: Box1, Box2, or Box3
+  
+  // Sync style values when switching layouts
+  const handleLayoutChange = useCallback((e) => {
+    const newLayout = e.target.value
+    const previousLayout = layoutNumber
+    
+    // When switching layouts, preserve the style value
+    if (previousLayout !== newLayout) {
+      if (previousLayout === '1' && newLayout === '2') {
+        // Switching from Layout 1 to Layout 2: copy style to layout2BoxType
+        setLayout2BoxType(style)
+      } else if (previousLayout === '2' && newLayout === '1') {
+        // Switching from Layout 2 to Layout 1: copy layout2BoxType to style
+        setStyle(layout2BoxType)
+      }
+    }
+    
+    setLayoutNumber(newLayout)
+  }, [layoutNumber, style, layout2BoxType])
   const [cardStates, setCardStates] = useState({
     card1: 'unopened',
     card2: 'unopened',
@@ -669,7 +688,7 @@ export default function Home() {
           enable3D={enable3D}
           onEnable3DChange={setEnable3D}
           layoutNumber={layoutNumber}
-          onLayoutChange={(e) => setLayoutNumber(e.target.value)}
+          onLayoutChange={handleLayoutChange}
           viewType={viewType}
           onViewChange={(value) => {
             setViewType(value)

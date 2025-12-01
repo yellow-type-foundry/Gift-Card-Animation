@@ -144,18 +144,27 @@
   /* Gift Card Grid */
   .gift-card-grid {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-rows: repeat(2, auto);
+    grid-auto-rows: 0;
+    overflow: hidden;
     justify-items: stretch;
   }
 
   @media (min-width: 768px) {
     .gift-card-grid {
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      grid-template-rows: repeat(2, auto);
+      grid-auto-rows: 0;
+      overflow: hidden;
     }
   }
 
   @media (min-width: 1024px) {
     .gift-card-grid {
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      grid-template-rows: repeat(2, auto);
+      grid-auto-rows: 0;
+      overflow: hidden;
     }
   }
 
