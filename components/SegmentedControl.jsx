@@ -7,8 +7,10 @@ import React, { useRef, useEffect, useState } from 'react'
  * @param {Array} options - Array of { value, label } objects
  * @param {string} value - Currently selected value
  * @param {Function} onChange - Callback when selection changes
+ * @param {string} buttonPadding - Horizontal padding for buttons (default: 'px-5')
+ * @param {React.ReactNode} activeChipContent - Optional content to render inside the active chip (e.g., chevron)
  */
-const SegmentedControl = ({ options, value, onChange }) => {
+const SegmentedControl = ({ options, value, onChange, buttonPadding = 'px-5', activeChipContent }) => {
   const containerRef = useRef(null)
   const chipRef = useRef(null)
   const [chipStyle, setChipStyle] = useState({ width: 0, height: 0, left: 0 })
@@ -57,8 +59,8 @@ const SegmentedControl = ({ options, value, onChange }) => {
           key={option.value}
           onClick={() => onChange(option.value)}
           className={`
-            relative z-10 px-5 py-2.5 h-10 rounded-full text-base font-medium transition-colors duration-200
-            flex items-center justify-center
+            relative z-10 ${buttonPadding} py-2.5 h-10 rounded-full text-base font-medium transition-colors duration-200
+            flex items-center justify-center gap-2
             ${value === option.value 
               ? 'text-black' 
               : 'text-[#525F7A]'
@@ -66,6 +68,11 @@ const SegmentedControl = ({ options, value, onChange }) => {
           `}
         >
           {option.label}
+          {value === option.value && activeChipContent && (
+            <span className="flex items-center">
+              {activeChipContent}
+            </span>
+          )}
         </button>
       ))}
     </div>

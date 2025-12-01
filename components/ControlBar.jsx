@@ -40,10 +40,182 @@ const ControlBar = ({
   }
 
   const [isMounted, setIsMounted] = useState(false)
+  const [isLayoutChipHovered, setIsLayoutChipHovered] = useState(false)
+  const layoutSelectorRef = useRef(null)
+  const stylePopoverRef = useRef(null)
+  const activeChipRef = useRef(null)
+  const hoverTimeoutRef = useRef(null)
+  const [popoverPosition, setPopoverPosition] = useState({ top: 0, left: 0 })
+  const [popoverVisible, setPopoverVisible] = useState(false)
 
   useEffect(() => {
     setIsMounted(true)
   }, [])
+
+  // Attach hover handlers to the active chip
+  useEffect(() => {
+    if (!layoutSelectorRef.current) return
+
+    const handleChipEnter = () => {
+      // Clear any pending hide timeout
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current)
+        hoverTimeoutRef.current = null
+      }
+      setIsLayoutChipHovered(true)
+      // Show popover with slight delay for smoother animation
+      setTimeout(() => {
+        setPopoverVisible(true)
+      }, 50)
+    }
+
+    const handleChipLeave = (e) => {
+      // Check if mouse is moving to popover
+      const popover = stylePopoverRef.current
+      if (popover && e.relatedTarget && popover.contains(e.relatedTarget)) {
+        return // Don't hide if moving to popover
+      }
+      
+      // Add delay before hiding to allow mouse movement
+      hoverTimeoutRef.current = setTimeout(() => {
+        setIsLayoutChipHovered(false)
+        setPopoverVisible(false)
+      }, 150) // 150ms delay
+    }
+
+    const handleChipClick = () => {
+      // Clear any pending hide timeout
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current)
+        hoverTimeoutRef.current = null
+      }
+      setIsLayoutChipHovered(true)
+      // Show popover immediately on click
+      setPopoverVisible(true)
+    }
+
+    const updatePopoverPosition = (activeButton, layoutContainer) => {
+      const containerRect = layoutContainer.getBoundingClientRect()
+      const buttonRect = activeButton.getBoundingClientRect()
+
+      // Position popover above the active chip, centered
+      setPopoverPosition({
+        top: 0, // Not used since we use bottom: 100%
+        left: buttonRect.left - containerRect.left + (buttonRect.width / 2), // Center of chip relative to container
+      })
+    }
+
+    const updateActiveChip = () => {
+      const layoutContainer = layoutSelectorRef.current
+      if (!layoutContainer) return
+
+      // Wait for next frame to ensure DOM is updated
+      requestAnimationFrame(() => {
+        // Find the SegmentedControl (it has relative class and contains buttons)
+        const segmentedControl = layoutContainer.querySelector('div[class*="relative"]')
+        if (!segmentedControl) return
+        
+        const buttons = segmentedControl.querySelectorAll('button')
+        const activeIndex = layoutNumber === '1' ? 0 : 1
+        const activeButton = buttons[activeIndex]
+
+        if (!activeButton) return
+
+        // Remove old handlers if chip changed
+        if (activeChipRef.current && activeChipRef.current !== activeButton) {
+          activeChipRef.current.removeEventListener('mouseenter', handleChipEnter)
+          activeChipRef.current.removeEventListener('mouseleave', handleChipLeave)
+          activeChipRef.current.removeEventListener('click', handleChipClick)
+        }
+
+        // Add new handlers
+        if (activeButton !== activeChipRef.current) {
+          activeChipRef.current = activeButton
+          activeButton.addEventListener('mouseenter', handleChipEnter)
+          activeButton.addEventListener('mouseleave', handleChipLeave)
+          activeButton.addEventListener('click', handleChipClick)
+        }
+
+        // Update popover position
+        updatePopoverPosition(activeButton, layoutContainer)
+      })
+    }
+
+    updateActiveChip()
+
+    // Update on window resize and when layout changes
+    const handleResize = () => {
+      if (layoutSelectorRef.current && activeChipRef.current) {
+        updatePopoverPosition(activeChipRef.current, layoutSelectorRef.current)
+      }
+    }
+    window.addEventListener('resize', handleResize)
+
+    return () => {
+      window.removeEventListener('resize', handleResize)
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current)
+      }
+      if (activeChipRef.current) {
+        activeChipRef.current.removeEventListener('mouseenter', handleChipEnter)
+        activeChipRef.current.removeEventListener('mouseleave', handleChipLeave)
+        activeChipRef.current.removeEventListener('click', handleChipClick)
+      }
+    }
+  }, [layoutNumber])
+
+  // Show popup when layout changes (after clicking a chip)
+  useEffect(() => {
+    if (layoutSelectorRef.current) {
+      // Wait for DOM to update with new active chip
+      requestAnimationFrame(() => {
+        const layoutContainer = layoutSelectorRef.current
+        if (!layoutContainer) return
+        
+        // Find the SegmentedControl
+        const segmentedControl = layoutContainer.querySelector('div[class*="relative"]')
+        if (!segmentedControl) return
+        
+        const buttons = segmentedControl.querySelectorAll('button')
+        const activeIndex = layoutNumber === '1' ? 0 : 1
+        const activeButton = buttons[activeIndex]
+        
+        if (activeButton) {
+          // Update position
+          const containerRect = layoutContainer.getBoundingClientRect()
+          const buttonRect = activeButton.getBoundingClientRect()
+          setPopoverPosition({
+            top: 0,
+            left: buttonRect.left - containerRect.left + (buttonRect.width / 2),
+          })
+          
+          // Show popup after a brief delay
+          setTimeout(() => {
+            setIsLayoutChipHovered(true)
+            setPopoverVisible(true)
+          }, 100)
+        }
+      })
+    }
+  }, [layoutNumber])
+
+  // Handle popover hover to keep it visible
+  const handlePopoverEnter = () => {
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current)
+      hoverTimeoutRef.current = null
+    }
+    setIsLayoutChipHovered(true)
+    setPopoverVisible(true)
+  }
+
+  const handlePopoverLeave = () => {
+    hoverTimeoutRef.current = setTimeout(() => {
+      setIsLayoutChipHovered(false)
+      setPopoverVisible(false)
+    }, 150)
+  }
+
 
   const controlBarStyle = useMemo(() => ({
     WebkitOverflowScrolling: 'touch',
@@ -73,7 +245,7 @@ const ControlBar = ({
   return (
     <div className="w-full bg-white rounded-full p-4">
       <div
-        className="w-full flex items-center justify-between overflow-x-auto md:overflow-visible whitespace-nowrap relative"
+        className="w-full flex items-center overflow-x-auto md:overflow-visible whitespace-nowrap relative"
         style={controlBarStyle}
       >
       {/* Tabs - Left side */}
@@ -88,30 +260,61 @@ const ControlBar = ({
         />
       </div>
       
+      {/* Spacer - Left */}
+      <div className="flex-1 hidden md:block" />
+      
       {/* Layout + Style selector - Centered */}
       {isSentTab && (
-        <div className="hidden md:flex items-center gap-4 shrink-0 absolute left-1/2 -translate-x-1/2 bg-white rounded-full p-2">
+        <div 
+          className="hidden md:flex items-center shrink-0 bg-white rounded-full p-2 relative z-10"
+        >
           {/* Layout selector */}
-          <SegmentedControl
-            options={[
-              { value: '1', label: 'Layout 1' },
-              { value: '2', label: 'Layout 2' }
-            ]}
-            value={layoutNumber}
-            onChange={(value) => onLayoutChange({ target: { value } })}
-          />
-          {/* Style selector */}
-          <SegmentedControl
-            options={[
-              { value: '1', label: 'Style 1' },
-              { value: '2', label: 'Style 2' },
-              { value: '3', label: 'Style 3' }
-            ]}
-            value={layoutNumber === '1' ? style : layout2BoxType}
-            onChange={layoutNumber === '1' ? onStyleChange : onLayout2BoxTypeChange}
-          />
+          <div ref={layoutSelectorRef}>
+            <SegmentedControl
+              options={[
+                { value: '1', label: 'Layout 1' },
+                { value: '2', label: 'Layout 2' }
+              ]}
+              value={layoutNumber}
+              onChange={(value) => onLayoutChange({ target: { value } })}
+            />
+          </div>
+          {/* Style selector - Popover (shown on hover of active chip) */}
+          <div
+            ref={stylePopoverRef}
+            className="absolute bg-white rounded-full shadow-lg border border-[#dde2e9] z-50"
+            style={{
+              bottom: '100%',
+              left: `${popoverPosition.left}px`,
+              transform: `translateX(-50%) translateY(${popoverVisible ? '0' : '10px'})`,
+              marginBottom: '8px',
+              whiteSpace: 'nowrap',
+              opacity: popoverVisible ? 1 : 0,
+              pointerEvents: popoverVisible ? 'auto' : 'none',
+              transition: 'opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              padding: '2px', // Even padding on all sides for extended hover area
+              marginTop: '-12px', // Compensate for top padding
+              marginBottom: '12px', // More space for easier mouse movement
+              visibility: isLayoutChipHovered ? 'visible' : 'hidden', // Keep mounted but hidden
+            }}
+            onMouseEnter={handlePopoverEnter}
+            onMouseLeave={handlePopoverLeave}
+          >
+            <SegmentedControl
+              options={[
+                { value: '1', label: 'Style 1' },
+                { value: '2', label: 'Style 2' },
+                { value: '3', label: 'Style 3' }
+              ]}
+              value={layoutNumber === '1' ? style : layout2BoxType}
+              onChange={layoutNumber === '1' ? onStyleChange : onLayout2BoxTypeChange}
+            />
+          </div>
         </div>
       )}
+      
+      {/* Spacer - Right */}
+      <div className="flex-1 hidden md:block" />
       
       {/* Controls - Right side */}
       <div className="flex items-center justify-end gap-4 shrink-0">
