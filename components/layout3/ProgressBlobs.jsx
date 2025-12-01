@@ -1,5 +1,6 @@
 import React, { useMemo, memo } from 'react'
 import { BOX_WIDTH, BOX_HEIGHT, STATIC_STYLES } from '@/constants/layout3Tokens'
+import { getPerformanceMode } from '@/utils/browserDetection'
 
 // Pre-calculate static values for each blob to avoid recalculating on every render
 const calculateBlobStaticValues = (color, index) => {
@@ -39,7 +40,8 @@ const Blob = memo(({
   isHovered, 
   disableBlurReveal, 
   fixedBlur,
-  staticValues 
+  staticValues,
+  performanceMode
 }) => {
   const { randomBlur, zIndexSeed, rgb } = staticValues
   
@@ -96,9 +98,28 @@ const Blob = memo(({
   const boxCenterX = BOX_WIDTH / 2
   const boxCenterY = BOX_HEIGHT / 2
   
-  const filterValue = fixedBlur !== undefined 
-    ? `blur(${fixedBlur}px)` 
-    : (disableBlurReveal ? 'blur(20px)' : (isHovered ? `blur(${randomBlur}px)` : 'blur(20px)'))
+  // Apply blur reduction for Safari - completely disable if needed
+  const getBlurValue = () => {
+    if (performanceMode.disableBlur) {
+      return 'none' // Completely disable blur for Safari
+    }
+    if (fixedBlur !== undefined) {
+      return `blur(${fixedBlur * performanceMode.blurReduction}px)`
+    }
+    if (disableBlurReveal) {
+      return `blur(${20 * performanceMode.blurReduction}px)`
+    }
+    if (isHovered) {
+      return `blur(${randomBlur * performanceMode.blurReduction}px)`
+    }
+    return `blur(${20 * performanceMode.blurReduction}px)`
+  }
+  
+  const filterValue = getBlurValue()
+  
+  // Disable ellipse deformation for Safari
+  const finalScaleX = performanceMode.disableEllipseDeformation ? 1 : scaleX
+  const finalScaleY = performanceMode.disableEllipseDeformation ? 1 : scaleY
   
   return (
     <div
@@ -106,15 +127,15 @@ const Blob = memo(({
         position: 'absolute',
         left: '50%',
         top: '50%',
-        transform: `translate3d(calc(-50% + ${currentX - boxCenterX + (circleSize / 2)}px), calc(-50% + ${currentY - boxCenterY + (circleSize / 2)}px), 0) scale(${scaleX}, ${scaleY})`,
+        transform: `translate3d(calc(-50% + ${currentX - boxCenterX + (circleSize / 2)}px), calc(-50% + ${currentY - boxCenterY + (circleSize / 2)}px), 0) scale(${finalScaleX}, ${finalScaleY})`,
         transformOrigin: 'center center',
         width: `${circleSize}px`,
         height: `${circleSize}px`,
         borderRadius: '50%',
         backgroundColor: color,
-        backgroundImage: gradientOverlay,
-        mixBlendMode: 'overlay',
-        boxShadow: blendedShadow,
+        backgroundImage: performanceMode.disableGradientOverlay ? 'none' : gradientOverlay,
+        mixBlendMode: performanceMode.useMixBlendMode ? 'overlay' : 'normal', // Disable for Safari
+        boxShadow: performanceMode.disableBoxShadow ? 'none' : blendedShadow,
         filter: filterValue,
         zIndex: blobZIndex,
         transition: 'filter 0.005s ease-out, transform 0.01s cubic-bezier(0.68, -0.6, 0.32, 1.6), z-index 0s',
@@ -122,6 +143,8 @@ const Blob = memo(({
         animationDelay: '0s',
         opacity: 0.97,
         willChange: isHovered ? 'transform, filter' : 'auto', // Only hint GPU when actually animating
+        // Safari optimization: use CSS containment
+        contain: performanceMode.isSafari ? 'layout style paint' : 'none',
       }}
     />
   )
@@ -130,6 +153,9 @@ const Blob = memo(({
 Blob.displayName = 'Blob'
 
 const ProgressBlobs = ({ blobGridColors, blobAnimations, dotPositions, circleSize, isHovered, disableBlurReveal = false, fixedBlur }) => {
+  // Get performance mode (cached to avoid recalculation)
+  const performanceMode = useMemo(() => getPerformanceMode(), [])
+  
   // Pre-calculate static values for all blobs (must be done outside map to follow Rules of Hooks)
   const blobStaticValues = useMemo(() => {
     return blobGridColors.map((color, index) => calculateBlobStaticValues(color, index))
@@ -179,6 +205,11 @@ const ProgressBlobs = ({ blobGridColors, blobAnimations, dotPositions, circleSiz
     }).join('\n')
   }, [blobAnimations])
 
+  // Don't render blobs at all on Safari for maximum performance (after all hooks)
+  if (performanceMode.isSafari) {
+    return null
+  }
+
   return (
     <>
       {blobKeyframes && (
@@ -210,6 +241,7 @@ const ProgressBlobs = ({ blobGridColors, blobAnimations, dotPositions, circleSiz
               disableBlurReveal={disableBlurReveal}
               fixedBlur={fixedBlur}
               staticValues={staticValues}
+              performanceMode={performanceMode}
             />
           )
         })}

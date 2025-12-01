@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { BOX_WIDTH, BOX_HEIGHT } from '@/constants/layout3Tokens'
+import { getPerformanceMode } from '@/utils/browserDetection'
 
 /**
  * Hook to manage dot animation with physics-based movement
@@ -11,6 +12,8 @@ export const useDotAnimation = (blobAnimations, isHovered, circleSize) => {
   const prevVelocitiesRef = useRef({}) // Store previous velocities for smoothing
   const isHoveredRef = useRef(isHovered) // Track hover state to avoid stale closures
   const circleSizeRef = useRef(circleSize) // Track circleSize to avoid stale closures
+  const frameCountRef = useRef(0) // Track frame count for throttling
+  const performanceMode = useRef(getPerformanceMode()) // Cache performance mode
 
   // Initialize dot positions
   useEffect(() => {
@@ -48,6 +51,7 @@ export const useDotAnimation = (blobAnimations, isHovered, circleSize) => {
   useEffect(() => {
     if (!isHovered) {
       animationRunningRef.current = false
+      frameCountRef.current = 0 // Reset frame count when animation stops
       return
     }
     
@@ -62,18 +66,19 @@ export const useDotAnimation = (blobAnimations, isHovered, circleSize) => {
     
     animationRunningRef.current = true
     
-    const REPULSION_DISTANCE = 40
-    const REPULSION_FORCE = 0.08 // Increased for more visible movement
-    const DAMPING = 0.698 // Reduced damping for more movement
-    const MIN_VELOCITY = 1.2 // Increased for more visible movement
-    const WANDER_STRENGTH = 0.105 // Increased for more variation
+    // Simplified physics constants for Safari
+    const REPULSION_DISTANCE = performanceMode.current.simplifyPhysics ? 30 : 40
+    const REPULSION_FORCE = performanceMode.current.simplifyPhysics ? 0.05 : 0.08 // Reduced for Safari
+    const DAMPING = performanceMode.current.simplifyPhysics ? 0.75 : 0.698 // More damping for Safari
+    const MIN_VELOCITY = performanceMode.current.simplifyPhysics ? 0.8 : 1.2 // Reduced for Safari
+    const WANDER_STRENGTH = performanceMode.current.simplifyPhysics ? 0.05 : 0.105 // Reduced for Safari
     const VELOCITY_SMOOTHING = 0.1 // Reduced smoothing for more responsive movement
     const BOUNDARY_PADDING = 1
-    const BOUNDARY_SOFTNESS = 20 // Distance from boundary where deceleration starts
-    const ACCELERATION_SMOOTHING = 0.2 // How quickly acceleration changes
-    const MAX_ACCELERATION = 0.4 // Maximum acceleration per frame
-    const ACCELERATION_DECAY = 0.85 // How much acceleration persists (higher = more momentum)
-    const VELOCITY_DRAG = 0.02 // Velocity-based drag on acceleration (makes fast movement harder to change direction)
+    const BOUNDARY_SOFTNESS = performanceMode.current.simplifyPhysics ? 15 : 20 // Reduced for Safari
+    const ACCELERATION_SMOOTHING = performanceMode.current.simplifyPhysics ? 0.3 : 0.2 // More smoothing for Safari
+    const MAX_ACCELERATION = performanceMode.current.simplifyPhysics ? 0.25 : 0.4 // Reduced for Safari
+    const ACCELERATION_DECAY = performanceMode.current.simplifyPhysics ? 0.9 : 0.85 // More persistence for Safari
+    const VELOCITY_DRAG = performanceMode.current.simplifyPhysics ? 0.03 : 0.02 // More drag for Safari
     const DT = 1 // Delta time (assuming 60fps, so 1 frame)
     // Use circleSize from ref to get current value
     const currentCircleSize = circleSizeRef.current || 58 // Fallback to max size if undefined
@@ -89,10 +94,37 @@ export const useDotAnimation = (blobAnimations, isHovered, circleSize) => {
         return
       }
       
+      // Throttle frames for Safari (~20fps instead of 60fps)
+      frameCountRef.current++
+      if (performanceMode.current.frameThrottle > 1 && frameCountRef.current % performanceMode.current.frameThrottle !== 0) {
+        animationFrameId = requestAnimationFrame(updatePositions)
+        return
+      }
+      
+      // For Safari: Skip physics calculations on some frames (only update position)
+      const skipPhysics = performanceMode.current.simplifyPhysics && (frameCountRef.current / performanceMode.current.frameThrottle) % 2 === 0
+      
       setDotPositions(prevPositions => {
         if (prevPositions.length === 0) return prevPositions
         
         const newPositions = prevPositions.map((pos, i) => {
+          // For Safari: Skip complex physics on some frames, just update position
+          if (skipPhysics) {
+            // Simple position update without physics
+            let newX = pos.x + pos.vx * DT
+            let newY = pos.y + pos.vy * DT
+            
+            // Simple boundary check
+            if (newX < BOUNDARY_PADDING || newX > maxX) {
+              newX = Math.max(BOUNDARY_PADDING, Math.min(maxX, newX))
+            }
+            if (newY < BOUNDARY_PADDING || newY > maxY) {
+              newY = Math.max(BOUNDARY_PADDING, Math.min(maxY, newY))
+            }
+            
+            return { ...pos, x: newX, y: newY }
+          }
+          
           // Initialize acceleration from previous frame (with decay for momentum)
           let ax = (pos.ax || 0) * ACCELERATION_DECAY
           let ay = (pos.ay || 0) * ACCELERATION_DECAY
@@ -115,21 +147,37 @@ export const useDotAnimation = (blobAnimations, isHovered, circleSize) => {
           let repulsionAy = 0
           // Only check blobs within repulsion distance squared (avoid sqrt until needed)
           const repulsionDistSq = REPULSION_DISTANCE * REPULSION_DISTANCE
+          
+          // For Safari: simplify physics by checking fewer neighbors
+          const maxChecks = performanceMode.current.simplifyPhysics 
+            ? Math.min(prevPositions.length, 2) // Only check 2 nearest for Safari (more aggressive)
+            : prevPositions.length
+          
           // Spatial optimization: only check blobs in a square region around current blob
           // This reduces O(n²) to roughly O(n) for evenly distributed blobs
           const checkRadius = REPULSION_DISTANCE * 1.5 // Check slightly beyond repulsion distance
+          
+          // For Safari: pre-calculate distances and sort to get nearest neighbors
+          const distances = []
           for (let j = 0; j < prevPositions.length; j++) {
             if (i === j) continue // Skip self
-            
             const otherPos = prevPositions[j]
             const dx = pos.x - otherPos.x
             const dy = pos.y - otherPos.y
-            
-            // Quick square distance check (no sqrt needed yet)
             const distanceSq = dx * dx + dy * dy
-            
+            if (distanceSq === 0) continue
+            distances.push({ j, distanceSq, dx, dy })
+          }
+          
+          // Sort by distance and take only nearest neighbors for Safari
+          if (performanceMode.current.simplifyPhysics) {
+            distances.sort((a, b) => a.distanceSq - b.distanceSq)
+          }
+          
+          const checksToPerform = distances.slice(0, maxChecks)
+          for (const { j, distanceSq, dx, dy } of checksToPerform) {
             // Early exit if too far (before expensive sqrt and calculations)
-            if (distanceSq > repulsionDistSq || distanceSq === 0) continue
+            if (distanceSq > repulsionDistSq) continue
             
             const distance = Math.sqrt(distanceSq)
             // Smooth repulsion curve (ease-out)

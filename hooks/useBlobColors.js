@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { hexToHsl, hslToHex } from '@/utils/colors'
 import { BOX_WIDTH, BOX_HEIGHT } from '@/constants/layout3Tokens'
+import { getPerformanceMode } from '@/utils/browserDetection'
 
 /**
  * Hook to generate random blob colors and animation parameters
@@ -10,11 +11,15 @@ export const useBlobColors = (baseColor) => {
   const [blobAnimations, setBlobAnimations] = useState([])
 
   useEffect(() => {
+    const performanceMode = getPerformanceMode()
+    // Reduce number of blobs for Safari (9 -> 5)
+    const blobCount = performanceMode.isSafari ? 5 : 9
+    
     const [baseH, baseS, baseL] = hexToHsl(baseColor)
     const colors = []
     const animations = []
     
-    for (let i = 0; i < 9; i++) {
+    for (let i = 0; i < blobCount; i++) {
       // Keep hue constant for fluidity effect, only vary S and L
       const randomH = baseH // Keep hue constant
       // Preserve monochrome (S=0) if base color is monochrome
