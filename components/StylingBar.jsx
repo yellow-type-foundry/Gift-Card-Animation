@@ -23,13 +23,13 @@ const StylingBar = ({
   const show3D = (layoutNumber === '2' || (layoutNumber === '1' && (style === '1' || style === '2' || style === '3')) || (layoutNumber === '2' && layout2BoxType === '3'))
 
   return (
-    <div className="w-fit bg-white rounded-full py-4 px-4 transition-all duration-300 ease-in-out">
+    <div className="w-fit bg-white rounded-full py-2 px-2 transition-all duration-300 ease-in-out">
       <div className="flex items-center overflow-x-auto md:overflow-visible">
         {/* Theming toggle - show for layout 1 and layout 2 */}
         <div 
           className={`shrink-0 transition-all duration-300 ease-in-out overflow-hidden ${
             showTheming 
-              ? 'max-w-[200px] opacity-100 mr-4' 
+              ? 'max-w-[200px] opacity-100 mr-2' 
               : 'max-w-0 opacity-0 mr-0 pointer-events-none'
           }`}
         >
@@ -50,7 +50,7 @@ const StylingBar = ({
         <div 
           className={`shrink-0 transition-all duration-300 ease-in-out overflow-hidden ${
             show3D 
-              ? `max-w-[200px] opacity-100 ${showAnimation ? 'mr-4' : ''}` 
+              ? `max-w-[200px] opacity-100 ${showAnimation ? 'mr-2' : ''}` 
               : 'max-w-0 opacity-0 mr-0 pointer-events-none'
           }`}
         >
