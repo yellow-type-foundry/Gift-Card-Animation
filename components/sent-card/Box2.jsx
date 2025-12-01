@@ -167,12 +167,15 @@ const Box2 = ({
   
   // Create gradient for Single 2 box: brand color to brand color -15 luminance (top to bottom)
   // Use hoverBoxColor when hovered to maintain hover effects
+  // Increased saturation by 10% for more vibrancy
   const boxGradient = useMemo(() => {
     const colorToUse = hoverBoxColor // Use hover color which already has hover effects applied
     const [h, s, l] = hexToHsl(colorToUse)
+    const vibrantS = Math.min(100, s + 15) // Increase saturation by 10% for more vibrancy
+    const vibrantColor = hslToHex(h, vibrantS, l)
     const darkerL = Math.max(0, l - 7) // Second stop: -15 luminance
-    const darkerColor = hslToHex(h, s, darkerL)
-    return `linear-gradient(to bottom, ${colorToUse} 0%, ${darkerColor} 100%)`
+    const darkerColor = hslToHex(h, vibrantS, darkerL) // Use increased saturation for darker color too
+    return `linear-gradient(to bottom, ${vibrantColor} 0%, ${darkerColor} 100%)`
   }, [hoverBoxColor])
 
   // Calculate lighter color for breathing duplicate boxes
