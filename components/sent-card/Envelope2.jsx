@@ -625,28 +625,6 @@ const Envelope2 = ({
               maskPosition: '0% 0%'
             }}
           />
-          
-          {/* Noise overlay - clipped to flap shape, positioned exactly like the flap image */}
-          <div 
-            className="absolute bottom-0 left-0 right-0 top-[2.39%] pointer-events-none"
-            data-name="Noise"
-            style={{
-              opacity: isHovered ? 0.7 : 0.75,
-              transition: `opacity ${GIFT_BOX_TOKENS.animations.duration.fast} ${GIFT_BOX_TOKENS.animations.easing.easeOut}`,
-              backgroundImage: `url(${GIFT_BOX_TOKENS.assets.noise})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              mixBlendMode: 'overlay',
-              WebkitMaskImage: `url(${imgFlap})`,
-              WebkitMaskSize: '100% 100%',
-              WebkitMaskRepeat: 'no-repeat',
-              WebkitMaskPosition: '0% 0%',
-              maskImage: `url(${imgFlap})`,
-              maskSize: '100% 100%',
-              maskRepeat: 'no-repeat',
-              maskPosition: '0% 0%'
-            }}
-          />
         </div>
 
         {/* Box (main container) - rounded only at bottom, sharp at top */}
