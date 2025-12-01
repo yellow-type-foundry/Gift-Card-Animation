@@ -692,56 +692,10 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-[#f0f1f5] flex flex-col items-start overflow-visible">
       <div 
-        className="w-full max-w-[1440px] mx-auto px-0 md:px-[80px] lg:px-[240px] pt-5 md:pt-10 pb-[200px] flex-1"
+        className="w-full max-w-[1440px] mx-auto px-0 md:px-[80px] lg:px-[240px] pt-5 pb-[200px] flex-1"
       >
-        {/* Content */}
-        <CardGrid
-            key={`card-grid-${layoutNumber}-${style}`}
-            activeTab={activeTab}
-            cardStates={cardStates}
-            messages={messages}
-            boxPairs={boxPairs}
-            cardHandlers={cardHandlers}
-            viewType={viewType}
-            layoutNumber={layoutNumber}
-            useColoredBackground={layoutNumber === '1' ? useColoredBackground : false}
-            animationType={animationType}
-            enable3D={enable3D}
-            sentCards={sentCards}
-            mixedCardTypes={mixedCardTypes}
-            getSentCardProps={getSentCardProps}
-            getSingle1Props={getSingle1Props}
-            getSentCard4Props={getSentCard4Props}
-            layout2BoxType={layout2BoxType}
-          />
-      </div>
-      {/* StylingBar and ControlBar at bottom */}
-      <div className="fixed bottom-0 left-0 right-0 z-50">
-        <div className="w-full max-w-[1440px] mx-auto px-0 md:px-[80px] lg:px-[240px] pb-6 pt-4">
-          {/* StylingBar */}
-          <div className="mb-4">
-            <StylingBar
-              isSentTab={activeTab === 'sent'}
-              useColoredBackground={useColoredBackground}
-              onThemingChange={setUseColoredBackground}
-              animationType={animationType}
-              onAnimationTypeChange={setAnimationType}
-              enable3D={enable3D}
-              onEnable3DChange={setEnable3D}
-              layoutNumber={layoutNumber}
-              viewType={viewType}
-              onViewChange={(value) => {
-                setViewType(value)
-                if (value === 'mixed') {
-                  setMixSeed(Date.now())
-                }
-              }}
-              isSingleView={isSingleView}
-              style={style}
-              layout2BoxType={layout2BoxType}
-            />
-          </div>
-          {/* ControlBar */}
+        {/* ControlBar */}
+        <div className="mb-6">
           <ControlBar
             activeTab={activeTab}
             onTabChange={handleTabChange}
@@ -770,6 +724,66 @@ export default function Home() {
             layout2BoxType={layout2BoxType}
             onLayout2BoxTypeChange={setLayout2BoxType}
           />
+        </div>
+        {/* Content */}
+        <CardGrid
+            key={`card-grid-${layoutNumber}-${style}`}
+            activeTab={activeTab}
+            cardStates={cardStates}
+            messages={messages}
+            boxPairs={boxPairs}
+            cardHandlers={cardHandlers}
+            viewType={viewType}
+            layoutNumber={layoutNumber}
+            useColoredBackground={layoutNumber === '1' ? useColoredBackground : false}
+            animationType={animationType}
+            enable3D={enable3D}
+            sentCards={sentCards}
+            mixedCardTypes={mixedCardTypes}
+            getSentCardProps={getSentCardProps}
+            getSingle1Props={getSingle1Props}
+            getSentCard4Props={getSentCard4Props}
+            layout2BoxType={layout2BoxType}
+          />
+      </div>
+      {/* StylingBar at bottom */}
+      <div className="fixed bottom-0 left-0 right-0 z-50">
+        <div className="w-full max-w-[1440px] mx-auto px-0 md:px-[80px] lg:px-[240px] pb-6 pt-4 flex items-center justify-between">
+          {/* Spacer for centering */}
+          <div className="flex-1"></div>
+          {/* StylingBar */}
+          <StylingBar
+            isSentTab={activeTab === 'sent'}
+            useColoredBackground={useColoredBackground}
+            onThemingChange={setUseColoredBackground}
+            animationType={animationType}
+            onAnimationTypeChange={setAnimationType}
+            enable3D={enable3D}
+            onEnable3DChange={setEnable3D}
+            layoutNumber={layoutNumber}
+            viewType={viewType}
+            onViewChange={(value) => {
+              setViewType(value)
+              if (value === 'mixed') {
+                setMixSeed(Date.now())
+              }
+            }}
+            isSingleView={isSingleView}
+            style={style}
+            layout2BoxType={layout2BoxType}
+          />
+          {/* Shuffle button - Right side */}
+          <div className="flex-1 flex justify-end">
+            <button
+              onClick={handleShuffle}
+              className="flex items-center justify-center w-[56px] h-[56px] rounded-full border border-[#dde2e9] bg-white text-base font-medium text-[#525F7A] hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0"
+              aria-label="Shuffle cards"
+            >
+              <svg width="24" height="24" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L14 4L12 6M2 4H14M4 10L2 12L4 14M14 12H2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
     </div>

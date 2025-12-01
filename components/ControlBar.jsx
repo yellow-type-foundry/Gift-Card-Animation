@@ -107,19 +107,37 @@ const ControlBar = ({
 
     const updateActiveChip = () => {
       const layoutContainer = layoutSelectorRef.current
-      if (!layoutContainer) return
+      if (!layoutContainer) {
+        // If container not found and isSentTab is true, retry after a short delay
+        if (isSentTab) {
+          setTimeout(() => updateActiveChip(), 50)
+        }
+        return
+      }
 
       // Wait for next frame to ensure DOM is updated
       requestAnimationFrame(() => {
         // Find the SegmentedControl (it has relative class and contains buttons)
         const segmentedControl = layoutContainer.querySelector('div[class*="relative"]')
-        if (!segmentedControl) return
+        if (!segmentedControl) {
+          // If segmented control not found and isSentTab is true, retry after a short delay
+          if (isSentTab) {
+            setTimeout(() => updateActiveChip(), 50)
+          }
+          return
+        }
         
         const buttons = segmentedControl.querySelectorAll('button')
         const activeIndex = layoutNumber === '1' ? 0 : 1
         const activeButton = buttons[activeIndex]
 
-        if (!activeButton) return
+        if (!activeButton) {
+          // If button not found and isSentTab is true, retry after a short delay
+          if (isSentTab) {
+            setTimeout(() => updateActiveChip(), 50)
+          }
+          return
+        }
 
         // Remove old handlers if chip changed
         if (activeChipRef.current && activeChipRef.current !== activeButton) {
@@ -162,7 +180,7 @@ const ControlBar = ({
         activeChipRef.current.removeEventListener('click', handleChipClick)
       }
     }
-  }, [layoutNumber])
+  }, [layoutNumber, isSentTab])
 
   // Show popup when layout changes (after clicking a chip)
   useEffect(() => {
@@ -245,7 +263,7 @@ const ControlBar = ({
   return (
     <div className="w-full bg-white rounded-full p-4">
       <div
-        className="w-full flex items-center overflow-x-auto md:overflow-visible whitespace-nowrap relative"
+        className="w-full flex items-center justify-between overflow-x-auto md:overflow-visible whitespace-nowrap relative"
         style={controlBarStyle}
       >
       {/* Tabs - Left side */}
@@ -260,13 +278,10 @@ const ControlBar = ({
         />
       </div>
       
-      {/* Spacer - Left */}
-      <div className="flex-1 hidden md:block" />
-      
-      {/* Layout + Style selector - Centered */}
+      {/* Layout + Style selector - Right side */}
       {isSentTab && (
         <div 
-          className="hidden md:flex items-center shrink-0 bg-white rounded-full p-2 relative z-10"
+          className="hidden md:flex items-center shrink-0 relative z-10"
         >
           {/* Layout selector */}
           <div ref={layoutSelectorRef}>
@@ -284,17 +299,17 @@ const ControlBar = ({
             ref={stylePopoverRef}
             className="absolute bg-white rounded-full shadow-lg border border-[#dde2e9] z-50"
             style={{
-              bottom: '100%',
+              top: '100%',
               left: `${popoverPosition.left}px`,
-              transform: `translateX(-50%) translateY(${popoverVisible ? '0' : '10px'})`,
-              marginBottom: '8px',
+              transform: `translateX(-50%) translateY(${popoverVisible ? '0' : '-10px'})`,
+              marginTop: '8px',
               whiteSpace: 'nowrap',
               opacity: popoverVisible ? 1 : 0,
               pointerEvents: popoverVisible ? 'auto' : 'none',
-              transition: 'opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              transition: 'opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
               padding: '2px', // Even padding on all sides for extended hover area
-              marginTop: '-12px', // Compensate for top padding
-              marginBottom: '12px', // More space for easier mouse movement
+              marginBottom: '-12px', // Compensate for bottom padding
+              marginTop: '4px', // More space for easier mouse movement
               visibility: isLayoutChipHovered ? 'visible' : 'hidden', // Keep mounted but hidden
             }}
             onMouseEnter={handlePopoverEnter}
@@ -312,30 +327,6 @@ const ControlBar = ({
           </div>
         </div>
       )}
-      
-      {/* Spacer - Right */}
-      <div className="flex-1 hidden md:block" />
-      
-      {/* Controls - Right side */}
-      <div className="flex items-center justify-end gap-4 shrink-0">
-        {/* Gift Sent specific controls */}
-        {isSentTab && (
-        <>
-          
-        </>
-        )}
-        
-        {/* Shuffle button - Always visible, always on far right */}
-        <button
-          onClick={onShuffle}
-          className="flex items-center justify-center w-10 h-10 rounded-full border border-[#dde2e9] bg-white text-base font-medium text-[#525F7A] hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0"
-          aria-label="Shuffle cards"
-        >
-          <svg width="20" height="20" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 2L14 4L12 6M2 4H14M4 10L2 12L4 14M14 12H2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </button>
-      </div>
       
       {/* Mobile: Floating Settings Button - Bottom Right */}
       {isSentTab && isMounted && createPortal(
@@ -426,23 +417,17 @@ const ControlBar = ({
                   {/* Theming toggle - only show for layout 1 */}
                   {layoutNumber === '1' && (
                     <div className="flex items-center justify-between">
-                      <span className="text-base text-[#525F7A] font-medium">Theming</span>
                       <button
                         onClick={() => !isSingleView && onThemingChange(!useColoredBackground)}
                         disabled={isSingleView}
-                        className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
-                          useColoredBackground ? 'bg-[#5a3dff]' : 'bg-gray-300'
+                        className={`h-10 px-4 rounded-full border border-[#dde2e9] text-base font-medium transition-colors focus:outline-none ${
+                          useColoredBackground 
+                            ? 'bg-[#5a3dff] text-white' 
+                            : 'bg-white text-[#525F7A] hover:bg-gray-50'
                         } ${isSingleView ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'}`}
-                        role="switch"
-                        aria-checked={useColoredBackground}
-                        aria-disabled={isSingleView}
                         aria-label="Toggle theming"
                       >
-                        <span
-                          className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${
-                            useColoredBackground ? 'translate-x-6' : 'translate-x-1'
-                          }`}
-                        />
+                        Theming
                       </button>
                     </div>
                   )}
@@ -471,21 +456,16 @@ const ControlBar = ({
                   {/* 3D toggle - show for layout 2 (including Box 3) and layout 1 style 1/2/3 */}
                   {((layoutNumber === '2') || (layoutNumber === '1' && (style === '1' || style === '2' || style === '3'))) && (
                     <div className="flex items-center justify-between">
-                      <span className="text-base text-[#525F7A] font-medium">3D</span>
                       <button
                         onClick={() => onEnable3DChange(!enable3D)}
-                        className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
-                          enable3D ? 'bg-[#5a3dff]' : 'bg-gray-300'
-                        } cursor-pointer`}
-                        role="switch"
-                        aria-checked={enable3D}
+                        className={`h-10 px-4 rounded-full border border-[#dde2e9] text-base font-medium transition-colors focus:outline-none cursor-pointer ${
+                          enable3D 
+                            ? 'bg-[#5a3dff] text-white' 
+                            : 'bg-white text-[#525F7A] hover:bg-gray-50'
+                        }`}
                         aria-label="Toggle 3D effect"
                       >
-                        <span
-                          className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${
-                            enable3D ? 'translate-x-6' : 'translate-x-1'
-                          }`}
-                        />
+                        3D
                       </button>
                     </div>
                   )}

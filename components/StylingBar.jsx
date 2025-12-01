@@ -25,28 +25,22 @@ const StylingBar = ({
   const show3D = (layoutNumber === '2' || (layoutNumber === '1' && (style === '1' || style === '2' || style === '3')) || (layoutNumber === '2' && layout2BoxType === '3'))
 
   return (
-    <div className="w-full bg-white rounded-full p-4">
-      <div className="w-full flex items-center justify-between gap-4 overflow-x-auto md:overflow-visible">
+    <div className="w-fit bg-white rounded-full p-4">
+      <div className="flex items-center gap-4 overflow-x-auto md:overflow-visible">
         {/* Theming toggle - only show for layout 1 */}
         {showTheming && (
           <div className="flex items-center gap-2 shrink-0">
-            <span className="text-base text-[#525F7A] font-medium">Theming</span>
             <button
               onClick={() => !isSingleView && onThemingChange(!useColoredBackground)}
               disabled={isSingleView}
-              className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
-                useColoredBackground ? 'bg-[#5a3dff]' : 'bg-gray-300'
+              className={`h-10 px-4 rounded-full border border-[#dde2e9] text-base font-medium transition-colors focus:outline-none ${
+                useColoredBackground 
+                  ? 'bg-[#5a3dff] text-white' 
+                  : 'bg-white text-[#525F7A] hover:bg-gray-50'
               } ${isSingleView ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'}`}
-              role="switch"
-              aria-checked={useColoredBackground}
-              aria-disabled={isSingleView}
               aria-label="Toggle theming"
             >
-              <span
-                className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${
-                  useColoredBackground ? 'translate-x-6' : 'translate-x-1'
-                }`}
-              />
+              Theming
             </button>
           </div>
         )}
@@ -77,27 +71,22 @@ const StylingBar = ({
         {/* 3D toggle */}
         {show3D && (
           <div className="flex items-center gap-2 shrink-0">
-            <span className="text-base text-[#525F7A] font-medium">3D</span>
             <button
               onClick={() => onEnable3DChange(!enable3D)}
-              className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-2 ${
-                enable3D ? 'bg-[#5a3dff]' : 'bg-gray-300'
-              } cursor-pointer`}
-              role="switch"
-              aria-checked={enable3D}
+              className={`h-10 px-4 rounded-full border border-[#dde2e9] text-base font-medium transition-colors focus:outline-none cursor-pointer ${
+                enable3D 
+                  ? 'bg-[#5a3dff] text-white' 
+                  : 'bg-white text-[#525F7A] hover:bg-gray-50'
+              }`}
               aria-label="Toggle 3D effect"
             >
-              <span
-                className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${
-                  enable3D ? 'translate-x-6' : 'translate-x-1'
-                }`}
-              />
+              3D
             </button>
           </div>
         )}
         
         {/* View selector */}
-        <div className="flex items-center gap-2 shrink-0 ml-auto">
+        <div className="flex items-center gap-2 shrink-0">
           <div className="relative inline-block">
             <select
               id="view-select"
