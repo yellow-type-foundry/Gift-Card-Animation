@@ -298,7 +298,7 @@ export const LAYOUT_CONFIG = {
     // The padding.top value controls the vertical position of the paper relative to the envelope
     // Paper appears to emerge from inside the envelope box (positioned above the box, below the flap)
     envelopeContainer: {
-      padding: { top: 46.5, right: 76, bottom: 0, left: 76 }, // Paper position: top padding positions paper to appear inside envelope
+      padding: { top: 21, right: 76, bottom: 0, left: 76 }, // Paper position: top padding positions paper to appear inside envelope
       margin: { top: 0, right: 0, bottom: 0, left: 0 },
       // Box styling (envelope base) - optimized for confetti white overlay
       boxOpacity: 1,

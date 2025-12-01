@@ -872,10 +872,16 @@ const SentCard = ({
   const isEnvelope3 = (hideEnvelope && !showGiftBoxWhenHidden && layout2BoxType === '3') ||
                       (hideEnvelope && !showGiftBoxWhenHidden && layout1Style === '3')
   // Envelope1: Layout 2 batch Style 1 (layout2BoxType === '1')
-  const isEnvelope1 = (hideEnvelope && !showGiftBoxWhenHidden && layout2BoxType === '1')
+  const isEnvelope1 = useMemo(() => 
+    (hideEnvelope && !showGiftBoxWhenHidden && layout2BoxType === '1'),
+    [hideEnvelope, showGiftBoxWhenHidden, layout2BoxType]
+  )
   // Envelope2: Layout 2 batch Style 2 (layout2BoxType === '2' OR undefined/default, AND not Envelope1/Envelope3)
   // Also Layout 1 batch Style 2 uses Envelope2, but that uses layout1StyleB.envelope, not layout2.envelope2
-  const isEnvelope2 = (hideEnvelope && !showGiftBoxWhenHidden && layout2BoxType !== '1' && layout2BoxType !== '3' && layout1Style !== '3')
+  const isEnvelope2 = useMemo(() => 
+    (hideEnvelope && !showGiftBoxWhenHidden && layout2BoxType !== '1' && layout2BoxType !== '3' && layout1Style !== '3'),
+    [hideEnvelope, showGiftBoxWhenHidden, layout2BoxType, layout1Style]
+  )
   // Box3 offsetY: Layout 1 Style 3 uses layout1Box3OffsetY, Layout 2 uses layout2Box3OffsetY
   const box3OffsetY = (layout1Style === '3') ? layout1Box3OffsetY : ((layout2BoxType === '3') ? layout2Box3OffsetY : envelopeOffsetY)
   // Envelope3 offsetY: Layout 1 Style 3 uses layout1Box3OffsetY, Layout 2 uses layout2Envelope3OffsetY (separate from Box3)
@@ -905,18 +911,24 @@ const SentCard = ({
   // - For Layout 1 Style 2: Use envelopeScale from layout1StyleB.envelope.scale (ALWAYS, no override)
   // - For Layout 2 Style 2: Use envelope2Scale from layout2.envelope2.scale
   const envelope2ScaleValue = useMemo(() => {
+    // Early return if not Envelope2 - use envelopeScale as fallback
     if (!isEnvelope2) return envelopeScale
     
-    // Layout 1 Style 2: ALWAYS use envelopeScale directly from props (from layout1StyleB.envelope.scale)
-    // This ensures it's not overridden by envelope2Scale (which is for Layout 2 only)
+    // Layout 1 Style 2: ALWAYS use 1.25 from layout1StyleB.envelope.scale
+    // CRITICAL: This is hardcoded to prevent any override - Layout 1 Style 2 Envelope2 MUST be 1.25
+    // Do NOT use envelopeScale prop as it might be overridden or incorrect when switching layouts
+    // The envelopeScale prop might have a stale value from the previous layout/style
     if (layout1Style === '2') {
-      return envelopeScale
+      // Layout 1 Style 2 Envelope2 scale is ALWAYS 1.25 from layout1StyleB.envelope.scale
+      // This is the source of truth and cannot be overridden, even when switching from other layouts
+      // We ignore the envelopeScale prop value completely for Layout 1 Style 2
+      return 1.25
     }
     
     // Layout 2 Style 2: Use envelope2Scale if provided, otherwise fallback to 1 (default scale)
     // envelope2Scale should always be provided for Layout 2 Style 2 from layout2.envelope2.scale
     return envelope2Scale !== undefined ? envelope2Scale : 1
-  }, [isEnvelope2, layout1Style, envelopeScale, envelope2Scale])
+  }, [isEnvelope2, layout1Style, envelope2Scale, envelopeScale]) // Keep envelopeScale for early return fallback
   // For Layout 1 Style 3, ensure both Box3 and Envelope3 use 1.125 scale
   // Priority: Layout 1 Style 3 > Layout 2 Box3/Envelope3 > Envelope1 > Envelope2 > Box1 > Box2 > default envelopeScale
   const effectiveScale = useMemo(() => {
@@ -931,7 +943,12 @@ const SentCard = ({
       return envelope1ScaleValue
     }
     // Envelope2 scale (for Layout 1 Style 2 or Layout 2 Style 2)
+    // CRITICAL: This MUST use envelope2ScaleValue, which correctly handles Layout 1 Style 2 vs Layout 2 Style 2
     if (isEnvelope2) {
+      // Double-check: For Layout 1 Style 2, ensure we're using the correct scale
+      if (layout1Style === '2' && envelope2ScaleValue !== envelopeScale) {
+        console.warn(`[effectiveScale] Layout 1 Style 2 Envelope2: envelope2ScaleValue (${envelope2ScaleValue}) !== envelopeScale (${envelopeScale}). Using envelope2ScaleValue.`)
+      }
       return envelope2ScaleValue
     }
     // Box1 scale (for useBox1 or layout2BoxType === '1')
@@ -958,13 +975,11 @@ const SentCard = ({
       position: 'absolute',
       left: '50%',
       top: '50%',
-      width: '100%',
-      height: '100%',
       transform: `translate(-50%, -50%) translateY(${offsetYValue}px) scale(${scaleValue})`,
       transformOrigin: 'center center',
       willChange: 'transform', // Optimize for transforms
-      // Ensure all children (including absolutely positioned paper) move with the transform
       // The wrapper creates a transform context that applies to all children
+      // Including absolutely positioned elements like the paper in Envelope2
     }
   }, [effectiveOffsetY, effectiveScale, isEnvelope3])
 
@@ -1483,6 +1498,7 @@ const SentCard = ({
               // Layout 1 Style 3 should go through the next block
               <div style={envelopeInnerWrapperStyle}>
                 <Envelope2
+                  key={`envelope2-${layout1Style}-${layout2BoxType}-${envelope2ScaleValue}`} // Force remount when layout/style/scale changes
                   progress={validatedProgress}
                   boxImage={boxImage}
                   boxColor={envelopeBoxColor}
