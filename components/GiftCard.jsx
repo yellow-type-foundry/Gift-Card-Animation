@@ -173,8 +173,8 @@ const GiftCard = ({
 
   // Card container hover styles
   const cardContainerStyle = useMemo(() => ({
-    borderWidth: TOKENS.sizes.borderWidth,
-    borderColor: TOKENS.colors.border.default,
+    borderWidth: 0,
+    borderColor: 'transparent',
     borderRadius: TOKENS.sizes.borderRadius.card,
     width: '100%',
     height: TOKENS.sizes.card.height.closed,
@@ -191,9 +191,14 @@ const GiftCard = ({
       onClick={handleCardClick}
       onMouseEnter={handleHoverEnter}
       onMouseLeave={handleHoverLeave}
-      className="border-solid relative overflow-hidden cursor-pointer w-full"
-      style={cardContainerStyle}
+      className="relative overflow-hidden cursor-pointer w-full"
+      style={{
+        ...cardContainerStyle,
+        outline: 'none',
+        border: 'none'
+      }}
       data-name="Default"
+      tabIndex={-1}
     >
       {/* Background Image */}
       <Image
@@ -209,10 +214,10 @@ const GiftCard = ({
       />
       
       {/* Inner Container */}
-      <div className="relative w-full h-full overflow-clip" style={{ zIndex: TOKENS.zIndex.innerContainer }}>
+      <div className="relative w-full h-full overflow-clip" style={{ zIndex: TOKENS.zIndex.innerContainer, border: 'none', outline: 'none' }}>
         {/* White Card Container */}
         <div 
-          className="bg-white box-border flex flex-col items-center absolute bottom-0"
+          className="bg-white flex flex-col items-center absolute bottom-0"
           style={{
             ...whiteCardStyle,
             borderRadius: TOKENS.sizes.borderRadius.card,
@@ -221,7 +226,10 @@ const GiftCard = ({
             left: '50%',
             transform: 'translateX(-50%)',
             padding: TOKENS.spacing.cardPadding,
-            gap: TOKENS.spacing.cardGap
+            gap: TOKENS.spacing.cardGap,
+            border: 'none',
+            outline: 'none',
+            boxSizing: 'border-box'
           }}
           data-name="Unopened Gift"
         >

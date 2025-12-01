@@ -378,7 +378,7 @@ const ControlBar = ({
         {/* Shuffle button - Always visible, always on far right */}
         <button
           onClick={onShuffle}
-          className="flex items-center gap-2 px-4 py-2 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0"
+          className="flex items-center justify-center aspect-square w-10 h-10 rounded-[12px] border border-[#dde2e9] bg-white text-sm text-[#525F7A] hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-[#5a3dff] focus:ring-offset-0"
           aria-label="Shuffle cards"
         >
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
