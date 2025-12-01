@@ -110,27 +110,32 @@ export const useDotAnimation = (blobAnimations, isHovered, circleSize) => {
             ay += dragY
           }
           
-          // Accumulate repulsion forces
+          // Accumulate repulsion forces (optimized: early exit for distant blobs)
           let repulsionAx = 0
           let repulsionAy = 0
-          prevPositions.forEach((otherPos, j) => {
-            if (i === j) return
+          // Only check blobs within repulsion distance squared (avoid sqrt until needed)
+          const repulsionDistSq = REPULSION_DISTANCE * REPULSION_DISTANCE
+          for (let j = 0; j < prevPositions.length; j++) {
+            if (i === j) continue // Skip self
             
+            const otherPos = prevPositions[j]
             const dx = pos.x - otherPos.x
             const dy = pos.y - otherPos.y
-            const distance = Math.sqrt(dx * dx + dy * dy)
+            const distanceSq = dx * dx + dy * dy
             
-            if (distance < REPULSION_DISTANCE && distance > 0) {
-              // Smooth repulsion curve (ease-out)
-              const normalizedDist = distance / REPULSION_DISTANCE
-              const smoothFactor = 1 - (normalizedDist * normalizedDist) // Quadratic ease-out
-              const force = REPULSION_FORCE * smoothFactor
-              const angle = Math.atan2(dy, dx)
-              // Accumulate repulsion acceleration
-              repulsionAx += Math.cos(angle) * force
-              repulsionAy += Math.sin(angle) * force
-            }
-          })
+            // Early exit if too far (before expensive sqrt)
+            if (distanceSq > repulsionDistSq || distanceSq === 0) continue
+            
+            const distance = Math.sqrt(distanceSq)
+            // Smooth repulsion curve (ease-out)
+            const normalizedDist = distance / REPULSION_DISTANCE
+            const smoothFactor = 1 - (normalizedDist * normalizedDist) // Quadratic ease-out
+            const force = REPULSION_FORCE * smoothFactor
+            const angle = Math.atan2(dy, dx)
+            // Accumulate repulsion acceleration
+            repulsionAx += Math.cos(angle) * force
+            repulsionAy += Math.sin(angle) * force
+          }
           
           // Accumulate boundary forces
           let boundaryAx = 0

@@ -223,6 +223,7 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
           backdropFilter: 'blur(40px)',
           WebkitBackdropFilter: 'blur(40px)',
           willChange: 'backdrop-filter',
+          contain: 'layout style paint', // CSS containment for better performance
         }}
       >
         <div style={gradientOverlayStyle} />
