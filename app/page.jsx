@@ -230,17 +230,35 @@ export default function Home() {
     setSentCards(randomized)
   }, [])
   
-  // Generate stable card types for mixed view
+  // Generate stable card types for mixed view - always 50% single, 50% batch
   const mixedCardTypes = useMemo(() => {
     if (viewType !== 'mixed') return null
-    // Use a seeded random function for consistent results
+    
+    const totalCards = sentCards.length
+    const batchCount = Math.floor(totalCards / 2) // 50% batch cards
+    const singleCount = totalCards - batchCount // Remaining are single cards
+    
+    // Create array with exactly 50% batch (true) and 50% single (false)
+    const types = [
+      ...Array(batchCount).fill(true),  // Batch cards
+      ...Array(singleCount).fill(false) // Single cards
+    ]
+    
+    // Shuffle using seeded random for consistent results
     let seed = mixSeed
     const seededRandom = () => {
       seed = (seed * 9301 + 49297) % 233280
       return seed / 233280
     }
-    return sentCards.map(() => seededRandom() < 0.5)
-  }, [viewType, mixSeed, sentCards])
+    
+    // Fisher-Yates shuffle with seeded random
+    for (let i = types.length - 1; i > 0; i--) {
+      const j = Math.floor(seededRandom() * (i + 1))
+      ;[types[i], types[j]] = [types[j], types[i]]
+    }
+    
+    return types
+  }, [viewType, mixSeed, sentCards.length])
   
   // Map layout number to config keys
   const getLayoutConfigKey = (layoutNum, viewType) => {
