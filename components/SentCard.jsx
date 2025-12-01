@@ -913,8 +913,9 @@ const SentCard = ({
       return envelopeScale
     }
     
-    // Layout 2 Style 2: Use envelope2Scale if provided, otherwise fallback to envelopeScale
-    return envelope2Scale !== undefined ? envelope2Scale : envelopeScale
+    // Layout 2 Style 2: Use envelope2Scale if provided, otherwise fallback to 1 (default scale)
+    // envelope2Scale should always be provided for Layout 2 Style 2 from layout2.envelope2.scale
+    return envelope2Scale !== undefined ? envelope2Scale : 1
   }, [isEnvelope2, layout1Style, envelopeScale, envelope2Scale])
   // For Layout 1 Style 3, ensure both Box3 and Envelope3 use 1.125 scale
   // Priority: Layout 1 Style 3 > Layout 2 Box3/Envelope3 > Envelope1 > Envelope2 > Box1 > Box2 > default envelopeScale
@@ -957,9 +958,13 @@ const SentCard = ({
       position: 'absolute',
       left: '50%',
       top: '50%',
+      width: '100%',
+      height: '100%',
       transform: `translate(-50%, -50%) translateY(${offsetYValue}px) scale(${scaleValue})`,
       transformOrigin: 'center center',
       willChange: 'transform', // Optimize for transforms
+      // Ensure all children (including absolutely positioned paper) move with the transform
+      // The wrapper creates a transform context that applies to all children
     }
   }, [effectiveOffsetY, effectiveScale, isEnvelope3])
 
@@ -1768,29 +1773,32 @@ const SentCard = ({
                     />
                   </div>
                 ) : (
-                  <Envelope2
-                    progress={validatedProgress}
-                    boxImage={boxImage}
-                    boxColor={envelopeBoxColor}
-                    flapColor={envelopeFlapColor}
-                    boxOpacity={EFFECTIVE_BOX_OPACITY}
-                    flapOpacity={EFFECTIVE_FLAP_OPACITY}
-                    progressIndicatorShadowColor={progressIndicatorShadowColor}
-                    progressBarSourceColor={progressBarSourceColor}
-                    progressBarLuminance={PROGRESS_BAR_LUMINANCE}
-                    progressBarSaturation={PROGRESS_BAR_SATURATION}
-                    containerPadding={EFFECTIVE_ENVELOPE_PADDING}
-                    containerMargin={EFFECTIVE_ENVELOPE_MARGIN}
+                  // Layout 2 Style 2: Envelope2 (wrapped to apply scale and offsetY)
+                  <div style={envelopeInnerWrapperStyle}>
+                    <Envelope2
+                      progress={validatedProgress}
+                      boxImage={boxImage}
+                      boxColor={envelopeBoxColor}
+                      flapColor={envelopeFlapColor}
+                      boxOpacity={EFFECTIVE_BOX_OPACITY}
+                      flapOpacity={EFFECTIVE_FLAP_OPACITY}
+                      progressIndicatorShadowColor={progressIndicatorShadowColor}
+                      progressBarSourceColor={progressBarSourceColor}
+                      progressBarLuminance={PROGRESS_BAR_LUMINANCE}
+                      progressBarSaturation={PROGRESS_BAR_SATURATION}
+                      containerPadding={EFFECTIVE_ENVELOPE_PADDING}
+                      containerMargin={EFFECTIVE_ENVELOPE_MARGIN}
                       isHovered={isHovered}
-                    parallaxX={parallaxX}
-                    parallaxY={parallaxY}
-                    tiltX={tiltX}
-                    tiltY={tiltY}
-                    animationType={animationType}
-                    enable3D={enable3D}
-                    hideProgressBar={hideProgressBarInBox}
-                    hidePaper={hidePaper}
-                  />
+                      parallaxX={parallaxX}
+                      parallaxY={parallaxY}
+                      tiltX={tiltX}
+                      tiltY={tiltY}
+                      animationType={animationType}
+                      enable3D={enable3D}
+                      hideProgressBar={hideProgressBarInBox}
+                      hidePaper={hidePaper}
+                    />
+                  </div>
                 )}
               </>
             ) : useBox1 ? (

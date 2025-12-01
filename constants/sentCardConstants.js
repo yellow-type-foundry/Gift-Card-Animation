@@ -456,7 +456,7 @@ export const LAYOUT_CONFIG = {
       height: undefined,     // Box height (e.g., '176px') - undefined = use GIFT_BOX_TOKENS default
       borderRadius: undefined, // Box border radius (e.g., '32px') - undefined = use GIFT_BOX_TOKENS default
       scale: 1,      // Box scale factor (e.g., 1.25) - undefined = use envelope.scale
-      offsetY: 6.1,   // Box vertical offset in pixels
+      offsetY: 2.6,   // Box vertical offset in pixels
     },
     // Envelope container settings (SINGLE 2 SPECIFIC - independent control block)
     envelopeContainer: {
