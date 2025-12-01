@@ -194,9 +194,6 @@ const Box2 = ({
     // Create progress bar color using unified saturation and luminance values
     // Extract hue from original source color (before S/L was applied), then apply exact progress bar S/L values
     // progressBarSourceColor should always be provided from parent - it's the original brand/dominant color before S/L
-    if (!progressBarSourceColor) {
-      console.warn('progressBarSourceColor not provided, using fallback')
-    }
     const sourceColor = progressBarSourceColor || '#1987C7' // Use original color, not boxColor which has S/L applied
     const [h, s, l] = hexToHsl(sourceColor)
     const adjustedS = Math.min(100, Math.max(0, progressBarSaturation)) // Use exact progress bar saturation

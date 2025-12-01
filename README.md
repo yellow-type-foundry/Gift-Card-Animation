@@ -59,7 +59,6 @@ npm start
 │   ├── Layout3Box.jsx        # Layout 3 box component
 │   ├── Layout3Canvas.jsx    # Layout 3 canvas container
 │   ├── SentCard.jsx         # Sent card component (Layout 1)
-│   ├── SentCard1.jsx        # Alternative sent card component
 │   ├── SentCard4.jsx        # Sent card variant
 │   ├── ShareModal.jsx       # Social sharing modal
 │   └── sent-card/           # Sent card sub-components

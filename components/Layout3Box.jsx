@@ -146,8 +146,7 @@ const Layout3Box = ({ boxColor = '#1987C7', logoPath = '/assets/GiftSent/SVG Log
           setLightCornerSvg(svgElement.outerHTML)
         }
       })
-      .catch(err => {
-        console.warn('Light Corner SVG not found, using placeholder:', err)
+      .catch(() => {
         setLightCornerSvg(`
           <svg width="100" height="90" viewBox="0 0 100 90" xmlns="http://www.w3.org/2000/svg">
             <defs>

@@ -190,10 +190,8 @@ const SentCard = ({
   // The original card should NOT have forceHovered=true, only the modal card should
   useEffect(() => {
     if (forceHovered) {
-      console.log('[SentCard] forceHovered is true - triggering hover state')
       // Use a small timeout to ensure the component is fully mounted
       const timeout = setTimeout(() => {
-        console.log('[SentCard] Calling handleHoverEnter()')
         handleHoverEnter()
       }, 0)
       return () => {
@@ -778,7 +776,6 @@ const SentCard = ({
     // For Box1, MUST use box1Scale from config
     if (isBox1Rendered) {
       if (box1Scale === undefined) {
-        console.warn('Box1 scale is undefined. Please set box1.scale in the config.')
         return 1 // Fallback only for Box1, but config should always define this
       }
       return box1Scale
@@ -797,7 +794,6 @@ const SentCard = ({
     // For Box1, MUST use box1TransformOrigin from config
     if (isBox1Rendered) {
       if (box1TransformOrigin === undefined) {
-        console.warn('Box1 transformOrigin is undefined. Please set box1.transformOrigin in the config.')
         return 'center top' // Fallback only for Box1, but config should always define this
       }
       return box1TransformOrigin
@@ -944,17 +940,6 @@ const SentCard = ({
     // Envelope2 scale (for Layout 1 Style 2 or Layout 2 Style 2)
     // CRITICAL: This MUST use envelope2ScaleValue, which correctly handles Layout 1 Style 2 vs Layout 2 Style 2
     if (isEnvelope2) {
-      if (process.env.NODE_ENV === 'development' && layout1Style === '2') {
-        console.log('[effectiveScale] Layout 1 Style 2 Envelope2:', {
-          isEnvelope2,
-          layout1Style,
-          envelope2ScaleValue,
-          envelopeScale,
-          hideEnvelope,
-          showGiftBoxWhenHidden,
-          layout2BoxType
-        })
-      }
       return envelope2ScaleValue
     }
     // Box1 scale (for useBox1 or layout2BoxType === '1')
@@ -1021,7 +1006,6 @@ const SentCard = ({
   const box1WrapperStyle = useMemo(() => {
     // NO HARDCODED VALUES - All values must come from config
     if (box1Width === undefined || box1Height === undefined) {
-      console.warn('Box1 width or height is undefined. Please set box1.width and box1.height in the config.')
       return {
         position: 'relative',
         pointerEvents: 'none',
@@ -1577,7 +1561,6 @@ const SentCard = ({
               // For Layout 2 Style 3 (layout2BoxType === '3'), use Envelope3
               // For Layout 2 Style 2 (default), use Envelope2
               <>
-                {console.log('[SentCard] hideEnvelope:', hideEnvelope, 'showGiftBoxWhenHidden:', showGiftBoxWhenHidden, 'hidePaper prop:', hidePaper) || null}
                 {(layout1Style === '3' || layout2BoxType === '3') ? (
                   // Envelope3 for Layout 1 Style 3 or Layout 2 Style 3
                   <div style={envelopeInnerWrapperStyle}>

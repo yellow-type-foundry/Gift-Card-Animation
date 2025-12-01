@@ -145,6 +145,7 @@ export default function Home() {
   const [viewType, setViewType] = useState('mixed') // 'mixed' | 'batch' | 'single' - what to display
   const [mixSeed, setMixSeed] = useState(0) // Seed to regenerate mix when toggled
   const [showSettingsMenu, setShowSettingsMenu] = useState(false) // Mobile settings menu visibility
+  const [isShuffling, setIsShuffling] = useState(false) // Track shuffle animation
   const [layout2BoxType, setLayout2BoxType] = useState('2') // '1' | '2' | '3' - for Layout 2 single card: Box1, Box2, or Box3
 
   // Close animation menu when button becomes disabled
@@ -488,19 +489,16 @@ export default function Home() {
       else if (layoutNum === '2') layoutKey = 'layout2'
       else {
         // Fallback: if layoutNum is invalid, use 'default' (Layout 1)
-        console.warn(`Invalid layoutNum: ${layoutNum}, defaulting to 'default' config`)
         layoutKey = 'default'
       }
     }
     
     if (!layoutKey) {
-      console.error(`Layout key is undefined for layoutNum: ${layoutNum}, useSingleConfig: ${useSingleConfig}`)
       return {}
     }
     
     const layoutConfig = LAYOUT_CONFIG[layoutKey]
     if (!layoutConfig) {
-      console.error(`Layout config not found for key: ${layoutKey}`)
       return {}
     }
     
@@ -717,6 +715,9 @@ export default function Home() {
   
   // Shuffle cards function
   const handleShuffle = useCallback(() => {
+    // Trigger rotation animation
+    setIsShuffling(true)
+    
     // Shuffle Gift Received cards
     const shuffledBoxPairs = shuffleArray(ALL_BOX_PAIRS)
     const selected = []
@@ -743,6 +744,11 @@ export default function Home() {
     if (viewType === 'mixed') {
       setMixSeed(Date.now())
     }
+    
+    // Reset animation after it completes
+    setTimeout(() => {
+      setIsShuffling(false)
+    }, 600)
     
   }, [viewType, layoutNumber])
   
@@ -820,9 +826,9 @@ export default function Home() {
               }
             }}
             disabled={activeTab !== 'sent'}
-            className={`styling-bar-tooltip flex items-center justify-center w-[48px] h-[48px] rounded-full border border-[#dde2e9] bg-white transition-colors focus:outline-none ${
+            className={`styling-bar-tooltip flex items-center justify-center w-[48px] h-[48px] rounded-full border border-[#dde2e9] bg-white transition-all ease-out focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 ${
               activeTab === 'sent' 
-                ? 'hover:bg-gray-50 cursor-pointer' 
+                ? 'hover:bg-gray-50 hover:translate-x-[2px] cursor-pointer' 
                 : 'opacity-40 cursor-not-allowed'
             }`}
             aria-label="View type"
@@ -885,11 +891,11 @@ export default function Home() {
         <button
           onClick={() => setUseColoredBackground(!useColoredBackground)}
           disabled={activeTab !== 'sent' || (layoutNumber !== '1' && layoutNumber !== '2')}
-          className={`styling-bar-tooltip flex items-center justify-center w-[48px] h-[48px] rounded-full border border-[#dde2e9] transition-colors focus:outline-none ${
+          className={`styling-bar-tooltip flex items-center justify-center w-[48px] h-[48px] rounded-full border border-[#dde2e9] transition-all ease-out focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 ${
             activeTab === 'sent' && (layoutNumber === '1' || layoutNumber === '2')
               ? useColoredBackground 
-                ? 'bg-[#5a3dff] text-white' 
-                : 'bg-white text-[#525F7A] hover:bg-gray-50 cursor-pointer'
+                ? 'bg-[#5a3dff] text-white hover:translate-x-[2px]' 
+                : 'bg-white text-[#525F7A] hover:bg-gray-50 hover:translate-x-[2px] cursor-pointer'
               : 'bg-white text-[#525F7A] opacity-40 cursor-not-allowed'
           }`}
           aria-label="Toggle theming"
@@ -904,11 +910,11 @@ export default function Home() {
         <button
           onClick={() => setEnable3D(!enable3D)}
           disabled={activeTab !== 'sent' || !(layoutNumber === '2' || (layoutNumber === '1' && (style === '1' || style === '2' || style === '3')) || (layoutNumber === '2' && layout2BoxType === '3'))}
-          className={`styling-bar-tooltip flex items-center justify-center w-[48px] h-[48px] rounded-full border border-[#dde2e9] transition-colors focus:outline-none ${
+          className={`styling-bar-tooltip flex items-center justify-center w-[48px] h-[48px] rounded-full border border-[#dde2e9] transition-all ease-out focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 ${
             activeTab === 'sent' && (layoutNumber === '2' || (layoutNumber === '1' && (style === '1' || style === '2' || style === '3')) || (layoutNumber === '2' && layout2BoxType === '3'))
               ? enable3D 
-                ? 'bg-[#5a3dff] text-white' 
-                : 'bg-white text-[#525F7A] hover:bg-gray-50 cursor-pointer'
+                ? 'bg-[#5a3dff] text-white hover:translate-x-[2px]' 
+                : 'bg-white text-[#525F7A] hover:bg-gray-50 hover:translate-x-[2px] cursor-pointer'
               : 'bg-white text-[#525F7A] opacity-40 cursor-not-allowed'
           }`}
           aria-label="Toggle 3D effect"
@@ -929,11 +935,11 @@ export default function Home() {
               }
             }}
             disabled={activeTab !== 'sent' || !((layoutNumber === '1' && style === '2') || (layoutNumber === '2' && layout2BoxType === '2'))}
-            className={`styling-bar-tooltip flex items-center justify-center w-[48px] h-[48px] rounded-full border border-[#dde2e9] transition-colors focus:outline-none ${
+            className={`styling-bar-tooltip flex items-center justify-center w-[48px] h-[48px] rounded-full border border-[#dde2e9] transition-all ease-out focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 ${
               activeTab === 'sent' && ((layoutNumber === '1' && style === '2') || (layoutNumber === '2' && layout2BoxType === '2'))
                 ? animationType !== 'none'
-                  ? 'bg-[#5a3dff] text-white' 
-                  : 'bg-white text-[#525F7A] hover:bg-gray-50 cursor-pointer'
+                  ? 'bg-[#5a3dff] text-white hover:translate-x-[2px]' 
+                  : 'bg-white text-[#525F7A] hover:bg-gray-50 hover:translate-x-[2px] cursor-pointer'
                 : 'bg-white text-[#525F7A] opacity-40 cursor-not-allowed'
             }`}
             aria-label="Toggle animation"
@@ -997,11 +1003,19 @@ export default function Home() {
         {/* Shuffle button */}
         <button
           onClick={handleShuffle}
-          className="styling-bar-tooltip flex items-center justify-center w-[48px] h-[48px] rounded-full border border-[#dde2e9] bg-white text-base font-medium text-[#525F7A] hover:bg-gray-50 transition-colors focus:outline-none"
+          className="styling-bar-tooltip flex items-center justify-center w-[48px] h-[48px] rounded-full border border-[#dde2e9] bg-white text-base font-medium text-[#525F7A] hover:bg-gray-50 hover:translate-x-[2px] transition-all ease-out focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
           aria-label="Shuffle cards"
           data-tooltip="Shuffle cards"
         >
-          <svg width="22" height="22" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg 
+            width="22" 
+            height="22" 
+            viewBox="0 0 16 16" 
+            fill="none" 
+            xmlns="http://www.w3.org/2000/svg"
+            className={isShuffling ? 'shuffle-icon-rotate' : ''}
+            style={{ transformOrigin: 'center' }}
+          >
             <path d="M1.5,8A6.5,6.5,0,0,1,13.478,4.5" fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
             <polyline points="13.5 0.5 13.5 4.5 9.5 4.5" fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>
             <path d="M14.5,8A6.5,6.5,0,0,1,2.522,11.5" fill="none" stroke="currentColor" strokeWidth="1.0" strokeLinecap="round" strokeLinejoin="round"/>

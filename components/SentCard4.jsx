@@ -39,10 +39,6 @@ const SentCard4 = ({
   envelopeScale = 1,
   envelopeOffsetY = 0
 }) => {
-  // Debug: Log props to verify they're being passed
-  if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
-    console.log('[SentCard4] Props:', { envelopeScale, envelopeOffsetY })
-  }
   // Hooks
   const cardRef = useRef(null)
   const { isHovered, handleHoverEnter, handleHoverLeave } = useHover()

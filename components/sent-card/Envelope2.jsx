@@ -298,7 +298,6 @@ const Envelope2 = ({
       {/* Paper/Card Container - highest z-index, absolutely positioned above envelope */}
       {/* Paper is an essential part of the envelope and moves with it */}
       {/* Hide paper for Box 2 (single cards) - only render if hidePaper is false */}
-      {console.log('[Envelope2] hidePaper prop received:', hidePaper, 'Will render paper:', !hidePaper) || null}
       {!hidePaper && <div 
         className="absolute left-1/2"
         data-name="Paper"

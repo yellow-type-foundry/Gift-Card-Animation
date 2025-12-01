@@ -135,8 +135,8 @@ const Logo = ({ logoPath, baseColor, isHovered, isDone }) => {
           setLogoSvg(svgElement.outerHTML)
         }
       })
-      .catch(err => {
-        console.warn('Logo SVG not found:', err)
+      .catch(() => {
+        // SVG not found, using fallback
       })
   }, [logoPath])
 

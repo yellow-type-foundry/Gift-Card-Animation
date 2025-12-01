@@ -608,3 +608,25 @@ body.share-modal-open [data-name="Gift Card"]:not([data-share-modal]) {
 .styling-bar-tooltip[data-menu-open]::after {
   opacity: 0 !important;
 }
+
+/* Remove all focus rings from StylingBar buttons */
+.styling-bar-tooltip:focus,
+.styling-bar-tooltip:focus-visible,
+.styling-bar-tooltip:active {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Shuffle button icon rotation animation */
+@keyframes shuffle-rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.shuffle-icon-rotate {
+  animation: shuffle-rotate 600ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}

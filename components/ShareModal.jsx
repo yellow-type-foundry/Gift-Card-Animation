@@ -171,62 +171,53 @@ function ShareModal({ isOpen, onClose, cardProps, onPauseConfetti, onOpen }) {
   useEffect(() => {
     if (!isOpen || !cardProps) return
     
-    console.log('[ShareModal] Setting up animation and capture')
-    
     // Notify parent to reset pause state
     if (onOpen) {
       onOpen()
     }
     
     // Start capture immediately - server handles all timing
-      // Only capture once - check if we've already captured
-      if (!hasCapturedRef.current) {
-        const captureTimeout = setTimeout(async () => {
-          // Double-check we haven't captured yet (race condition protection)
-          if (hasCapturedRef.current) {
-            console.log('[ShareModal] Already captured, skipping')
-            return
-          }
-          
-          hasCapturedRef.current = true // Mark as capturing
-          setIsCapturing(true)
-          
-          try {
-            console.log('[ShareModal] Starting capture...')
-            // TESTING: Enable static mode by adding ?static=true to skip animation wait
-            // Change to false to test with animation
-            const USE_STATIC_MODE = false // Set to false to enable confetti animation
-            const apiUrl = USE_STATIC_MODE ? '/api/capture-card?static=true' : '/api/capture-card'
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(cardPropsRef.current),
-              })
-            
-            if (response.ok) {
-              const blob = await response.blob()
-              const imageUrl = URL.createObjectURL(blob)
-              setCapturedImage(imageUrl)
-              console.log('[ShareModal] Card captured successfully')
-            } else {
-              console.error('[ShareModal] Failed to capture card:', await response.text())
-              hasCapturedRef.current = false // Reset on error so user can try again
-            }
-          } catch (error) {
-            console.error('[ShareModal] Error capturing card:', error)
-            hasCapturedRef.current = false // Reset on error so user can try again
-          } finally {
-            setIsCapturing(false)
-          }
-      }, 0) // Start capture immediately - server handles timing
-        
-        return () => {
-          clearTimeout(captureTimeout)
+    // Only capture once - check if we've already captured
+    if (!hasCapturedRef.current) {
+      const captureTimeout = setTimeout(async () => {
+        // Double-check we haven't captured yet (race condition protection)
+        if (hasCapturedRef.current) {
+          return
         }
-      } else {
-        console.log('[ShareModal] Capture already initiated, skipping duplicate')
+        
+        hasCapturedRef.current = true // Mark as capturing
+        setIsCapturing(true)
+        
+        try {
+          // TESTING: Enable static mode by adding ?static=true to skip animation wait
+          // Change to false to test with animation
+          const USE_STATIC_MODE = false // Set to false to enable confetti animation
+          const apiUrl = USE_STATIC_MODE ? '/api/capture-card?static=true' : '/api/capture-card'
+          const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(cardPropsRef.current),
+          })
+          
+          if (response.ok) {
+            const blob = await response.blob()
+            const imageUrl = URL.createObjectURL(blob)
+            setCapturedImage(imageUrl)
+          } else {
+            hasCapturedRef.current = false // Reset on error so user can try again
+          }
+        } catch (error) {
+          hasCapturedRef.current = false // Reset on error so user can try again
+        } finally {
+          setIsCapturing(false)
+        }
+      }, 0) // Start capture immediately - server handles timing
+      
+      return () => {
+        clearTimeout(captureTimeout)
+      }
     }
   }, [isOpen, onPauseConfetti, onOpen]) // Removed cardProps from dependencies to prevent re-runs
 
