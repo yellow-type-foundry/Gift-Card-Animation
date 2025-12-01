@@ -20,39 +20,8 @@ import Layout3Box from '@/components/Layout3Box'
 import Envelope3 from '@/components/Envelope3'
 import ShareModal from '@/components/ShareModal'
 import { PROGRESS_PILL_RADIUS, HEADER_OVERLAY_BG, PROGRESS_GLOW_BOX_SHADOW, ENVELOPE_DIMENSIONS, FOOTER_CONFIG } from '@/constants/sentCardConstants'
-
-// Box1 images (brand names)
-const BOX1_IMAGES = [
-  '/assets/GiftSent/Gift Container/Apple.png',
-  '/assets/GiftSent/Gift Container/Chipotle.png',
-  '/assets/GiftSent/Gift Container/Columbia.png',
-  '/assets/GiftSent/Gift Container/Goody.png',
-  '/assets/GiftSent/Gift Container/Nike.png',
-  '/assets/GiftSent/Gift Container/Supergoop.png',
-  '/assets/GiftSent/Gift Container/Tiffany & Co.png'
-]
-
-// Map PNG logos to SVG logos for text emboss styling
-const LOGO_PNG_TO_SVG_MAP = {
-  '/assets/GiftSent/Gift Container/Apple.png': '/assets/GiftSent/SVG Logo/Apple.svg',
-  '/assets/GiftSent/Gift Container/Chipotle.png': '/assets/GiftSent/SVG Logo/Chipotle.svg',
-  '/assets/GiftSent/Gift Container/Columbia.png': '/assets/GiftSent/SVG Logo/Logo.svg', // Using Logo.svg as default/fallback
-  '/assets/GiftSent/Gift Container/Goody.png': '/assets/GiftSent/SVG Logo/Goody.svg',
-  '/assets/GiftSent/Gift Container/Nike.png': '/assets/GiftSent/SVG Logo/Nike.svg',
-  '/assets/GiftSent/Gift Container/Supergoop.png': '/assets/GiftSent/SVG Logo/Supergoop.svg',
-  '/assets/GiftSent/Gift Container/Tiffany & Co.png': '/assets/GiftSent/SVG Logo/Tiffany & Co.svg',
-}
-
-// Map SVG logo paths to brand colors
-const LOGO_BRAND_COLORS = {
-  '/assets/GiftSent/SVG Logo/Goody.svg': '#B89EFF',
-  '/assets/GiftSent/SVG Logo/Chipotle.svg': '#AC2318',
-  '/assets/GiftSent/SVG Logo/Logo.svg': '#1987C7', // Columbia
-  '/assets/GiftSent/SVG Logo/Nike.svg': '#111111',
-  '/assets/GiftSent/SVG Logo/Apple.svg': '#D6D6D6',
-  '/assets/GiftSent/SVG Logo/Supergoop.svg': '#0000B4',
-  '/assets/GiftSent/SVG Logo/Tiffany & Co.svg': '#81D8D0',
-}
+import { LOGO_BRAND_COLORS, SINGLE2_LUMINANCE, SINGLE2_SATURATION, PROGRESS_BAR_LUMINANCE, PROGRESS_BAR_SATURATION } from '@/constants/sentCardBrandConstants'
+import { getBox1Image, getSvgLogoPath, getBrandName, calculateTilt, calculateParallax } from '@/utils/sentCardHelpers'
 
 const SentCard = ({
   from = 'Alex Torres',
@@ -324,29 +293,14 @@ const SentCard = ({
     box1Left, box1Right, box1Bottom, box1TransformOrigin
   ])
   
-  // Calculate tilt angles based on mouse position
-  const tiltX = useMemo(() => {
-    if (!isHovered || !shouldApplyTilt) return 0
-    // Map y position (0-1) to tilt angle (-3 to 3 degrees)
-    return (mousePosition.y - 0.5) * 5
-  }, [isHovered, shouldApplyTilt, mousePosition.y])
+  // Calculate tilt angles and parallax offsets based on mouse position
+  const { tiltX, tiltY } = useMemo(() => {
+    return calculateTilt(mousePosition, isHovered, shouldApplyTilt)
+  }, [isHovered, shouldApplyTilt, mousePosition])
   
-  const tiltY = useMemo(() => {
-    if (!isHovered || !shouldApplyTilt) return 0
-    // Map x position (0-1) to tilt angle (-3 to 3 degrees), inverted for natural feel
-    return (0.5 - mousePosition.x) * 5
-  }, [isHovered, shouldApplyTilt, mousePosition.x])
-  
-  // Parallax offsets for envelope/box (opposite direction, smaller magnitude)
-  const parallaxX = useMemo(() => {
-    if (!isHovered || !shouldApplyTilt) return 0
-    return (mousePosition.x - 0.5) * 10 // 10px max offset
-  }, [isHovered, shouldApplyTilt, mousePosition.x])
-  
-  const parallaxY = useMemo(() => {
-    if (!isHovered || !shouldApplyTilt) return 0
-    return (mousePosition.y - 0.5) * 10 // 10px max offset
-  }, [isHovered, shouldApplyTilt, mousePosition.y])
+  const { parallaxX, parallaxY } = useMemo(() => {
+    return calculateParallax(mousePosition, isHovered, shouldApplyTilt)
+  }, [isHovered, shouldApplyTilt, mousePosition])
   
   // Progress animation
   const {
@@ -358,80 +312,20 @@ const SentCard = ({
   
   // Select Box1 image randomly but consistently per card - when useBox1 is true or layout2BoxType is '1'
   const box1Image = useMemo(() => {
-    if (!useBox1 && layout2BoxType !== '1') return null
-    // Use boxImage as a seed for consistent random selection per card
-    // This ensures each card gets a random brand that stays the same across re-renders
-    let hash = 0
-    for (let i = 0; i < boxImage.length; i++) {
-      hash = ((hash << 5) - hash) + boxImage.charCodeAt(i)
-      hash = hash & hash // Convert to 32-bit integer
-    }
-    const index = Math.abs(hash) % BOX1_IMAGES.length
-    return BOX1_IMAGES[index]
+    return getBox1Image(useBox1, layout2BoxType, boxImage)
   }, [useBox1, layout2BoxType, boxImage])
   
   // Map PNG logo to SVG logo for Single 2 (Box2) text emboss styling
-  // For Single 2, select logo randomly but consistently per card (same as box1Image)
   const svgLogoPath = useMemo(() => {
-    // For Single 2 (hideEnvelope && showGiftBoxWhenHidden), use same random selection logic
-    if (hideEnvelope && showGiftBoxWhenHidden) {
-      // Use boxImage as a seed for consistent random selection per card
-      let hash = 0
-      for (let i = 0; i < boxImage.length; i++) {
-        hash = ((hash << 5) - hash) + boxImage.charCodeAt(i)
-        hash = hash & hash // Convert to 32-bit integer
-      }
-      const index = Math.abs(hash) % BOX1_IMAGES.length
-      const pngPath = BOX1_IMAGES[index]
-      return LOGO_PNG_TO_SVG_MAP[pngPath] || '/assets/GiftSent/SVG Logo/Logo.svg'
-    }
-    // For Single 1 (useBox1), use mapped logo
-    if (box1Image) {
-      return LOGO_PNG_TO_SVG_MAP[box1Image] || '/assets/GiftSent/SVG Logo/Logo.svg'
-    }
-    // Default fallback
-    return '/assets/GiftSent/SVG Logo/Logo.svg'
+    return getSvgLogoPath(hideEnvelope, showGiftBoxWhenHidden, box1Image, boxImage)
   }, [hideEnvelope, showGiftBoxWhenHidden, box1Image, boxImage])
 
   // Extract brand name from logo path
   const brandName = useMemo(() => {
-    // Get the logo path (prefer SVG, fallback to PNG)
-    let logoPath = svgLogoPath
-    if (!logoPath && box1Image) {
-      logoPath = box1Image
-    }
-    if (!logoPath) {
-      // Fallback: try to get from random selection (same logic as above)
-      if (hideEnvelope && showGiftBoxWhenHidden) {
-        let hash = 0
-        for (let i = 0; i < boxImage.length; i++) {
-          hash = ((hash << 5) - hash) + boxImage.charCodeAt(i)
-          hash = hash & hash // Convert to 32-bit integer
-        }
-        const index = Math.abs(hash) % BOX1_IMAGES.length
-        logoPath = BOX1_IMAGES[index]
-      }
-    }
-    
-    if (!logoPath) return null
-    
-    // Extract filename from path
-    const filename = logoPath.split('/').pop() || ''
-    // Remove extension (.png, .svg)
-    const nameWithoutExt = filename.replace(/\.(png|svg)$/i, '')
-    // Handle special cases
-    if (nameWithoutExt === 'Logo') return 'Columbia'
-    return nameWithoutExt
-  }, [svgLogoPath, box1Image, hideEnvelope, showGiftBoxWhenHidden, validatedProgress.current, validatedProgress.total])
+    return getBrandName(svgLogoPath, box1Image, hideEnvelope, showGiftBoxWhenHidden, boxImage)
+  }, [svgLogoPath, box1Image, hideEnvelope, showGiftBoxWhenHidden, boxImage])
 
-  // Single 2 Box Color Controls (Box2)
-  // Batch 2 envelope colors are now controlled via props from LAYOUT_CONFIG
-  const SINGLE2_LUMINANCE = 62  // Luminance for Single 2 brand colors (0-100)
-  const SINGLE2_SATURATION = 40  // Saturation for Single 2 brand colors (0-100)
-  
-  // Progress Bar Saturation and Luminance (unified for both Single 2 and Batch 2)
-  const PROGRESS_BAR_LUMINANCE = 60  // Luminance for progress bar indicator (0-100)
-  const PROGRESS_BAR_SATURATION = 50 // Saturation for progress bar indicator (0-100)
+  // Single 2 Box Color Controls (Box2) and Progress Bar constants are now imported from constants
 
   // Extract dominant color from gift container image (for Single 1) or boxImage (for other layouts)
   // For Style 2 (Box2), use brand color from logo instead of cover image
